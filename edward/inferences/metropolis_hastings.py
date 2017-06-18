@@ -21,27 +21,25 @@ class MetropolisHastings(MonteCarlo):
 
   #### Notes
 
-  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
-  \mid x)` while fixing inference over :math:`\\beta` using another
-  distribution :math:`q(\\beta)`.
+  In conditional inference, we infer \\(z\\) in \\(p(z, \\beta
+  \mid x)\\) while fixing inference over \\(\\beta\\) using another
+  distribution \\(q(\\beta)\\).
   To calculate the acceptance ratio, `MetropolisHastings` uses an
   estimate of the marginal density,
 
-  .. math::
+  $p(x, z) = \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
+            \\approx p(x, z, \\beta^*)$
 
-    p(x, z) = \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
-            \\approx p(x, z, \\beta^*)
-
-  leveraging a single Monte Carlo sample, where :math:`\\beta^* \sim
-  q(\\beta)`. This is unbiased (and therefore asymptotically exact as a
-  pseudo-marginal method) if :math:`q(\\beta) = p(\\beta \mid x)`.
+  leveraging a single Monte Carlo sample, where \\(\\beta^* \sim
+  q(\\beta)\\). This is unbiased (and therefore asymptotically exact as a
+  pseudo-marginal method) if \\(q(\\beta) = p(\\beta \mid x)\\).
   """
   def __init__(self, latent_vars, proposal_vars, data=None):
     """
     Args:
       proposal_vars: dict of RandomVariable to RandomVariable.
         Collection of random variables to perform inference on; each is
-        binded to a proposal distribution :math:`g(z' \mid z)`.
+        binded to a proposal distribution \\(g(z' \mid z)\\).
 
     #### Examples
 
@@ -63,11 +61,10 @@ class MetropolisHastings(MonteCarlo):
     """Draw sample from proposal conditional on last sample. Then
     accept or reject the sample based on the ratio,
 
-    .. math::
-      \\text{ratio} =
+    $\\text{ratio} =
           \log p(x, z^{\\text{new}}) - \log p(x, z^{\\text{old}}) +
           \log g(z^{\\text{new}} \mid z^{\\text{old}}) -
-          \log g(z^{\\text{old}} \mid z^{\\text{new}})
+          \log g(z^{\\text{old}} \mid z^{\\text{new}})$
 
     #### Notes
 

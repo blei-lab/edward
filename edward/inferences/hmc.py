@@ -22,19 +22,17 @@ class HMC(MonteCarlo):
 
   #### Notes
 
-  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
-  \mid x)` while fixing inference over :math:`\\beta` using another
-  distribution :math:`q(\\beta)`.
+  In conditional inference, we infer \\(z\\) in \\(p(z, \\beta
+  \mid x)\\) while fixing inference over \\(\\beta\\) using another
+  distribution \\(q(\\beta)\\).
   `HMC` substitutes the model's log marginal density
 
-  .. math::
+  $\log p(x, z) = \log \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
+                \\approx \log p(x, z, \\beta^*)$
 
-    \log p(x, z) = \log \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
-                \\approx \log p(x, z, \\beta^*)
-
-  leveraging a single Monte Carlo sample, where :math:`\\beta^* \sim
-  q(\\beta)`. This is unbiased (and therefore asymptotically exact as a
-  pseudo-marginal method) if :math:`q(\\beta) = p(\\beta \mid x)`.
+  leveraging a single Monte Carlo sample, where \\(\\beta^* \sim
+  q(\\beta)\\). This is unbiased (and therefore asymptotically exact as a
+  pseudo-marginal method) if \\(q(\\beta) = p(\\beta \mid x)\\).
   """
   def __init__(self, *args, **kwargs):
     """

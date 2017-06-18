@@ -16,16 +16,12 @@ class MAP(VariationalInference):
   This class implements gradient-based optimization to solve the
   optimization problem,
 
-  .. math::
-
-    \min_{z} - p(z \mid x).
+  $\min_{z} - p(z \mid x).$
 
   This is equivalent to using a `PointMass` variational distribution
   and minimizing the unnormalized objective,
 
-  .. math::
-
-    - \mathbb{E}_{q(z; \lambda)} [ \log p(x, z) ].
+  $- \mathbb{E}_{q(z; \lambda)} [ \log p(x, z) ].$
 
   #### Notes
 
@@ -34,16 +30,16 @@ class MAP(VariationalInference):
   discrete optimization.
 
   This class also minimizes the loss with respect to any model
-  parameters :math:`p(z \mid x; \\theta)`.
+  parameters \\(p(z \mid x; \\theta)\\).
 
-  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
-  \mid x)` while fixing inference over :math:`\\beta` using another
-  distribution :math:`q(\\beta)`. `MAP` optimizes
-  :math:`\mathbb{E}_{q(\\beta)} [ \log p(x, z, \\beta) ]`, leveraging
-  a single Monte Carlo sample, :math:`\log p(x, z, \\beta^*)`, where
-  :math:`\\beta^* \sim q(\\beta)`. This is a lower bound to the
-  marginal density :math:`\log p(x, z)`, and it is exact if
-  :math:`q(\\beta) = p(\\beta \mid x)` (up to stochasticity).
+  In conditional inference, we infer \\(z\\) in \\(p(z, \\beta
+  \mid x)\\) while fixing inference over \\(\\beta\\) using another
+  distribution \\(q(\\beta)\\). `MAP` optimizes
+  \\(\mathbb{E}_{q(\\beta)} [ \log p(x, z, \\beta) ]\\), leveraging
+  a single Monte Carlo sample, \\(\log p(x, z, \\beta^*)\\), where
+  \\(\\beta^* \sim q(\\beta)\\). This is a lower bound to the
+  marginal density \\(\log p(x, z)\\), and it is exact if
+  \\(q(\\beta) = p(\\beta \mid x)\\) (up to stochasticity).
   """
   def __init__(self, latent_vars=None, data=None):
     """
@@ -96,8 +92,7 @@ class MAP(VariationalInference):
     """Build loss function. Its automatic differentiation
     is the gradient of
 
-    .. math::
-      - \log p(x,z)
+    $- \log p(x,z).$
     """
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.

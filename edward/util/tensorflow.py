@@ -204,17 +204,16 @@ def get_control_variate_coef(f, h):
   """Returns scalar used by control variates method for variance reduction in
   MCMC methods.
 
-  If we have a statistic :math:`m` unbiased estimator of :math:`\mu` and
-  and another statistic :math:`t` which is an unbiased estimator of
-  :math:`\tau` then :math:`m^* = m + c(t - \tau)` is also an unbiased
-  estimator of :math:`\mu' for any coefficient :math:`c`.
+  If we have a statistic \\(m\\) unbiased estimator of \\(\mu\\) and
+  and another statistic \\(t\\) which is an unbiased estimator of
+  \\(\tau\\) then \\(m^* = m + c(t - \tau)\\) is also an unbiased
+  estimator of \\(\mu\\) for any coefficient \\(c\\).
 
   This function calculates the optimal coefficient
-  .. math::
 
-    \c^* = \frac{Cov(m,t)}{Var(t)}
+  $\c^* = \frac{Cov(m,t)}{Var(t)}$
 
-  for minimizing the variance of :math:`m^*`.
+  for minimizing the variance of \\(`m^*\\).
 
   Args:
     f: tf.Tensor.

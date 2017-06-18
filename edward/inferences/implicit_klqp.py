@@ -16,17 +16,15 @@ class ImplicitKLqp(GANInference):
 
   It minimizes the KL divergence
 
-  .. math::
+  $\\text{KL}( q(z, \\beta; \lambda) \| p(z, \\beta \mid x) ),$
 
-    \\text{KL}( q(z, \\beta; \lambda) \| p(z, \\beta \mid x) ),
-
-  where :math:`z` are local variables associated to a data point and
-  :math:`\\beta` are global variables shared across data points.
+  where \\(z\\) are local variables associated to a data point and
+  \\(\\beta\\) are global variables shared across data points.
 
   Global latent variables require `log_prob()` and need to return a
   random sample when fetched from the graph. Local latent variables
   and observed variables require only a random sample when fetched
-  from the graph. (This is true for both :math:`p` and :math:`q`.)
+  from the graph. (This is true for both \\(p\\) and \\(q\\).)
 
   All variational factors must be reparameterizable: each of the
   random variables (`rv`) satisfies `rv.is_reparameterized` and
@@ -43,8 +41,8 @@ class ImplicitKLqp(GANInference):
       It takes three arguments: a data dict, local latent variable
       dict, and global latent variable dict. As with GAN
       discriminators, it can take a batch of data points and local
-      variables, of size :math:`M`, and output a vector of length
-      :math:`M`.
+      variables, of size \\(M\\), and output a vector of length
+      \\(M\\).
     global_vars: dict of RandomVariable to RandomVariable, optional
       Identifying which variables in `latent_vars` are global
       variables, shared across data points. These will not be
@@ -107,25 +105,21 @@ class ImplicitKLqp(GANInference):
   def build_loss_and_gradients(self, var_list):
     """Build loss function
 
-    .. math::
-
-      -\Big(\mathbb{E}_{q(\\beta)} [\log p(\\beta) - \log q(\\beta) ] +
+    $-\Big(\mathbb{E}_{q(\\beta)} [\log p(\\beta) - \log q(\\beta) ] +
         \sum_{n=1}^N \mathbb{E}_{q(\\beta)q(z_n\mid\\beta)} [
-            r^*(x_n, z_n, \\beta) ] \Big).
+            r^*(x_n, z_n, \\beta) ] \Big).$
 
     We minimize it with respect to parameterized variational
-    families :math:`q(z, \\beta; \lambda)`.
+    families \\(q(z, \\beta; \lambda)\\).
 
-    :math:`r^*(x_n, z_n, \\beta)` is a function of a single data point
-    :math:`x_n`, single local variable :math:`z_n`, and all global
-    variables :math:`\\beta`. It is equal to the log-ratio
+    \\(r^*(x_n, z_n, \\beta)\\) is a function of a single data point
+    \\(x_n\\), single local variable \\(z_n\\), and all global
+    variables \\(\\beta\\). It is equal to the log-ratio
 
-    .. math::
+    $\log p(x_n, z_n\mid \\beta) - \log q(x_n, z_n\mid \\beta),$
 
-      \log p(x_n, z_n\mid \\beta) - \log q(x_n, z_n\mid \\beta),
-
-    where :math:`q(x_n)` is the empirical data distribution. Rather
-    than explicit calculation, :math:`r^*(x, z, \\beta)` is the
+    where \\(q(x_n)\\) is the empirical data distribution. Rather
+    than explicit calculation, \\(r^*(x, z, \\beta)\\) is the
     solution to a ratio estimation problem, minimizing the specified
     `ratio_loss`.
 
@@ -134,9 +128,9 @@ class ImplicitKLqp(GANInference):
 
     Notes
     -----
-    This also includes model parameters :math:`p(x, z, \\beta; \\theta)`
+    This also includes model parameters \\(p(x, z, \\beta; \\theta)\\)
     and variational distributions with inference networks
-    :math:`q(z\mid x)`.
+    \\(q(z\mid x)\\).
 
     There are a bunch of extensions we could easily do in this
     implementation:

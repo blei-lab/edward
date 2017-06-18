@@ -46,15 +46,13 @@ def ppc(T, data, latent_vars=None, n_samples=100):
     List containing the reference distribution, which is a NumPy array
     with `n_samples` elements,
 
-    .. math::
-      (T(x^{{\\text{rep}},1}, z^{1}), ...,
-       T(x^{\\text{rep,nsamples}}, z^{\\text{nsamples}}))
+    $(T(x^{{\\text{rep}},1}, z^{1}), ...,
+       T(x^{\\text{rep,nsamples}}, z^{\\text{nsamples}}))$
 
     and the realized discrepancy, which is a NumPy array with
     `n_samples` elements,
 
-    .. math::
-      (T(x, z^{1}), ..., T(x, z^{\\text{nsamples}})).
+    $(T(x, z^{1}), ..., T(x, z^{\\text{nsamples}})).$
 
 
   #### Examples
