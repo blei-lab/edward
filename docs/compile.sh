@@ -1,6 +1,7 @@
 #!/bin/bash
 printf "Compiling Edward website.\n\n"
 docdir=$(pwd)
+tmpdir=/tmp/docs
 
 echo "Clearing any previously built files."
 rm -rf build/
@@ -9,9 +10,13 @@ printf "Done.\n\n"
 echo "Begin docstring generation."
 python parser/generate.py \
   --src_dir=$docdir/tex/ \
-  --output_dir=/tmp/docs/
-python autogen.py \
-  --src_dir=/tmp/docs/
+  --output_dir=$tmpdir/
+python generate_api_navbar.py \
+  --src_dir=$tmpdir/
+python generate_api_toc.py \
+    --src_dir=$docdir/tex/template-api.pandoc \
+    --yaml_dir=$tmpdir/api/_toc.yaml \
+    --out_dir=$tmpdir/template.pandoc
 printf "Done.\n\n"
 
 echo "Begin pandoc compilation."
@@ -30,11 +35,25 @@ for filename in {./,ed/,ed/criticisms/,ed/inferences/,ed/models/,ed/util/}*.md; 
          --bibliography=$docdir/tex/bib.bib \
          --csl=$docdir/tex/apa.csl \
          --title-prefix="Edward" \
-         --template=$docdir/tex/template.pandoc \
+         --template=$tmpdir/template.pandoc \
+         --output=$docdir/build/api/${filename%.*}.html
+done
+for filename in *.tex; do
+  echo api/$filename
+  pandoc ${filename%.*}.tex \
+         --from=latex+link_attributes+native_spans \
+         --to=html \
+         --filter=$docdir/pandoc-code2raw.py \
+         --mathjax \
+         --no-highlight \
+         --bibliography=$docdir/tex/bib.bib \
+         --csl=$docdir/tex/apa.csl \
+         --title-prefix="Edward" \
+         --template=$tmpdir/template.pandoc \
          --output=$docdir/build/api/${filename%.*}.html
 done
 cd ..
-for filename in {./,api/,tutorials/}*.tex; do
+for filename in {./,tutorials/}*.tex; do
   echo $filename
   pandoc ${filename%.*}.tex \
          --from=latex+link_attributes+native_spans \
