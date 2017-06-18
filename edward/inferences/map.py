@@ -20,15 +20,15 @@ class MAP(VariationalInference):
 
     \min_{z} - p(z \mid x).
 
-  This is equivalent to using a ``PointMass`` variational distribution
+  This is equivalent to using a `PointMass` variational distribution
   and minimizing the unnormalized objective,
 
   .. math::
 
     - \mathbb{E}_{q(z; \lambda)} [ \log p(x, z) ].
 
-  Notes
-  -----
+  #### Notes
+
   This class is currently restricted to optimization over
   differentiable latent variables. For example, it does not solve
   discrete optimization.
@@ -38,7 +38,7 @@ class MAP(VariationalInference):
 
   In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
   \mid x)` while fixing inference over :math:`\\beta` using another
-  distribution :math:`q(\\beta)`. ``MAP`` optimizes
+  distribution :math:`q(\\beta)`. `MAP` optimizes
   :math:`\mathbb{E}_{q(\\beta)} [ \log p(x, z, \\beta) ]`, leveraging
   a single Monte Carlo sample, :math:`\log p(x, z, \\beta^*)`, where
   :math:`\\beta^* \sim q(\\beta)`. This is a lower bound to the
@@ -47,34 +47,37 @@ class MAP(VariationalInference):
   """
   def __init__(self, latent_vars=None, data=None):
     """
-    Parameters
-    ----------
-    latent_vars : list of RandomVariable or
-                  dict of RandomVariable to RandomVariable
-      Collection of random variables to perform inference on. If
-      list, each random variable will be implictly optimized
-      using a ``PointMass`` random variable that is defined
-      internally (with unconstrained support). If dictionary, each
-      value in the dictionary must be a ``PointMass`` random variable.
+    Args:
+      latent_vars: list of RandomVariable or
+                    dict of RandomVariable to RandomVariable.
+        Collection of random variables to perform inference on. If
+        list, each random variable will be implictly optimized
+        using a `PointMass` random variable that is defined
+        internally (with unconstrained support). If dictionary, each
+        value in the dictionary must be a `PointMass` random variable.
 
-    Examples
-    --------
-    Most explicitly, ``MAP`` is specified via a dictionary:
+    #### Examples
 
-    >>> qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
-    >>> qmu = PointMass(params=tf.Variable(tf.zeros(K*D)))
-    >>> qsigma = PointMass(params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))
-    >>> ed.MAP({pi: qpi, mu: qmu, sigma: qsigma}, data)
+    Most explicitly, `MAP` is specified via a dictionary:
 
-    We also automate the specification of ``PointMass`` distributions,
+    ```python
+    qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
+    qmu = PointMass(params=tf.Variable(tf.zeros(K*D)))
+    qsigma = PointMass(params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))
+    ed.MAP({pi: qpi, mu: qmu, sigma: qsigma}, data)
+    ```
+
+    We also automate the specification of `PointMass` distributions,
     so one can pass in a list of latent variables instead:
 
-    >>> ed.MAP([beta], data)
-    >>> ed.MAP([pi, mu, sigma], data)
+    ```python
+    ed.MAP([beta], data)
+    ed.MAP([pi, mu, sigma], data)
+    ```
 
-    Currently, ``MAP`` can only instantiate ``PointMass`` random variables
+    Currently, `MAP` can only instantiate `PointMass` random variables
     with unconstrained support. To constrain their support, one must
-    manually pass in the ``PointMass`` family.
+    manually pass in the `PointMass` family.
     """
     if isinstance(latent_vars, list):
       with tf.variable_scope("posterior"):

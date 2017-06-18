@@ -20,9 +20,9 @@ class KLpq(VariationalInference):
   To perform the optimization, this class uses a technique from
   adaptive importance sampling (Cappe et al., 2008).
 
-  Notes
-  -----
-  ``KLpq`` also optimizes any model parameters :math:`p(z\mid x;
+  #### Notes
+
+  `KLpq` also optimizes any model parameters :math:`p(z\mid x;
   \\theta)`. It does this by variational EM, minimizing
 
   .. math::
@@ -40,7 +40,7 @@ class KLpq(VariationalInference):
 
     \log p(x, z^{(s)}), z^{(s)} \sim q(z; \lambda),
 
-  for each sample :math:`s=1,\ldots,S`, ``KLpq`` uses
+  for each sample :math:`s=1,\ldots,S`, `KLpq` uses
 
   .. math::
 
@@ -55,11 +55,10 @@ class KLpq(VariationalInference):
   def initialize(self, n_samples=1, *args, **kwargs):
     """Initialization.
 
-    Parameters
-    ----------
-    n_samples : int, optional
-      Number of samples from variational model for calculating
-      stochastic gradients.
+    Args:
+      n_samples: int, optional.
+        Number of samples from variational model for calculating
+        stochastic gradients.
     """
     self.n_samples = n_samples
     return super(KLpq, self).initialize(*args, **kwargs)

@@ -20,12 +20,12 @@ class HMC(MonteCarlo):
   """Hamiltonian Monte Carlo, also known as hybrid Monte Carlo
   (Duane et al., 1987; Neal, 2011).
 
-  Notes
-  -----
+  #### Notes
+
   In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
   \mid x)` while fixing inference over :math:`\\beta` using another
   distribution :math:`q(\\beta)`.
-  ``HMC`` substitutes the model's log marginal density
+  `HMC` substitutes the model's log marginal density
 
   .. math::
 
@@ -38,25 +38,26 @@ class HMC(MonteCarlo):
   """
   def __init__(self, *args, **kwargs):
     """
-    Examples
-    --------
-    >>> z = Normal(loc=0.0, scale=1.0)
-    >>> x = Normal(loc=tf.ones(10) * z, scale=1.0)
-    >>>
-    >>> qz = Empirical(tf.Variable(tf.zeros(500)))
-    >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
-    >>> inference = ed.HMC({z: qz}, data)
+    #### Examples
+
+    ```python
+    z = Normal(loc=0.0, scale=1.0)
+    x = Normal(loc=tf.ones(10) * z, scale=1.0)
+
+    qz = Empirical(tf.Variable(tf.zeros(500)))
+    data = {x: np.array([0.0] * 10, dtype=np.float32)}
+    inference = ed.HMC({z: qz}, data)
+    ```
     """
     super(HMC, self).__init__(*args, **kwargs)
 
   def initialize(self, step_size=0.25, n_steps=2, *args, **kwargs):
     """
-    Parameters
-    ----------
-    step_size : float, optional
-      Step size of numerical integrator.
-    n_steps : int, optional
-      Number of steps of numerical integrator.
+    Args:
+      step_size: float, optional.
+        Step size of numerical integrator.
+      n_steps: int, optional.
+        Number of steps of numerical integrator.
     """
     self.step_size = step_size
     self.n_steps = n_steps
@@ -68,10 +69,10 @@ class HMC(MonteCarlo):
     Correct for the integrator's discretization error using an
     acceptance ratio.
 
-    Notes
-    -----
+    #### Notes
+
     The updates assume each Empirical random variable is directly
-    parameterized by ``tf.Variable``s.
+    parameterized by `tf.Variable`s.
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
@@ -103,7 +104,7 @@ class HMC(MonteCarlo):
     sample_values = tf.cond(accept, lambda: list(six.itervalues(new_sample)),
                             lambda: list(six.itervalues(old_sample)))
     if not isinstance(sample_values, list):
-      # ``tf.cond`` returns tf.Tensor if output is a list of size 1.
+      # `tf.cond` returns tf.Tensor if output is a list of size 1.
       sample_values = [sample_values]
 
     sample = {z: sample_value for z, sample_value in
@@ -123,10 +124,9 @@ class HMC(MonteCarlo):
     """Utility function to calculate model's log joint density,
     log p(x, z), for inputs z (and fixed data x).
 
-    Parameters
-    ----------
-    z_sample : dict
-      Latent variable keys to samples.
+    Args:
+      z_sample: dict.
+        Latent variable keys to samples.
     """
     self.scope_iter += 1
     scope = 'inference_' + str(id(self)) + '/' + str(self.scope_iter)

@@ -19,21 +19,20 @@ class GANInference(VariationalInference):
   """
   def __init__(self, data, discriminator):
     """
-    Parameters
-    ----------
-    data : dict
-      Data dictionary which binds observed variables (of type
-      ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
-      type ``tf.Tensor``).  It can also bind placeholders (of type
-      ``tf.Tensor``) used in the model to their realizations.
-    discriminator : function
-      Function (with parameters) to discriminate samples. It should
-      output logit probabilities (real-valued) and not probabilities
-      in [0, 1].
+    Args:
+      data: dict.
+        Data dictionary which binds observed variables (of type
+        `RandomVariable` or `tf.Tensor`) to their realizations (of
+        type `tf.Tensor`).  It can also bind placeholders (of type
+        `tf.Tensor`) used in the model to their realizations.
+      discriminator: function.
+        Function (with parameters) to discriminate samples. It should
+        output logit probabilities (real-valued) and not probabilities
+        in \\([0, 1]\\).
 
-    Notes
-    -----
-    ``GANInference`` does not support latent variable inference. Note
+    #### Notes
+
+    `GANInference` does not support latent variable inference. Note
     that GAN-style training also samples from the prior: this does not
     work well for latent variables that are shared across many data
     points (global variables).
@@ -42,14 +41,16 @@ class GANInference(VariationalInference):
     discriminator's parameters can be accessed with the variable scope
     "Disc".
 
-    GANs also only work for one observed random variable in ``data``.
+    GANs also only work for one observed random variable in `data`.
 
-    Examples
-    --------
-    >>> z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
-    >>> x = generative_network(z)
-    >>>
-    >>> inference = ed.GANInference({x: x_data}, discriminator)
+    #### Examples
+
+    ```python
+    z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
+    x = generative_network(z)
+
+    inference = ed.GANInference({x: x_data}, discriminator)
+    ```
     """
     if not callable(discriminator):
       raise TypeError("discriminator must be a callable function.")
@@ -64,28 +65,28 @@ class GANInference(VariationalInference):
 
     Parameters
     ----------
-    optimizer : str or tf.train.Optimizer, optional
+    optimizer: str or tf.train.Optimizer, optional
       A TensorFlow optimizer, to use for optimizing the generator
       objective. Alternatively, one can pass in the name of a
       TensorFlow optimizer, and default parameters for the optimizer
       will be used.
-    optimizer_d : str or tf.train.Optimizer, optional
+    optimizer_d: str or tf.train.Optimizer, optional
       A TensorFlow optimizer, to use for optimizing the discriminator
       objective. Alternatively, one can pass in the name of a
       TensorFlow optimizer, and default parameters for the optimizer
       will be used.
-    global_step : tf.Variable, optional
-      Optional ``Variable`` to increment by one after the variables
+    global_step: tf.Variable, optional
+      Optional `Variable` to increment by one after the variables
       for the generator have been updated. See
-      ``tf.train.Optimizer.apply_gradients``.
-    global_step_d : tf.Variable, optional
-      Optional ``Variable`` to increment by one after the variables
+      `tf.train.Optimizer.apply_gradients`.
+    global_step_d: tf.Variable, optional
+      Optional `Variable` to increment by one after the variables
       for the discriminator have been updated. See
-      ``tf.train.Optimizer.apply_gradients``.
-    var_list : list of tf.Variable, optional
+      `tf.train.Optimizer.apply_gradients`.
+    var_list: list of tf.Variable, optional
       List of TensorFlow variables to optimize over (in the generative
-      model). Default is all trainable variables that ``latent_vars``
-      and ``data`` depend on.
+      model). Default is all trainable variables that `latent_vars`
+      and `data` depend on.
     """
     # call grandparent's method; avoid parent (VariationalInference)
     super(VariationalInference, self).initialize(*args, **kwargs)
@@ -149,10 +150,10 @@ class GANInference(VariationalInference):
 
     Parameters
     ----------
-    feed_dict : dict, optional
+    feed_dict: dict, optional
       Feed dictionary for a TensorFlow session run. It is used to feed
       placeholders that are not fed during initialization.
-    variables : str, optional
+    variables: str, optional
       Which set of variables to update. Either "Disc" or "Gen".
       Default is both.
 
@@ -165,7 +166,7 @@ class GANInference(VariationalInference):
     Notes
     -----
     The outputted iteration number is the total number of calls to
-    ``update``. Each update may include updating only a subset of
+    `update`. Each update may include updating only a subset of
     parameters.
     """
     if feed_dict is None:

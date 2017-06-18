@@ -18,12 +18,12 @@ except Exception as e:
 class SGHMC(MonteCarlo):
   """Stochastic gradient Hamiltonian Monte Carlo (Chen et al., 2014).
 
-  Notes
-  -----
+  #### Notes
+
   In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
   \mid x)` while fixing inference over :math:`\\beta` using another
   distribution :math:`q(\\beta)`.
-  ``SGHMC`` substitutes the model's log marginal density
+  `SGHMC` substitutes the model's log marginal density
 
   .. math::
 
@@ -36,25 +36,26 @@ class SGHMC(MonteCarlo):
   """
   def __init__(self, *args, **kwargs):
     """
-    Examples
-    --------
-    >>> z = Normal(loc=0.0, scale=1.0)
-    >>> x = Normal(loc=tf.ones(10) * z, scale=1.0)
+    #### Examples
+
+    ```python
+    z = Normal(loc=0.0, scale=1.0)
+    x = Normal(loc=tf.ones(10) * z, scale=1.0)
     >>>
-    >>> qz = Empirical(tf.Variable(tf.zeros(500)))
-    >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
-    >>> inference = ed.SGHMC({z: qz}, data)
+    qz = Empirical(tf.Variable(tf.zeros(500)))
+    data = {x: np.array([0.0] * 10, dtype=np.float32)}
+    inference = ed.SGHMC({z: qz}, data)
+    ```
     """
     super(SGHMC, self).__init__(*args, **kwargs)
 
   def initialize(self, step_size=0.25, friction=0.1, *args, **kwargs):
     """
-    Parameters
-    ----------
-    step_size : float, optional
-      Constant scale factor of learning rate.
-    friction : float, optional
-      Constant scale on the friction term in the Hamiltonian system.
+    Args:
+      step_size: float, optional.
+        Constant scale factor of learning rate.
+      friction: float, optional.
+        Constant scale on the friction term in the Hamiltonian system.
     """
     self.step_size = step_size
     self.friction = friction
@@ -108,10 +109,9 @@ class SGHMC(MonteCarlo):
     """Utility function to calculate model's log joint density,
     log p(x, z), for inputs z (and fixed data x).
 
-    Parameters
-    ----------
-    z_sample : dict
-      Latent variable keys to samples.
+    Args:
+      z_sample: dict.
+        Latent variable keys to samples.
     """
     scope = 'inference_' + str(id(self))
     # Form dictionary in order to replace conditioning on prior or

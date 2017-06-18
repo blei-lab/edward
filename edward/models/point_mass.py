@@ -24,22 +24,23 @@ class distributions_PointMass(Distribution):
                validate_args=False,
                allow_nan_stats=True,
                name="PointMass"):
-    """Initialize a ``PointMass`` random variable.
+    """Initialize a `PointMass` random variable.
 
-    Parameters
-    ----------
-    params : tf.Tensor
-      The location with all probability mass.
+    Args:
+      params: tf.Tensor.
+        The location with all probability mass.
 
-    Examples
-    --------
-    >>> # scalar
-    >>> x = PointMass(params=28.3)
-    >>> assert x.shape == ()
-    >>>
-    >>> # 5 x 2 x 3 tensor
-    >>> dp = PointMass(params=tf.zeros([5, 2, 3]))
-    >>> assert x.shape == (5, 2, 3)
+    #### Examples
+
+    ```python
+    # scalar
+    x = PointMass(params=28.3)
+    assert x.shape == ()
+
+    # 5 x 2 x 3 tensor
+    dp = PointMass(params=tf.zeros([5, 2, 3]))
+    assert x.shape == (5, 2, 3)
+    ```
     """
     parameters = locals()
     with tf.name_scope(name, values=[params]):

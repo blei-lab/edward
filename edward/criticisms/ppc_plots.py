@@ -11,16 +11,14 @@ except ImportError:
 def ppc_density_plot(y, y_rep):
   """Create 1D kernel density plot comparing data to samples from posterior.
 
-  Parameters
-  ----------
-  y : np.ndarray
-    A 1-D NumPy array.
-  y_rep : np.ndarray
-    A 2-D NumPy array where rows represent different samples from posterior.
+  Args:
+    y: np.ndarray.
+      A 1-D NumPy array.
+    y_rep: np.ndarray.
+      A 2-D NumPy array where rows represent different samples from posterior.
 
-  Returns
-  -------
-  matplotlib axes
+  Returns:
+    matplotlib axes
   """
   ax = sns.kdeplot(y, color="maroon")
 
@@ -43,21 +41,18 @@ def ppc_density_plot(y, y_rep):
 def ppc_stat_hist_plot(y_stats, yrep_stats, stat_name=None, **kwargs):
   """Create histogram plot comparing data to samples from posterior.
 
-  Parameters
-  ----------
-  y_stats : float
-    Float representing statistic value of observed data.
-  yrep_stats : np.ndarray
-    A 1-D NumPy array.
-  stat_name : string, optional
-    Optional string value for including statistic name in legend.
-  **kwargs
-    Keyword arguments used by seaborn.distplot can be given to customize plot.
+  Args:
+    y_stats: float.
+      Float representing statistic value of observed data.
+    yrep_stats: np.ndarray.
+      A 1-D NumPy array.
+    stat_name: string, optional.
+      Optional string value for including statistic name in legend.
+    **kwargs:
+      Keyword arguments used by seaborn.distplot can be given to customize plot.
 
-
-  Returns
-  -------
-  matplotlib axes
+  Returns:
+    matplotlib axes.
   """
   ax = sns.distplot(yrep_stats, kde=False, label=r'$T(y_{rep})$', **kwargs)
 
