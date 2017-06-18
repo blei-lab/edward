@@ -24,12 +24,12 @@ import os
 import six
 
 from tensorflow.python.util import tf_inspect
-from tensorflow.tools.common import public_api
-from tensorflow.tools.common import traverse
-from tensorflow.tools.docs import doc_generator_visitor
-from tensorflow.tools.docs import parser
-from tensorflow.tools.docs import pretty_docs
-from tensorflow.tools.docs import py_guide_parser
+import public_api
+import traverse
+import doc_generator_visitor
+import parser
+import pretty_docs
+import py_guide_parser
 
 
 def _is_free_function(py_object, full_name, index):
@@ -99,7 +99,7 @@ def write_docs(output_dir, parser_config, yaml_toc):
             _is_free_function(py_object, full_name, parser_config.index)):
       continue
 
-    sitepath = os.path.join('api_docs/python',
+    sitepath = os.path.join('api',
                             parser.documentation_path(full_name)[:-3])
 
     # For TOC, we need to store a mapping from full_name to the file
@@ -152,7 +152,7 @@ def write_docs(output_dir, parser_config, yaml_toc):
       for module in modules:
         f.write('  - title: ' + module + '\n'
                 '    section:\n' + '    - title: Overview\n' +
-                '      path: /TARGET_DOC_ROOT/VERSION/' + symbol_to_file[module]
+                '      path: /' + symbol_to_file[module]
                 + '\n')
 
         symbols_in_module = module_children.get(module, [])
@@ -161,14 +161,14 @@ def write_docs(output_dir, parser_config, yaml_toc):
 
         for full_name in symbols_in_module:
           f.write('    - title: ' + full_name[len(module) + 1:] + '\n'
-                  '      path: /TARGET_DOC_ROOT/VERSION/' +
+                  '      path: /' +
                   symbol_to_file[full_name] + '\n')
 
   # Write a global index containing all full names with links.
-  with open(os.path.join(output_dir, 'index.md'), 'w') as f:
-    f.write(
-        parser.generate_global_index('TensorFlow', parser_config.index,
-                                     parser_config.reference_resolver))
+  # with open(os.path.join(output_dir, 'index.md'), 'w') as f:
+  #   f.write(
+  #       parser.generate_global_index('Edward', parser_config.index,
+  #                                    parser_config.reference_resolver))
 
 
 def add_dict_to_dict(add_from, add_to):
@@ -366,14 +366,14 @@ EXCLUDED = set(['__init__.py', 'OWNERS', 'README.txt'])
 
 def _other_docs(src_dir, output_dir, reference_resolver):
   """Convert all the files in `src_dir` and write results to `output_dir`."""
-  header = '<!-- DO NOT EDIT! Automatically generated file. -->\n'
+  header = ''
 
   # Iterate through all the source files and process them.
   tag_updater = _UpdateTags()
   for dirpath, _, filenames in os.walk(src_dir):
-    # How to get from `dirpath` to api_docs/python/
+    # How to get from `dirpath` to api/
     relative_path_to_root = os.path.relpath(
-        path=os.path.join(src_dir, 'api_docs/python'), start=dirpath)
+        path=os.path.join(src_dir, 'api'), start=dirpath)
 
     # Make the directory under output_dir.
     new_dir = os.path.join(output_dir,
@@ -392,19 +392,24 @@ def _other_docs(src_dir, output_dir, reference_resolver):
       full_in_path = os.path.join(dirpath, base_name)
       suffix = os.path.relpath(path=full_in_path, start=src_dir)
       full_out_path = os.path.join(output_dir, suffix)
-      if not base_name.endswith('.md'):
-        print('Copying non-md file %s...' % suffix)
+      if not base_name.endswith('.md') and not base_name.endswith('.tex'):
+        print('Copying non-md/tex file %s...' % suffix)
         open(full_out_path, 'w').write(open(full_in_path).read())
         continue
-      if dirpath.endswith('/api_guides/python'):
+      if dirpath.endswith('/api'):
         print('Processing Python guide %s...' % base_name)
         md_string = tag_updater.process(full_in_path)
       else:
         print('Processing doc %s...' % suffix)
         md_string = open(full_in_path).read()
 
-      output = reference_resolver.replace_references(md_string,
-                                                     relative_path_to_root)
+      if base_name.endswith('.tex'):
+        output = reference_resolver.replace_references(md_string,
+                                                       relative_path_to_root,
+                                                       style='tex')
+      else:
+        output = reference_resolver.replace_references(md_string,
+                                                       relative_path_to_root)
       with open(full_out_path, 'w') as f:
         f.write(header + output)
 
@@ -496,11 +501,11 @@ class DocGenerator(object):
     reference_resolver = self.make_reference_resolver(visitor, doc_index)
 
     guide_index = _build_guide_index(
-        os.path.join(flags.src_dir, 'api_guides/python'))
+        os.path.join(flags.src_dir, 'api'))
 
     parser_config = self.make_parser_config(visitor, reference_resolver,
                                             guide_index, flags.base_dir)
-    output_dir = os.path.join(flags.output_dir, 'api_docs/python')
+    output_dir = os.path.join(flags.output_dir, 'api')
 
     write_docs(output_dir, parser_config, yaml_toc=self.yaml_toc)
     _other_docs(flags.src_dir, flags.output_dir, reference_resolver)

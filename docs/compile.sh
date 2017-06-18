@@ -15,12 +15,11 @@ python autogen.py \
 printf "Done.\n\n"
 
 echo "Begin pandoc compilation."
-mkdir -p build/api
-mkdir -p build/tutorials
-mkdir -p $docdir/build/api/ed/{criticisms/ppc_plots/,inferences/,models/}
-cd /tmp/docs/api
 # TODO recursively
-for filename in {./,ed/,ed/criticisms/,ed/criticisms/ppc_plots/}*.md; do
+mkdir -p build/api/ed/{criticisms/,inferences/,models/,util/}
+mkdir -p build/tutorials
+cd $tmpdir/api
+for filename in {./,ed/,ed/criticisms/,ed/inferences/,ed/models/,ed/util/}*.md; do
   echo api/$filename
   pandoc ${filename%.*}.md \
          --from=markdown+link_attributes+native_spans \

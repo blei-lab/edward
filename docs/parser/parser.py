@@ -163,7 +163,7 @@ class ReferenceResolver(object):
     with open(filepath, 'w') as f:
       json.dump(json_dict, f)
 
-  def replace_references(self, string, relative_path_to_root):
+  def replace_references(self, string, relative_path_to_root, style='md'):
     """Replace "@{symbol}" references with links to symbol's documentation page.
 
     This functions finds all occurrences of "@{symbol}" in `string`
@@ -188,11 +188,12 @@ class ReferenceResolver(object):
     """
     return re.sub(SYMBOL_REFERENCE_RE,
                   lambda match: self._one_ref(match.group(1),  # pylint: disable=g-long-lambda
-                                              relative_path_to_root),
+                                              relative_path_to_root,
+                                              style),
                   string)
 
   def python_link(self, link_text, ref_full_name, relative_path_to_root,
-                  code_ref=True):
+                  code_ref=True, style='md'):
     """Resolve a "@{python symbol}" reference to a Markdown link.
 
     This will pick the canonical location for duplicate symbols.  The
@@ -214,9 +215,15 @@ class ReferenceResolver(object):
     """
     link = self.reference_to_url(ref_full_name, relative_path_to_root)
     if code_ref:
-      return '[`%s`](%s)' % (link_text, link)
+      if style == 'md':
+        return '[`%s`](%s)' % (link_text, link)
+      else:
+        return '\href{%s}{\\texttt{%s}}' % (link, link_text)
     else:
-      return '[%s](%s)' % (link_text, link)
+      if style == 'md':
+        return '[%s](%s)' % (link_text, link)
+      else:
+        return '\href{%s}{%s}' % (link, link_text)
 
   def py_master_name(self, full_name):
     """Return the master name for a Python symbol name."""
@@ -268,9 +275,11 @@ class ReferenceResolver(object):
     if not ref_path:
       ref_path = documentation_path(master_name)
 
+    # TODO this breaks for files like ed.html and ed/ folder
+    ref_path = ref_path.replace('.md', '')
     return os.path.join(relative_path_to_root, ref_path)
 
-  def _one_ref(self, string, relative_path_to_root):
+  def _one_ref(self, string, relative_path_to_root, style):
     """Return a link for a single "@{symbol}" reference."""
     # Look for link text after $.
     dollar = string.rfind('$')
@@ -300,7 +309,7 @@ class ReferenceResolver(object):
           break
       if is_python:  # Python symbol
         return self.python_link(link_text, string, relative_path_to_root,
-                                code_ref=not manual_link_text)
+                                code_ref=True, style=style)
 
     # Error!
     log_error('Did not understand "@{%s}"' % string)
@@ -1273,9 +1282,9 @@ class ParserConfig(object):
     self.index = index
     self.guide_index = guide_index
     self.base_dir = base_dir
-    self.defined_in_prefix = 'tensorflow/'
+    self.defined_in_prefix = 'edward/'
     self.code_url_prefix = (
-        'https://www.tensorflow.org/code/tensorflow/')  # pylint: disable=line-too-long
+        'https://github.com/blei-lab/edward/tree/master/edward/')  # pylint: disable=line-too-long
 
   def py_name_to_object(self, full_name):
     """Return the Python object for a Python symbol name."""

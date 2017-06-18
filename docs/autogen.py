@@ -136,7 +136,8 @@ def generate_navbar(page_data):
       title = page_data['title']
       page_name = page_data['page']
       parent_pages = page_data['parent_pages']
-      if len(parent_pages) == 0 and page_name != 'index.tex':
+      if len(parent_pages) == 0 and \
+              page_name not in ['index.tex', 'reference.tex']:
         top_navbar += '\n'
         top_navbar += '<a class="button3" href="/api/'
         top_navbar += page_name.replace('.tex', '')
@@ -197,22 +198,18 @@ def generate_navbar(page_data):
 
 def generate_tensorflow_distributions():
   import edward.models
-  from tensorflow.contrib import distributions
+  from edward.models import RandomVariable
 
-  built_in_models = ['DirichletProcess', 'distributions_DirichletProcess',
-                     'Empirical', 'distributions_Empirical',
-                     'ParamMixture', 'distributions_ParamMixture',
-                     'PointMass', 'distributions_PointMass']
   models = [getattr(edward.models, name) for name in dir(edward.models)]
   models = [model for model in models
             if (isinstance(model, type) and
-                issubclass(model, distributions.Distribution) and
-                model.__name__ not in built_in_models
+                issubclass(model, RandomVariable) and
+                model != RandomVariable
                 )
             ]
   models = sorted(models, key=lambda cls: cls.__name__)
 
-  stub = 'https://www.tensorflow.org/api_docs/python/tf/contrib/distributions'
+  stub = '/api/ed/models'
   fragment = ('\\begin{{lstlisting}}[raw=html]'
               '<a class="reference" '
               'href="{stub}/{name}" title="edward.models.{name}">'
