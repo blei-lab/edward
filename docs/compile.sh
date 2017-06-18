@@ -1,65 +1,68 @@
 #!/bin/bash
 printf "Compiling Edward website.\n\n"
+docdir=$(pwd)
 
-echo "Clearing all html files."
-rm -f {./,api/,tutorials/}*.html
+echo "Clearing any previously built files."
+rm -rf build/
 printf "Done.\n\n"
 
-# Generate docstrings
 echo "Begin docstring generation."
-sphinx-build -b html -j 4 "tex/api/" "build/html/"
-python autogen.py
+python parser/generate.py \
+  --src_dir=$docdir/tex/ \
+  --output_dir=/tmp/docs/
+python autogen.py \
+  --src_dir=/tmp/docs/
 printf "Done.\n\n"
 
-# Compile all the tex files into html
 echo "Begin pandoc compilation."
-mkdir -p api
-mkdir -p tutorials
-cd tex
-for filename in {./,tutorials/}*.tex; do
+mkdir -p build/api
+mkdir -p build/tutorials
+mkdir -p $docdir/build/api/ed/{criticisms/ppc_plots/,inferences/,models/}
+cd /tmp/docs/api
+# TODO recursively
+for filename in {./,ed/,ed/criticisms/,ed/criticisms/ppc_plots/}*.md; do
+  echo api/$filename
+  pandoc ${filename%.*}.md \
+         --from=markdown+link_attributes+native_spans \
+         --to=html \
+         --filter=$docdir/pandoc-code2raw.py \
+         --mathjax \
+         --no-highlight \
+         --bibliography=$docdir/tex/bib.bib \
+         --csl=$docdir/tex/apa.csl \
+         --title-prefix="Edward" \
+         --template=$docdir/tex/template.pandoc \
+         --output=$docdir/build/api/${filename%.*}.html
+done
+cd ..
+for filename in {./,api/,tutorials/}*.tex; do
   echo $filename
   pandoc ${filename%.*}.tex \
          --from=latex+link_attributes+native_spans \
          --to=html \
-         --filter="../pandoc-code2raw.py" \
+         --filter=$docdir/pandoc-code2raw.py \
          --mathjax \
          --no-highlight \
-         --bibliography=bib.bib \
-         --csl=apa.csl \
+         --bibliography=$docdir/tex/bib.bib \
+         --csl=$docdir/tex/apa.csl \
          --title-prefix="Edward" \
-         --template=template.pandoc \
-         --output=../${filename%.*}.html
-done
-cd ../build
-for filename in *.tex; do
-  echo api/$filename
-  pandoc ${filename%.*}.tex \
-         --from=latex+link_attributes+native_spans \
-         --to=html \
-         --filter="../pandoc-code2raw.py" \
-         --mathjax \
-         --no-highlight \
-         --bibliography=../tex/bib.bib \
-         --csl=../tex/apa.csl \
-         --title-prefix="Edward" \
-         --template=../tex/template.pandoc \
-         --output=../api/${filename%.*}.html
+         --template=$docdir/tex/template.pandoc \
+         --output=$docdir/build/${filename%.*}.html
 done
 printf "Done.\n\n"
 
-cd ..
+cd $docdir
 echo "Begin postprocessing scripts."
-echo "./insert_github_links.py"
-python insert_github_links.py
-echo "./rearrange_attribute_rows.py"
-python rearrange_attribute_rows.py
-echo "./remove_orphan_methods.py"
-python remove_orphan_methods.py
-echo "./replace_sphinx_code_blocks.py"
-python replace_sphinx_code_blocks.py
 echo "./strip_p_in_li.py"
 python strip_p_in_li.py
 printf "Done.\n\n"
 
+echo "Begin copying index files."
+cp -r css/ build/
+cp -r icons/ build/
+cp -r images/ build/
+cp CNAME build/
+printf "Done.\n\n"
+
 # Clear intermediate docstring-generated files
-rm -rf build
+rm -rf /tmp/docs

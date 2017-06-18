@@ -148,68 +148,39 @@ The classes below inherit methods from base inference classes;
 see the \href{/api/inference-development}{development page} for more
 details.
 
-{%sphinx
-
-.. autoclass:: edward.inferences.VariationalInference
-   :members:
-
-.. autoclass:: edward.inferences.KLqp
-   :members:
-
-.. autoclass:: edward.inferences.ReparameterizationKLqp
-
-.. autoclass:: edward.inferences.ReparameterizationKLKLqp
-
-.. autoclass:: edward.inferences.ReparameterizationEntropyKLqp
-
-.. autoclass:: edward.inferences.ScoreKLqp
-
-.. autoclass:: edward.inferences.ScoreKLKLqp
-
-.. autoclass:: edward.inferences.ScoreEntropyKLqp
-
-.. autoclass:: edward.inferences.GANInference
-   :members:
-
-.. autoclass:: edward.inferences.BiGANInference
-   :members:
-
-.. autoclass:: edward.inferences.WGANInference
-   :members:
-
-.. autoclass:: edward.inferences.ImplicitKLqp
-   :members:
-
-.. autoclass:: edward.inferences.KLpq
-   :members:
-
-.. autoclass:: edward.inferences.MAP
-   :members:
-
-.. autoclass:: edward.inferences.Laplace
-   :members:
-
-.. autoclass:: edward.inferences.MonteCarlo
-   :members:
-
-.. autoclass:: edward.inferences.MetropolisHastings
-   :members:
-
-.. autoclass:: edward.inferences.Gibbs
-   :members:
-
-.. autoclass:: edward.inferences.HMC
-   :members:
-
-.. autoclass:: edward.inferences.SGLD
-   :members:
-
-.. autoclass:: edward.inferences.SGHMC
-   :members:
-
-.. automodule:: edward.inferences.conjugacy
-   :members: complete_conditional
-
-%}
+\begin{itemize}
+  \item @{ed.inferences.VariationalInference}
+    \begin{itemize}
+    \item @{ed.inferences.KLqp}
+      \begin{itemize}
+      \item @{ed.inferences.ReparameterizationKLqp}
+      \item @{ed.inferences.ReparameterizationKLKLqp}
+      \item @{ed.inferences.ReparameterizationEntropyKLqp}
+      \item @{ed.inferences.ScoreKLqp}
+      \item @{ed.inferences.ScoreKLKLqp}
+      \item @{ed.inferences.ScoreEntropyKLqp}
+      \end{itemize}
+    \item @{ed.inferences.KLpq}
+    \item @{ed.inferences.GANInference}
+      \begin{itemize}
+      \item @{ed.inferences.BiGANInference}
+      \item @{ed.inferences.ImplicitKLqp}
+      \item @{ed.inferences.WGANInference}
+      \end{itemize}
+    \item @{ed.inferences.MAP}
+      \begin{itemize}
+      \item @{ed.inferences.Laplace}
+      \end{itemize}
+    \end{itemize}
+  \item @{ed.inferences.MonteCarlo}
+    \begin{itemize}
+    \item @{ed.inferences.Gibbs}
+    \item @{ed.inferences.MetropolisHastings}
+    \item @{ed.inferences.HMC}
+    \item @{ed.inferences.SGLD}
+    \item @{ed.inferences.SGHMC}
+    \end{itemize}
+  \item @{ed.inferences.conjugacy.complete_conditional}
+\end{itemize}
 
 \subsubsection{References}\label{references}
