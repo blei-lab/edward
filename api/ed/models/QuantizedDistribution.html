@@ -209,7 +209,13 @@ j =          0     1     2</code></pre>
     *args,
     **kwargs
 )</code></pre>
-<p>Args: sample_shape: tf.TensorShape, optional. Shape of samples to draw from the random variable. value: tf.Tensor, optional. Fixed tensor to associate with random variable. Must have shape <code>sample_shape + batch_shape + event_shape</code>. collections: list, optional. Optional list of graph collections keys. The random variable is added to these collections. Defaults to [&quot;random_variables&quot;]. *args, **kwargs: Passed into parent <code>__init__</code>.</p>
+<p>Create a new random variable.</p>
+<h4 id="args">Args:</h4>
+<ul>
+<li><b><code>sample_shape</code></b>: tf.TensorShape, optional. Shape of samples to draw from the random variable.</li>
+<li><b><code>value</code></b>: tf.Tensor, optional. Fixed tensor to associate with random variable. Must have shape <code>sample_shape + batch_shape + event_shape</code>.</li>
+<li><b><code>collections</code></b>: list, optional. Optional list of graph collections keys. The random variable is added to these collections. Defaults to [&quot;random_variables&quot;].</li>
+</ul>
 <h3 id="__abs__">
 <code><strong>abs</strong></code>
 </h3>
@@ -353,7 +359,7 @@ j =          0     1     2</code></pre>
 <pre class="python"><code>batch_shape_tensor(name=&#39;batch_shape_tensor&#39;)</code></pre>
 <p>Shape of a single sample from a single event index as a 1-D <code>Tensor</code>.</p>
 <p>The batch dimensions are indexes into independent, non-identical parameterizations of this distribution.</p>
-<h4 id="args">Args:</h4>
+<h4 id="args-1">Args:</h4>
 <ul>
 <li><b><code>name</code></b>: name to give to the op</li>
 </ul>
@@ -379,7 +385,7 @@ j =          0     1     2</code></pre>
         = P[X &lt;= y], otherwise.</code></pre>
 <p>Since <code>Y</code> only has mass at whole numbers, <code>P[Y &lt;= y] = P[Y &lt;= floor(y)]</code>. This dictates that fractional <code>y</code> are first floored to a whole number, and then above definition applies.</p>
 <p>The base distribution's <code>cdf</code> method must be defined on <code>y - 1</code>.</p>
-<h4 id="args-1">Args:</h4>
+<h4 id="args-2">Args:</h4>
 <ul>
 <li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
 <li><b><code>name</code></b>: The name to give this op.</li>
@@ -394,7 +400,7 @@ j =          0     1     2</code></pre>
 <pre class="python"><code>copy(**override_parameters_kwargs)</code></pre>
 <p>Creates a deep copy of the distribution.</p>
 <p>Note: the copy distribution may continue to depend on the original initialization arguments.</p>
-<h4 id="args-2">Args:</h4>
+<h4 id="args-3">Args:</h4>
 <p>**override_parameters_kwargs: String/value dictionary of initialization arguments to override with new values.</p>
 <h4 id="returns-6">Returns:</h4>
 <ul>
@@ -412,7 +418,7 @@ j =          0     1     2</code></pre>
 <p>Alternatively, for non-vector, multivariate distributions (e.g., matrix-valued, Wishart), <code>Covariance</code> shall return a (batch of) matrices under some vectorization of the events, i.e.,</p>
 <pre class="none"><code>Cov[i, j] = Covariance(Vec(X)_i, Vec(X)_j) = [as above]</code></pre>
 <p>where <code>Cov</code> is a (batch of) <code>k' x k'</code> matrices, <code>0 &lt;= (i, j) &lt; k' = reduce_prod(event_shape)</code>, and <code>Vec</code> is some function mapping indices of this distribution's event dimensions to indices of a length-<code>k'</code> vector.</p>
-<h4 id="args-3">Args:</h4>
+<h4 id="args-4">Args:</h4>
 <ul>
 <li><b><code>name</code></b>: The name to give this op.</li>
 </ul>
@@ -435,7 +441,7 @@ j =          0     1     2</code></pre>
 <p>In a session, computes and returns the value of this random variable.</p>
 <p>This is not a graph construction method, it does not add ops to the graph.</p>
 <p>This convenience method requires a session where the graph containing this variable has been launched. If no session is passed, the default session is used.</p>
-<h4 id="args-4">Args:</h4>
+<h4 id="args-5">Args:</h4>
 <ul>
 <li><b><code>session</code></b>: tf.BaseSession, optional. The <code>tf.Session</code> to use to evaluate this random variable. If none, the default session is used.</li>
 <li><b><code>feed_dict</code></b>: dict, optional. A dictionary that maps <code>tf.Tensor</code> objects to feed values. See <code>tf.Session.run()</code> for a description of the valid feed values.</li>
@@ -453,7 +459,7 @@ with tf.Session() as sess:
 </h3>
 <pre class="python"><code>event_shape_tensor(name=&#39;event_shape_tensor&#39;)</code></pre>
 <p>Shape of a single sample from a single batch as a 1-D int32 <code>Tensor</code>.</p>
-<h4 id="args-5">Args:</h4>
+<h4 id="args-6">Args:</h4>
 <ul>
 <li><b><code>name</code></b>: name to give to the op</li>
 </ul>
@@ -506,7 +512,7 @@ with tf.Session() as sess:
 </h3>
 <pre class="python"><code>is_scalar_batch(name=&#39;is_scalar_batch&#39;)</code></pre>
 <p>Indicates that <code>batch_shape == []</code>.</p>
-<h4 id="args-6">Args:</h4>
+<h4 id="args-7">Args:</h4>
 <ul>
 <li><b><code>name</code></b>: The name to give this op.</li>
 </ul>
@@ -519,7 +525,7 @@ with tf.Session() as sess:
 </h3>
 <pre class="python"><code>is_scalar_event(name=&#39;is_scalar_event&#39;)</code></pre>
 <p>Indicates that <code>event_shape == []</code>.</p>
-<h4 id="args-7">Args:</h4>
+<h4 id="args-8">Args:</h4>
 <ul>
 <li><b><code>name</code></b>: The name to give this op.</li>
 </ul>
@@ -546,7 +552,7 @@ with tf.Session() as sess:
         = P[X &lt;= y], otherwise.</code></pre>
 <p>Since <code>Y</code> only has mass at whole numbers, <code>P[Y &lt;= y] = P[Y &lt;= floor(y)]</code>. This dictates that fractional <code>y</code> are first floored to a whole number, and then above definition applies.</p>
 <p>The base distribution's <code>log_cdf</code> method must be defined on <code>y - 1</code>.</p>
-<h4 id="args-8">Args:</h4>
+<h4 id="args-9">Args:</h4>
 <ul>
 <li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
 <li><b><code>name</code></b>: The name to give this op.</li>
@@ -570,7 +576,7 @@ with tf.Session() as sess:
          := 0, if j &lt; low or y &gt; high,
          := P[y - 1 &lt; X &lt;= y],  all other y.</code></pre>
 <p>The base distribution's <code>log_cdf</code> method must be defined on <code>y - 1</code>. If the base distribution has a <code>log_survival_function</code> method results will be more accurate for large values of <code>y</code>, and in this case the <code>log_survival_function</code> must also be defined on <code>y - 1</code>.</p>
-<h4 id="args-9">Args:</h4>
+<h4 id="args-10">Args:</h4>
 <ul>
 <li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
 <li><b><code>name</code></b>: The name to give this op.</li>
@@ -600,7 +606,7 @@ with tf.Session() as sess:
                       = P[X &lt;= y], otherwise.</code></pre>
 <p>Since <code>Y</code> only has mass at whole numbers, <code>P[Y &lt;= y] = P[Y &lt;= floor(y)]</code>. This dictates that fractional <code>y</code> are first floored to a whole number, and then above definition applies.</p>
 <p>The base distribution's <code>log_cdf</code> method must be defined on <code>y - 1</code>.</p>
-<h4 id="args-10">Args:</h4>
+<h4 id="args-11">Args:</h4>
 <ul>
 <li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
 <li><b><code>name</code></b>: The name to give this op.</li>
@@ -628,7 +634,7 @@ with tf.Session() as sess:
 <p>Shapes of parameters given the desired shape of a call to <code>sample()</code>.</p>
 <p>This is a class method that describes what key/value arguments are required to instantiate the given <code>Distribution</code> so that a particular shape is returned for that instance's call to <code>sample()</code>.</p>
 <p>Subclasses should override class method <code>_param_shapes</code>.</p>
-<h4 id="args-11">Args:</h4>
+<h4 id="args-12">Args:</h4>
 <ul>
 <li><b><code>sample_shape</code></b>: <code>Tensor</code> or python list/tuple. Desired shape of a call to <code>sample()</code>.</li>
 <li><b><code>name</code></b>: name to prepend ops with.</li>
@@ -645,7 +651,7 @@ with tf.Session() as sess:
 <p>param_shapes with static (i.e. <code>TensorShape</code>) shapes.</p>
 <p>This is a class method that describes what key/value arguments are required to instantiate the given <code>Distribution</code> so that a particular shape is returned for that instance's call to <code>sample()</code>. Assumes that the sample's shape is known statically.</p>
 <p>Subclasses should override class method <code>_param_shapes</code> to return constant-valued tensors when constant values are fed.</p>
-<h4 id="args-12">Args:</h4>
+<h4 id="args-13">Args:</h4>
 <ul>
 <li><b><code>sample_shape</code></b>: <code>TensorShape</code> or python list/tuple. Desired shape of a call to <code>sample()</code>.</li>
 </ul>
@@ -670,7 +676,7 @@ with tf.Session() as sess:
          := 0, if j &lt; low or y &gt; high,
          := P[y - 1 &lt; X &lt;= y],  all other y.</code></pre>
 <p>The base distribution's <code>cdf</code> method must be defined on <code>y - 1</code>. If the base distribution has a <code>survival_function</code> method, results will be more accurate for large values of <code>y</code>, and in this case the <code>survival_function</code> must also be defined on <code>y - 1</code>.</p>
-<h4 id="args-13">Args:</h4>
+<h4 id="args-14">Args:</h4>
 <ul>
 <li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
 <li><b><code>name</code></b>: The name to give this op.</li>
@@ -689,7 +695,7 @@ with tf.Session() as sess:
 <p>Quantile function. Aka &quot;inverse cdf&quot; or &quot;percent point function&quot;.</p>
 <p>Given random variable <code>X</code> and <code>p in [0, 1]</code>, the <code>quantile</code> is:</p>
 <pre class="none"><code>quantile(p) := x such that P[X &lt;= x] == p</code></pre>
-<h4 id="args-14">Args:</h4>
+<h4 id="args-15">Args:</h4>
 <ul>
 <li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
 <li><b><code>name</code></b>: The name to give this op.</li>
@@ -708,7 +714,7 @@ with tf.Session() as sess:
 )</code></pre>
 <p>Generate samples of the specified shape.</p>
 <p>Note that a call to <code>sample()</code> without arguments will generate a single sample.</p>
-<h4 id="args-15">Args:</h4>
+<h4 id="args-16">Args:</h4>
 <ul>
 <li><b><code>sample_shape</code></b>: 0D or 1D <code>int32</code> <code>Tensor</code>. Shape of the generated samples.</li>
 <li><b><code>seed</code></b>: Python integer seed for RNG</li>
@@ -726,7 +732,7 @@ with tf.Session() as sess:
 <p>Standard deviation is defined as,</p>
 <pre class="none"><code>stddev = E[(X - E[X])**2]**0.5</code></pre>
 <p>where <code>X</code> is the random variable associated with this distribution, <code>E</code> denotes expectation, and <code>stddev.shape = batch_shape + event_shape</code>.</p>
-<h4 id="args-16">Args:</h4>
+<h4 id="args-17">Args:</h4>
 <ul>
 <li><b><code>name</code></b>: The name to give this op.</li>
 </ul>
@@ -754,7 +760,7 @@ with tf.Session() as sess:
                       = P[X &lt;= y], otherwise.</code></pre>
 <p>Since <code>Y</code> only has mass at whole numbers, <code>P[Y &lt;= y] = P[Y &lt;= floor(y)]</code>. This dictates that fractional <code>y</code> are first floored to a whole number, and then above definition applies.</p>
 <p>The base distribution's <code>cdf</code> method must be defined on <code>y - 1</code>.</p>
-<h4 id="args-17">Args:</h4>
+<h4 id="args-18">Args:</h4>
 <ul>
 <li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
 <li><b><code>name</code></b>: The name to give this op.</li>
@@ -774,7 +780,7 @@ with tf.Session() as sess:
 <p>Variance is defined as,</p>
 <pre class="none"><code>Var = E[(X - E[X])**2]</code></pre>
 <p>where <code>X</code> is the random variable associated with this distribution, <code>E</code> denotes expectation, and <code>Var.shape = batch_shape + event_shape</code>.</p>
-<h4 id="args-18">Args:</h4>
+<h4 id="args-19">Args:</h4>
 <ul>
 <li><b><code>name</code></b>: The name to give this op.</li>
 </ul>
