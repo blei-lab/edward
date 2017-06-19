@@ -24,6 +24,28 @@ class KLqp(VariationalInference):
   This class minimizes the objective by automatically selecting from a
   variety of black box inference techniques.
 
+  #### Implementation Details
+
+  $-\\text{ELBO} =
+      -\mathbb{E}_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]$
+
+  KLqp supports
+
+  1. score function gradients [@paisley2012variational]
+  2. reparameterization gradients [@kingma2014auto]
+
+  of the loss function.
+
+  If the KL divergence between the variational model and the prior
+  is tractable, then the loss function can be written as
+
+  $-\mathbb{E}_{q(z; \lambda)}[\log p(x \mid z)] +
+      \\text{KL}( q(z; \lambda) \| p(z) ),$
+
+  where the KL term is computed analytically [@kingma2014auto]. We
+  compute this automatically when $p(z)$ and $q(z; \lambda)$ are
+  Normal.
+
   #### Notes
 
   `KLqp` also optimizes any model parameters $p(z \mid x;
@@ -77,28 +99,6 @@ class KLqp(VariationalInference):
     return super(KLqp, self).initialize(*args, **kwargs)
 
   def _build_loss_and_gradients(self, var_list):
-    """Wrapper for the `KLqp` loss function.
-
-    $-\\text{ELBO} =
-        -\mathbb{E}_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]$
-
-    KLqp supports
-
-    1. score function gradients [@paisley2012variational]
-    2. reparameterization gradients [@kingma2014auto]
-
-    of the loss function.
-
-    If the KL divergence between the variational model and the prior
-    is tractable, then the loss function can be written as
-
-    $-\mathbb{E}_{q(z; \lambda)}[\log p(x \mid z)] +
-        \\text{KL}( q(z; \lambda) \| p(z) ),$
-
-    where the KL term is computed analytically [@kingma2014auto]. We
-    compute this automatically when $p(z)$ and $q(z; \lambda)$ are
-    Normal.
-    """
     is_reparameterizable = all([
         rv.reparameterization_type ==
         tf.contrib.distributions.FULLY_REPARAMETERIZED
@@ -318,7 +318,6 @@ class ScoreEntropyKLqp(VariationalInference):
     return _build_score_entropy_loss_and_gradients(self, var_list)
 
 
-<<<<<<< HEAD
 class ScoreRBKLqp(VariationalInference):
   """Variational inference with the KL divergence
 
@@ -353,10 +352,7 @@ class ScoreRBKLqp(VariationalInference):
     return build_score_rb_loss_and_gradients(self, var_list)
 
 
-def build_reparam_loss_and_gradients(inference, var_list):
-=======
 def _build_reparam_loss_and_gradients(inference, var_list):
->>>>>>> make all build methods private
   """Build loss function. Its automatic differentiation
   is a stochastic gradient of
 

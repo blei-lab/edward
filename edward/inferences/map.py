@@ -110,11 +110,6 @@ class MAP(VariationalInference):
     super(MAP, self).__init__(latent_vars, data)
 
   def _build_loss_and_gradients(self, var_list):
-    """Build loss function. Its automatic differentiation
-    is the gradient of
-
-    $- \log p(x,z).$
-    """
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
     scope = tf.get_default_graph().unique_name("inference")

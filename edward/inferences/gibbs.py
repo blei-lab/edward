@@ -134,11 +134,8 @@ class Gibbs(MonteCarlo):
     return {'t': t, 'accept_rate': accept_rate}
 
   def _build_update(self):
-    """
-    #### Notes
-
-    The updates assume each Empirical random variable is directly
-    parameterized by `tf.Variable`s.
+    """Note the updates assume each Empirical random variable is
+    directly parameterized by `tf.Variable`s.
     """
     # Update Empirical random variables according to the complete
     # conditionals. We will feed the conditionals when calling `update()`.

@@ -30,6 +30,48 @@ class ImplicitKLqp(GANInference):
   random variables (`rv`) satisfies `rv.is_reparameterized` and
   `rv.is_continuous`.
 
+  #### Implementation Details
+
+  The algorithm builds the loss function
+
+  $-\Big(\mathbb{E}_{q(\\beta)} [\log p(\\beta) - \log q(\\beta) ] +
+      \sum_{n=1}^N \mathbb{E}_{q(\\beta)q(z_n\mid\\beta)} [
+          r^*(x_n, z_n, \\beta) ] \Big).$
+
+  We minimize it with respect to parameterized variational
+  families $q(z, \\beta; \lambda)$.
+
+  $r^*(x_n, z_n, \\beta)$ is a function of a single data point
+  $x_n$, single local variable $z_n$, and all global
+  variables $\\beta$. It is equal to the log-ratio
+
+  $\log p(x_n, z_n\mid \\beta) - \log q(x_n, z_n\mid \\beta),$
+
+  where $q(x_n)$ is the empirical data distribution. Rather
+  than explicit calculation, $r^*(x, z, \\beta)$ is the
+  solution to a ratio estimation problem, minimizing the specified
+  `ratio_loss`.
+
+  Gradients are taken using the reparameterization trick
+  [@kingma2014auto].
+
+  #### Notes
+
+  This also includes model parameters $p(x, z, \\beta; \\theta)$
+  and variational distributions with inference networks
+  $q(z\mid x)$.
+
+  There are a bunch of extensions we could easily do in this
+  implementation:
+
+  + further factorizations can be used to better leverage the
+    graph structure for more complicated models;
+  + score function gradients for global variables;
+  + use more samples; this would require the `copy()` utility
+    function for q's as well, and an additional loop. we opt not to
+    because it complicates the code;
+  + analytic KL/swapping out the penalty term for the globals.
+
   #### Notes
 
   Unlike `GANInference`, `discriminator` takes dict's as input,
@@ -103,46 +145,6 @@ class ImplicitKLqp(GANInference):
     return super(ImplicitKLqp, self).initialize(*args, **kwargs)
 
   def _build_loss_and_gradients(self, var_list):
-    """Build loss function
-
-    $-\Big(\mathbb{E}_{q(\\beta)} [\log p(\\beta) - \log q(\\beta) ] +
-        \sum_{n=1}^N \mathbb{E}_{q(\\beta)q(z_n\mid\\beta)} [
-            r^*(x_n, z_n, \\beta) ] \Big).$
-
-    We minimize it with respect to parameterized variational
-    families $q(z, \\beta; \lambda)$.
-
-    $r^*(x_n, z_n, \\beta)$ is a function of a single data point
-    $x_n$, single local variable $z_n$, and all global
-    variables $\\beta$. It is equal to the log-ratio
-
-    $\log p(x_n, z_n\mid \\beta) - \log q(x_n, z_n\mid \\beta),$
-
-    where $q(x_n)$ is the empirical data distribution. Rather
-    than explicit calculation, $r^*(x, z, \\beta)$ is the
-    solution to a ratio estimation problem, minimizing the specified
-    `ratio_loss`.
-
-    Gradients are taken using the reparameterization trick
-    [@kingma2014auto].
-
-    #### Notes
-
-    This also includes model parameters $p(x, z, \\beta; \\theta)$
-    and variational distributions with inference networks
-    $q(z\mid x)$.
-
-    There are a bunch of extensions we could easily do in this
-    implementation:
-
-    + further factorizations can be used to better leverage the
-      graph structure for more complicated models;
-    + score function gradients for global variables;
-    + use more samples; this would require the `copy()` utility
-      function for q's as well, and an additional loop. we opt not to
-      because it complicates the code;
-    + analytic KL/swapping out the penalty term for the globals.
-    """
     # Collect tensors used in calculation of losses.
     scope = tf.get_default_graph().unique_name("inference")
     qbeta_sample = {}

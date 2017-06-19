@@ -18,6 +18,10 @@ except Exception as e:
 class SGLD(MonteCarlo):
   """Stochastic gradient Langevin dynamics [@welling2011bayesian].
 
+  The algorithm simulates Langevin dynamics using a discretized
+  integrator. Its discretization error goes to zero as the learning
+  rate decreases.
+
   #### Notes
 
   In conditional inference, we infer $z$ in $p(z, \\beta
@@ -55,13 +59,8 @@ class SGLD(MonteCarlo):
     return super(SGLD, self).initialize(*args, **kwargs)
 
   def _build_update(self):
-    """Simulate Langevin dynamics using a discretized integrator. Its
-    discretization error goes to zero as the learning rate decreases.
-
-    #### Notes
-
-    The updates assume each Empirical random variable is directly
-    parameterized by `tf.Variable`s.
+    """Note the updates assume each Empirical random variable is
+    directly parameterized by `tf.Variable`s.
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}

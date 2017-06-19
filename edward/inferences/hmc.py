@@ -20,6 +20,10 @@ class HMC(MonteCarlo):
   """Hamiltonian Monte Carlo, also known as hybrid Monte Carlo
   [@duane1987hybrid; @neal2011mcmc].
 
+  The algorithm simulates Hamiltonian dynamics using a numerical
+  integrator. It corrects for the integrator's discretization error
+  using an acceptance ratio.
+
   #### Notes
 
   In conditional inference, we infer $z$ in $p(z, \\beta
@@ -64,14 +68,8 @@ class HMC(MonteCarlo):
     return super(HMC, self).initialize(*args, **kwargs)
 
   def _build_update(self):
-    """Simulate Hamiltonian dynamics using a numerical integrator.
-    Correct for the integrator's discretization error using an
-    acceptance ratio.
-
-    #### Notes
-
-    The updates assume each Empirical random variable is directly
-    parameterized by `tf.Variable`s.
+    """Note the updates assume each Empirical random variable is
+    directly parameterized by `tf.Variable`s.
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}

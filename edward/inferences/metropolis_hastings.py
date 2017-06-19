@@ -19,6 +19,15 @@ except Exception as e:
 class MetropolisHastings(MonteCarlo):
   """Metropolis-Hastings [@metropolis1953equation; @hastings1970monte].
 
+  For each iteration, `MetropolisHastings` samples from the proposal
+  conditional on last sample. Then accept or reject the sample based
+  on the ratio,
+
+  $\\text{ratio} =
+        \log p(x, z^{\\text{new}}) - \log p(x, z^{\\text{old}}) +
+        \log g(z^{\\text{new}} \mid z^{\\text{old}}) -
+        \log g(z^{\\text{old}} \mid z^{\\text{new}})$
+
   #### Notes
 
   In conditional inference, we infer $z$ in $p(z, \\beta
@@ -67,18 +76,8 @@ class MetropolisHastings(MonteCarlo):
     return super(MetropolisHastings, self).initialize(*args, **kwargs)
 
   def _build_update(self):
-    """Draw sample from proposal conditional on last sample. Then
-    accept or reject the sample based on the ratio,
-
-    $\\text{ratio} =
-          \log p(x, z^{\\text{new}}) - \log p(x, z^{\\text{old}}) +
-          \log g(z^{\\text{new}} \mid z^{\\text{old}}) -
-          \log g(z^{\\text{old}} \mid z^{\\text{new}})$
-
-    #### Notes
-
-    The updates assume each Empirical random variable is directly
-    parameterized by `tf.Variable`s.
+    """Note the updates assume each Empirical random variable is
+    directly parameterized by `tf.Variable`s.
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
