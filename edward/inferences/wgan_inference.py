@@ -66,7 +66,7 @@ class WGANInference(GANInference):
       self.clip_op = [w.assign(tf.clip_by_value(w, -clip, clip))
                       for w in var_list]
 
-  def build_loss_and_gradients(self, var_list):
+  def _build_loss_and_gradients(self, var_list):
     x_true = list(six.itervalues(self.data))[0]
     x_fake = list(six.iterkeys(self.data))[0]
     with tf.variable_scope("Disc"):

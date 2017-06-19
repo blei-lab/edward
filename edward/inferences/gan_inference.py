@@ -93,7 +93,7 @@ class GANInference(VariationalInference):
     super(VariationalInference, self).initialize(*args, **kwargs)
 
     self.loss, grads_and_vars, self.loss_d, grads_and_vars_d = \
-        self.build_loss_and_gradients(var_list)
+        self._build_loss_and_gradients(var_list)
 
     optimizer, global_step = _build_optimizer(optimizer, global_step)
     optimizer_d, global_step_d = _build_optimizer(optimizer_d, global_step_d)
@@ -110,7 +110,7 @@ class GANInference(VariationalInference):
                         collections=[self._summary_key])
       self.summarize = tf.summary.merge_all(key=self._summary_key)
 
-  def build_loss_and_gradients(self, var_list):
+  def _build_loss_and_gradients(self, var_list):
     x_true = list(six.itervalues(self.data))[0]
     x_fake = list(six.iterkeys(self.data))[0]
     with tf.variable_scope("Disc"):

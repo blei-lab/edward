@@ -66,7 +66,7 @@ class MetropolisHastings(MonteCarlo):
     kwargs['auto_transform'] = False
     return super(MetropolisHastings, self).initialize(*args, **kwargs)
 
-  def build_update(self):
+  def _build_update(self):
     """Draw sample from proposal conditional on last sample. Then
     accept or reject the sample based on the ratio,
 

@@ -18,7 +18,7 @@ class MonteCarlo(Inference):
   inherit from `MonteCarlo`, sharing methods in this class.
 
   To build an algorithm inheriting from `MonteCarlo`, one must at the
-  minimum implement `build_update`: it determines how to assign
+  minimum implement `_build_update`: it determines how to assign
   the samples in the `Empirical` approximations.
 
   #### Notes
@@ -98,7 +98,7 @@ class MonteCarlo(Inference):
 
     self._n_accept = tf.Variable(0, trainable=False, name="n_accept")
     self._n_accept_over_t = self._n_accept / self._t
-    self._train = self.build_update()
+    self._train = self._build_update()
 
     self.reset.append(tf.variables_initializer([self.n_accept]))
 
@@ -157,7 +157,7 @@ class MonteCarlo(Inference):
         self._progbar.update(t, {'Acceptance Rate': info_dict['accept_rate']})
 
   @abc.abstractmethod
-  def build_update(self):
+  def _build_update(self):
     """Build update rules, returning an assign op for parameters in
     the `Empirical` random variables.
 

@@ -76,7 +76,7 @@ class KLqp(VariationalInference):
     self.kl_scaling = kl_scaling
     return super(KLqp, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, var_list):
+  def _build_loss_and_gradients(self, var_list):
     """Wrapper for the `KLqp` loss function.
 
     $-\\text{ELBO} =
@@ -109,22 +109,22 @@ class KLqp(VariationalInference):
       raise TypeError("kl_scaling must be None when using non-analytic KL term")
     if is_reparameterizable:
       if is_analytic_kl:
-        return build_reparam_kl_loss_and_gradients(self, var_list)
+        return _build_reparam_kl_loss_and_gradients(self, var_list)
       # elif is_analytic_entropy:
-      #    return build_reparam_entropy_loss_and_gradients(self, var_list)
+      #    return _build_reparam_entropy_loss_and_gradients(self, var_list)
       else:
-        return build_reparam_loss_and_gradients(self, var_list)
+        return _build_reparam_loss_and_gradients(self, var_list)
     else:
       # Prefer Rao-Blackwellization over analytic KL. Unknown what
       # would happen stability-wise if the two are combined.
       # if is_analytic_kl:
-      #   return build_score_kl_loss_and_gradients(self, var_list)
+      #   return _build_score_kl_loss_and_gradients(self, var_list)
       # Analytic entropies may lead to problems around
       # convergence; for now it is deactivated.
       # elif is_analytic_entropy:
-      #    return build_score_entropy_loss_and_gradients(self, var_list)
+      #    return _build_score_entropy_loss_and_gradients(self, var_list)
       # else:
-      return build_score_rb_loss_and_gradients(self, var_list)
+      return _build_score_rb_loss_and_gradients(self, var_list)
 
 
 class ReparameterizationKLqp(VariationalInference):
@@ -150,8 +150,8 @@ class ReparameterizationKLqp(VariationalInference):
     self.n_samples = n_samples
     return super(ReparameterizationKLqp, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, var_list):
-    return build_reparam_loss_and_gradients(self, var_list)
+  def _build_loss_and_gradients(self, var_list):
+    return _build_reparam_loss_and_gradients(self, var_list)
 
 
 class ReparameterizationKLKLqp(VariationalInference):
@@ -191,8 +191,8 @@ class ReparameterizationKLKLqp(VariationalInference):
     self.kl_scaling = kl_scaling
     return super(ReparameterizationKLKLqp, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, var_list):
-    return build_reparam_kl_loss_and_gradients(self, var_list)
+  def _build_loss_and_gradients(self, var_list):
+    return _build_reparam_kl_loss_and_gradients(self, var_list)
 
 
 class ReparameterizationEntropyKLqp(VariationalInference):
@@ -219,8 +219,8 @@ class ReparameterizationEntropyKLqp(VariationalInference):
     return super(ReparameterizationEntropyKLqp, self).initialize(
         *args, **kwargs)
 
-  def build_loss_and_gradients(self, var_list):
-    return build_reparam_entropy_loss_and_gradients(self, var_list)
+  def _build_loss_and_gradients(self, var_list):
+    return _build_reparam_entropy_loss_and_gradients(self, var_list)
 
 
 class ScoreKLqp(VariationalInference):
@@ -246,8 +246,8 @@ class ScoreKLqp(VariationalInference):
     self.n_samples = n_samples
     return super(ScoreKLqp, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, var_list):
-    return build_score_loss_and_gradients(self, var_list)
+  def _build_loss_and_gradients(self, var_list):
+    return _build_score_loss_and_gradients(self, var_list)
 
 
 class ScoreKLKLqp(VariationalInference):
@@ -287,8 +287,8 @@ class ScoreKLKLqp(VariationalInference):
     self.kl_scaling = kl_scaling
     return super(ScoreKLKLqp, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, var_list):
-    return build_score_kl_loss_and_gradients(self, var_list)
+  def _build_loss_and_gradients(self, var_list):
+    return _build_score_kl_loss_and_gradients(self, var_list)
 
 
 class ScoreEntropyKLqp(VariationalInference):
@@ -314,10 +314,11 @@ class ScoreEntropyKLqp(VariationalInference):
     self.n_samples = n_samples
     return super(ScoreEntropyKLqp, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, var_list):
-    return build_score_entropy_loss_and_gradients(self, var_list)
+  def _build_loss_and_gradients(self, var_list):
+    return _build_score_entropy_loss_and_gradients(self, var_list)
 
 
+<<<<<<< HEAD
 class ScoreRBKLqp(VariationalInference):
   """Variational inference with the KL divergence
 
@@ -353,6 +354,9 @@ class ScoreRBKLqp(VariationalInference):
 
 
 def build_reparam_loss_and_gradients(inference, var_list):
+=======
+def _build_reparam_loss_and_gradients(inference, var_list):
+>>>>>>> make all build methods private
   """Build loss function. Its automatic differentiation
   is a stochastic gradient of
 
@@ -414,7 +418,7 @@ def build_reparam_loss_and_gradients(inference, var_list):
   return loss, grads_and_vars
 
 
-def build_reparam_kl_loss_and_gradients(inference, var_list):
+def _build_reparam_kl_loss_and_gradients(inference, var_list):
   """Build loss function. Its automatic differentiation
   is a stochastic gradient of
 
@@ -475,7 +479,7 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
   return loss, grads_and_vars
 
 
-def build_reparam_entropy_loss_and_gradients(inference, var_list):
+def _build_reparam_entropy_loss_and_gradients(inference, var_list):
   """Build loss function. Its automatic differentiation
   is a stochastic gradient of
 
@@ -539,7 +543,7 @@ def build_reparam_entropy_loss_and_gradients(inference, var_list):
   return loss, grads_and_vars
 
 
-def build_score_loss_and_gradients(inference, var_list):
+def _build_score_loss_and_gradients(inference, var_list):
   """Build loss function and gradients based on the score function
   estimator [@paisley2012variational].
 
@@ -605,7 +609,7 @@ def build_score_loss_and_gradients(inference, var_list):
   return loss, grads_and_vars
 
 
-def build_score_kl_loss_and_gradients(inference, var_list):
+def _build_score_kl_loss_and_gradients(inference, var_list):
   """Build loss function and gradients based on the score function
   estimator [@paisley2012variational].
 
@@ -671,7 +675,7 @@ def build_score_kl_loss_and_gradients(inference, var_list):
   return loss, grads_and_vars
 
 
-def build_score_entropy_loss_and_gradients(inference, var_list):
+def _build_score_entropy_loss_and_gradients(inference, var_list):
   """Build loss function and gradients based on the score function
   estimator [@paisley2012variational].
 

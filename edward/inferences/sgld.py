@@ -54,7 +54,7 @@ class SGLD(MonteCarlo):
     self.step_size = step_size
     return super(SGLD, self).initialize(*args, **kwargs)
 
-  def build_update(self):
+  def _build_update(self):
     """Simulate Langevin dynamics using a discretized integrator. Its
     discretization error goes to zero as the learning rate decreases.
 

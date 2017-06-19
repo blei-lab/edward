@@ -102,7 +102,7 @@ class ImplicitKLqp(GANInference):
 
     return super(ImplicitKLqp, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, var_list):
+  def _build_loss_and_gradients(self, var_list):
     """Build loss function
 
     $-\Big(\mathbb{E}_{q(\\beta)} [\log p(\\beta) - \log q(\\beta) ] +

@@ -60,7 +60,7 @@ class SGHMC(MonteCarlo):
               for z, qz in six.iteritems(self.latent_vars)}
     return super(SGHMC, self).initialize(*args, **kwargs)
 
-  def build_update(self):
+  def _build_update(self):
     """Simulate Hamiltonian dynamics with friction using a discretized
     integrator. Its discretization error goes to zero as the learning
     rate decreases.

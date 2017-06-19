@@ -109,7 +109,7 @@ class MAP(VariationalInference):
 
     super(MAP, self).__init__(latent_vars, data)
 
-  def build_loss_and_gradients(self, var_list):
+  def _build_loss_and_gradients(self, var_list):
     """Build loss function. Its automatic differentiation
     is the gradient of
 

@@ -133,7 +133,7 @@ class Gibbs(MonteCarlo):
 
     return {'t': t, 'accept_rate': accept_rate}
 
-  def build_update(self):
+  def _build_update(self):
     """
     #### Notes
 

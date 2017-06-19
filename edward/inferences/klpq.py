@@ -56,7 +56,7 @@ class KLpq(VariationalInference):
     self.n_samples = n_samples
     return super(KLpq, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, var_list):
+  def _build_loss_and_gradients(self, var_list):
     """Build loss function
 
     $\\text{KL}( p(z \mid x) \| q(z) )

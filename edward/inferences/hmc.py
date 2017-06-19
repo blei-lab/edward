@@ -63,7 +63,7 @@ class HMC(MonteCarlo):
     self._scope = tf.get_default_graph().unique_name("inference") + '/'
     return super(HMC, self).initialize(*args, **kwargs)
 
-  def build_update(self):
+  def _build_update(self):
     """Simulate Hamiltonian dynamics using a numerical integrator.
     Correct for the integrator's discretization error using an
     acceptance ratio.
