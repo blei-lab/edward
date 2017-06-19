@@ -20,7 +20,29 @@ class distributions_ParamMixture(Distribution):
   Note that this distribution actually represents the conditional
   distribution of the observable variable given a latent categorical
   variable `cat` saying which mixture component generated this
-  distribution."""
+  distribution.
+
+  #### Notes
+
+  Given `ParamMixture`'s `sample_shape`, `batch_shape`, and
+  `event_shape`, its `components` has shape
+  `sample_shape + [num_components] + batch_shape + event_shape`,
+  and its `cat` has shape `sample_shape + batch_shape`.
+
+  #### Examples
+
+  ```python
+  probs = tf.ones(5) / 5.0
+  params = {'mu': tf.zeros(5), 'sigma': tf.ones(5)}
+  x = ParamMixture(probs, params, Normal)
+  assert x.shape == ()
+
+  probs = tf.ones([2, 5]) / 5.0
+  params = {'p': tf.zeros([5, 2]) + 0.8}
+  x = ParamMixture(probs, params, Bernoulli)
+  assert x.shape == (2,)
+  ```
+  """
   def __init__(self,
                mixing_weights,
                component_params,
@@ -40,27 +62,6 @@ class distributions_ParamMixture(Distribution):
         Distribution of each component. The outer (left-most) dimension
         of its batch shape when instantiated determines the number of
         components.
-
-    #### Notes
-
-    Given `ParamMixture`'s `sample_shape`, `batch_shape`, and
-    `event_shape`, its `components` has shape
-    `sample_shape + [num_components] + batch_shape + event_shape`,
-    and its `cat` has shape `sample_shape + batch_shape`.
-
-    #### Examples
-
-    ```python
-    probs = tf.ones(5) / 5.0
-    params = {'mu': tf.zeros(5), 'sigma': tf.ones(5)}
-    x = ParamMixture(probs, params, Normal)
-    assert x.shape == ()
-
-    probs = tf.ones([2, 5]) / 5.0
-    params = {'p': tf.zeros([5, 2]) + 0.8}
-    x = ParamMixture(probs, params, Bernoulli)
-    assert x.shape == (2,)
-    ```
     """
     parameters = locals()
     parameters.pop("self")
@@ -262,5 +263,9 @@ class distributions_ParamMixture(Distribution):
 _name = 'ParamMixture'
 _candidate = distributions_ParamMixture
 _globals = globals()
-params = {'__doc__': _candidate.__doc__}
-_globals[_name] = type(_name, (RandomVariable, _candidate), params)
+def __init__(self, *args, **kwargs):
+  RandomVariable.__init__(self, *args, **kwargs)
+__init__.__doc__ = _candidate.__init__.__doc__
+_params = {'__doc__': _candidate.__doc__,
+           '__init__': __init__}
+_globals[_name] = type(_name, (RandomVariable, _candidate), _params)

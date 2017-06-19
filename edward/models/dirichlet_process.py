@@ -20,6 +20,19 @@ class distributions_DirichletProcess(Distribution):
   It has two parameters: a positive real value $\\alpha$, known
   as the concentration parameter (`concentration`), and a base
   distribution $H$ (`base`).
+
+  #### Examples
+
+  ```python
+  # scalar concentration parameter, scalar base distribution
+  dp = DirichletProcess(0.1, Normal(loc=0.0, scale=1.0))
+  assert dp.shape == ()
+
+  # vector of concentration parameters, matrix of Exponentials
+  dp = DirichletProcess(tf.constant([0.1, 0.4]),
+                        Exponential(lam=tf.ones([5, 3])))
+  assert dp.shape == (2, 5, 3)
+  ```
   """
   def __init__(self,
                concentration,
@@ -36,19 +49,6 @@ class distributions_DirichletProcess(Distribution):
       base: RandomVariable.
         Base distribution. Its shape determines the shape of an
         individual DP (event shape).
-
-    #### Examples
-
-    ```python
-    # scalar concentration parameter, scalar base distribution
-    dp = DirichletProcess(0.1, Normal(loc=0.0, scale=1.0))
-    assert dp.shape == ()
-
-    # vector of concentration parameters, matrix of Exponentials
-    dp = DirichletProcess(tf.constant([0.1, 0.4]),
-    ...                       Exponential(lam=tf.ones([5, 3])))
-    assert dp.shape == (2, 5, 3)
-    ```
     """
     parameters = locals()
     with tf.name_scope(name, values=[concentration]):
@@ -228,5 +228,9 @@ class distributions_DirichletProcess(Distribution):
 _name = 'DirichletProcess'
 _candidate = distributions_DirichletProcess
 _globals = globals()
-params = {'__doc__': _candidate.__doc__}
-_globals[_name] = type(_name, (RandomVariable, _candidate), params)
+def __init__(self, *args, **kwargs):
+  RandomVariable.__init__(self, *args, **kwargs)
+__init__.__doc__ = _candidate.__init__.__doc__
+_params = {'__doc__': _candidate.__doc__,
+           '__init__': __init__}
+_globals[_name] = type(_name, (RandomVariable, _candidate), _params)

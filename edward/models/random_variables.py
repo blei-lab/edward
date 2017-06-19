@@ -16,7 +16,12 @@ for _name in sorted(dir(_distributions)):
           _candidate != _distributions.Distribution and
           issubclass(_candidate, _distributions.Distribution)):
 
-    _params = {'__doc__': _candidate.__doc__}
+    # to use _candidate's docstring, must write a new __init__ method
+    def __init__(self, *args, **kwargs):
+      _RandomVariable.__init__(self, *args, **kwargs)
+    __init__.__doc__ = _candidate.__init__.__doc__
+    _params = {'__doc__': _candidate.__doc__,
+               '__init__': __init__}
     _globals[_name] = type(_name, (_RandomVariable, _candidate), _params)
 
     del _candidate

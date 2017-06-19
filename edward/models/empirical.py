@@ -14,7 +14,20 @@ except Exception as e:
 
 
 class distributions_Empirical(Distribution):
-  """Empirical random variable."""
+  """Empirical random variable.
+
+  #### Examples
+
+  ```python
+  # 100 samples of a scalar
+  x = Empirical(params=tf.zeros(100))
+  assert x.shape == ()
+
+  # 5 samples of a 2 x 3 matrix
+  dp = Empirical(params=tf.zeros([5, 2, 3]))
+  assert x.shape == (2, 3)
+  ```
+  """
   def __init__(self,
                params,
                validate_args=False,
@@ -26,18 +39,6 @@ class distributions_Empirical(Distribution):
       params: tf.Tensor.
       Collection of samples. Its outer (left-most) dimension
       determines the number of samples.
-
-    #### Examples
-
-    ```python
-    # 100 samples of a scalar
-    x = Empirical(params=tf.zeros(100))
-    assert x.shape == ()
-
-    # 5 samples of a 2 x 3 matrix
-    dp = Empirical(params=tf.zeros([5, 2, 3]))
-    assert x.shape == (2, 3)
-    ```
     """
     parameters = locals()
     with tf.name_scope(name, values=[params]):
@@ -113,5 +114,9 @@ class distributions_Empirical(Distribution):
 _name = 'Empirical'
 _candidate = distributions_Empirical
 _globals = globals()
-params = {'__doc__': _candidate.__doc__}
-_globals[_name] = type(_name, (RandomVariable, _candidate), params)
+def __init__(self, *args, **kwargs):
+  RandomVariable.__init__(self, *args, **kwargs)
+__init__.__doc__ = _candidate.__init__.__doc__
+_params = {'__doc__': _candidate.__doc__,
+           '__init__': __init__}
+_globals[_name] = type(_name, (RandomVariable, _candidate), _params)

@@ -37,13 +37,13 @@ class MetropolisHastings(MonteCarlo):
   #### Examples
 
   ```python
-  z = Normal(loc=0.0, scale=1.0)
-  x = Normal(loc=tf.ones(10) * z, scale=1.0)
+  mu = Normal(loc=0.0, scale=1.0)
+  x = Normal(loc=mu, scale=1.0, sample_shape=10)
 
-  qz = Empirical(tf.Variable(tf.zeros(500)))
-  proposal_z = Normal(loc=z, scale=0.5)
-  data = {x: np.array([0.0] * 10, dtype=np.float32)}
-  inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
+  qmu = Empirical(tf.Variable(tf.zeros(500)))
+  proposal_mu = Normal(loc=mu, scale=0.5)
+  inference = ed.MetropolisHastings({mu: qmu}, {mu: proposal_mu},
+                                    data={x: np.zeros(10, dtype=np.float32)})
   ```
   """
   def __init__(self, latent_vars, proposal_vars, data=None):

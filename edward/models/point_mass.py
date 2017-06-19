@@ -18,6 +18,18 @@ class distributions_PointMass(Distribution):
 
   It is analogous to an Empirical random variable with one sample, but
   its parameter argument does not have an outer dimension.
+
+  #### Examples
+
+  ```python
+  # scalar
+  x = PointMass(params=28.3)
+  assert x.shape == ()
+
+  # 5 x 2 x 3 tensor
+  dp = PointMass(params=tf.zeros([5, 2, 3]))
+  assert x.shape == (5, 2, 3)
+  ```
   """
   def __init__(self,
                params,
@@ -29,18 +41,6 @@ class distributions_PointMass(Distribution):
     Args:
       params: tf.Tensor.
         The location with all probability mass.
-
-    #### Examples
-
-    ```python
-    # scalar
-    x = PointMass(params=28.3)
-    assert x.shape == ()
-
-    # 5 x 2 x 3 tensor
-    dp = PointMass(params=tf.zeros([5, 2, 3]))
-    assert x.shape == (5, 2, 3)
-    ```
     """
     parameters = locals()
     with tf.name_scope(name, values=[params]):
@@ -99,5 +99,9 @@ class distributions_PointMass(Distribution):
 _name = 'PointMass'
 _candidate = distributions_PointMass
 _globals = globals()
-params = {'__doc__': _candidate.__doc__}
-_globals[_name] = type(_name, (RandomVariable, _candidate), params)
+def __init__(self, *args, **kwargs):
+  RandomVariable.__init__(self, *args, **kwargs)
+__init__.__doc__ = _candidate.__init__.__doc__
+_params = {'__doc__': _candidate.__doc__,
+           '__init__': __init__}
+_globals[_name] = type(_name, (RandomVariable, _candidate), _params)
