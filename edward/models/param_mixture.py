@@ -30,36 +30,37 @@ class distributions_ParamMixture(Distribution):
                name="ParamMixture"):
     """Initialize a batch of mixture random variables.
 
-    Parameters
-    ----------
-    mixing_weights : tf.Tensor
-      (Normalized) weights whose inner (right-most) dimension matches
-      the number of components.
-    component_params : dict
-      Parameters of the per-component distributions.
-    component_dist : RandomVariable
-      Distribution of each component. The outer (left-most) dimension
-      of its batch shape when instantiated determines the number of
-      components.
+    Args:
+      mixing_weights: tf.Tensor.
+        (Normalized) weights whose inner (right-most) dimension matches
+        the number of components.
+      component_params: dict.
+        Parameters of the per-component distributions.
+      component_dist: RandomVariable.
+        Distribution of each component. The outer (left-most) dimension
+        of its batch shape when instantiated determines the number of
+        components.
 
-    Notes
-    -----
-    Given ``ParamMixture``'s ``sample_shape``, ``batch_shape``, and
-    ``event_shape``, its ``components`` has shape
-    ``sample_shape + [num_components] + batch_shape + event_shape``,
-    and its ``cat`` has shape ``sample_shape + batch_shape``.
+    #### Notes
 
-    Examples
-    --------
-    >>> probs = tf.ones(5) / 5.0
-    >>> params = {'mu': tf.zeros(5), 'sigma': tf.ones(5)}
-    >>> x = ParamMixture(probs, params, Normal)
-    >>> assert x.shape == ()
-    >>>
-    >>> probs = tf.ones([2, 5]) / 5.0
-    >>> params = {'p': tf.zeros([5, 2]) + 0.8}
-    >>> x = ParamMixture(probs, params, Bernoulli)
-    >>> assert x.shape == (2,)
+    Given `ParamMixture`'s `sample_shape`, `batch_shape`, and
+    `event_shape`, its `components` has shape
+    `sample_shape + [num_components] + batch_shape + event_shape`,
+    and its `cat` has shape `sample_shape + batch_shape`.
+
+    #### Examples
+
+    ```python
+    probs = tf.ones(5) / 5.0
+    params = {'mu': tf.zeros(5), 'sigma': tf.ones(5)}
+    x = ParamMixture(probs, params, Normal)
+    assert x.shape == ()
+
+    probs = tf.ones([2, 5]) / 5.0
+    params = {'p': tf.zeros([5, 2]) + 0.8}
+    x = ParamMixture(probs, params, Bernoulli)
+    assert x.shape == (2,)
+    ```
     """
     parameters = locals()
     parameters.pop("self")

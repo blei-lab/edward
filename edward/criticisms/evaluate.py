@@ -27,62 +27,61 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
   the probability of observing the data is calculated under the
   posterior predictive's log-density.
 
-  Parameters
-  ----------
-  metrics : list of str or str
-    List of metrics or a single metric:
-    ``'binary_accuracy'``,
-    ``'categorical_accuracy'``,
-    ``'sparse_categorical_accuracy'``,
-    ``'log_loss'`` or ``'binary_crossentropy'``,
-    ``'categorical_crossentropy'``,
-    ``'sparse_categorical_crossentropy'``,
-    ``'hinge'``,
-    ``'squared_hinge'``,
-    ``'mse'`` or ``'MSE'`` or ``'mean_squared_error'``,
-    ``'mae'`` or ``'MAE'`` or ``'mean_absolute_error'``,
-    ``'mape'`` or ``'MAPE'`` or ``'mean_absolute_percentage_error'``,
-    ``'msle'`` or ``'MSLE'`` or ``'mean_squared_logarithmic_error'``,
-    ``'poisson'``,
-    ``'cosine'`` or ``'cosine_proximity'``,
-    ``'log_lik'`` or ``'log_likelihood'``.
-  data : dict
-    Data to evaluate model with. It binds observed variables (of type
-    ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
-    type ``tf.Tensor``). It can also bind placeholders (of type
-    ``tf.Tensor``) used in the model to their realizations.
-  n_samples : int, optional
-    Number of posterior samples for making predictions, using the
-    posterior predictive distribution.
-  output_key : RandomVariable or tf.Tensor, optional
-    It is the key in ``data`` which corresponds to the model's output.
+  Args:
+    metrics: list of str or str.
+      List of metrics or a single metric:
+      `'binary_accuracy'`,
+      `'categorical_accuracy'`,
+      `'sparse_categorical_accuracy'`,
+      `'log_loss'` or `'binary_crossentropy'`,
+      `'categorical_crossentropy'`,
+      `'sparse_categorical_crossentropy'`,
+      `'hinge'`,
+      `'squared_hinge'`,
+      `'mse'` or `'MSE'` or `'mean_squared_error'`,
+      `'mae'` or `'MAE'` or `'mean_absolute_error'`,
+      `'mape'` or `'MAPE'` or `'mean_absolute_percentage_error'`,
+      `'msle'` or `'MSLE'` or `'mean_squared_logarithmic_error'`,
+      `'poisson'`,
+      `'cosine'` or `'cosine_proximity'`,
+      `'log_lik'` or `'log_likelihood'`.
+    data: dict.
+      Data to evaluate model with. It binds observed variables (of type
+      `RandomVariable` or `tf.Tensor`) to their realizations (of
+      type `tf.Tensor`). It can also bind placeholders (of type
+      `tf.Tensor`) used in the model to their realizations.
+    n_samples: int, optional.
+      Number of posterior samples for making predictions, using the
+      posterior predictive distribution.
+    output_key: RandomVariable or tf.Tensor, optional.
+      It is the key in `data` which corresponds to the model's output.
 
-  Returns
-  -------
-  list of float or float
+  Returns:
+    list of float or float.
     A list of evaluations or a single evaluation.
 
-  Raises
-  ------
-  NotImplementedError
+  Raises:
+    NotImplementedError.
     If an input metric does not match an implemented metric in Edward.
 
-  Examples
-  --------
-  >>> # build posterior predictive after inference: it is
-  >>> # parameterized by a posterior sample
-  >>> x_post = ed.copy(x, {z: qz, beta: qbeta})
-  >>>
-  >>> # log-likelihood performance
-  >>> ed.evaluate('log_likelihood', data={x_post: x_train})
-  >>>
-  >>> # classification accuracy
-  >>> # here, ``x_ph`` is any features the model is defined with respect to,
-  >>> # and ``y_post`` is the posterior predictive distribution
-  >>> ed.evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
-  >>>
-  >>> # mean squared error
-  >>> ed.evaluate('mean_squared_error', data={y: y_data, x: x_data})
+  #### Examples
+
+  ```python
+  # build posterior predictive after inference: it is
+  # parameterized by a posterior sample
+  x_post = ed.copy(x, {z: qz, beta: qbeta})
+
+  # log-likelihood performance
+  ed.evaluate('log_likelihood', data={x_post: x_train})
+
+  # classification accuracy
+  # here, `x_ph` is any features the model is defined with respect to,
+  # and `y_post` is the posterior predictive distribution
+  ed.evaluate('binary_accuracy', data={y_post: y_train, x_ph: x_train})
+
+  # mean squared error
+  ed.evaluate('mean_squared_error', data={y: y_data, x: x_data})
+  ```
   """
   sess = get_session()
   if isinstance(metrics, str):
@@ -197,12 +196,11 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
 def binary_accuracy(y_true, y_pred):
   """Binary prediction accuracy, also known as 0/1-loss.
 
-  Parameters
-  ----------
-  y_true : tf.Tensor
-    Tensor of 0s and 1s (most generally, any real values a and b).
-  y_pred : tf.Tensor
-    Tensor of predictions, with same shape as ``y_true``.
+  Args:
+    y_true: tf.Tensor.
+      Tensor of 0s and 1s (most generally, any real values a and b).
+    y_pred: tf.Tensor.
+      Tensor of predictions, with same shape as `y_true`.
   """
   y_true = tf.cast(y_true, tf.float32)
   y_pred = tf.cast(y_pred, tf.float32)
@@ -210,16 +208,15 @@ def binary_accuracy(y_true, y_pred):
 
 
 def categorical_accuracy(y_true, y_pred):
-  """Multi-class prediction accuracy. One-hot representation for ``y_true``.
+  """Multi-class prediction accuracy. One-hot representation for `y_true`.
 
-  Parameters
-  ----------
-  y_true : tf.Tensor
-    Tensor of 0s and 1s, where the outermost dimension of size ``K``
-    has only one 1 per row.
-  y_pred : tf.Tensor
-    Tensor of predictions, with shape ``y_true.shape[:-1]``. Each
-    entry is an integer {0, 1, ..., K-1}.
+  Args:
+    y_true: tf.Tensor.
+      Tensor of 0s and 1s, where the outermost dimension of size `K`
+      has only one 1 per row.
+    y_pred: tf.Tensor.
+      Tensor of predictions, with shape `y_true.shape[:-1]`. Each
+      entry is an integer {0, 1, ..., K-1}.
   """
   y_true = tf.cast(tf.argmax(y_true, len(y_true.shape) - 1), tf.float32)
   y_pred = tf.cast(y_pred, tf.float32)
@@ -228,14 +225,13 @@ def categorical_accuracy(y_true, y_pred):
 
 def sparse_categorical_accuracy(y_true, y_pred):
   """Multi-class prediction accuracy. Label {0, 1, .., K-1}
-  representation for ``y_true``.
+  representation for `y_true`.
 
-  Parameters
-  ----------
-  y_true : tf.Tensor
-    Tensor of integers {0, 1, ..., K-1}.
-  y_pred : tf.Tensor
-    Tensor of predictions, with same shape as ``y_true``.
+  Args:
+    y_true: tf.Tensor.
+      Tensor of integers {0, 1, ..., K-1}.
+    y_pred: tf.Tensor.
+      Tensor of predictions, with same shape as `y_true`.
   """
   y_true = tf.cast(y_true, tf.float32)
   y_pred = tf.cast(y_pred, tf.float32)
@@ -248,13 +244,12 @@ def sparse_categorical_accuracy(y_true, y_pred):
 def binary_crossentropy(y_true, y_pred):
   """Binary cross-entropy.
 
-  Parameters
-  ----------
-  y_true : tf.Tensor
-    Tensor of 0s and 1s.
-  y_pred : tf.Tensor
-    Tensor of real values (logit probabilities), with same shape as
-    ``y_true``.
+  Args:
+    y_true: tf.Tensor.
+      Tensor of 0s and 1s.
+    y_pred: tf.Tensor.
+      Tensor of real values (logit probabilities), with same shape as
+      `y_true`.
   """
   y_true = tf.cast(y_true, tf.float32)
   y_pred = tf.cast(y_pred, tf.float32)
@@ -263,16 +258,15 @@ def binary_crossentropy(y_true, y_pred):
 
 
 def categorical_crossentropy(y_true, y_pred):
-  """Multi-class cross entropy. One-hot representation for ``y_true``.
+  """Multi-class cross entropy. One-hot representation for `y_true`.
 
-  Parameters
-  ----------
-  y_true : tf.Tensor
-    Tensor of 0s and 1s, where the outermost dimension of size K
-    has only one 1 per row.
-  y_pred : tf.Tensor
-    Tensor of real values (logit probabilities), with same shape as
-    ``y_true``. The outermost dimension is the number of classes.
+  Args:
+    y_true: tf.Tensor.
+      Tensor of 0s and 1s, where the outermost dimension of size K
+      has only one 1 per row.
+    y_pred: tf.Tensor.
+      Tensor of real values (logit probabilities), with same shape as
+      `y_true`. The outermost dimension is the number of classes.
   """
   y_true = tf.cast(y_true, tf.float32)
   y_pred = tf.cast(y_pred, tf.float32)
@@ -282,15 +276,14 @@ def categorical_crossentropy(y_true, y_pred):
 
 def sparse_categorical_crossentropy(y_true, y_pred):
   """Multi-class cross entropy. Label {0, 1, .., K-1} representation
-  for ``y_true.``
+  for `y_true.`
 
-  Parameters
-  ----------
-  y_true : tf.Tensor
-    Tensor of integers {0, 1, ..., K-1}.
-  y_pred : tf.Tensor
-    Tensor of real values (logit probabilities), with shape
-    ``(y_true.shape, K)``. The outermost dimension is the number of classes.
+  Args:
+    y_true: tf.Tensor.
+      Tensor of integers {0, 1, ..., K-1}.
+    y_pred: tf.Tensor.
+      Tensor of real values (logit probabilities), with shape
+      `(y_true.shape, K)`. The outermost dimension is the number of classes.
   """
   y_true = tf.cast(y_true, tf.int64)
   y_pred = tf.cast(y_pred, tf.float32)
@@ -301,12 +294,11 @@ def sparse_categorical_crossentropy(y_true, y_pred):
 def hinge(y_true, y_pred):
   """Hinge loss.
 
-  Parameters
-  ----------
-  y_true : tf.Tensor
-    Tensor of 0s and 1s.
-  y_pred : tf.Tensor
-    Tensor of real values, with same shape as ``y_true``.
+  Args:
+    y_true: tf.Tensor.
+      Tensor of 0s and 1s.
+    y_pred: tf.Tensor.
+      Tensor of real values, with same shape as `y_true`.
   """
   y_true = tf.cast(y_true, tf.float32)
   y_pred = tf.cast(y_pred, tf.float32)
@@ -316,12 +308,11 @@ def hinge(y_true, y_pred):
 def squared_hinge(y_true, y_pred):
   """Squared hinge loss.
 
-  Parameters
-  ----------
-  y_true : tf.Tensor
-    Tensor of 0s and 1s.
-  y_pred : tf.Tensor
-    Tensor of real values, with same shape as ``y_true``.
+  Args:
+    y_true: tf.Tensor.
+      Tensor of 0s and 1s.
+    y_pred: tf.Tensor.
+      Tensor of real values, with same shape as `y_true`.
   """
   y_true = tf.cast(y_true, tf.float32)
   y_pred = tf.cast(y_pred, tf.float32)
@@ -334,11 +325,10 @@ def squared_hinge(y_true, y_pred):
 def mean_squared_error(y_true, y_pred):
   """Mean squared error loss.
 
-  Parameters
-  ----------
-  y_true : tf.Tensor
-  y_pred : tf.Tensor
-    Tensors of same shape and type.
+  Args:
+    y_true: tf.Tensor.
+    y_pred: tf.Tensor.
+      Tensors of same shape and type.
   """
   return tf.reduce_mean(tf.square(y_pred - y_true))
 
@@ -346,11 +336,10 @@ def mean_squared_error(y_true, y_pred):
 def mean_absolute_error(y_true, y_pred):
   """Mean absolute error loss.
 
-  Parameters
-  ----------
-  y_true : tf.Tensor
-  y_pred : tf.Tensor
-    Tensors of same shape and type.
+  Args:
+    y_true: tf.Tensor.
+    y_pred: tf.Tensor.
+      Tensors of same shape and type.
   """
   return tf.reduce_mean(tf.abs(y_pred - y_true))
 
@@ -358,11 +347,10 @@ def mean_absolute_error(y_true, y_pred):
 def mean_absolute_percentage_error(y_true, y_pred):
   """Mean absolute percentage error loss.
 
-  Parameters
-  ----------
-  y_true : tf.Tensor
-  y_pred : tf.Tensor
-    Tensors of same shape and type.
+  Args:
+    y_true: tf.Tensor.
+    y_pred: tf.Tensor.
+      Tensors of same shape and type.
   """
   diff = tf.abs((y_true - y_pred) / tf.clip_by_value(tf.abs(y_true),
                                                      1e-8, np.inf))
@@ -372,11 +360,10 @@ def mean_absolute_percentage_error(y_true, y_pred):
 def mean_squared_logarithmic_error(y_true, y_pred):
   """Mean squared logarithmic error loss.
 
-  Parameters
-  ----------
-  y_true : tf.Tensor
-  y_pred : tf.Tensor
-    Tensors of same shape and type.
+  Args:
+    y_true: tf.Tensor.
+    y_pred: tf.Tensor.
+      Tensors of same shape and type.
   """
   first_log = tf.log(tf.clip_by_value(y_pred, 1e-8, np.inf) + 1.0)
   second_log = tf.log(tf.clip_by_value(y_true, 1e-8, np.inf) + 1.0)
@@ -384,14 +371,13 @@ def mean_squared_logarithmic_error(y_true, y_pred):
 
 
 def poisson(y_true, y_pred):
-  """Negative Poisson log-likelihood of data ``y_true`` given predictions
-  ``y_pred`` (up to proportion).
+  """Negative Poisson log-likelihood of data `y_true` given predictions
+  `y_pred` (up to proportion).
 
-  Parameters
-  ----------
-  y_true : tf.Tensor
-  y_pred : tf.Tensor
-    Tensors of same shape and type.
+  Args:
+    y_true: tf.Tensor.
+    y_pred: tf.Tensor.
+      Tensors of same shape and type.
   """
   return tf.reduce_sum(y_pred - y_true * tf.log(y_pred + 1e-8))
 
@@ -399,11 +385,10 @@ def poisson(y_true, y_pred):
 def cosine_proximity(y_true, y_pred):
   """Cosine similarity of two vectors.
 
-  Parameters
-  ----------
-  y_true : tf.Tensor
-  y_pred : tf.Tensor
-    Tensors of same shape and type.
+  Args:
+    y_true: tf.Tensor.
+    y_pred: tf.Tensor.
+      Tensors of same shape and type.
   """
   y_true = tf.nn.l2_normalize(y_true, len(y_true.shape) - 1)
   y_pred = tf.nn.l2_normalize(y_pred, len(y_pred.shape) - 1)

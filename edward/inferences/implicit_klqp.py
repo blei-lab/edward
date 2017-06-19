@@ -16,59 +16,56 @@ class ImplicitKLqp(GANInference):
 
   It minimizes the KL divergence
 
-  .. math::
+  $\\text{KL}( q(z, \\beta; \lambda) \| p(z, \\beta \mid x) ),$
 
-    \\text{KL}( q(z, \\beta; \lambda) \| p(z, \\beta \mid x) ),
+  where $z$ are local variables associated to a data point and
+  $\\beta$ are global variables shared across data points.
 
-  where :math:`z` are local variables associated to a data point and
-  :math:`\\beta` are global variables shared across data points.
-
-  Global latent variables require ``log_prob()`` and need to return a
+  Global latent variables require `log_prob()` and need to return a
   random sample when fetched from the graph. Local latent variables
   and observed variables require only a random sample when fetched
-  from the graph. (This is true for both :math:`p` and :math:`q`.)
+  from the graph. (This is true for both $p$ and $q$.)
 
   All variational factors must be reparameterizable: each of the
-  random variables (``rv``) satisfies ``rv.is_reparameterized`` and
-  ``rv.is_continuous``.
+  random variables (`rv`) satisfies `rv.is_reparameterized` and
+  `rv.is_continuous`.
   """
   def __init__(self, latent_vars, data=None, discriminator=None,
                global_vars=None):
     """
-    Parameters
-    ----------
-    discriminator : function
-      Function (with parameters). Unlike ``GANInference``, it is
-      interpreted as a ratio estimator rather than a discriminator.
-      It takes three arguments: a data dict, local latent variable
-      dict, and global latent variable dict. As with GAN
-      discriminators, it can take a batch of data points and local
-      variables, of size :math:`M`, and output a vector of length
-      :math:`M`.
-    global_vars : dict of RandomVariable to RandomVariable, optional
-      Identifying which variables in ``latent_vars`` are global
-      variables, shared across data points. These will not be
-      encompassed in the ratio estimation problem, and will be
-      estimated with tractable variational approximations.
+    Args:
+      discriminator: function.
+        Function (with parameters). Unlike `GANInference`, it is
+        interpreted as a ratio estimator rather than a discriminator.
+        It takes three arguments: a data dict, local latent variable
+        dict, and global latent variable dict. As with GAN
+        discriminators, it can take a batch of data points and local
+        variables, of size $M$, and output a vector of length
+        $M$.
+      global_vars: dict of RandomVariable to RandomVariable, optional.
+        Identifying which variables in `latent_vars` are global
+        variables, shared across data points. These will not be
+        encompassed in the ratio estimation problem, and will be
+        estimated with tractable variational approximations.
 
-    Notes
-    -----
-    Unlike ``GANInference``, ``discriminator`` takes dict's as input,
+    #### Notes
+
+    Unlike `GANInference`, `discriminator` takes dict's as input,
     and must subset to the appropriate values through lexical scoping
     from the previously defined model and latent variables. This is
     necessary as the discriminator can take an arbitrary set of data,
     latent, and global variables.
 
-    Note the type for ``discriminator``'s output changes when one
-    passes in the ``scale`` argument to ``initialize()``.
+    Note the type for `discriminator`'s output changes when one
+    passes in the `scale` argument to `initialize()`.
 
-    + If ``scale`` has at most one item, then ``discriminator``
+    + If `scale` has at most one item, then `discriminator`
     outputs a tensor whose multiplication with that element is
     broadcastable. (For example, the output is a tensor and the single
     scale factor is a scalar.)
-    + If ``scale`` has more than one item, then in order to scale
-    its corresponding output, ``discriminator`` must output a
-    dictionary of same size and keys as ``scale``.
+    + If `scale` has more than one item, then in order to scale
+    its corresponding output, `discriminator` must output a
+    dictionary of same size and keys as `scale`.
     """
     if not callable(discriminator):
       raise TypeError("discriminator must be a callable function.")
@@ -85,13 +82,12 @@ class ImplicitKLqp(GANInference):
   def initialize(self, ratio_loss='log', *args, **kwargs):
     """Initialization.
 
-    Parameters
-    ----------
-    ratio_loss : str or fn, optional
-      Loss function minimized to get the ratio estimator. 'log' or 'hinge'.
-      Alternatively, one can pass in a function of two inputs,
-      ``psamples`` and ``qsamples``, and output a point-wise value
-      with shape matching the shapes of the two inputs.
+    Args:
+      ratio_loss: str or fn, optional.
+        Loss function minimized to get the ratio estimator. 'log' or 'hinge'.
+        Alternatively, one can pass in a function of two inputs,
+        `psamples` and `qsamples`, and output a point-wise value
+        with shape matching the shapes of the two inputs.
     """
     if callable(ratio_loss):
       self.ratio_loss = ratio_loss
@@ -107,36 +103,32 @@ class ImplicitKLqp(GANInference):
   def build_loss_and_gradients(self, var_list):
     """Build loss function
 
-    .. math::
-
-      -\Big(\mathbb{E}_{q(\\beta)} [\log p(\\beta) - \log q(\\beta) ] +
+    $-\Big(\mathbb{E}_{q(\\beta)} [\log p(\\beta) - \log q(\\beta) ] +
         \sum_{n=1}^N \mathbb{E}_{q(\\beta)q(z_n\mid\\beta)} [
-            r^*(x_n, z_n, \\beta) ] \Big).
+            r^*(x_n, z_n, \\beta) ] \Big).$
 
     We minimize it with respect to parameterized variational
-    families :math:`q(z, \\beta; \lambda)`.
+    families $q(z, \\beta; \lambda)$.
 
-    :math:`r^*(x_n, z_n, \\beta)` is a function of a single data point
-    :math:`x_n`, single local variable :math:`z_n`, and all global
-    variables :math:`\\beta`. It is equal to the log-ratio
+    $r^*(x_n, z_n, \\beta)$ is a function of a single data point
+    $x_n$, single local variable $z_n$, and all global
+    variables $\\beta$. It is equal to the log-ratio
 
-    .. math::
+    $\log p(x_n, z_n\mid \\beta) - \log q(x_n, z_n\mid \\beta),$
 
-      \log p(x_n, z_n\mid \\beta) - \log q(x_n, z_n\mid \\beta),
-
-    where :math:`q(x_n)` is the empirical data distribution. Rather
-    than explicit calculation, :math:`r^*(x, z, \\beta)` is the
+    where $q(x_n)$ is the empirical data distribution. Rather
+    than explicit calculation, $r^*(x, z, \\beta)$ is the
     solution to a ratio estimation problem, minimizing the specified
-    ``ratio_loss``.
+    `ratio_loss`.
 
     Gradients are taken using the reparameterization trick (Kingma and
     Welling, 2014).
 
-    Notes
-    -----
-    This also includes model parameters :math:`p(x, z, \\beta; \\theta)`
+    #### Notes
+
+    This also includes model parameters $p(x, z, \\beta; \\theta)$
     and variational distributions with inference networks
-    :math:`q(z\mid x)`.
+    $q(z\mid x)$.
 
     There are a bunch of extensions we could easily do in this
     implementation:
@@ -144,7 +136,7 @@ class ImplicitKLqp(GANInference):
     + further factorizations can be used to better leverage the
       graph structure for more complicated models;
     + score function gradients for global variables;
-    + use more samples; this would require the ``copy()`` utility
+    + use more samples; this would require the `copy()` utility
       function for q's as well, and an additional loop. we opt not to
       because it complicates the code;
     + analytic KL/swapping out the penalty term for the globals.

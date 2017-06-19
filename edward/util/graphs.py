@@ -28,9 +28,8 @@ def get_session():
   If the session is not already defined, then the function will create
   a global session.
 
-  Returns
-  -------
-  _ED_SESSION : tf.InteractiveSession
+  Returns:
+    _ED_SESSION: tf.InteractiveSession.
   """
   global _ED_SESSION
   if tf.get_default_session() is None:
@@ -47,9 +46,8 @@ def get_session():
 def random_variables():
   """Return all random variables in the TensorFlow graph.
 
-  Returns
-  -------
-  list of RandomVariable
+  Returns:
+    list of RandomVariable.
   """
   return tf.get_collection(RANDOM_VARIABLE_COLLECTION)
 
@@ -57,10 +55,9 @@ def random_variables():
 def set_seed(x):
   """Set seed for both NumPy and TensorFlow.
 
-  Parameters
-  ----------
-  x : int, float
-    seed
+  Args:
+    x: int, float.
+      seed
   """
   node_names = list(six.iterkeys(tf.get_default_graph()._nodes_by_name))
   if len(node_names) > 0 and node_names != ['keras_learning_phase']:

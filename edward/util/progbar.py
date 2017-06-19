@@ -13,17 +13,16 @@ class Progbar(object):
   def __init__(self, target, width=30, interval=0.01, verbose=1):
     """(Yet another) progress bar.
 
-    Parameters
-    ----------
-    target : int
-      Total number of steps expected.
-    width : int, optional
-      Width of progress bar.
-    interval : float, optional
-      Minimum time (in seconds) for progress bar to be displayed
-      during updates.
-    verbose : int, optional
-      Level of verbosity. 0 suppresses output; 1 is default.
+    Args:
+      target: int.
+        Total number of steps expected.
+      width: int, optional.
+        Width of progress bar.
+      interval: float, optional.
+        Minimum time (in seconds) for progress bar to be displayed
+        during updates.
+      verbose: int, optional.
+        Level of verbosity. 0 suppresses output; 1 is default.
     """
     self.target = target
     self.width = width
@@ -37,21 +36,20 @@ class Progbar(object):
     self.seen_so_far = 0
 
   def update(self, current, values=None, force=False):
-    """Update progress bar, and print to standard output if ``force``
-    is True, or the last update was completed longer than ``interval``
-    amount of time ago, or ``current`` >= ``target``.
+    """Update progress bar, and print to standard output if `force`
+    is True, or the last update was completed longer than `interval`
+    amount of time ago, or `current` >= `target`.
 
     The written output is the progress bar and all unique values.
 
-    Parameters
-    ----------
-    current : int
-      Index of current step.
-    values : dict of str to float, optional
-      Dict of name by value-for-last-step. The progress bar
-      will display averages for these values.
-    force : bool, optional
-      Whether to force visual progress update.
+    Args:
+      current: int.
+        Index of current step.
+      values: dict of str to float, optional.
+        Dict of name by value-for-last-step. The progress bar
+        will display averages for these values.
+      force: bool, optional.
+        Whether to force visual progress update.
     """
     if values is None:
       values = {}

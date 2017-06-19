@@ -15,11 +15,11 @@ except Exception as e:
 
 
 class distributions_DirichletProcess(Distribution):
-  """Dirichlet process :math:`\mathcal{DP}(\\alpha, H)`.
+  """Dirichlet process $\mathcal{DP}(\\alpha, H)$.
 
-  It has two parameters: a positive real value :math:`\\alpha`, known
-  as the concentration parameter (``concentration``), and a base
-  distribution :math:`H` (``base``).
+  It has two parameters: a positive real value $\\alpha$, known
+  as the concentration parameter (`concentration`), and a base
+  distribution $H$ (`base`).
   """
   def __init__(self,
                concentration,
@@ -29,25 +29,26 @@ class distributions_DirichletProcess(Distribution):
                name="DirichletProcess"):
     """Initialize a batch of Dirichlet processes.
 
-    Parameters
-    ----------
-    concentration : tf.Tensor
-      Concentration parameter. Must be positive real-valued. Its shape
-      determines the number of independent DPs (batch shape).
-    base : RandomVariable
-      Base distribution. Its shape determines the shape of an
-      individual DP (event shape).
+    Args:
+      concentration: tf.Tensor.
+        Concentration parameter. Must be positive real-valued. Its shape
+        determines the number of independent DPs (batch shape).
+      base: RandomVariable.
+        Base distribution. Its shape determines the shape of an
+        individual DP (event shape).
 
-    Examples
-    --------
-    >>> # scalar concentration parameter, scalar base distribution
-    >>> dp = DirichletProcess(0.1, Normal(loc=0.0, scale=1.0))
-    >>> assert dp.shape == ()
-    >>>
-    >>> # vector of concentration parameters, matrix of Exponentials
-    >>> dp = DirichletProcess(tf.constant([0.1, 0.4]),
+    #### Examples
+
+    ```python
+    # scalar concentration parameter, scalar base distribution
+    dp = DirichletProcess(0.1, Normal(loc=0.0, scale=1.0))
+    assert dp.shape == ()
+
+    # vector of concentration parameters, matrix of Exponentials
+    dp = DirichletProcess(tf.constant([0.1, 0.4]),
     ...                       Exponential(lam=tf.ones([5, 3])))
-    >>> assert dp.shape == (2, 5, 3)
+    assert dp.shape == (2, 5, 3)
+    ```
     """
     parameters = locals()
     with tf.name_scope(name, values=[concentration]):
@@ -120,24 +121,23 @@ class distributions_DirichletProcess(Distribution):
     return self.base.shape
 
   def _sample_n(self, n, seed=None):
-    """Sample ``n`` draws from the DP. Draws from the base
-    distribution are memoized across ``n`` and across calls to
-    ``sample()``.
+    """Sample `n` draws from the DP. Draws from the base
+    distribution are memoized across `n` and across calls to
+    `sample()`.
 
     Draws from the base distribution are not memoized across the batch
     shape, i.e., each independent DP in the batch shape has its own
     memoized samples.
 
-    Returns
-    -------
-    tf.Tensor
-      A ``tf.Tensor`` of shape ``[n] + batch_shape + event_shape``,
-      where ``n`` is the number of samples for each DP,
-      ``batch_shape`` is the number of independent DPs, and
-      ``event_shape`` is the shape of the base distribution.
+    Returns:
+      tf.Tensor.
+      A `tf.Tensor` of shape `[n] + batch_shape + event_shape`,
+      where `n` is the number of samples for each DP,
+      `batch_shape` is the number of independent DPs, and
+      `event_shape` is the shape of the base distribution.
 
-    Notes
-    -----
+    #### Notes
+
     The implementation has one inefficiency, which is that it draws
     (batch_shape,) samples from the base distribution when adding a
     new persistent state. Ideally, we would only draw new samples for
@@ -205,9 +205,9 @@ class distributions_DirichletProcess(Distribution):
     if len(bools.shape) <= 1:
       bools_tile = bools
     else:
-      # ``tf.where`` only index subsets when ``bools`` is at most a
-      # vector. In general, ``bools`` has shape (n, batch_shape).
-      # Therefore we tile ``bools`` to be of shape
+      # `tf.where` only index subsets when `bools` is at most a
+      # vector. In general, `bools` has shape (n, batch_shape).
+      # Therefore we tile `bools` to be of shape
       # (n, batch_shape, event_shape) in order to index per-element.
       bools_tile = tf.tile(tf.reshape(
           bools, [n] + batch_shape + [1] * len(event_shape)),

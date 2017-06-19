@@ -18,41 +18,40 @@ except Exception as e:
 class SGLD(MonteCarlo):
   """Stochastic gradient Langevin dynamics (Welling and Teh, 2011).
 
-  Notes
-  -----
-  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
-  \mid x)` while fixing inference over :math:`\\beta` using another
-  distribution :math:`q(\\beta)`.
-  ``SGLD`` substitutes the model's log marginal density
+  #### Notes
 
-  .. math::
+  In conditional inference, we infer $z$ in $p(z, \\beta
+  \mid x)$ while fixing inference over $\\beta$ using another
+  distribution $q(\\beta)$.
+  `SGLD` substitutes the model's log marginal density
 
-    \log p(x, z) = \log \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
-                \\approx \log p(x, z, \\beta^*)
+  $\log p(x, z) = \log \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
+                \\approx \log p(x, z, \\beta^*)$
 
-  leveraging a single Monte Carlo sample, where :math:`\\beta^* \sim
-  q(\\beta)`. This is unbiased (and therefore asymptotically exact as a
-  pseudo-marginal method) if :math:`q(\\beta) = p(\\beta \mid x)`.
+  leveraging a single Monte Carlo sample, where $\\beta^* \sim
+  q(\\beta)$. This is unbiased (and therefore asymptotically exact as a
+  pseudo-marginal method) if $q(\\beta) = p(\\beta \mid x)$.
   """
   def __init__(self, *args, **kwargs):
     """
-    Examples
-    --------
-    >>> z = Normal(loc=0.0, scale=1.0)
-    >>> x = Normal(loc=tf.ones(10) * z, scale=1.0)
-    >>>
-    >>> qz = Empirical(tf.Variable(tf.zeros(500)))
-    >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
-    >>> inference = ed.SGLD({z: qz}, data)
+    #### Examples
+
+    ```python
+    z = Normal(loc=0.0, scale=1.0)
+    x = Normal(loc=tf.ones(10) * z, scale=1.0)
+
+    qz = Empirical(tf.Variable(tf.zeros(500)))
+    data = {x: np.array([0.0] * 10, dtype=np.float32)}
+    inference = ed.SGLD({z: qz}, data)
+    ```
     """
     super(SGLD, self).__init__(*args, **kwargs)
 
   def initialize(self, step_size=0.25, *args, **kwargs):
     """
-    Parameters
-    ----------
-    step_size : float, optional
-      Constant scale factor of learning rate.
+    Args:
+      step_size: float, optional.
+        Constant scale factor of learning rate.
     """
     self.step_size = step_size
     return super(SGLD, self).initialize(*args, **kwargs)
@@ -61,10 +60,10 @@ class SGLD(MonteCarlo):
     """Simulate Langevin dynamics using a discretized integrator. Its
     discretization error goes to zero as the learning rate decreases.
 
-    Notes
-    -----
+    #### Notes
+
     The updates assume each Empirical random variable is directly
-    parameterized by ``tf.Variable``s.
+    parameterized by `tf.Variable`s.
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
@@ -97,10 +96,9 @@ class SGLD(MonteCarlo):
     """Utility function to calculate model's log joint density,
     log p(x, z), for inputs z (and fixed data x).
 
-    Parameters
-    ----------
-    z_sample : dict
-      Latent variable keys to samples.
+    Args:
+      z_sample: dict.
+        Latent variable keys to samples.
     """
     scope = 'inference_' + str(id(self))
     # Form dictionary in order to replace conditioning on prior or

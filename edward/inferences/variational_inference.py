@@ -20,11 +20,11 @@ except ImportError:
 @six.add_metaclass(abc.ABCMeta)
 class VariationalInference(Inference):
   """Abstract base class for variational inference. Specific
-  variational inference methods inherit from ``VariationalInference``,
+  variational inference methods inherit from `VariationalInference`,
   sharing methods such as a default optimizer.
 
-  To build an algorithm inheriting from ``VariaitonalInference``, one
-  must at the minimum implement ``build_loss_and_gradients``: it
+  To build an algorithm inheriting from `VariaitonalInference`, one
+  must at the minimum implement `build_loss_and_gradients`: it
   determines the loss function and gradients to apply for a given
   optimizer.
   """
@@ -35,23 +35,22 @@ class VariationalInference(Inference):
                  global_step=None, *args, **kwargs):
     """Initialize variational inference.
 
-    Parameters
-    ----------
-    optimizer : str or tf.train.Optimizer, optional
-      A TensorFlow optimizer, to use for optimizing the variational
-      objective. Alternatively, one can pass in the name of a
-      TensorFlow optimizer, and default parameters for the optimizer
-      will be used.
-    var_list : list of tf.Variable, optional
-      List of TensorFlow variables to optimize over. Default is all
-      trainable variables that ``latent_vars`` and ``data`` depend on,
-      excluding those that are only used in conditionals in ``data``.
-    use_prettytensor : bool, optional
-      ``True`` if aim to use PrettyTensor optimizer (when using
-      PrettyTensor) or ``False`` if aim to use TensorFlow optimizer.
-      Defaults to TensorFlow.
-    global_step : tf.Variable, optional
-      A TensorFlow variable to hold the global step.
+    Args:
+      optimizer: str or tf.train.Optimizer, optional.
+        A TensorFlow optimizer, to use for optimizing the variational
+        objective. Alternatively, one can pass in the name of a
+        TensorFlow optimizer, and default parameters for the optimizer
+        will be used.
+      var_list: list of tf.Variable, optional.
+        List of TensorFlow variables to optimize over. Default is all
+        trainable variables that `latent_vars` and `data` depend on,
+        excluding those that are only used in conditionals in `data`.
+      use_prettytensor: bool, optional.
+        `True` if aim to use PrettyTensor optimizer (when using
+        PrettyTensor) or `False` if aim to use TensorFlow optimizer.
+        Defaults to TensorFlow.
+      global_step: tf.Variable, optional.
+        A TensorFlow variable to hold the global step.
     """
     super(VariationalInference, self).initialize(*args, **kwargs)
 
@@ -141,15 +140,13 @@ class VariationalInference(Inference):
   def update(self, feed_dict=None):
     """Run one iteration of optimizer for variational inference.
 
-    Parameters
-    ----------
-    feed_dict : dict, optional
-      Feed dictionary for a TensorFlow session run. It is used to feed
-      placeholders that are not fed during initialization.
+    Args:
+      feed_dict: dict, optional.
+        Feed dictionary for a TensorFlow session run. It is used to feed
+        placeholders that are not fed during initialization.
 
-    Returns
-    -------
-    dict
+    Returns;
+      dict.
       Dictionary of algorithm-specific information. In this case, the
       loss function value after one iteration.
     """
@@ -187,11 +184,10 @@ class VariationalInference(Inference):
     """Build loss function and its gradients. They will be leveraged
     in an optimizer to update the model and variational parameters.
 
-    Any derived class of ``VariationalInference`` **must** implement
+    Any derived class of `VariationalInference` **must** implement
     this method.
 
-    Raises
-    ------
-    NotImplementedError
+    Raises;
+      NotImplementedError.
     """
     raise NotImplementedError()

@@ -19,40 +19,39 @@ except Exception as e:
 class MetropolisHastings(MonteCarlo):
   """Metropolis-Hastings (Metropolis et al., 1953; Hastings, 1970).
 
-  Notes
-  -----
-  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
-  \mid x)` while fixing inference over :math:`\\beta` using another
-  distribution :math:`q(\\beta)`.
-  To calculate the acceptance ratio, ``MetropolisHastings`` uses an
+  #### Notes
+
+  In conditional inference, we infer $z$ in $p(z, \\beta
+  \mid x)$ while fixing inference over $\\beta$ using another
+  distribution $q(\\beta)$.
+  To calculate the acceptance ratio, `MetropolisHastings` uses an
   estimate of the marginal density,
 
-  .. math::
+  $p(x, z) = \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
+            \\approx p(x, z, \\beta^*)$
 
-    p(x, z) = \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
-            \\approx p(x, z, \\beta^*)
-
-  leveraging a single Monte Carlo sample, where :math:`\\beta^* \sim
-  q(\\beta)`. This is unbiased (and therefore asymptotically exact as a
-  pseudo-marginal method) if :math:`q(\\beta) = p(\\beta \mid x)`.
+  leveraging a single Monte Carlo sample, where $\\beta^* \sim
+  q(\\beta)$. This is unbiased (and therefore asymptotically exact as a
+  pseudo-marginal method) if $q(\\beta) = p(\\beta \mid x)$.
   """
   def __init__(self, latent_vars, proposal_vars, data=None):
     """
-    Parameters
-    ----------
-    proposal_vars : dict of RandomVariable to RandomVariable
-      Collection of random variables to perform inference on; each is
-      binded to a proposal distribution :math:`g(z' \mid z)`.
+    Args:
+      proposal_vars: dict of RandomVariable to RandomVariable.
+        Collection of random variables to perform inference on; each is
+        binded to a proposal distribution $g(z' \mid z)$.
 
-    Examples
-    --------
-    >>> z = Normal(loc=0.0, scale=1.0)
-    >>> x = Normal(loc=tf.ones(10) * z, scale=1.0)
-    >>>
-    >>> qz = Empirical(tf.Variable(tf.zeros(500)))
-    >>> proposal_z = Normal(loc=z, scale=0.5)
-    >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
-    >>> inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
+    #### Examples
+
+    ```python
+    z = Normal(loc=0.0, scale=1.0)
+    x = Normal(loc=tf.ones(10) * z, scale=1.0)
+
+    qz = Empirical(tf.Variable(tf.zeros(500)))
+    proposal_z = Normal(loc=z, scale=0.5)
+    data = {x: np.array([0.0] * 10, dtype=np.float32)}
+    inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
+    ```
     """
     check_latent_vars(proposal_vars)
     self.proposal_vars = proposal_vars
@@ -62,16 +61,15 @@ class MetropolisHastings(MonteCarlo):
     """Draw sample from proposal conditional on last sample. Then
     accept or reject the sample based on the ratio,
 
-    .. math::
-      \\text{ratio} =
+    $\\text{ratio} =
           \log p(x, z^{\\text{new}}) - \log p(x, z^{\\text{old}}) +
           \log g(z^{\\text{new}} \mid z^{\\text{old}}) -
-          \log g(z^{\\text{old}} \mid z^{\\text{new}})
+          \log g(z^{\\text{old}} \mid z^{\\text{new}})$
 
-    Notes
-    -----
+    #### Notes
+
     The updates assume each Empirical random variable is directly
-    parameterized by ``tf.Variable``s.
+    parameterized by `tf.Variable`s.
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
@@ -136,7 +134,7 @@ class MetropolisHastings(MonteCarlo):
     sample_values = tf.cond(accept, lambda: list(six.itervalues(new_sample)),
                             lambda: list(six.itervalues(old_sample)))
     if not isinstance(sample_values, list):
-      # ``tf.cond`` returns tf.Tensor if output is a list of size 1.
+      # `tf.cond` returns tf.Tensor if output is a list of size 1.
       sample_values = [sample_values]
 
     sample = {z: sample_value for z, sample_value in

@@ -13,41 +13,33 @@ from edward.util import copy
 class KLpq(VariationalInference):
   """Variational inference with the KL divergence
 
-  .. math::
-
-    \\text{KL}( p(z \mid x) \| q(z) ).
+  $\\text{KL}( p(z \mid x) \| q(z) ).$
 
   To perform the optimization, this class uses a technique from
   adaptive importance sampling (Cappe et al., 2008).
 
-  Notes
-  -----
-  ``KLpq`` also optimizes any model parameters :math:`p(z\mid x;
-  \\theta)`. It does this by variational EM, minimizing
+  #### Notes
 
-  .. math::
+  `KLpq` also optimizes any model parameters $p(z\mid x;
+  \\theta)$. It does this by variational EM, minimizing
 
-    \mathbb{E}_{p(z \mid x; \lambda)} [ \log p(x, z; \\theta) ]
+  $\mathbb{E}_{p(z \mid x; \lambda)} [ \log p(x, z; \\theta) ]$
 
-  with respect to :math:`\\theta`.
+  with respect to $\\theta$.
 
-  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
-  \mid x)` while fixing inference over :math:`\\beta` using another
-  distribution :math:`q(\\beta)`. During gradient calculation, instead
+  In conditional inference, we infer $z` in $p(z, \\beta
+  \mid x)$ while fixing inference over $\\beta$ using another
+  distribution $q(\\beta)$. During gradient calculation, instead
   of using the model's density
 
-  .. math::
+  $\log p(x, z^{(s)}), z^{(s)} \sim q(z; \lambda),$
 
-    \log p(x, z^{(s)}), z^{(s)} \sim q(z; \lambda),
+  for each sample $s=1,\ldots,S$, `KLpq` uses
 
-  for each sample :math:`s=1,\ldots,S`, ``KLpq`` uses
+  $\log p(x, z^{(s)}, \\beta^{(s)}),$
 
-  .. math::
-
-    \log p(x, z^{(s)}, \\beta^{(s)}),
-
-  where :math:`z^{(s)} \sim q(z; \lambda)` and :math:`\\beta^{(s)}
-  \sim q(\\beta)`.
+  where $z^{(s)} \sim q(z; \lambda)$ and$\\beta^{(s)}
+  \sim q(\\beta)$.
   """
   def __init__(self, *args, **kwargs):
     super(KLpq, self).__init__(*args, **kwargs)
@@ -55,11 +47,10 @@ class KLpq(VariationalInference):
   def initialize(self, n_samples=1, *args, **kwargs):
     """Initialization.
 
-    Parameters
-    ----------
-    n_samples : int, optional
-      Number of samples from variational model for calculating
-      stochastic gradients.
+    Args:
+      n_samples: int, optional.
+        Number of samples from variational model for calculating
+        stochastic gradients.
     """
     self.n_samples = n_samples
     return super(KLpq, self).initialize(*args, **kwargs)
@@ -67,33 +58,28 @@ class KLpq(VariationalInference):
   def build_loss_and_gradients(self, var_list):
     """Build loss function
 
-    .. math::
-      \\text{KL}( p(z \mid x) \| q(z) )
-      = \mathbb{E}_{p(z \mid x)} [ \log p(z \mid x) - \log q(z; \lambda) ]
+    $\\text{KL}( p(z \mid x) \| q(z) )
+      = \mathbb{E}_{p(z \mid x)} [ \log p(z \mid x) - \log q(z; \lambda) ]$
 
     and stochastic gradients based on importance sampling.
 
     The loss function can be estimated as
 
-    .. math::
-      \\frac{1}{S} \sum_{s=1}^S [
-        w_{\\text{norm}}(z^s; \lambda) (\log p(x, z^s) - \log q(z^s; \lambda) ],
+    $\\frac{1}{S} \sum_{s=1}^S [
+      w_{\\text{norm}}(z^s; \lambda) (\log p(x, z^s) - \log q(z^s; \lambda) ],$
 
-    where for :math:`z^s \sim q(z; \lambda)`,
+    where for $z^s \sim q(z; \lambda)$,
 
-    .. math::
+    $w_{\\text{norm}}(z^s; \lambda) =
+          w(z^s; \lambda) / \sum_{s=1}^S w(z^s; \lambda)$
 
-      w_{\\text{norm}}(z^s; \lambda) =
-          w(z^s; \lambda) / \sum_{s=1}^S w(z^s; \lambda)
-
-    normalizes the importance weights, :math:`w(z^s; \lambda) = p(x,
-    z^s) / q(z^s; \lambda)`.
+    normalizes the importance weights, $w(z^s; \lambda) = p(x,
+    z^s) / q(z^s; \lambda)$.
 
     This provides a gradient,
 
-    .. math::
-      - \\frac{1}{S} \sum_{s=1}^S [
-        w_{\\text{norm}}(z^s; \lambda) \\nabla_{\lambda} \log q(z^s; \lambda) ].
+    $- \\frac{1}{S} \sum_{s=1}^S [
+      w_{\\text{norm}}(z^s; \lambda) \\nabla_{\lambda} \log q(z^s; \lambda) ].$
     """
     p_log_prob = [0.0] * self.n_samples
     q_log_prob = [0.0] * self.n_samples

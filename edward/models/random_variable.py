@@ -26,63 +26,64 @@ class RandomVariable(object):
 
   The random variable's shape is given by
 
-  ``sample_shape + batch_shape + event_shape``,
+  `sample_shape + batch_shape + event_shape`,
 
-  where ``sample_shape`` is an optional argument representing the
+  where `sample_shape` is an optional argument representing the
   dimensions of samples drawn from the distribution (default is
-  a scalar); ``batch_shape`` is the number of independent random variables
-  (determined by the shape of its parameters); and ``event_shape`` is
-  the shape of one draw from the distribution (e.g., ``Normal`` has a
-  scalar ``event_shape``; ``Dirichlet`` has a vector ``event_shape``).
+  a scalar); `batch_shape` is the number of independent random variables
+  (determined by the shape of its parameters); and `event_shape` is
+  the shape of one draw from the distribution (e.g., `Normal` has a
+  scalar `event_shape`; `Dirichlet` has a vector `event_shape`).
 
-  Notes
-  -----
-  ``RandomVariable`` assumes use in a multiple inheritance setting. The
-  child class must first inherit ``RandomVariable``, then second inherit a
-  class in ``tf.contrib.distributions``. With Python's method resolution
+  #### Notes
+
+  `RandomVariable` assumes use in a multiple inheritance setting. The
+  child class must first inherit `RandomVariable`, then second inherit a
+  class in `tf.contrib.distributions`. With Python's method resolution
   order, this implies the following during initialization (using
-  ``distributions.Bernoulli`` as an example):
+  `distributions.Bernoulli` as an example):
 
-  1. Start the ``__init__()`` of the child class, which passes all
-     ``*args, **kwargs`` to ``RandomVariable``.
-  2. This in turn passes all ``*args, **kwargs`` to
-     ``distributions.Bernoulli``, completing the ``__init__()`` of
-     ``distributions.Bernoulli``.
-  3. Complete the ``__init__()`` of ``RandomVariable``, which calls
-     ``self.sample()``, relying on the method from
-     ``distributions.Bernoulli``.
-  4. Complete the ``__init__()`` of the child class.
+  1. Start the `__init__()` of the child class, which passes all
+     `*args, **kwargs` to `RandomVariable`.
+  2. This in turn passes all `*args, **kwargs` to
+     `distributions.Bernoulli`, completing the `__init__()` of
+     `distributions.Bernoulli`.
+  3. Complete the `__init__()` of `RandomVariable`, which calls
+     `self.sample()`, relying on the method from
+     `distributions.Bernoulli`.
+  4. Complete the `__init__()` of the child class.
 
-  Methods from both ``RandomVariable`` and ``distributions.Bernoulli``
+  Methods from both `RandomVariable` and `distributions.Bernoulli`
   populate the namespace of the child class. Methods from
-  ``RandomVariable`` will take higher priority if there are conflicts.
+  `RandomVariable` will take higher priority if there are conflicts.
 
-  Examples
-  --------
-  >>> p = tf.constant(0.5)
-  >>> x = Bernoulli(p)
-  >>>
-  >>> z1 = tf.constant([[1.0, -0.8], [0.3, -1.0]])
-  >>> z2 = tf.constant([[0.9, 0.2], [2.0, -0.1]])
-  >>> x = Bernoulli(logits=tf.matmul(z1, z2))
-  >>>
-  >>> mu = Normal(tf.constant(0.0), tf.constant(1.0))
-  >>> x = Normal(mu, tf.constant(1.0))
+  #### Examples
+
+  ```python
+  p = tf.constant(0.5)
+  x = Bernoulli(p)
+
+  z1 = tf.constant([[1.0, -0.8], [0.3, -1.0]])
+  z2 = tf.constant([[0.9, 0.2], [2.0, -0.1]])
+  x = Bernoulli(logits=tf.matmul(z1, z2))
+
+  mu = Normal(tf.constant(0.0), tf.constant(1.0))
+  x = Normal(mu, tf.constant(1.0))
+  ```
   """
   def __init__(self, *args, **kwargs):
     """
-    Parameters
-    ----------
-    sample_shape : tf.TensorShape, optional
-      Shape of samples to draw from the random variable.
-    value : tf.Tensor, optional
-      Fixed tensor to associate with random variable. Must have shape
-      ``sample_shape + batch_shape + event_shape``.
-    collections : list, optional
-      Optional list of graph collections keys. The random variable is
-      added to these collections. Defaults to ["random_variables"].
-    *args, **kwargs
-      Passed into parent ``__init__``.
+    Args:
+      sample_shape: tf.TensorShape, optional.
+        Shape of samples to draw from the random variable.
+      value: tf.Tensor, optional.
+        Fixed tensor to associate with random variable. Must have shape
+        `sample_shape + batch_shape + event_shape`.
+      collections: list, optional.
+        Optional list of graph collections keys. The random variable is
+        added to these collections. Defaults to ["random_variables"].
+      *args, **kwargs:
+        Passed into parent `__init__`.
     """
     # pop and store RandomVariable-specific parameters in _kwargs
     sample_shape = kwargs.pop('sample_shape', ())
@@ -142,7 +143,7 @@ class RandomVariable(object):
   @property
   def unique_name(self):
     """Name of random variable with its unique scoping name. Use
-    ``name`` to just get the name of the random variable."""
+    `name` to just get the name of the random variable."""
     return self._unique_name
 
   def __str__(self):
@@ -281,24 +282,25 @@ class RandomVariable(object):
     containing this variable has been launched. If no session is
     passed, the default session is used.
 
-    Parameters
-    ----------
-    session : tf.BaseSession, optional
-      The ``tf.Session`` to use to evaluate this random variable. If
-      none, the default session is used.
-    feed_dict : dict, optional
-      A dictionary that maps ``tf.Tensor`` objects to feed values. See
-      ``tf.Session.run()`` for a description of the valid feed values.
+    Args:
+      session: tf.BaseSession, optional.
+        The `tf.Session` to use to evaluate this random variable. If
+        none, the default session is used.
+      feed_dict: dict, optional.
+        A dictionary that maps `tf.Tensor` objects to feed values. See
+        `tf.Session.run()` for a description of the valid feed values.
 
-    Examples
-    --------
-    >>> x = Normal(0.0, 1.0)
-    >>> with tf.Session() as sess:
-    >>>   # Usage passing the session explicitly.
-    >>>   print(x.eval(sess))
-    >>>   # Usage with the default session.  The 'with' block
-    >>>   # above makes 'sess' the default session.
-    >>>   print(x.eval())
+    #### Examples
+
+    ```python
+    x = Normal(0.0, 1.0)
+    with tf.Session() as sess:
+      # Usage passing the session explicitly.
+      print(x.eval(sess))
+      # Usage with the default session.  The 'with' block
+      # above makes 'sess' the default session.
+      print(x.eval())
+    ```
     """
     return self.value().eval(session=session, feed_dict=feed_dict)
 

@@ -20,9 +20,9 @@ class BiGANInference(GANInference):
   """
   def __init__(self, latent_vars, data, discriminator):
     """
-    Notes
-    -----
-    ``BiGANInference`` matches a mapping from data to latent variables and a
+    #### Notes
+
+    `BiGANInference` matches a mapping from data to latent variables and a
     mapping from latent variables to data through a joint
     discriminator.
 
@@ -33,12 +33,14 @@ class BiGANInference(GANInference):
     encoder and decoder parameters can be accessed with the variable scope
     "Gen".
 
-    Examples
-    --------
-    >>> with tf.variable_scope("Gen"):
-    >>>   xf = gen_data(z_ph)
-    >>>   zf = gen_latent(x_ph)
-    >>> inference = ed.BiGANInference({z_ph: zf}, {xf: x_ph}, discriminator)
+    #### Examples
+
+    ```python
+    with tf.variable_scope("Gen"):
+      xf = gen_data(z_ph)
+      zf = gen_latent(x_ph)
+    inference = ed.BiGANInference({z_ph: zf}, {xf: x_ph}, discriminator)
+    ```
     """
     if not callable(discriminator):
       raise TypeError("discriminator must be a callable function.")

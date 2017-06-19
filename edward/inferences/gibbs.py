@@ -18,22 +18,23 @@ class Gibbs(MonteCarlo):
   """
   def __init__(self, latent_vars, proposal_vars=None, data=None):
     """
-    Parameters
-    ----------
-    proposal_vars : dict of RandomVariable to RandomVariable, optional
-      Collection of random variables to perform inference on; each is
-      binded to its complete conditionals which Gibbs cycles draws on.
-      If not specified, default is to use ``ed.complete_conditional``.
+    Args:
+      proposal_vars: dict of RandomVariable to RandomVariable, optional.
+        Collection of random variables to perform inference on; each is
+        binded to its complete conditionals which Gibbs cycles draws on.
+        If not specified, default is to use `ed.complete_conditional`.
 
-    Examples
-    --------
-    >>> x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
-    >>>
-    >>> p = Beta(1.0, 1.0)
-    >>> x = Bernoulli(probs=p, sample_shape=10)
-    >>>
-    >>> qp = Empirical(tf.Variable(tf.zeros(500)))
-    >>> inference = ed.Gibbs({p: qp}, data={x: x_data})
+    #### Examples
+
+    ```python
+    x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+
+    p = Beta(1.0, 1.0)
+    x = Bernoulli(probs=p, sample_shape=10)
+
+    qp = Empirical(tf.Variable(tf.zeros(500)))
+    inference = ed.Gibbs({p: qp}, data={x: x_data})
+    ```
     """
     if proposal_vars is None:
       proposal_vars = {z: complete_conditional(z)
@@ -46,14 +47,13 @@ class Gibbs(MonteCarlo):
 
   def initialize(self, scan_order='random', *args, **kwargs):
     """
-    Parameters
-    ----------
-    scan_order : list or str, optional
-      The scan order for each Gibbs update. If list, it is the
-      deterministic order of latent variables. An element in the list
-      can be a ``RandomVariable`` or itself a list of
-      ``RandomVariable``s (this defines a blocked Gibbs sampler). If
-      'random', will use a random order at each update.
+    Args:
+      scan_order: list or str, optional.
+        The scan order for each Gibbs update. If list, it is the
+        deterministic order of latent variables. An element in the list
+        can be a `RandomVariable` or itself a list of
+        `RandomVariable`s (this defines a blocked Gibbs sampler). If
+        'random', will use a random order at each update.
     """
     self.scan_order = scan_order
     self.feed_dict = {}
@@ -62,15 +62,13 @@ class Gibbs(MonteCarlo):
   def update(self, feed_dict=None):
     """Run one iteration of Gibbs sampling.
 
-    Parameters
-    ----------
-    feed_dict : dict, optional
-      Feed dictionary for a TensorFlow session run. It is used to feed
-      placeholders that are not fed during initialization.
+    Args:
+      feed_dict: dict, optional.
+        Feed dictionary for a TensorFlow session run. It is used to feed
+        placeholders that are not fed during initialization.
 
-    Returns
-    -------
-    dict
+    Returns:
+      dict.
       Dictionary of algorithm-specific information. In this case, the
       acceptance rate of samples since (and including) this iteration.
     """
@@ -129,13 +127,13 @@ class Gibbs(MonteCarlo):
 
   def build_update(self):
     """
-    Notes
-    -----
+    #### Notes
+
     The updates assume each Empirical random variable is directly
-    parameterized by ``tf.Variable``s.
+    parameterized by `tf.Variable`s.
     """
     # Update Empirical random variables according to the complete
-    # conditionals. We will feed the conditionals when calling ``update()``.
+    # conditionals. We will feed the conditionals when calling `update()`.
     assign_ops = []
     for z, qz in six.iteritems(self.latent_vars):
       variable = qz.get_variables()[0]
