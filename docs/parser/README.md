@@ -1,16 +1,14 @@
 # Parser
 
-These are documentation tools from TensorFlow, used to parse
-docstrings into Markdown. They are not exposed in the public API so we
-copy and paste them here.
+These are tools to parse docstrings into Markdown.
 
-Built from commit `3cb3cc6d426112f432db62db6f493ea00ce31e0f`.
+We build on the parser from TensorFlow
+(commit `3cb3cc6d426112f432db62db6f493ea00ce31e0f`):
 
 + https://github.com/tensorflow/tensorflow/tree/master/tensorflow/tools/docs
 + https://github.com/tensorflow/tensorflow/tree/master/tensorflow/tools/common
 
-`{generate,generate_lib,parser}.py` are all tweaked to work for
-Edward. Use a diff tool to see the differences.
+Use a diff tool to analyze the line-by-line differences.
 
 ## Usage
 
