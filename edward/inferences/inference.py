@@ -35,7 +35,7 @@ class Inference(object):
   `sess.run(inference.reset)`.
   """
   def __init__(self, latent_vars=None, data=None):
-    """Initialization.
+    """Create an inference algorithm.
 
     Args:
       latent_vars: dict, optional.

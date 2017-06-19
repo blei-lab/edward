@@ -33,7 +33,8 @@ class SGLD(MonteCarlo):
   pseudo-marginal method) if $q(\\beta) = p(\\beta \mid x)$.
   """
   def __init__(self, *args, **kwargs):
-    """
+    """Create an inference algorithm.
+
     #### Examples
 
     ```python

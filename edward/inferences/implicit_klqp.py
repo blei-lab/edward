@@ -32,7 +32,8 @@ class ImplicitKLqp(GANInference):
   """
   def __init__(self, latent_vars, data=None, discriminator=None,
                global_vars=None):
-    """
+    """Create an inference algorithm.
+
     Args:
       discriminator: function.
         Function (with parameters). Unlike `GANInference`, it is

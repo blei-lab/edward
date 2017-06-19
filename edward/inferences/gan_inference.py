@@ -18,7 +18,8 @@ class GANInference(VariationalInference):
   only a program that generates samples.
   """
   def __init__(self, data, discriminator):
-    """
+    """Create an inference algorithm.
+
     Args:
       data: dict.
         Data dictionary which binds observed variables (of type
@@ -61,7 +62,7 @@ class GANInference(VariationalInference):
   def initialize(self, optimizer=None, optimizer_d=None,
                  global_step=None, global_step_d=None, var_list=None,
                  *args, **kwargs):
-    """Initialize GAN inference.
+    """Initialize inference algorithm.
 
     Args:
       optimizer: str or tf.train.Optimizer, optional.

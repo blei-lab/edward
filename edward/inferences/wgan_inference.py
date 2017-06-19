@@ -23,7 +23,8 @@ class WGANInference(GANInference):
   only a program that generates samples.
   """
   def __init__(self, *args, **kwargs):
-    """
+    """Create an inference algorithm.
+
     #### Examples
 
     ```python

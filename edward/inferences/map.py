@@ -42,7 +42,8 @@ class MAP(VariationalInference):
   $q(\\beta) = p(\\beta \mid x)$ (up to stochasticity).
   """
   def __init__(self, latent_vars=None, data=None):
-    """
+    """Create an inference algorithm.
+
     Args:
       latent_vars: list of RandomVariable or
                     dict of RandomVariable to RandomVariable.

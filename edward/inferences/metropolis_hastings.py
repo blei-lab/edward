@@ -35,7 +35,8 @@ class MetropolisHastings(MonteCarlo):
   pseudo-marginal method) if $q(\\beta) = p(\\beta \mid x)$.
   """
   def __init__(self, latent_vars, proposal_vars, data=None):
-    """
+    """Create an inference algorithm.
+
     Args:
       proposal_vars: dict of RandomVariable to RandomVariable.
         Collection of random variables to perform inference on; each is

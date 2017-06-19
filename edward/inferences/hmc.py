@@ -35,7 +35,8 @@ class HMC(MonteCarlo):
   pseudo-marginal method) if $q(\\beta) = p(\\beta \mid x)$.
   """
   def __init__(self, *args, **kwargs):
-    """
+    """Create an inference algorithm.
+
     #### Examples
 
     ```python
@@ -50,7 +51,8 @@ class HMC(MonteCarlo):
     super(HMC, self).__init__(*args, **kwargs)
 
   def initialize(self, step_size=0.25, n_steps=2, *args, **kwargs):
-    """
+    """Initialize inference algorithm.
+
     Args:
       step_size: float, optional.
         Step size of numerical integrator.

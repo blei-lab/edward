@@ -28,7 +28,8 @@ class Laplace(MAP):
   covariance of the normal approximation.
   """
   def __init__(self, latent_vars, data=None):
-    """
+    """Create an inference algorithm.
+
     Args:
       latent_vars: list of RandomVariable or
                     dict of RandomVariable to RandomVariable.

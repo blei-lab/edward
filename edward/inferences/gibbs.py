@@ -17,7 +17,8 @@ class Gibbs(MonteCarlo):
   """Gibbs sampling (Geman and Geman, 1984).
   """
   def __init__(self, latent_vars, proposal_vars=None, data=None):
-    """
+    """Create an inference algorithm.
+
     Args:
       proposal_vars: dict of RandomVariable to RandomVariable, optional.
         Collection of random variables to perform inference on; each is
@@ -46,7 +47,8 @@ class Gibbs(MonteCarlo):
     super(Gibbs, self).__init__(latent_vars, data)
 
   def initialize(self, scan_order='random', *args, **kwargs):
-    """
+    """Initialization.
+
     Args:
       scan_order: list or str, optional.
         The scan order for each Gibbs update. If list, it is the
@@ -60,7 +62,7 @@ class Gibbs(MonteCarlo):
     return super(Gibbs, self).initialize(*args, **kwargs)
 
   def update(self, feed_dict=None):
-    """Run one iteration of Gibbs sampling.
+    """Run one iteration of sampling.
 
     Args:
       feed_dict: dict, optional.

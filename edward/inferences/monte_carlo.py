@@ -22,7 +22,7 @@ class MonteCarlo(Inference):
   the samples in the `Empirical` approximations.
   """
   def __init__(self, latent_vars=None, data=None):
-    """Initialization.
+    """Create an inference algorithm.
 
     Args:
       latent_vars: list or dict, optional.
@@ -108,7 +108,7 @@ class MonteCarlo(Inference):
       self.summarize = tf.summary.merge_all(key=summary_key)
 
   def update(self, feed_dict=None):
-    """Run one iteration of sampling for Monte Carlo.
+    """Run one iteration of sampling.
 
     Args:
       feed_dict: dict, optional.

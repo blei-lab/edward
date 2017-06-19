@@ -138,7 +138,7 @@ class VariationalInference(Inference):
         tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=scope)))
 
   def update(self, feed_dict=None):
-    """Run one iteration of optimizer for variational inference.
+    """Run one iteration of optimization.
 
     Args:
       feed_dict: dict, optional.
@@ -187,7 +187,7 @@ class VariationalInference(Inference):
     Any derived class of `VariationalInference` **must** implement
     this method.
 
-    Raises;
+    Raises:
       NotImplementedError.
     """
     raise NotImplementedError()

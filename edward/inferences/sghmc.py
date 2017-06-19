@@ -33,7 +33,8 @@ class SGHMC(MonteCarlo):
   pseudo-marginal method) if $q(\\beta) = p(\\beta \mid x)$.
   """
   def __init__(self, *args, **kwargs):
-    """
+    """Create an inference algorithm.
+
     #### Examples
 
     ```python
@@ -48,7 +49,8 @@ class SGHMC(MonteCarlo):
     super(SGHMC, self).__init__(*args, **kwargs)
 
   def initialize(self, step_size=0.25, friction=0.1, *args, **kwargs):
-    """
+    """Initialize inference algorithm.
+
     Args:
       step_size: float, optional.
         Constant scale factor of learning rate.
