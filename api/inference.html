@@ -28,48 +28,25 @@
       margin-bottom: 5%;
     }
   }
-  /* Docstrings. */
-  dl.class + dl.class, dl.function + dl.function {
-    /* Add border inbetween docstrings. */
-    border-top: 1px solid #E1E1E1;
-  }
-  dt { /* Add spacing for top border. */
-    margin-top: 1.0rem;
-  }
-  dd { /* Remove overall indenting in an entry. */
-    margin-left: 0.0rem;
-  }
-  dl th, dl td { /* Remove extraneous padding and decorations. */
-    padding: 0 15px 0 0;
-    border: none;
-  }
-  dt em, dt span.sig-paren { /* Keep style of declarations consistent. */
-    font-family: monospace, monospace;
-    font-style: normal;
-    font-size: 14px !important;
-  }
-  /* Attribute contents within a docstring. */
-  dd blockquote, dl blockquote, dt blockquote { /* Reduce margins. */
-    margin-left: 0.0rem;
-    margin-top: 0.0rem;
-    margin-bottom: 0.0rem;
-  }
-  dl td p { /* Reduce spacing. */
-    margin-bottom: 0.75rem;
-  }
-  dl td.field-body { /* Add indenting. */
-    padding-top: 0.75rem;
-    padding-left: 2.0rem;
-    display: block;
-  }
-  dl code { /* Keep code font size consistent with rest of contents. */
-    font-size: 90%;
+  /* Downgrade API's header styles without explicitly modifying their type. */
+  div.nine.columns h1 { text-align: left; }
+  div.nine.columns h1 { font-size: 3.0rem; line-height: 1.25; letter-spacing: -.1rem; }
+  div.nine.columns h2 { font-size: 2.4rem; line-height: 1.3;  letter-spacing: -.1rem; }
+  div.nine.columns h3 { font-size: 2.4rem; line-height: 1.35; letter-spacing: -.08rem; }
+  div.nine.columns h4 { font-size: 1.8rem; line-height: 1.5;  letter-spacing: -.05rem; }
+  div.nine.columns h5 { font-size: 1.5rem; line-height: 1.6;  letter-spacing: 0; }
+  @media (min-width: 550px) {
+    div.nine.columns h1 { font-size: 3.6rem; }
+    div.nine.columns h2 { font-size: 3.0rem; }
+    div.nine.columns h3 { font-size: 3.0rem; }
+    div.nine.columns h4 { font-size: 2.5rem; }
+    div.nine.columns h5 { font-size: 1.5rem; }
   }
   </style>
 <!-- KaTeX -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/contrib/auto-render.min.js"></script>
 <!-- highlight.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
@@ -105,11 +82,13 @@
 <img alt="Edward" class="logo-width" src="/images/edward.png"/>
 </center>
 </a>
-<a class="button u-full-width" href="/getting-started">Getting Started</a>
-<a class="button u-full-width" href="/tutorials/">Tutorials</a>
 <a class="button u-full-width" href="/api/">API</a>
-<a class="button u-full-width" href="/community">Community</a>
-<a class="button u-full-width" href="/contributing">Contributing</a>
+<hr style="margin-top: 1rem; margin-bottom: 1.5rem;"/>
+<a class="button u-full-width" href="/api/reference">Reference</a>
+<a class="button u-full-width" href="/api/ed/criticisms.html">ed.criticisms</a>
+<a class="button u-full-width" href="/api/ed/inferences.html">ed.inferences</a>
+<a class="button u-full-width" href="/api/ed/models.html">ed.models</a>
+<a class="button u-full-width" href="/api/ed/util.html">ed.util</a>
 <div class="row" style="padding-bottom: 5%"> </div>
 <a class="button2 u-pull-right" href="https://github.com/blei-lab/edward" style="padding-right:10%">
 <span style="vertical-align:middle;">Github</span> 
@@ -118,14 +97,13 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="api-and-documentation">API and Documentation</h2>
+<h1 id="api-and-documentation">API and Documentation</h1>
 <div class="row" style="padding-bottom: 5%">
 <div class="row" style="padding-bottom: 1%">
 <a class="button3" href="/api/data">Data</a>
 <a class="button3" href="/api/model">Model</a>
 <a class="button3 button-primary" href="/api/inference">Inference</a>
 <a class="button3" href="/api/criticism">Criticism</a>
-<a class="button3" href="/api/reference">Reference</a>
 </div>
 <div class="row">
 <a class="button4" href="/api/inference-classes">Classes</a>
@@ -178,215 +156,41 @@ p(\beta\mid\mathbf{x}_{\text{train}}, \mathbf{z}^*)\]</span> where <span class="
 <pre class="python" language="Python"><code>inference = ed.Inference({beta: qbeta}, {x: x_train})</code></pre>
 <p>For example, implicit prior samples are useful for generative adversarial networks. Their inference problem does not require any inference over the latent variables; it uses samples from the prior.</p>
 <hr/>
-<dl class="class">
-<dt id="edward.inferences.Inference">
-<em class="property">class </em><code class="descclassname">edward.inferences.</code><code class="descname">Inference</code><span class="sig-paren">(</span><em>latent_vars=None</em>, <em>data=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L18" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Abstract base class for inference. All inference algorithms in
-Edward inherit from <code class="docutils literal"><span class="pre">Inference</span></code>, sharing common methods and
-properties via a class hierarchy.</p>
-<p>Specific algorithms typically inherit from other subclasses of
-<code class="docutils literal"><span class="pre">Inference</span></code> rather than <code class="docutils literal"><span class="pre">Inference</span></code> directly. For example, one
-might inherit from the abstract classes <code class="docutils literal"><span class="pre">MonteCarlo</span></code> or
-<code class="docutils literal"><span class="pre">VariationalInference</span></code>.</p>
-<p>To build an algorithm inheriting from <code class="docutils literal"><span class="pre">Inference</span></code>, one must at the
-minimum implement <code class="docutils literal"><span class="pre">initialize</span></code> and <code class="docutils literal"><span class="pre">update</span></code>: the former builds
-the computational graph for the algorithm; the latter runs the
-computational graph for the algorithm.</p>
-<p>To reset inference (e.g., internal variable counters incremented
-over training), fetch inference’s reset ops from session with
-<code class="docutils literal"><span class="pre">sess.run(inference.reset)</span></code>.</p>
-<p class="rubric">Methods</p>
-<p>Initialization.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name"></col>
-<col class="field-body"></col>
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>latent_vars</strong> : dict, optional</p>
-<blockquote>
-<div><p>Collection of latent variables (of type <code class="docutils literal"><span class="pre">RandomVariable</span></code> or
-<code class="docutils literal"><span class="pre">tf.Tensor</span></code>) to perform inference on. Each random variable is
-binded to another random variable; the latter will infer the
-former conditional on data.</p>
-</div></blockquote>
-<p><strong>data</strong> : dict, optional</p>
-<blockquote class="last">
-<div><p>Data dictionary which binds observed variables (of type
-<code class="docutils literal"><span class="pre">RandomVariable</span></code> or <code class="docutils literal"><span class="pre">tf.Tensor</span></code>) to their realizations (of
-type <code class="docutils literal"><span class="pre">tf.Tensor</span></code>). It can also bind placeholders (of type
-<code class="docutils literal"><span class="pre">tf.Tensor</span></code>) used in the model to their realizations; and
-prior latent variables (of type <code class="docutils literal"><span class="pre">RandomVariable</span></code>) to posterior
-latent variables (of type <code class="docutils literal"><span class="pre">RandomVariable</span></code>).</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>mu = Normal(loc=tf.constant(0.0), scale=tf.constant(1.0))
-x = Normal(loc=tf.ones(50) * mu, scale=tf.constant(1.0))
-
-qmu_loc = tf.Variable(tf.random_normal([]))
-qmu_scale = tf.nn.softplus(tf.Variable(tf.random_normal([])))
-qmu = Normal(loc=qmu_loc, scale=qmu_scale)
-
-inference = ed.Inference({mu: qmu}, data={x: tf.zeros(50)})
-</code>
-</pre>
-<p class="rubric">Methods</p>
-<dl class="method">
-<dt id="edward.inferences.Inference.run">
-<code class="descname">run</code><span class="sig-paren">(</span><em>variables=None</em>, <em>use_coordinator=True</em>, <em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L92" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>A simple wrapper to run inference.</p>
-<ol class="arabic simple">
-<li>Initialize algorithm via <code class="docutils literal"><span class="pre">initialize</span></code>.</li>
-<li>(Optional) Build a TensorFlow summary writer for TensorBoard.</li>
-<li>(Optional) Initialize TensorFlow variables.</li>
-<li>(Optional) Start queue runners.</li>
-<li>Run <code class="docutils literal"><span class="pre">update</span></code> for <code class="docutils literal"><span class="pre">self.n_iter</span></code> iterations.</li>
-<li>While running, <code class="docutils literal"><span class="pre">print_progress</span></code>.</li>
-<li>Finalize algorithm via <code class="docutils literal"><span class="pre">finalize</span></code>.</li>
-<li>(Optional) Stop queue runners.</li>
-</ol>
-<p>To customize the way inference is run, run these steps
-individually.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name"></col>
-<col class="field-body"></col>
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>variables</strong> : list, optional</p>
-<blockquote>
-<div><p>A list of TensorFlow variables to initialize during inference.
-Default is to initialize all variables (this includes
-reinitializing variables that were already initialized). To
-avoid initializing any variables, pass in an empty list.</p>
-</div></blockquote>
-<p><strong>use_coordinator</strong> : bool, optional</p>
-<blockquote>
-<div><p>Whether to start and stop queue runners during inference using a
-TensorFlow coordinator. For example, queue runners are necessary
-for batch training with file readers.</p>
-</div></blockquote>
-<p><strong>*args</strong></p>
-<blockquote>
-<div><p>Passed into <code class="docutils literal"><span class="pre">initialize</span></code>.</p>
-</div></blockquote>
-<p><strong>**kwargs</strong></p>
-<blockquote class="last">
-<div><p>Passed into <code class="docutils literal"><span class="pre">initialize</span></code>.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-<dl class="method">
-<dt id="edward.inferences.Inference.initialize">
-<code class="descname">initialize</code><span class="sig-paren">(</span><em>n_iter=1000</em>, <em>n_print=None</em>, <em>scale=None</em>, <em>logdir=None</em>, <em>log_timestamp=True</em>, <em>log_vars=None</em>, <em>debug=False</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L154" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Initialize inference algorithm. It initializes hyperparameters
-and builds ops for the algorithm’s computation graph.</p>
-<p>Any derived class of <code class="docutils literal"><span class="pre">Inference</span></code> <strong>must</strong> implement this method.
-No methods which build ops should be called outside <code class="docutils literal"><span class="pre">initialize()</span></code>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name"></col>
-<col class="field-body"></col>
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>n_iter</strong> : int, optional</p>
-<blockquote>
-<div><p>Number of iterations for algorithm when calling <code class="docutils literal"><span class="pre">run()</span></code>.
-Alternatively if controlling inference manually, it is the
-expected number of calls to <code class="docutils literal"><span class="pre">update()</span></code>; this number determines
-tracking information during the print progress.</p>
-</div></blockquote>
-<p><strong>n_print</strong> : int, optional</p>
-<blockquote>
-<div><p>Number of iterations for each print progress. To suppress print
-progress, then specify 0. Default is <code class="docutils literal"><span class="pre">int(n_iter</span> <span class="pre">/</span> <span class="pre">100)</span></code>.</p>
-</div></blockquote>
-<p><strong>scale</strong> : dict of RandomVariable to tf.Tensor, optional</p>
-<blockquote>
-<div><p>A tensor to scale computation for any random variable that it is
-binded to. Its shape must be broadcastable; it is multiplied
-element-wise to the random variable. For example, this is useful
-for mini-batch scaling when inferring global variables, or
-applying masks on a random variable.</p>
-</div></blockquote>
-<p><strong>logdir</strong> : str, optional</p>
-<blockquote>
-<div><p>Directory where event file will be written. For details,
-see <code class="docutils literal"><span class="pre">tf.summary.FileWriter</span></code>. Default is to log nothing.</p>
-</div></blockquote>
-<p><strong>log_timestamp</strong> : bool, optional</p>
-<blockquote>
-<div><p>If True (and <code class="docutils literal"><span class="pre">logdir</span></code> is specified), create a subdirectory of
-<code class="docutils literal"><span class="pre">logdir</span></code> to save the specific run results. The subdirectory’s
-name is the current UTC timestamp with format ‘YYYYMMDD_HHMMSS’.</p>
-</div></blockquote>
-<p><strong>log_vars</strong> : list, optional</p>
-<blockquote>
-<div><p>Specifies the list of variables to log after each <code class="docutils literal"><span class="pre">n_print</span></code>
-steps. If None, will log all variables. If <code class="docutils literal"><span class="pre">[]</span></code>, no variables
-will be logged. <code class="docutils literal"><span class="pre">logdir</span></code> must be specified for variables to be
-logged.</p>
-</div></blockquote>
-<p><strong>debug</strong> : bool, optional</p>
-<blockquote class="last">
-<div><p>If True, add checks for <code class="docutils literal"><span class="pre">NaN</span></code> and <code class="docutils literal"><span class="pre">Inf</span></code> to all computations
-in the graph. May result in substantially slower execution
-times.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-<dl class="method">
-<dt id="edward.inferences.Inference.update">
-<code class="descname">update</code><span class="sig-paren">(</span><em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L234" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Run one iteration of inference.</p>
-<p>Any derived class of <code class="docutils literal"><span class="pre">Inference</span></code> <strong>must</strong> implement this method.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name"></col>
-<col class="field-body"></col>
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>feed_dict</strong> : dict, optional</p>
-<blockquote>
-<div><p>Feed dictionary for a TensorFlow session run. It is used to feed
-placeholders that are not fed during initialization.</p>
-</div></blockquote>
-</td>
-</tr>
-<tr class="field"><th class="field-name">Returns:</th></tr><tr class="field-even field"><td class="field-body"><p class="first">dict</p>
-<blockquote class="last">
-<div><p>Dictionary of algorithm-specific information.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-<dl class="method">
-<dt id="edward.inferences.Inference.print_progress">
-<code class="descname">print_progress</code><span class="sig-paren">(</span><em>info_dict</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L271" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Print progress to output.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name"></col>
-<col class="field-body"></col>
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>info_dict</strong> : dict</p>
-<blockquote class="last">
-<div><p>Dictionary of algorithm-specific information.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-<dl class="method">
-<dt id="edward.inferences.Inference.finalize">
-<code class="descname">finalize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/inferences/inference.py#L284" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Function to call after convergence.</p>
-</dd></dl>
-</dd></dl>
+<ul>
+<li><a href="./ed/Inference"><code>ed.inferences.Inference</code></a></li>
+<li><a href="./ed/VariationalInference"><code>ed.inferences.VariationalInference</code></a>
+<ul>
+<li><a href="./ed/KLqp"><code>ed.inferences.KLqp</code></a>
+<ul>
+<li><a href="./ed/ReparameterizationKLqp"><code>ed.inferences.ReparameterizationKLqp</code></a></li>
+<li><a href="./ed/ReparameterizationKLKLqp"><code>ed.inferences.ReparameterizationKLKLqp</code></a></li>
+<li><a href="./ed/ReparameterizationEntropyKLqp"><code>ed.inferences.ReparameterizationEntropyKLqp</code></a></li>
+<li><a href="./ed/ScoreKLqp"><code>ed.inferences.ScoreKLqp</code></a></li>
+<li><a href="./ed/ScoreKLKLqp"><code>ed.inferences.ScoreKLKLqp</code></a></li>
+<li><a href="./ed/ScoreEntropyKLqp"><code>ed.inferences.ScoreEntropyKLqp</code></a></li>
+</ul></li>
+<li><a href="./ed/KLpq"><code>ed.inferences.KLpq</code></a></li>
+<li><a href="./ed/GANInference"><code>ed.inferences.GANInference</code></a>
+<ul>
+<li><a href="./ed/BiGANInference"><code>ed.inferences.BiGANInference</code></a></li>
+<li><a href="./ed/ImplicitKLqp"><code>ed.inferences.ImplicitKLqp</code></a></li>
+<li><a href="./ed/WGANInference"><code>ed.inferences.WGANInference</code></a></li>
+</ul></li>
+<li><a href="./ed/MAP"><code>ed.inferences.MAP</code></a>
+<ul>
+<li><a href="./ed/Laplace"><code>ed.inferences.Laplace</code></a></li>
+</ul></li>
+</ul></li>
+<li><a href="./ed/MonteCarlo"><code>ed.inferences.MonteCarlo</code></a>
+<ul>
+<li><a href="./ed/Gibbs"><code>ed.inferences.Gibbs</code></a></li>
+<li><a href="./ed/MetropolisHastings"><code>ed.inferences.MetropolisHastings</code></a></li>
+<li><a href="./ed/HMC"><code>ed.inferences.HMC</code></a></li>
+<li><a href="./ed/SGLD"><code>ed.inferences.SGLD</code></a></li>
+<li><a href="./ed/SGHMC"><code>ed.inferences.SGHMC</code></a></li>
+</ul></li>
+<li><a href="BROKEN_LINK"><code>ed.inferences.conjugacy.complete_conditional</code></a></li>
+</ul>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

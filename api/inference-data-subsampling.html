@@ -1,20 +1,21 @@
 <!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
-<meta content="text/css" http-equiv="Content-Style-Type"/>
-<meta content="pandoc" name="generator"/>
-<title>Edward – Data Subsampling</title>
-<!-- Mobile Specific Metas -->
-<meta content="width=device-width, initial-scale=1" name="viewport">
-<!-- FONT -->
-<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
-<!-- CSS -->
-<link href="/css/normalize.css" rel="stylesheet">
-<link href="/css/skeleton.css" rel="stylesheet">
-<!-- Dynamically resize logo for mobile -->
-<style type="text/css">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Edward – Data Subsampling</title>
+  <!-- Mobile Specific Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT -->
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <!-- Dynamically resize logo for mobile -->
+  <style type="text/css">
   .logo-width {
     width: 100%;
     box-sizing: border-box;
@@ -28,104 +29,88 @@
       margin-bottom: 5%;
     }
   }
-  /* Docstrings. */
-  dl.class + dl.class, dl.function + dl.function {
-    /* Add border inbetween docstrings. */
-    border-top: 1px solid #E1E1E1;
-  }
-  dt { /* Add spacing for top border. */
-    margin-top: 1.0rem;
-  }
-  dd { /* Remove overall indenting in an entry. */
-    margin-left: 0.0rem;
-  }
-  dl th, dl td { /* Remove extraneous padding and decorations. */
-    padding: 0 15px 0 0;
-    border: none;
-  }
-  dt em, dt span.sig-paren { /* Keep style of declarations consistent. */
-    font-family: monospace, monospace;
-    font-style: normal;
-    font-size: 14px !important;
-  }
-  /* Attribute contents within a docstring. */
-  dd blockquote, dl blockquote, dt blockquote { /* Reduce margins. */
-    margin-left: 0.0rem;
-    margin-top: 0.0rem;
-    margin-bottom: 0.0rem;
-  }
-  dl td p { /* Reduce spacing. */
-    margin-bottom: 0.75rem;
-  }
-  dl td.field-body { /* Add indenting. */
-    padding-top: 0.75rem;
-    padding-left: 2.0rem;
-    display: block;
-  }
-  dl code { /* Keep code font size consistent with rest of contents. */
-    font-size: 90%;
+  /* Downgrade API's header styles without explicitly modifying their type. */
+  div.nine.columns h1 { text-align: left; }
+  div.nine.columns h1 { font-size: 3.0rem; line-height: 1.25; letter-spacing: -.1rem; }
+  div.nine.columns h2 { font-size: 2.4rem; line-height: 1.3;  letter-spacing: -.1rem; }
+  div.nine.columns h3 { font-size: 2.4rem; line-height: 1.35; letter-spacing: -.08rem; }
+  div.nine.columns h4 { font-size: 1.8rem; line-height: 1.5;  letter-spacing: -.05rem; }
+  div.nine.columns h5 { font-size: 1.5rem; line-height: 1.6;  letter-spacing: 0; }
+  @media (min-width: 550px) {
+    div.nine.columns h1 { font-size: 3.6rem; }
+    div.nine.columns h2 { font-size: 3.0rem; }
+    div.nine.columns h3 { font-size: 3.0rem; }
+    div.nine.columns h4 { font-size: 2.5rem; }
+    div.nine.columns h5 { font-size: 1.5rem; }
   }
   </style>
-<!-- KaTeX -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
-<!-- highlight.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
-<!-- Favicon -->
-<link href="/icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
-<link href="/icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
-<link href="/icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
-<link href="/icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
-<link href="/icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
-<link href="/icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
-<link href="/icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
-<link href="/icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
-<link href="/icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
-<link href="/icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
-<link href="/icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
-<link href="/icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
-<link href="/icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
-<link href="/icons/manifest.json" rel="manifest">
-<link color="#5bbad5" href="/icons/safari-pinned-tab.svg" rel="mask-icon">
-<link href="/icons/favicon.ico" rel="shortcut icon">
-<meta content="#da532c" name="msapplication-TileColor">
-<meta content="/icons/mstile-144x144.png" name="msapplication-TileImage">
-<meta content="/icons/browserconfig.xml" name="msapplication-config">
-<meta content="#ffffff" name="theme-color">
-</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+
+  <!-- KaTeX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/contrib/auto-render.min.js"></script>
+
+  <!-- highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css">
+
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="57x57" href="/icons/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/icons/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/icons/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/icons/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/icons/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/icons/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="/icons/android-chrome-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="/icons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16">
+  <link rel="manifest" href="/icons/manifest.json">
+  <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="/icons/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-TileImage" content="/icons/mstile-144x144.png">
+  <meta name="msapplication-config" content="/icons/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+</head>
 <body>
 <div class="container">
-<div class="row" style="margin-top: 5%">
-<div class="three columns">
-<h1><a href="/">Edward</a></h1>
-<a href="/">
-<center>
-<img alt="Edward" class="logo-width" src="/images/edward.png"/>
-</center>
-</a>
-<a class="button u-full-width" href="/getting-started">Getting Started</a>
-<a class="button u-full-width" href="/tutorials/">Tutorials</a>
-<a class="button u-full-width" href="/api/">API</a>
-<a class="button u-full-width" href="/community">Community</a>
-<a class="button u-full-width" href="/contributing">Contributing</a>
-<div class="row" style="padding-bottom: 5%"> </div>
-<a class="button2 u-pull-right" href="https://github.com/blei-lab/edward" style="padding-right:10%">
-<span style="vertical-align:middle;">Github</span> 
-      <img alt="Edward on Github" src="/images/github-mark.svg" style="vertical-align:middle;"/>
-</a>
-<div class="row" style="padding-bottom: 5%"> </div>
-</div>
-<div class="nine columns">
-<h2 id="api-and-documentation">API and Documentation</h2>
+  <div class="row" style="margin-top: 5%">
+    <div class="three columns">
+    <h1><a href="/">Edward</a></h1>
+    <a href="/">
+    <center>
+      <img src="/images/edward.png" class="logo-width" alt="Edward" />
+    </center>
+    </a>
+    <a class="button u-full-width" href="/api/">API</a>
+    <hr style="margin-top: 1rem; margin-bottom: 1.5rem;"/>
+    <a class="button u-full-width" href="/api/reference">Reference</a>
+    <a class="button u-full-width" href="/api/ed/criticisms.html">ed.criticisms</a>
+<a class="button u-full-width" href="/api/ed/inferences.html">ed.inferences</a>
+<a class="button u-full-width" href="/api/ed/models.html">ed.models</a>
+<a class="button u-full-width" href="/api/ed/util.html">ed.util</a>
+
+    <div class="row" style="padding-bottom: 5%"> </div>
+    <a class="button2 u-pull-right" style="padding-right:10%"
+      href="https://github.com/blei-lab/edward">
+      <span style="vertical-align:middle;">Github</span>&nbsp;
+      <img src="/images/github-mark.svg" style="vertical-align:middle;"
+      alt="Edward on Github" />
+    </a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    </div>
+    <div class="nine columns">
+<h1 id="api-and-documentation">API and Documentation</h1>
 <div class="row" style="padding-bottom: 5%">
 <div class="row" style="padding-bottom: 1%">
 <a class="button3" href="/api/data">Data</a>
 <a class="button3" href="/api/model">Model</a>
 <a class="button3 button-primary" href="/api/inference">Inference</a>
 <a class="button3" href="/api/criticism">Criticism</a>
-<a class="button3" href="/api/reference">Reference</a>
 </div>
 <div class="row">
 <a class="button4" href="/api/inference-classes">Classes</a>
@@ -138,7 +123,7 @@
 <p>Running algorithms which require the full data set for each update can be expensive when the data is large. In order to scale inferences, we can do <em>data subsampling</em>, i.e., update inference using only a subsample of data at a time.</p>
 <p>(Note that only certain algorithms support data subsampling such as <code>MAP</code>, <code>KLqp</code>, and <code>SGLD</code>. Also, below we illustrate data subsampling for hierarchical models; for models with only global variables such as Bayesian neural networks, a simpler solution exists: see the <a href="/tutorials/batch-training">batch training tutorial</a>.)</p>
 <h3 id="subgraphs">Subgraphs</h3>
-<p><img alt="image" src="/images/hierarchical_model_subgraph.png" width="250"/><br/>
+<p><img src="/images/hierarchical_model_subgraph.png" alt="image" width="250" /><br />
 <span><em>Data subsampling with a hierarchical model. We define a subgraph of the full model, forming a plate of size <span class="math inline">\(M\)</span> rather than <span class="math inline">\(N\)</span>.</em></span></p>
 <p>In the subgraph setting, we do data subsampling while working with a subgraph of the full model. This setting is necessary when the data and model do not fit in memory. It is scalable in that both the algorithm’s computational complexity (per iteration) and memory complexity are independent of the data set size.</p>
 <p>As illustration, consider a hierarchical model, <span class="math display">\[p(\mathbf{x}, \mathbf{z}, \beta)
@@ -193,8 +178,8 @@ qz = Categorical(logits=tf.gather(qz_variables, idx_ph))</code></pre>
 <p>An alternative approach to reduce memory complexity is to use an inference network <span class="citation">(Dayan, Hinton, Neal, &amp; Zemel, 1995)</span>, also known as amortized inference <span class="citation">(Stuhlmüller, Taylor, &amp; Goodman, 2013)</span>. This can be applied using a global parameterization of <span class="math inline">\(q(\mathbf{z}, \beta)\)</span>. For more details, see the <a href="/tutorials/inference-networks">inference networks tutorial</a>.</p>
 <p>In streaming data, or online inference, the size of the data <span class="math inline">\(N\)</span> may be unknown, or conceptually the size of the data may be infinite and at any time in which we query parameters from the online algorithm, the outputted parameters are from having processed as many data points up to that time. The approach of Bayesian filtering <span class="citation">(Broderick, Boyd, Wibisono, Wilson, &amp; Jordan, 2013; Doucet, Godsill, &amp; Andrieu, 2000)</span> can be applied in Edward using recursive posterior inferences; the approach of population posteriors <span class="citation">(McInerney, Ranganath, &amp; Blei, 2015)</span> is readily applicable from the subgraph setting.</p>
 <p>In other settings, working on a subgraph of the model does not apply, such as in time series models when we want to preserve dependencies across time steps in our variational model. Approaches in the literature can be applied in Edward <span class="citation">(Binder, Murphy, &amp; Russell, 1997; Foti, Xu, Laird, &amp; Fox, 2014; Johnson &amp; Willsky, 2014)</span>.</p>
-<h3 class="unnumbered" id="references">References</h3>
-<div class="references" id="refs">
+<h3 id="references" class="unnumbered">References</h3>
+<div id="refs" class="references">
 <div id="ref-binder1997space">
 <p>Binder, J., Murphy, K., &amp; Russell, S. (1997). Space-efficient inference in dynamic probabilistic networks. In <em>International joint conference on artificial intelligence</em>.</p>
 </div>
@@ -220,9 +205,9 @@ qz = Categorical(logits=tf.gather(qz_variables, idx_ph))</code></pre>
 <p>Stuhlmüller, A., Taylor, J., &amp; Goodman, N. (2013). Learning stochastic inverses. In <em>Neural information processing systems</em>.</p>
 </div>
 </div>
-</div>
-</div>
-<div class="row" style="padding-bottom: 25%"> </div>
+    </div>
+  </div>
+  <div class="row" style="padding-bottom: 25%"> </div>
 </div>
 <script>
   hljs.initHighlightingOnLoad();

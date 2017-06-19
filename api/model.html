@@ -28,48 +28,25 @@
       margin-bottom: 5%;
     }
   }
-  /* Docstrings. */
-  dl.class + dl.class, dl.function + dl.function {
-    /* Add border inbetween docstrings. */
-    border-top: 1px solid #E1E1E1;
-  }
-  dt { /* Add spacing for top border. */
-    margin-top: 1.0rem;
-  }
-  dd { /* Remove overall indenting in an entry. */
-    margin-left: 0.0rem;
-  }
-  dl th, dl td { /* Remove extraneous padding and decorations. */
-    padding: 0 15px 0 0;
-    border: none;
-  }
-  dt em, dt span.sig-paren { /* Keep style of declarations consistent. */
-    font-family: monospace, monospace;
-    font-style: normal;
-    font-size: 14px !important;
-  }
-  /* Attribute contents within a docstring. */
-  dd blockquote, dl blockquote, dt blockquote { /* Reduce margins. */
-    margin-left: 0.0rem;
-    margin-top: 0.0rem;
-    margin-bottom: 0.0rem;
-  }
-  dl td p { /* Reduce spacing. */
-    margin-bottom: 0.75rem;
-  }
-  dl td.field-body { /* Add indenting. */
-    padding-top: 0.75rem;
-    padding-left: 2.0rem;
-    display: block;
-  }
-  dl code { /* Keep code font size consistent with rest of contents. */
-    font-size: 90%;
+  /* Downgrade API's header styles without explicitly modifying their type. */
+  div.nine.columns h1 { text-align: left; }
+  div.nine.columns h1 { font-size: 3.0rem; line-height: 1.25; letter-spacing: -.1rem; }
+  div.nine.columns h2 { font-size: 2.4rem; line-height: 1.3;  letter-spacing: -.1rem; }
+  div.nine.columns h3 { font-size: 2.4rem; line-height: 1.35; letter-spacing: -.08rem; }
+  div.nine.columns h4 { font-size: 1.8rem; line-height: 1.5;  letter-spacing: -.05rem; }
+  div.nine.columns h5 { font-size: 1.5rem; line-height: 1.6;  letter-spacing: 0; }
+  @media (min-width: 550px) {
+    div.nine.columns h1 { font-size: 3.6rem; }
+    div.nine.columns h2 { font-size: 3.0rem; }
+    div.nine.columns h3 { font-size: 3.0rem; }
+    div.nine.columns h4 { font-size: 2.5rem; }
+    div.nine.columns h5 { font-size: 1.5rem; }
   }
   </style>
 <!-- KaTeX -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/contrib/auto-render.min.js"></script>
 <!-- highlight.js -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
@@ -105,11 +82,13 @@
 <img alt="Edward" class="logo-width" src="/images/edward.png"/>
 </center>
 </a>
-<a class="button u-full-width" href="/getting-started">Getting Started</a>
-<a class="button u-full-width" href="/tutorials/">Tutorials</a>
 <a class="button u-full-width" href="/api/">API</a>
-<a class="button u-full-width" href="/community">Community</a>
-<a class="button u-full-width" href="/contributing">Contributing</a>
+<hr style="margin-top: 1rem; margin-bottom: 1.5rem;"/>
+<a class="button u-full-width" href="/api/reference">Reference</a>
+<a class="button u-full-width" href="/api/ed/criticisms.html">ed.criticisms</a>
+<a class="button u-full-width" href="/api/ed/inferences.html">ed.inferences</a>
+<a class="button u-full-width" href="/api/ed/models.html">ed.models</a>
+<a class="button u-full-width" href="/api/ed/util.html">ed.util</a>
 <div class="row" style="padding-bottom: 5%"> </div>
 <a class="button2 u-pull-right" href="https://github.com/blei-lab/edward" style="padding-right:10%">
 <span style="vertical-align:middle;">Github</span> 
@@ -118,14 +97,13 @@
 <div class="row" style="padding-bottom: 5%"> </div>
 </div>
 <div class="nine columns">
-<h2 id="api-and-documentation">API and Documentation</h2>
+<h1 id="api-and-documentation">API and Documentation</h1>
 <div class="row" style="padding-bottom: 5%">
 <div class="row" style="padding-bottom: 1%">
 <a class="button3" href="/api/data">Data</a>
 <a class="button3 button-primary" href="/api/model">Model</a>
 <a class="button3" href="/api/inference">Inference</a>
 <a class="button3" href="/api/criticism">Criticism</a>
-<a class="button3" href="/api/reference">Reference</a>
 </div>
 <div class="row">
 <a class="button4" href="/api/model-compositionality">Compositionality</a>
@@ -166,331 +144,60 @@ tf.tanh(x * y)
 x[2]  # 3rd normal rv in the vector</code></pre>
 <p>In the <a href="/api/model-compositionality">compositionality page</a>, we describe how to build models by composing random variables.</p>
 <hr/>
-<p>For a list of random variables supported in Edward, see the <a href="/api/reference">API reference page</a>. Additional methods are available, detailed below.</p>
-<dl class="class">
-<dt id="edward.models.RandomVariable">
-<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">RandomVariable</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L16" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Base class for random variables.</p>
-<p>A random variable is an object parameterized by tensors. It is
-equipped with methods such as the log-density, mean, and sample.</p>
-<p>It also wraps a tensor, where the tensor corresponds to a sample
-from the random variable. This enables operations on the TensorFlow
-graph, allowing random variables to be used in conjunction with
-other TensorFlow ops.</p>
-<p>The random variable’s shape is given by</p>
-<p><code class="docutils literal"><span class="pre">sample_shape</span> <span class="pre">+</span> <span class="pre">batch_shape</span> <span class="pre">+</span> <span class="pre">event_shape</span></code>,</p>
-<p>where <code class="docutils literal"><span class="pre">sample_shape</span></code> is an optional argument representing the
-dimensions of samples drawn from the distribution (default is
-a scalar); <code class="docutils literal"><span class="pre">batch_shape</span></code> is the number of independent random variables
-(determined by the shape of its parameters); and <code class="docutils literal"><span class="pre">event_shape</span></code> is
-the shape of one draw from the distribution (e.g., <code class="docutils literal"><span class="pre">Normal</span></code> has a
-scalar <code class="docutils literal"><span class="pre">event_shape</span></code>; <code class="docutils literal"><span class="pre">Dirichlet</span></code> has a vector <code class="docutils literal"><span class="pre">event_shape</span></code>).</p>
-<p class="rubric">Notes</p>
-<p><code class="docutils literal"><span class="pre">RandomVariable</span></code> assumes use in a multiple inheritance setting. The
-child class must first inherit <code class="docutils literal"><span class="pre">RandomVariable</span></code>, then second inherit a
-class in <code class="docutils literal"><span class="pre">tf.contrib.distributions</span></code>. With Python’s method resolution
-order, this implies the following during initialization (using
-<code class="docutils literal"><span class="pre">distributions.Bernoulli</span></code> as an example):</p>
-<ol class="arabic simple">
-<li>Start the <code class="docutils literal"><span class="pre">__init__()</span></code> of the child class, which passes all
-<code class="docutils literal"><span class="pre">*args,</span> <span class="pre">**kwargs</span></code> to <code class="docutils literal"><span class="pre">RandomVariable</span></code>.</li>
-<li>This in turn passes all <code class="docutils literal"><span class="pre">*args,</span> <span class="pre">**kwargs</span></code> to
-<code class="docutils literal"><span class="pre">distributions.Bernoulli</span></code>, completing the <code class="docutils literal"><span class="pre">__init__()</span></code> of
-<code class="docutils literal"><span class="pre">distributions.Bernoulli</span></code>.</li>
-<li>Complete the <code class="docutils literal"><span class="pre">__init__()</span></code> of <code class="docutils literal"><span class="pre">RandomVariable</span></code>, which calls
-<code class="docutils literal"><span class="pre">self.sample()</span></code>, relying on the method from
-<code class="docutils literal"><span class="pre">distributions.Bernoulli</span></code>.</li>
-<li>Complete the <code class="docutils literal"><span class="pre">__init__()</span></code> of the child class.</li>
-</ol>
-<p>Methods from both <code class="docutils literal"><span class="pre">RandomVariable</span></code> and <code class="docutils literal"><span class="pre">distributions.Bernoulli</span></code>
-populate the namespace of the child class. Methods from
-<code class="docutils literal"><span class="pre">RandomVariable</span></code> will take higher priority if there are conflicts.</p>
-<p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>p = tf.constant(0.5)
-x = Bernoulli(p)
-
-z1 = tf.constant([[1.0, -0.8], [0.3, -1.0]])
-z2 = tf.constant([[0.9, 0.2], [2.0, -0.1]])
-x = Bernoulli(logits=tf.matmul(z1, z2))
-
-mu = Normal(tf.constant(0.0), tf.constant(1.0))
-x = Normal(mu, tf.constant(1.0))
-</code>
-</pre>
-<p class="rubric">Attributes</p>
-<p class="rubric">Methods</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name"></col>
-<col class="field-body"></col>
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>sample_shape</strong> : tf.TensorShape, optional</p>
-<blockquote>
-<div><p>Shape of samples to draw from the random variable.</p>
-</div></blockquote>
-<p><strong>value</strong> : tf.Tensor, optional</p>
-<blockquote>
-<div><p>Fixed tensor to associate with random variable. Must have shape
-<code class="docutils literal"><span class="pre">sample_shape</span> <span class="pre">+</span> <span class="pre">batch_shape</span> <span class="pre">+</span> <span class="pre">event_shape</span></code>.</p>
-</div></blockquote>
-<p><strong>collections</strong> : list, optional</p>
-<blockquote>
-<div><p>Optional list of graph collections keys. The random variable is
-added to these collections. Defaults to [“random_variables”].</p>
-</div></blockquote>
-<p><strong>*args, **kwargs</strong></p>
-<blockquote class="last">
-<div><p>Passed into parent <code class="docutils literal"><span class="pre">__init__</span></code>.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Attributes</p>
-<p class="rubric">Methods</p>
-<dl class="attribute">
-<dt id="edward.models.RandomVariable.sample_shape">
-<code class="descname">sample_shape</code><a class="headerlink" href="" title="Permalink to this definition"></a></dt>
-<dd><p>Sample shape of random variable.</p>
-</dd></dl>
-<dl class="attribute">
-<dt id="edward.models.RandomVariable.shape">
-<code class="descname">shape</code><a class="headerlink" href="" title="Permalink to this definition"></a></dt>
-<dd><p>Shape of random variable.</p>
-</dd></dl>
-<dl class="attribute">
-<dt id="edward.models.RandomVariable.unique_name">
-<code class="descname">unique_name</code><a class="headerlink" href="" title="Permalink to this definition"></a></dt>
-<dd><p>Name of random variable with its unique scoping name. Use
-<code class="docutils literal"><span class="pre">name</span></code> to just get the name of the random variable.</p>
-</dd></dl>
-<dl class="method">
-<dt id="edward.models.RandomVariable.eval">
-<code class="descname">eval</code><span class="sig-paren">(</span><em>session=None</em>, <em>feed_dict=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L275" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>In a session, computes and returns the value of this random variable.</p>
-<p>This is not a graph construction method, it does not add ops to the graph.</p>
-<p>This convenience method requires a session where the graph
-containing this variable has been launched. If no session is
-passed, the default session is used.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name"></col>
-<col class="field-body"></col>
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>session</strong> : tf.BaseSession, optional</p>
-<blockquote>
-<div><p>The <code class="docutils literal"><span class="pre">tf.Session</span></code> to use to evaluate this random variable. If
-none, the default session is used.</p>
-</div></blockquote>
-<p><strong>feed_dict</strong> : dict, optional</p>
-<blockquote class="last">
-<div><p>A dictionary that maps <code class="docutils literal"><span class="pre">tf.Tensor</span></code> objects to feed values. See
-<code class="docutils literal"><span class="pre">tf.Session.run()</span></code> for a description of the valid feed values.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Examples</p>
-<pre class="python" language="Python"><code>x = Normal(0.0, 1.0)
-with tf.Session() as sess:
-  # Usage passing the session explicitly.
-  print(x.eval(sess))
-  # Usage with the default session.  The 'with' block
-  # above makes 'sess' the default session.
-  print(x.eval())
-</code>
-</pre>
-</dd></dl>
-<dl class="method">
-<dt id="edward.models.RandomVariable.value">
-<code class="descname">value</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L305" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Get tensor that the random variable corresponds to.</p>
-</dd></dl>
-<dl class="method">
-<dt id="edward.models.RandomVariable.get_ancestors">
-<code class="descname">get_ancestors</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L309" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Get ancestor random variables.</p>
-</dd></dl>
-<dl class="method">
-<dt id="edward.models.RandomVariable.get_blanket">
-<code class="descname">get_blanket</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L314" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Get the random variable’s Markov blanket.</p>
-</dd></dl>
-<dl class="method">
-<dt id="edward.models.RandomVariable.get_children">
-<code class="descname">get_children</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L319" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Get child random variables.</p>
-</dd></dl>
-<dl class="method">
-<dt id="edward.models.RandomVariable.get_descendants">
-<code class="descname">get_descendants</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L324" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Get descendant random variables.</p>
-</dd></dl>
-<dl class="method">
-<dt id="edward.models.RandomVariable.get_parents">
-<code class="descname">get_parents</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L329" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Get parent random variables.</p>
-</dd></dl>
-<dl class="method">
-<dt id="edward.models.RandomVariable.get_siblings">
-<code class="descname">get_siblings</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L334" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Get sibling random variables.</p>
-</dd></dl>
-<dl class="method">
-<dt id="edward.models.RandomVariable.get_variables">
-<code class="descname">get_variables</code><span class="sig-paren">(</span><em>collection=None</em><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L339" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Get TensorFlow variables that the random variable depends on.</p>
-</dd></dl>
-<dl class="method">
-<dt id="edward.models.RandomVariable.get_shape">
-<code class="descname">get_shape</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="u-pull-right" href="https://github.com/blei-lab/edward/blob/master/edward/models/random_variable.py#L344" title="Link to definition on GitHub.">[source]</a></dt>
-<dd><p>Get shape of random variable.</p>
-</dd></dl>
-</dd></dl>
-<dl class="class">
-<dt id="edward.models.DirichletProcess">
-<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">DirichletProcess</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="" title="Permalink to this definition"></a></dt>
-<dd><p>Dirichlet process <span class="math">\(\mathcal{DP}(\alpha, H)\)</span>.</p>
-<p>It has two parameters: a positive real value <span class="math">\(\alpha\)</span>, known
-as the concentration parameter (<code class="docutils literal"><span class="pre">concentration</span></code>), and a base
-distribution <span class="math">\(H\)</span> (<code class="docutils literal"><span class="pre">base</span></code>).</p>
-<p class="rubric">Attributes</p>
-<p class="rubric">Methods</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name"></col>
-<col class="field-body"></col>
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>sample_shape</strong> : tf.TensorShape, optional</p>
-<blockquote>
-<div><p>Shape of samples to draw from the random variable.</p>
-</div></blockquote>
-<p><strong>value</strong> : tf.Tensor, optional</p>
-<blockquote>
-<div><p>Fixed tensor to associate with random variable. Must have shape
-<code class="docutils literal"><span class="pre">sample_shape</span> <span class="pre">+</span> <span class="pre">batch_shape</span> <span class="pre">+</span> <span class="pre">event_shape</span></code>.</p>
-</div></blockquote>
-<p><strong>collections</strong> : list, optional</p>
-<blockquote>
-<div><p>Optional list of graph collections keys. The random variable is
-added to these collections. Defaults to [“random_variables”].</p>
-</div></blockquote>
-<p><strong>*args, **kwargs</strong></p>
-<blockquote class="last">
-<div><p>Passed into parent <code class="docutils literal"><span class="pre">__init__</span></code>.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Attributes</p>
-</dd></dl>
-<dl class="class">
-<dt id="edward.models.Empirical">
-<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">Empirical</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="" title="Permalink to this definition"></a></dt>
-<dd><p>Empirical random variable.</p>
-<p class="rubric">Attributes</p>
-<p class="rubric">Methods</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name"></col>
-<col class="field-body"></col>
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>sample_shape</strong> : tf.TensorShape, optional</p>
-<blockquote>
-<div><p>Shape of samples to draw from the random variable.</p>
-</div></blockquote>
-<p><strong>value</strong> : tf.Tensor, optional</p>
-<blockquote>
-<div><p>Fixed tensor to associate with random variable. Must have shape
-<code class="docutils literal"><span class="pre">sample_shape</span> <span class="pre">+</span> <span class="pre">batch_shape</span> <span class="pre">+</span> <span class="pre">event_shape</span></code>.</p>
-</div></blockquote>
-<p><strong>collections</strong> : list, optional</p>
-<blockquote>
-<div><p>Optional list of graph collections keys. The random variable is
-added to these collections. Defaults to [“random_variables”].</p>
-</div></blockquote>
-<p><strong>*args, **kwargs</strong></p>
-<blockquote class="last">
-<div><p>Passed into parent <code class="docutils literal"><span class="pre">__init__</span></code>.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Attributes</p>
-</dd></dl>
-<dl class="class">
-<dt id="edward.models.ParamMixture">
-<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">ParamMixture</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="" title="Permalink to this definition"></a></dt>
-<dd><p>A mixture distribution where all components are of the same family.</p>
-<p>Note that this distribution actually represents the conditional
-distribution of the observable variable given a latent categorical
-variable <cite>cat</cite> saying which mixture component generated this
-distribution.</p>
-<p class="rubric">Attributes</p>
-<p class="rubric">Methods</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name"></col>
-<col class="field-body"></col>
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>sample_shape</strong> : tf.TensorShape, optional</p>
-<blockquote>
-<div><p>Shape of samples to draw from the random variable.</p>
-</div></blockquote>
-<p><strong>value</strong> : tf.Tensor, optional</p>
-<blockquote>
-<div><p>Fixed tensor to associate with random variable. Must have shape
-<code class="docutils literal"><span class="pre">sample_shape</span> <span class="pre">+</span> <span class="pre">batch_shape</span> <span class="pre">+</span> <span class="pre">event_shape</span></code>.</p>
-</div></blockquote>
-<p><strong>collections</strong> : list, optional</p>
-<blockquote>
-<div><p>Optional list of graph collections keys. The random variable is
-added to these collections. Defaults to [“random_variables”].</p>
-</div></blockquote>
-<p><strong>*args, **kwargs</strong></p>
-<blockquote class="last">
-<div><p>Passed into parent <code class="docutils literal"><span class="pre">__init__</span></code>.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Attributes</p>
-</dd></dl>
-<dl class="class">
-<dt id="edward.models.PointMass">
-<em class="property">class </em><code class="descclassname">edward.models.</code><code class="descname">PointMass</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="" title="Permalink to this definition"></a></dt>
-<dd><p>PointMass random variable.</p>
-<p>It is analogous to an Empirical random variable with one sample, but
-its parameter argument does not have an outer dimension.</p>
-<p class="rubric">Attributes</p>
-<p class="rubric">Methods</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name"></col>
-<col class="field-body"></col>
-<tbody valign="top">
-<tr class="field"><th class="field-name">Parameters:</th></tr><tr class="field-odd field"><td class="field-body"><p class="first"><strong>sample_shape</strong> : tf.TensorShape, optional</p>
-<blockquote>
-<div><p>Shape of samples to draw from the random variable.</p>
-</div></blockquote>
-<p><strong>value</strong> : tf.Tensor, optional</p>
-<blockquote>
-<div><p>Fixed tensor to associate with random variable. Must have shape
-<code class="docutils literal"><span class="pre">sample_shape</span> <span class="pre">+</span> <span class="pre">batch_shape</span> <span class="pre">+</span> <span class="pre">event_shape</span></code>.</p>
-</div></blockquote>
-<p><strong>collections</strong> : list, optional</p>
-<blockquote>
-<div><p>Optional list of graph collections keys. The random variable is
-added to these collections. Defaults to [“random_variables”].</p>
-</div></blockquote>
-<p><strong>*args, **kwargs</strong></p>
-<blockquote class="last">
-<div><p>Passed into parent <code class="docutils literal"><span class="pre">__init__</span></code>.</p>
-</div></blockquote>
-</td>
-</tr>
-</tbody>
-</table>
-<p class="rubric">Attributes</p>
-</dd></dl>
+<ul>
+<li><a href="./ed/RandomVariable"><code>ed.models.RandomVariable</code></a></li>
+<li><a href="./ed/models/Bernoulli"><code>ed.models.Bernoulli</code></a></li>
+<li><a href="./ed/models/BernoulliWithSigmoidProbs"><code>ed.models.BernoulliWithSigmoidProbs</code></a></li>
+<li><a href="./ed/models/Beta"><code>ed.models.Beta</code></a></li>
+<li><a href="./ed/models/BetaWithSoftplusConcentration"><code>ed.models.BetaWithSoftplusConcentration</code></a></li>
+<li><a href="./ed/models/Binomial"><code>ed.models.Binomial</code></a></li>
+<li><a href="./ed/models/Categorical"><code>ed.models.Categorical</code></a></li>
+<li><a href="./ed/models/Chi2"><code>ed.models.Chi2</code></a></li>
+<li><a href="./ed/models/Chi2WithAbsDf"><code>ed.models.Chi2WithAbsDf</code></a></li>
+<li><a href="./ed/models/ConditionalDistribution"><code>ed.models.ConditionalDistribution</code></a></li>
+<li><a href="./ed/models/ConditionalTransformedDistribution"><code>ed.models.ConditionalTransformedDistribution</code></a></li>
+<li><a href="./ed/models/Deterministic"><code>ed.models.Deterministic</code></a></li>
+<li><a href="./ed/models/Dirichlet"><code>ed.models.Dirichlet</code></a></li>
+<li><a href="./ed/models/DirichletMultinomial"><code>ed.models.DirichletMultinomial</code></a></li>
+<li><a href="./ed/models/DirichletProcess"><code>ed.models.DirichletProcess</code></a></li>
+<li><a href="./ed/models/Empirical"><code>ed.models.Empirical</code></a></li>
+<li><a href="./ed/models/ExpRelaxedOneHotCategorical"><code>ed.models.ExpRelaxedOneHotCategorical</code></a></li>
+<li><a href="./ed/models/Exponential"><code>ed.models.Exponential</code></a></li>
+<li><a href="./ed/models/ExponentialWithSoftplusRate"><code>ed.models.ExponentialWithSoftplusRate</code></a></li>
+<li><a href="./ed/models/Gamma"><code>ed.models.Gamma</code></a></li>
+<li><a href="./ed/models/GammaWithSoftplusConcentrationRate"><code>ed.models.GammaWithSoftplusConcentrationRate</code></a></li>
+<li><a href="./ed/models/Geometric"><code>ed.models.Geometric</code></a></li>
+<li><a href="./ed/models/InverseGamma"><code>ed.models.InverseGamma</code></a></li>
+<li><a href="./ed/models/InverseGammaWithSoftplusConcentrationRate"><code>ed.models.InverseGammaWithSoftplusConcentrationRate</code></a></li>
+<li><a href="./ed/models/Laplace"><code>ed.models.Laplace</code></a></li>
+<li><a href="./ed/models/LaplaceWithSoftplusScale"><code>ed.models.LaplaceWithSoftplusScale</code></a></li>
+<li><a href="./ed/models/Logistic"><code>ed.models.Logistic</code></a></li>
+<li><a href="./ed/models/Mixture"><code>ed.models.Mixture</code></a></li>
+<li><a href="./ed/models/Multinomial"><code>ed.models.Multinomial</code></a></li>
+<li><a href="./ed/models/MultivariateNormalDiag"><code>ed.models.MultivariateNormalDiag</code></a></li>
+<li><a href="./ed/models/MultivariateNormalDiagPlusLowRank"><code>ed.models.MultivariateNormalDiagPlusLowRank</code></a></li>
+<li><a href="./ed/models/MultivariateNormalDiagWithSoftplusScale"><code>ed.models.MultivariateNormalDiagWithSoftplusScale</code></a></li>
+<li><a href="./ed/models/MultivariateNormalFullCovariance"><code>ed.models.MultivariateNormalFullCovariance</code></a></li>
+<li><a href="./ed/models/MultivariateNormalTriL"><code>ed.models.MultivariateNormalTriL</code></a></li>
+<li><a href="./ed/models/NegativeBinomial"><code>ed.models.NegativeBinomial</code></a></li>
+<li><a href="./ed/models/Normal"><code>ed.models.Normal</code></a></li>
+<li><a href="./ed/models/NormalWithSoftplusScale"><code>ed.models.NormalWithSoftplusScale</code></a></li>
+<li><a href="./ed/models/OneHotCategorical"><code>ed.models.OneHotCategorical</code></a></li>
+<li><a href="./ed/models/ParamMixture"><code>ed.models.ParamMixture</code></a></li>
+<li><a href="./ed/models/PointMass"><code>ed.models.PointMass</code></a></li>
+<li><a href="./ed/models/Poisson"><code>ed.models.Poisson</code></a></li>
+<li><a href="./ed/models/QuantizedDistribution"><code>ed.models.QuantizedDistribution</code></a></li>
+<li><a href="./ed/models/RelaxedBernoulli"><code>ed.models.RelaxedBernoulli</code></a></li>
+<li><a href="./ed/models/RelaxedOneHotCategorical"><code>ed.models.RelaxedOneHotCategorical</code></a></li>
+<li><a href="./ed/models/StudentT"><code>ed.models.StudentT</code></a></li>
+<li><a href="./ed/models/StudentTWithAbsDfSoftplusScale"><code>ed.models.StudentTWithAbsDfSoftplusScale</code></a></li>
+<li><a href="./ed/models/TransformedDistribution"><code>ed.models.TransformedDistribution</code></a></li>
+<li><a href="./ed/models/Uniform"><code>ed.models.Uniform</code></a></li>
+<li><a href="./ed/models/VectorDeterministic"><code>ed.models.VectorDeterministic</code></a></li>
+<li><a href="./ed/models/VectorLaplaceDiag"><code>ed.models.VectorLaplaceDiag</code></a></li>
+<li><a href="./ed/models/WishartCholesky"><code>ed.models.WishartCholesky</code></a></li>
+<li><a href="./ed/models/WishartFull"><code>ed.models.WishartFull</code></a></li>
+</ul>
 </div>
 </div>
 <div class="row" style="padding-bottom: 25%"> </div>

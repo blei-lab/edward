@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Edward – ed.models.Gamma</title>
+  <!-- Mobile Specific Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT -->
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <!-- Dynamically resize logo for mobile -->
+  <style type="text/css">
+  .logo-width {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15%;
+  }
+  /* Roughly the point when website is single column */
+  @media (max-width: 850px) {
+    .logo-width {
+      width: 50%;
+      box-sizing: border-box;
+      margin-bottom: 5%;
+    }
+  }
+  /* Downgrade API's header styles without explicitly modifying their type. */
+  div.nine.columns h1 { text-align: left; }
+  div.nine.columns h1 { font-size: 3.0rem; line-height: 1.25; letter-spacing: -.1rem; }
+  div.nine.columns h2 { font-size: 2.4rem; line-height: 1.3;  letter-spacing: -.1rem; }
+  div.nine.columns h3 { font-size: 2.4rem; line-height: 1.35; letter-spacing: -.08rem; }
+  div.nine.columns h4 { font-size: 1.8rem; line-height: 1.5;  letter-spacing: -.05rem; }
+  div.nine.columns h5 { font-size: 1.5rem; line-height: 1.6;  letter-spacing: 0; }
+  @media (min-width: 550px) {
+    div.nine.columns h1 { font-size: 3.6rem; }
+    div.nine.columns h2 { font-size: 3.0rem; }
+    div.nine.columns h3 { font-size: 3.0rem; }
+    div.nine.columns h4 { font-size: 2.5rem; }
+    div.nine.columns h5 { font-size: 1.5rem; }
+  }
+  </style>
+
+  <!-- KaTeX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/contrib/auto-render.min.js"></script>
+
+  <!-- highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css">
+
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="57x57" href="/icons/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/icons/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/icons/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/icons/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/icons/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/icons/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="/icons/android-chrome-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="/icons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16">
+  <link rel="manifest" href="/icons/manifest.json">
+  <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="/icons/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-TileImage" content="/icons/mstile-144x144.png">
+  <meta name="msapplication-config" content="/icons/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+</head>
+<body>
+<div class="container">
+  <div class="row" style="margin-top: 5%">
+    <div class="three columns">
+    <h1><a href="/">Edward</a></h1>
+    <a href="/">
+    <center>
+      <img src="/images/edward.png" class="logo-width" alt="Edward" />
+    </center>
+    </a>
+    <a class="button u-full-width" href="/api/">API</a>
+    <hr style="margin-top: 1rem; margin-bottom: 1.5rem;"/>
+    <a class="button u-full-width" href="/api/reference">Reference</a>
+    <a class="button u-full-width" href="/api/ed/criticisms.html">ed.criticisms</a>
+<a class="button u-full-width" href="/api/ed/inferences.html">ed.inferences</a>
+<a class="button u-full-width" href="/api/ed/models.html">ed.models</a>
+<a class="button u-full-width" href="/api/ed/util.html">ed.util</a>
+
+    <div class="row" style="padding-bottom: 5%"> </div>
+    <a class="button2 u-pull-right" style="padding-right:10%"
+      href="https://github.com/blei-lab/edward">
+      <span style="vertical-align:middle;">Github</span>&nbsp;
+      <img src="/images/github-mark.svg" style="vertical-align:middle;"
+      alt="Edward on Github" />
+    </a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    </div>
+    <div class="nine columns">
+
+<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<meta itemprop="name" content="ed.models.Gamma" /><meta itemprop="property" content="allow_nan_stats"/><meta itemprop="property" content="batch_shape"/><meta itemprop="property" content="concentration"/><meta itemprop="property" content="dtype"/><meta itemprop="property" content="event_shape"/><meta itemprop="property" content="name"/><meta itemprop="property" content="parameters"/><meta itemprop="property" content="rate"/><meta itemprop="property" content="reparameterization_type"/><meta itemprop="property" content="sample_shape"/><meta itemprop="property" content="shape"/><meta itemprop="property" content="unique_name"/><meta itemprop="property" content="validate_args"/><meta itemprop="property" content="__abs__"/><meta itemprop="property" content="__add__"/><meta itemprop="property" content="__and__"/><meta itemprop="property" content="__bool__"/><meta itemprop="property" content="__div__"/><meta itemprop="property" content="__eq__"/><meta itemprop="property" content="__floordiv__"/><meta itemprop="property" content="__ge__"/><meta itemprop="property" content="__getitem__"/><meta itemprop="property" content="__gt__"/><meta itemprop="property" content="__init__"/><meta itemprop="property" content="__invert__"/><meta itemprop="property" content="__iter__"/><meta itemprop="property" content="__le__"/><meta itemprop="property" content="__lt__"/><meta itemprop="property" content="__mod__"/><meta itemprop="property" content="__mul__"/><meta itemprop="property" content="__neg__"/><meta itemprop="property" content="__nonzero__"/><meta itemprop="property" content="__or__"/><meta itemprop="property" content="__pow__"/><meta itemprop="property" content="__radd__"/><meta itemprop="property" content="__rand__"/><meta itemprop="property" content="__rdiv__"/><meta itemprop="property" content="__rfloordiv__"/><meta itemprop="property" content="__rmod__"/><meta itemprop="property" content="__rmul__"/><meta itemprop="property" content="__ror__"/><meta itemprop="property" content="__rpow__"/><meta itemprop="property" content="__rsub__"/><meta itemprop="property" content="__rtruediv__"/><meta itemprop="property" content="__rxor__"/><meta itemprop="property" content="__sub__"/><meta itemprop="property" content="__truediv__"/><meta itemprop="property" content="__xor__"/><meta itemprop="property" content="batch_shape_tensor"/><meta itemprop="property" content="cdf"/><meta itemprop="property" content="conjugate_log_prob"/><meta itemprop="property" content="copy"/><meta itemprop="property" content="covariance"/><meta itemprop="property" content="entropy"/><meta itemprop="property" content="eval"/><meta itemprop="property" content="event_shape_tensor"/><meta itemprop="property" content="get_ancestors"/><meta itemprop="property" content="get_blanket"/><meta itemprop="property" content="get_children"/><meta itemprop="property" content="get_descendants"/><meta itemprop="property" content="get_parents"/><meta itemprop="property" content="get_shape"/><meta itemprop="property" content="get_siblings"/><meta itemprop="property" content="get_variables"/><meta itemprop="property" content="is_scalar_batch"/><meta itemprop="property" content="is_scalar_event"/><meta itemprop="property" content="log_cdf"/><meta itemprop="property" content="log_prob"/><meta itemprop="property" content="log_survival_function"/><meta itemprop="property" content="mean"/><meta itemprop="property" content="mode"/><meta itemprop="property" content="param_shapes"/><meta itemprop="property" content="param_static_shapes"/><meta itemprop="property" content="prob"/><meta itemprop="property" content="quantile"/><meta itemprop="property" content="sample"/><meta itemprop="property" content="stddev"/><meta itemprop="property" content="survival_function"/><meta itemprop="property" content="value"/><meta itemprop="property" content="variance"/><meta itemprop="property" content="support"/>
+</div>
+<h1 id="ed.models.gamma">ed.models.Gamma</h1>
+<h2 id="class-gamma">Class <code>Gamma</code></h2>
+<p>Inherits From: <a href="../../ed/RandomVariable"><code>RandomVariable</code></a></p>
+<p>Gamma distribution.</p>
+<p>The Gamma distribution is defined over positive real numbers using parameters <code>concentration</code> (aka &quot;alpha&quot;) and <code>rate</code> (aka &quot;beta&quot;).</p>
+<h4 id="mathematical-details">Mathematical Details</h4>
+<p>The probability density function (pdf) is,</p>
+<pre class="none"><code>pdf(x; alpha, beta, x &gt; 0) = x**(alpha - 1) exp(-x beta) / Z
+Z = Gamma(alpha) beta**alpha</code></pre>
+<p>where:</p>
+<ul>
+<li><code>concentration = alpha</code>, <code>alpha &gt; 0</code>,</li>
+<li><code>rate = beta</code>, <code>beta &gt; 0</code>,</li>
+<li><code>Z</code> is the normalizing constant, and,</li>
+<li><code>Gamma</code> is the <a href="https://en.wikipedia.org/wiki/Gamma_function">gamma function</a>.</li>
+</ul>
+<p>The cumulative density function (cdf) is,</p>
+<pre class="none"><code>cdf(x; alpha, beta, x &gt; 0) = GammaInc(alpha, beta x) / Gamma(alpha)</code></pre>
+<p>where <code>GammaInc</code> is the <a href="https://en.wikipedia.org/wiki/Incomplete_gamma_function">lower incomplete Gamma function</a>.</p>
+<p>The parameters can be intuited via their relationship to mean and stddev,</p>
+<pre class="none"><code>concentration = alpha = (mean / stddev)**2
+rate = beta = mean / stddev**2 = concentration / mean</code></pre>
+<p>Distribution parameters are automatically broadcast in all functions; see examples for details.</p>
+<p>WARNING: This distribution may draw 0-valued samples for small <code>concentration</code> values. See note in <code>tf.random_gamma</code> docstring.</p>
+<h4 id="examples">Examples</h4>
+<pre class="python"><code>dist = Gamma(concentration=3.0, rate=2.0)
+dist2 = Gamma(concentration=[3.0, 4.0], rate=[2.0, 3.0])</code></pre>
+<h2 id="properties">Properties</h2>
+<h3 id="allow_nan_stats">
+<code>allow_nan_stats</code>
+</h3>
+<p>Python <code>bool</code> describing behavior when a stat is undefined.</p>
+<p>Stats return +/- infinity when it makes sense. E.g., the variance of a Cauchy distribution is infinity. However, sometimes the statistic is undefined, e.g., if a distribution's pdf does not achieve a maximum within the support of the distribution, the mode is undefined. If the mean is undefined, then by definition the variance is undefined. E.g. the mean for Student's T for df = 1 is undefined (no clear way to say it is either + or - infinity), so the variance = E[(X - mean)**2] is also undefined.</p>
+<h4 id="returns">Returns:</h4>
+<ul>
+<li><b><code>allow_nan_stats</code></b>: Python <code>bool</code>.</li>
+</ul>
+<h3 id="batch_shape">
+<code>batch_shape</code>
+</h3>
+<p>Shape of a single sample from a single event index as a <code>TensorShape</code>.</p>
+<p>May be partially defined or unknown.</p>
+<p>The batch dimensions are indexes into independent, non-identical parameterizations of this distribution.</p>
+<h4 id="returns-1">Returns:</h4>
+<ul>
+<li><b><code>batch_shape</code></b>: <code>TensorShape</code>, possibly unknown.</li>
+</ul>
+<h3 id="concentration">
+<code>concentration</code>
+</h3>
+<p>Concentration parameter.</p>
+<h3 id="dtype">
+<code>dtype</code>
+</h3>
+<p>The <code>DType</code> of <code>Tensor</code>s handled by this <code>Distribution</code>.</p>
+<h3 id="event_shape">
+<code>event_shape</code>
+</h3>
+<p>Shape of a single sample from a single batch as a <code>TensorShape</code>.</p>
+<p>May be partially defined or unknown.</p>
+<h4 id="returns-2">Returns:</h4>
+<ul>
+<li><b><code>event_shape</code></b>: <code>TensorShape</code>, possibly unknown.</li>
+</ul>
+<h3 id="name">
+<code>name</code>
+</h3>
+<p>Name prepended to all ops created by this <code>Distribution</code>.</p>
+<h3 id="parameters">
+<code>parameters</code>
+</h3>
+<p>Dictionary of parameters used to instantiate this <code>Distribution</code>.</p>
+<h3 id="rate">
+<code>rate</code>
+</h3>
+<p>Rate parameter.</p>
+<h3 id="reparameterization_type">
+<code>reparameterization_type</code>
+</h3>
+<p>Describes how samples from the distribution are reparameterized.</p>
+<p>Currently this is one of the static instances <code>distributions.FULLY_REPARAMETERIZED</code> or <code>distributions.NOT_REPARAMETERIZED</code>.</p>
+<h4 id="returns-3">Returns:</h4>
+<p>An instance of <code>ReparameterizationType</code>.</p>
+<h3 id="sample_shape">
+<code>sample_shape</code>
+</h3>
+<p>Sample shape of random variable.</p>
+<h3 id="shape">
+<code>shape</code>
+</h3>
+<p>Shape of random variable.</p>
+<h3 id="unique_name">
+<code>unique_name</code>
+</h3>
+<p>Name of random variable with its unique scoping name. Use <code>name</code> to just get the name of the random variable.</p>
+<h3 id="validate_args">
+<code>validate_args</code>
+</h3>
+<p>Python <code>bool</code> indicating possibly expensive checks are enabled.</p>
+<h2 id="methods">Methods</h2>
+<h3 id="__init__">
+<code><strong>init</strong></code>
+</h3>
+<pre class="python"><code>__init__(
+    *args,
+    **kwargs
+)</code></pre>
+<p>Args: sample_shape: tf.TensorShape, optional. Shape of samples to draw from the random variable. value: tf.Tensor, optional. Fixed tensor to associate with random variable. Must have shape <code>sample_shape + batch_shape + event_shape</code>. collections: list, optional. Optional list of graph collections keys. The random variable is added to these collections. Defaults to [&quot;random_variables&quot;]. *args, **kwargs: Passed into parent <code>__init__</code>.</p>
+<h3 id="__abs__">
+<code><strong>abs</strong></code>
+</h3>
+<pre class="python"><code>__abs__()</code></pre>
+<h3 id="__add__">
+<code><strong>add</strong></code>
+</h3>
+<pre class="python"><code>__add__(other)</code></pre>
+<h3 id="__and__">
+<code><strong>and</strong></code>
+</h3>
+<pre class="python"><code>__and__(other)</code></pre>
+<h3 id="__bool__">
+<code><strong>bool</strong></code>
+</h3>
+<pre class="python"><code>__bool__()</code></pre>
+<h3 id="__div__">
+<code><strong>div</strong></code>
+</h3>
+<pre class="python"><code>__div__(other)</code></pre>
+<h3 id="__eq__">
+<code><strong>eq</strong></code>
+</h3>
+<pre class="python"><code>__eq__(other)</code></pre>
+<h3 id="__floordiv__">
+<code><strong>floordiv</strong></code>
+</h3>
+<pre class="python"><code>__floordiv__(other)</code></pre>
+<h3 id="__ge__">
+<code><strong>ge</strong></code>
+</h3>
+<pre class="python"><code>__ge__(other)</code></pre>
+<h3 id="__getitem__">
+<code><strong>getitem</strong></code>
+</h3>
+<pre class="python"><code>__getitem__(key)</code></pre>
+<p>Subset the tensor associated to the random variable, not the random variable itself.</p>
+<h3 id="__gt__">
+<code><strong>gt</strong></code>
+</h3>
+<pre class="python"><code>__gt__(other)</code></pre>
+<h3 id="__invert__">
+<code><strong>invert</strong></code>
+</h3>
+<pre class="python"><code>__invert__()</code></pre>
+<h3 id="__iter__">
+<code><strong>iter</strong></code>
+</h3>
+<pre class="python"><code>__iter__()</code></pre>
+<h3 id="__le__">
+<code><strong>le</strong></code>
+</h3>
+<pre class="python"><code>__le__(other)</code></pre>
+<h3 id="__lt__">
+<code><strong>lt</strong></code>
+</h3>
+<pre class="python"><code>__lt__(other)</code></pre>
+<h3 id="__mod__">
+<code><strong>mod</strong></code>
+</h3>
+<pre class="python"><code>__mod__(other)</code></pre>
+<h3 id="__mul__">
+<code><strong>mul</strong></code>
+</h3>
+<pre class="python"><code>__mul__(other)</code></pre>
+<h3 id="__neg__">
+<code><strong>neg</strong></code>
+</h3>
+<pre class="python"><code>__neg__()</code></pre>
+<h3 id="__nonzero__">
+<code><strong>nonzero</strong></code>
+</h3>
+<pre class="python"><code>__nonzero__()</code></pre>
+<h3 id="__or__">
+<code><strong>or</strong></code>
+</h3>
+<pre class="python"><code>__or__(other)</code></pre>
+<h3 id="__pow__">
+<code><strong>pow</strong></code>
+</h3>
+<pre class="python"><code>__pow__(other)</code></pre>
+<h3 id="__radd__">
+<code><strong>radd</strong></code>
+</h3>
+<pre class="python"><code>__radd__(other)</code></pre>
+<h3 id="__rand__">
+<code><strong>rand</strong></code>
+</h3>
+<pre class="python"><code>__rand__(other)</code></pre>
+<h3 id="__rdiv__">
+<code><strong>rdiv</strong></code>
+</h3>
+<pre class="python"><code>__rdiv__(other)</code></pre>
+<h3 id="__rfloordiv__">
+<code><strong>rfloordiv</strong></code>
+</h3>
+<pre class="python"><code>__rfloordiv__(other)</code></pre>
+<h3 id="__rmod__">
+<code><strong>rmod</strong></code>
+</h3>
+<pre class="python"><code>__rmod__(other)</code></pre>
+<h3 id="__rmul__">
+<code><strong>rmul</strong></code>
+</h3>
+<pre class="python"><code>__rmul__(other)</code></pre>
+<h3 id="__ror__">
+<code><strong>ror</strong></code>
+</h3>
+<pre class="python"><code>__ror__(other)</code></pre>
+<h3 id="__rpow__">
+<code><strong>rpow</strong></code>
+</h3>
+<pre class="python"><code>__rpow__(other)</code></pre>
+<h3 id="__rsub__">
+<code><strong>rsub</strong></code>
+</h3>
+<pre class="python"><code>__rsub__(other)</code></pre>
+<h3 id="__rtruediv__">
+<code><strong>rtruediv</strong></code>
+</h3>
+<pre class="python"><code>__rtruediv__(other)</code></pre>
+<h3 id="__rxor__">
+<code><strong>rxor</strong></code>
+</h3>
+<pre class="python"><code>__rxor__(other)</code></pre>
+<h3 id="__sub__">
+<code><strong>sub</strong></code>
+</h3>
+<pre class="python"><code>__sub__(other)</code></pre>
+<h3 id="__truediv__">
+<code><strong>truediv</strong></code>
+</h3>
+<pre class="python"><code>__truediv__(other)</code></pre>
+<h3 id="__xor__">
+<code><strong>xor</strong></code>
+</h3>
+<pre class="python"><code>__xor__(other)</code></pre>
+<h3 id="batch_shape_tensor">
+<code>batch_shape_tensor</code>
+</h3>
+<pre class="python"><code>batch_shape_tensor(name=&#39;batch_shape_tensor&#39;)</code></pre>
+<p>Shape of a single sample from a single event index as a 1-D <code>Tensor</code>.</p>
+<p>The batch dimensions are indexes into independent, non-identical parameterizations of this distribution.</p>
+<h4 id="args">Args:</h4>
+<ul>
+<li><b><code>name</code></b>: name to give to the op</li>
+</ul>
+<h4 id="returns-4">Returns:</h4>
+<ul>
+<li><b><code>batch_shape</code></b>: <code>Tensor</code>.</li>
+</ul>
+<h3 id="cdf">
+<code>cdf</code>
+</h3>
+<pre class="python"><code>cdf(
+    value,
+    name=&#39;cdf&#39;
+)</code></pre>
+<p>Cumulative distribution function.</p>
+<p>Given random variable <code>X</code>, the cumulative distribution function <code>cdf</code> is:</p>
+<pre class="none"><code>cdf(x) := P[X &lt;= x]</code></pre>
+<h4 id="args-1">Args:</h4>
+<ul>
+<li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
+<li><b><code>name</code></b>: The name to give this op.</li>
+</ul>
+<h4 id="returns-5">Returns:</h4>
+<ul>
+<li><b><code>cdf</code></b>: a <code>Tensor</code> of shape <code>sample_shape(x) + self.batch_shape</code> with values of type <code>self.dtype</code>.</li>
+</ul>
+<h3 id="conjugate_log_prob">
+<code>conjugate_log_prob</code>
+</h3>
+<pre class="python"><code>conjugate_log_prob(val=None)</code></pre>
+<h3 id="copy">
+<code>copy</code>
+</h3>
+<pre class="python"><code>copy(**override_parameters_kwargs)</code></pre>
+<p>Creates a deep copy of the distribution.</p>
+<p>Note: the copy distribution may continue to depend on the original initialization arguments.</p>
+<h4 id="args-2">Args:</h4>
+<p>**override_parameters_kwargs: String/value dictionary of initialization arguments to override with new values.</p>
+<h4 id="returns-6">Returns:</h4>
+<ul>
+<li><b><code>distribution</code></b>: A new instance of <code>type(self)</code> initialized from the union of self.parameters and override_parameters_kwargs, i.e., <code>dict(self.parameters, **override_parameters_kwargs)</code>.</li>
+</ul>
+<h3 id="covariance">
+<code>covariance</code>
+</h3>
+<pre class="python"><code>covariance(name=&#39;covariance&#39;)</code></pre>
+<p>Covariance.</p>
+<p>Covariance is (possibly) defined only for non-scalar-event distributions.</p>
+<p>For example, for a length-<code>k</code>, vector-valued distribution, it is calculated as,</p>
+<pre class="none"><code>Cov[i, j] = Covariance(X_i, X_j) = E[(X_i - E[X_i]) (X_j - E[X_j])]</code></pre>
+<p>where <code>Cov</code> is a (batch of) <code>k x k</code> matrix, <code>0 &lt;= (i, j) &lt; k</code>, and <code>E</code> denotes expectation.</p>
+<p>Alternatively, for non-vector, multivariate distributions (e.g., matrix-valued, Wishart), <code>Covariance</code> shall return a (batch of) matrices under some vectorization of the events, i.e.,</p>
+<pre class="none"><code>Cov[i, j] = Covariance(Vec(X)_i, Vec(X)_j) = [as above]</code></pre>
+<p>where <code>Cov</code> is a (batch of) <code>k' x k'</code> matrices, <code>0 &lt;= (i, j) &lt; k' = reduce_prod(event_shape)</code>, and <code>Vec</code> is some function mapping indices of this distribution's event dimensions to indices of a length-<code>k'</code> vector.</p>
+<h4 id="args-3">Args:</h4>
+<ul>
+<li><b><code>name</code></b>: The name to give this op.</li>
+</ul>
+<h4 id="returns-7">Returns:</h4>
+<ul>
+<li><b><code>covariance</code></b>: Floating-point <code>Tensor</code> with shape <code>[B1, ..., Bn, k', k']</code> where the first <code>n</code> dimensions are batch coordinates and <code>k' = reduce_prod(self.event_shape)</code>.</li>
+</ul>
+<h3 id="entropy">
+<code>entropy</code>
+</h3>
+<pre class="python"><code>entropy(name=&#39;entropy&#39;)</code></pre>
+<p>Shannon entropy in nats.</p>
+<h3 id="eval">
+<code>eval</code>
+</h3>
+<pre class="python"><code>eval(
+    session=None,
+    feed_dict=None
+)</code></pre>
+<p>In a session, computes and returns the value of this random variable.</p>
+<p>This is not a graph construction method, it does not add ops to the graph.</p>
+<p>This convenience method requires a session where the graph containing this variable has been launched. If no session is passed, the default session is used.</p>
+<h4 id="args-4">Args:</h4>
+<ul>
+<li><b><code>session</code></b>: tf.BaseSession, optional. The <code>tf.Session</code> to use to evaluate this random variable. If none, the default session is used.</li>
+<li><b><code>feed_dict</code></b>: dict, optional. A dictionary that maps <code>tf.Tensor</code> objects to feed values. See <code>tf.Session.run()</code> for a description of the valid feed values.</li>
+</ul>
+<h4 id="examples-1">Examples</h4>
+<pre class="python"><code>x = Normal(0.0, 1.0)
+with tf.Session() as sess:
+  # Usage passing the session explicitly.
+  print(x.eval(sess))
+  # Usage with the default session.  The &#39;with&#39; block
+  # above makes &#39;sess&#39; the default session.
+  print(x.eval())</code></pre>
+<h3 id="event_shape_tensor">
+<code>event_shape_tensor</code>
+</h3>
+<pre class="python"><code>event_shape_tensor(name=&#39;event_shape_tensor&#39;)</code></pre>
+<p>Shape of a single sample from a single batch as a 1-D int32 <code>Tensor</code>.</p>
+<h4 id="args-5">Args:</h4>
+<ul>
+<li><b><code>name</code></b>: name to give to the op</li>
+</ul>
+<h4 id="returns-8">Returns:</h4>
+<ul>
+<li><b><code>event_shape</code></b>: <code>Tensor</code>.</li>
+</ul>
+<h3 id="get_ancestors">
+<code>get_ancestors</code>
+</h3>
+<pre class="python"><code>get_ancestors(collection=None)</code></pre>
+<p>Get ancestor random variables.</p>
+<h3 id="get_blanket">
+<code>get_blanket</code>
+</h3>
+<pre class="python"><code>get_blanket(collection=None)</code></pre>
+<p>Get the random variable's Markov blanket.</p>
+<h3 id="get_children">
+<code>get_children</code>
+</h3>
+<pre class="python"><code>get_children(collection=None)</code></pre>
+<p>Get child random variables.</p>
+<h3 id="get_descendants">
+<code>get_descendants</code>
+</h3>
+<pre class="python"><code>get_descendants(collection=None)</code></pre>
+<p>Get descendant random variables.</p>
+<h3 id="get_parents">
+<code>get_parents</code>
+</h3>
+<pre class="python"><code>get_parents(collection=None)</code></pre>
+<p>Get parent random variables.</p>
+<h3 id="get_shape">
+<code>get_shape</code>
+</h3>
+<pre class="python"><code>get_shape()</code></pre>
+<p>Get shape of random variable.</p>
+<h3 id="get_siblings">
+<code>get_siblings</code>
+</h3>
+<pre class="python"><code>get_siblings(collection=None)</code></pre>
+<p>Get sibling random variables.</p>
+<h3 id="get_variables">
+<code>get_variables</code>
+</h3>
+<pre class="python"><code>get_variables(collection=None)</code></pre>
+<p>Get TensorFlow variables that the random variable depends on.</p>
+<h3 id="is_scalar_batch">
+<code>is_scalar_batch</code>
+</h3>
+<pre class="python"><code>is_scalar_batch(name=&#39;is_scalar_batch&#39;)</code></pre>
+<p>Indicates that <code>batch_shape == []</code>.</p>
+<h4 id="args-6">Args:</h4>
+<ul>
+<li><b><code>name</code></b>: The name to give this op.</li>
+</ul>
+<h4 id="returns-9">Returns:</h4>
+<ul>
+<li><b><code>is_scalar_batch</code></b>: <code>bool</code> scalar <code>Tensor</code>.</li>
+</ul>
+<h3 id="is_scalar_event">
+<code>is_scalar_event</code>
+</h3>
+<pre class="python"><code>is_scalar_event(name=&#39;is_scalar_event&#39;)</code></pre>
+<p>Indicates that <code>event_shape == []</code>.</p>
+<h4 id="args-7">Args:</h4>
+<ul>
+<li><b><code>name</code></b>: The name to give this op.</li>
+</ul>
+<h4 id="returns-10">Returns:</h4>
+<ul>
+<li><b><code>is_scalar_event</code></b>: <code>bool</code> scalar <code>Tensor</code>.</li>
+</ul>
+<h3 id="log_cdf">
+<code>log_cdf</code>
+</h3>
+<pre class="python"><code>log_cdf(
+    value,
+    name=&#39;log_cdf&#39;
+)</code></pre>
+<p>Log cumulative distribution function.</p>
+<p>Given random variable <code>X</code>, the cumulative distribution function <code>cdf</code> is:</p>
+<pre class="none"><code>log_cdf(x) := Log[ P[X &lt;= x] ]</code></pre>
+<p>Often, a numerical approximation can be used for <code>log_cdf(x)</code> that yields a more accurate answer than simply taking the logarithm of the <code>cdf</code> when <code>x &lt;&lt; -1</code>.</p>
+<h4 id="args-8">Args:</h4>
+<ul>
+<li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
+<li><b><code>name</code></b>: The name to give this op.</li>
+</ul>
+<h4 id="returns-11">Returns:</h4>
+<ul>
+<li><b><code>logcdf</code></b>: a <code>Tensor</code> of shape <code>sample_shape(x) + self.batch_shape</code> with values of type <code>self.dtype</code>.</li>
+</ul>
+<h3 id="log_prob">
+<code>log_prob</code>
+</h3>
+<pre class="python"><code>log_prob(
+    value,
+    name=&#39;log_prob&#39;
+)</code></pre>
+<p>Log probability density/mass function.</p>
+<h4 id="args-9">Args:</h4>
+<ul>
+<li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
+<li><b><code>name</code></b>: The name to give this op.</li>
+</ul>
+<h4 id="returns-12">Returns:</h4>
+<ul>
+<li><b><code>log_prob</code></b>: a <code>Tensor</code> of shape <code>sample_shape(x) + self.batch_shape</code> with values of type <code>self.dtype</code>.</li>
+</ul>
+<h3 id="log_survival_function">
+<code>log_survival_function</code>
+</h3>
+<pre class="python"><code>log_survival_function(
+    value,
+    name=&#39;log_survival_function&#39;
+)</code></pre>
+<p>Log survival function.</p>
+<p>Given random variable <code>X</code>, the survival function is defined:</p>
+<pre class="none"><code>log_survival_function(x) = Log[ P[X &gt; x] ]
+                         = Log[ 1 - P[X &lt;= x] ]
+                         = Log[ 1 - cdf(x) ]</code></pre>
+<p>Typically, different numerical approximations can be used for the log survival function, which are more accurate than <code>1 - cdf(x)</code> when <code>x &gt;&gt; 1</code>.</p>
+<h4 id="args-10">Args:</h4>
+<ul>
+<li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
+<li><b><code>name</code></b>: The name to give this op.</li>
+</ul>
+<h4 id="returns-13">Returns:</h4>
+<p><code>Tensor</code> of shape <code>sample_shape(x) + self.batch_shape</code> with values of type <code>self.dtype</code>.</p>
+<h3 id="mean">
+<code>mean</code>
+</h3>
+<pre class="python"><code>mean(name=&#39;mean&#39;)</code></pre>
+<p>Mean.</p>
+<h3 id="mode">
+<code>mode</code>
+</h3>
+<pre class="python"><code>mode(name=&#39;mode&#39;)</code></pre>
+<p>Mode.</p>
+<p>Additional documentation from <code>Gamma</code>:</p>
+<p>The mode of a gamma distribution is <code>(shape - 1) / rate</code> when <code>shape &gt; 1</code>, and <code>NaN</code> otherwise. If <code>self.allow_nan_stats</code> is <code>False</code>, an exception will be raised rather than returning <code>NaN</code>.</p>
+<h3 id="param_shapes">
+<code>param_shapes</code>
+</h3>
+<pre class="python"><code>param_shapes(
+    cls,
+    sample_shape,
+    name=&#39;DistributionParamShapes&#39;
+)</code></pre>
+<p>Shapes of parameters given the desired shape of a call to <code>sample()</code>.</p>
+<p>This is a class method that describes what key/value arguments are required to instantiate the given <code>Distribution</code> so that a particular shape is returned for that instance's call to <code>sample()</code>.</p>
+<p>Subclasses should override class method <code>_param_shapes</code>.</p>
+<h4 id="args-11">Args:</h4>
+<ul>
+<li><b><code>sample_shape</code></b>: <code>Tensor</code> or python list/tuple. Desired shape of a call to <code>sample()</code>.</li>
+<li><b><code>name</code></b>: name to prepend ops with.</li>
+</ul>
+<h4 id="returns-14">Returns:</h4>
+<p><code>dict</code> of parameter name to <code>Tensor</code> shapes.</p>
+<h3 id="param_static_shapes">
+<code>param_static_shapes</code>
+</h3>
+<pre class="python"><code>param_static_shapes(
+    cls,
+    sample_shape
+)</code></pre>
+<p>param_shapes with static (i.e. <code>TensorShape</code>) shapes.</p>
+<p>This is a class method that describes what key/value arguments are required to instantiate the given <code>Distribution</code> so that a particular shape is returned for that instance's call to <code>sample()</code>. Assumes that the sample's shape is known statically.</p>
+<p>Subclasses should override class method <code>_param_shapes</code> to return constant-valued tensors when constant values are fed.</p>
+<h4 id="args-12">Args:</h4>
+<ul>
+<li><b><code>sample_shape</code></b>: <code>TensorShape</code> or python list/tuple. Desired shape of a call to <code>sample()</code>.</li>
+</ul>
+<h4 id="returns-15">Returns:</h4>
+<p><code>dict</code> of parameter name to <code>TensorShape</code>.</p>
+<h4 id="raises">Raises:</h4>
+<ul>
+<li><b><code>ValueError</code></b>: if <code>sample_shape</code> is a <code>TensorShape</code> and is not fully defined.</li>
+</ul>
+<h3 id="prob">
+<code>prob</code>
+</h3>
+<pre class="python"><code>prob(
+    value,
+    name=&#39;prob&#39;
+)</code></pre>
+<p>Probability density/mass function.</p>
+<h4 id="args-13">Args:</h4>
+<ul>
+<li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
+<li><b><code>name</code></b>: The name to give this op.</li>
+</ul>
+<h4 id="returns-16">Returns:</h4>
+<ul>
+<li><b><code>prob</code></b>: a <code>Tensor</code> of shape <code>sample_shape(x) + self.batch_shape</code> with values of type <code>self.dtype</code>.</li>
+</ul>
+<h3 id="quantile">
+<code>quantile</code>
+</h3>
+<pre class="python"><code>quantile(
+    value,
+    name=&#39;quantile&#39;
+)</code></pre>
+<p>Quantile function. Aka &quot;inverse cdf&quot; or &quot;percent point function&quot;.</p>
+<p>Given random variable <code>X</code> and <code>p in [0, 1]</code>, the <code>quantile</code> is:</p>
+<pre class="none"><code>quantile(p) := x such that P[X &lt;= x] == p</code></pre>
+<h4 id="args-14">Args:</h4>
+<ul>
+<li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
+<li><b><code>name</code></b>: The name to give this op.</li>
+</ul>
+<h4 id="returns-17">Returns:</h4>
+<ul>
+<li><b><code>quantile</code></b>: a <code>Tensor</code> of shape <code>sample_shape(x) + self.batch_shape</code> with values of type <code>self.dtype</code>.</li>
+</ul>
+<h3 id="sample">
+<code>sample</code>
+</h3>
+<pre class="python"><code>sample(
+    sample_shape=(),
+    seed=None,
+    name=&#39;sample&#39;
+)</code></pre>
+<p>Generate samples of the specified shape.</p>
+<p>Note that a call to <code>sample()</code> without arguments will generate a single sample.</p>
+<h4 id="args-15">Args:</h4>
+<ul>
+<li><b><code>sample_shape</code></b>: 0D or 1D <code>int32</code> <code>Tensor</code>. Shape of the generated samples.</li>
+<li><b><code>seed</code></b>: Python integer seed for RNG</li>
+<li><b><code>name</code></b>: name to give to the op.</li>
+</ul>
+<h4 id="returns-18">Returns:</h4>
+<ul>
+<li><b><code>samples</code></b>: a <code>Tensor</code> with prepended dimensions <code>sample_shape</code>.</li>
+</ul>
+<h3 id="stddev">
+<code>stddev</code>
+</h3>
+<pre class="python"><code>stddev(name=&#39;stddev&#39;)</code></pre>
+<p>Standard deviation.</p>
+<p>Standard deviation is defined as,</p>
+<pre class="none"><code>stddev = E[(X - E[X])**2]**0.5</code></pre>
+<p>where <code>X</code> is the random variable associated with this distribution, <code>E</code> denotes expectation, and <code>stddev.shape = batch_shape + event_shape</code>.</p>
+<h4 id="args-16">Args:</h4>
+<ul>
+<li><b><code>name</code></b>: The name to give this op.</li>
+</ul>
+<h4 id="returns-19">Returns:</h4>
+<ul>
+<li><b><code>stddev</code></b>: Floating-point <code>Tensor</code> with shape identical to <code>batch_shape + event_shape</code>, i.e., the same shape as <code>self.mean()</code>.</li>
+</ul>
+<h3 id="survival_function">
+<code>survival_function</code>
+</h3>
+<pre class="python"><code>survival_function(
+    value,
+    name=&#39;survival_function&#39;
+)</code></pre>
+<p>Survival function.</p>
+<p>Given random variable <code>X</code>, the survival function is defined:</p>
+<pre class="none"><code>survival_function(x) = P[X &gt; x]
+                     = 1 - P[X &lt;= x]
+                     = 1 - cdf(x).</code></pre>
+<h4 id="args-17">Args:</h4>
+<ul>
+<li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
+<li><b><code>name</code></b>: The name to give this op.</li>
+</ul>
+<h4 id="returns-20">Returns:</h4>
+<p><code>Tensor</code> of shape <code>sample_shape(x) + self.batch_shape</code> with values of type <code>self.dtype</code>.</p>
+<h3 id="value">
+<code>value</code>
+</h3>
+<pre class="python"><code>value()</code></pre>
+<p>Get tensor that the random variable corresponds to.</p>
+<h3 id="variance">
+<code>variance</code>
+</h3>
+<pre class="python"><code>variance(name=&#39;variance&#39;)</code></pre>
+<p>Variance.</p>
+<p>Variance is defined as,</p>
+<pre class="none"><code>Var = E[(X - E[X])**2]</code></pre>
+<p>where <code>X</code> is the random variable associated with this distribution, <code>E</code> denotes expectation, and <code>Var.shape = batch_shape + event_shape</code>.</p>
+<h4 id="args-18">Args:</h4>
+<ul>
+<li><b><code>name</code></b>: The name to give this op.</li>
+</ul>
+<h4 id="returns-21">Returns:</h4>
+<ul>
+<li><b><code>variance</code></b>: Floating-point <code>Tensor</code> with shape identical to <code>batch_shape + event_shape</code>, i.e., the same shape as <code>self.mean()</code>.</li>
+</ul>
+<h2 id="class-members">Class Members</h2>
+<h3 id="support">
+<code>support</code>
+</h3>
+    </div>
+  </div>
+  <div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>

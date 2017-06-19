@@ -1,20 +1,21 @@
 <!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
-<meta content="text/css" http-equiv="Content-Style-Type"/>
-<meta content="pandoc" name="generator"/>
-<title>Edward – Developing Custom Random Variables</title>
-<!-- Mobile Specific Metas -->
-<meta content="width=device-width, initial-scale=1" name="viewport">
-<!-- FONT -->
-<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
-<!-- CSS -->
-<link href="/css/normalize.css" rel="stylesheet">
-<link href="/css/skeleton.css" rel="stylesheet">
-<!-- Dynamically resize logo for mobile -->
-<style type="text/css">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Edward – Developing Custom Random Variables</title>
+  <!-- Mobile Specific Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT -->
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <!-- Dynamically resize logo for mobile -->
+  <style type="text/css">
   .logo-width {
     width: 100%;
     box-sizing: border-box;
@@ -28,104 +29,88 @@
       margin-bottom: 5%;
     }
   }
-  /* Docstrings. */
-  dl.class + dl.class, dl.function + dl.function {
-    /* Add border inbetween docstrings. */
-    border-top: 1px solid #E1E1E1;
-  }
-  dt { /* Add spacing for top border. */
-    margin-top: 1.0rem;
-  }
-  dd { /* Remove overall indenting in an entry. */
-    margin-left: 0.0rem;
-  }
-  dl th, dl td { /* Remove extraneous padding and decorations. */
-    padding: 0 15px 0 0;
-    border: none;
-  }
-  dt em, dt span.sig-paren { /* Keep style of declarations consistent. */
-    font-family: monospace, monospace;
-    font-style: normal;
-    font-size: 14px !important;
-  }
-  /* Attribute contents within a docstring. */
-  dd blockquote, dl blockquote, dt blockquote { /* Reduce margins. */
-    margin-left: 0.0rem;
-    margin-top: 0.0rem;
-    margin-bottom: 0.0rem;
-  }
-  dl td p { /* Reduce spacing. */
-    margin-bottom: 0.75rem;
-  }
-  dl td.field-body { /* Add indenting. */
-    padding-top: 0.75rem;
-    padding-left: 2.0rem;
-    display: block;
-  }
-  dl code { /* Keep code font size consistent with rest of contents. */
-    font-size: 90%;
+  /* Downgrade API's header styles without explicitly modifying their type. */
+  div.nine.columns h1 { text-align: left; }
+  div.nine.columns h1 { font-size: 3.0rem; line-height: 1.25; letter-spacing: -.1rem; }
+  div.nine.columns h2 { font-size: 2.4rem; line-height: 1.3;  letter-spacing: -.1rem; }
+  div.nine.columns h3 { font-size: 2.4rem; line-height: 1.35; letter-spacing: -.08rem; }
+  div.nine.columns h4 { font-size: 1.8rem; line-height: 1.5;  letter-spacing: -.05rem; }
+  div.nine.columns h5 { font-size: 1.5rem; line-height: 1.6;  letter-spacing: 0; }
+  @media (min-width: 550px) {
+    div.nine.columns h1 { font-size: 3.6rem; }
+    div.nine.columns h2 { font-size: 3.0rem; }
+    div.nine.columns h3 { font-size: 3.0rem; }
+    div.nine.columns h4 { font-size: 2.5rem; }
+    div.nine.columns h5 { font-size: 1.5rem; }
   }
   </style>
-<!-- KaTeX -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
-<!-- highlight.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
-<!-- Favicon -->
-<link href="/icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
-<link href="/icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
-<link href="/icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
-<link href="/icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
-<link href="/icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
-<link href="/icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
-<link href="/icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
-<link href="/icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
-<link href="/icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
-<link href="/icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
-<link href="/icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
-<link href="/icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
-<link href="/icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
-<link href="/icons/manifest.json" rel="manifest">
-<link color="#5bbad5" href="/icons/safari-pinned-tab.svg" rel="mask-icon">
-<link href="/icons/favicon.ico" rel="shortcut icon">
-<meta content="#da532c" name="msapplication-TileColor">
-<meta content="/icons/mstile-144x144.png" name="msapplication-TileImage">
-<meta content="/icons/browserconfig.xml" name="msapplication-config">
-<meta content="#ffffff" name="theme-color">
-</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+
+  <!-- KaTeX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/contrib/auto-render.min.js"></script>
+
+  <!-- highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css">
+
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="57x57" href="/icons/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/icons/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/icons/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/icons/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/icons/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/icons/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="/icons/android-chrome-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="/icons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16">
+  <link rel="manifest" href="/icons/manifest.json">
+  <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="/icons/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-TileImage" content="/icons/mstile-144x144.png">
+  <meta name="msapplication-config" content="/icons/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+</head>
 <body>
 <div class="container">
-<div class="row" style="margin-top: 5%">
-<div class="three columns">
-<h1><a href="/">Edward</a></h1>
-<a href="/">
-<center>
-<img alt="Edward" class="logo-width" src="/images/edward.png"/>
-</center>
-</a>
-<a class="button u-full-width" href="/getting-started">Getting Started</a>
-<a class="button u-full-width" href="/tutorials/">Tutorials</a>
-<a class="button u-full-width" href="/api/">API</a>
-<a class="button u-full-width" href="/community">Community</a>
-<a class="button u-full-width" href="/contributing">Contributing</a>
-<div class="row" style="padding-bottom: 5%"> </div>
-<a class="button2 u-pull-right" href="https://github.com/blei-lab/edward" style="padding-right:10%">
-<span style="vertical-align:middle;">Github</span> 
-      <img alt="Edward on Github" src="/images/github-mark.svg" style="vertical-align:middle;"/>
-</a>
-<div class="row" style="padding-bottom: 5%"> </div>
-</div>
-<div class="nine columns">
-<h2 id="api-and-documentation">API and Documentation</h2>
+  <div class="row" style="margin-top: 5%">
+    <div class="three columns">
+    <h1><a href="/">Edward</a></h1>
+    <a href="/">
+    <center>
+      <img src="/images/edward.png" class="logo-width" alt="Edward" />
+    </center>
+    </a>
+    <a class="button u-full-width" href="/api/">API</a>
+    <hr style="margin-top: 1rem; margin-bottom: 1.5rem;"/>
+    <a class="button u-full-width" href="/api/reference">Reference</a>
+    <a class="button u-full-width" href="/api/ed/criticisms.html">ed.criticisms</a>
+<a class="button u-full-width" href="/api/ed/inferences.html">ed.inferences</a>
+<a class="button u-full-width" href="/api/ed/models.html">ed.models</a>
+<a class="button u-full-width" href="/api/ed/util.html">ed.util</a>
+
+    <div class="row" style="padding-bottom: 5%"> </div>
+    <a class="button2 u-pull-right" style="padding-right:10%"
+      href="https://github.com/blei-lab/edward">
+      <span style="vertical-align:middle;">Github</span>&nbsp;
+      <img src="/images/github-mark.svg" style="vertical-align:middle;"
+      alt="Edward on Github" />
+    </a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    </div>
+    <div class="nine columns">
+<h1 id="api-and-documentation">API and Documentation</h1>
 <div class="row" style="padding-bottom: 5%">
 <div class="row" style="padding-bottom: 1%">
 <a class="button3" href="/api/data">Data</a>
 <a class="button3 button-primary" href="/api/model">Model</a>
 <a class="button3" href="/api/inference">Inference</a>
 <a class="button3" href="/api/criticism">Criticism</a>
-<a class="button3" href="/api/reference">Reference</a>
 </div>
 <div class="row">
 <a class="button4" href="/api/model-compositionality">Compositionality</a>
@@ -142,10 +127,10 @@ class CustomRandomVariable(RandomVariable, Distribution):
     super(CustomRandomVariable, self).__init__(*args, **kwargs)
 
   def _log_prob(self, value):
-    raise NotImplementedError("log_prob is not implemented")
+    raise NotImplementedError(&quot;log_prob is not implemented&quot;)
 
   def _sample_n(self, n, seed=None):
-    raise NotImplementedError("sample_n is not implemented")</code></pre>
+    raise NotImplementedError(&quot;sample_n is not implemented&quot;)</code></pre>
 <p>One method that all Edward random variables call during instantiation is <code>_sample_n()</code>. It takes an integer <code>n</code> as input and outputs a tensor of shape <code>(n,) + batch_shape + event_shape</code>, where <code>batch_shape</code> is the number of independent distributions in the instantiated object and <code>event_shape</code> is the shape of an individual distribution.</p>
 <p>For examples of custom random variables developed in Edward, see <a href="https://github.com/blei-lab/edward/blob/master/edward/models/empirical.py"><code>empirical.py</code></a> and <a href="https://github.com/blei-lab/edward/blob/master/edward/models/point_mass.py"><code>point_mass.py</code></a> in the Github repository. For more details and more methods one can implement, see the API documentation in TensorFlow’s <a href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Distribution"><code>Distribution</code> class</a>.</p>
 <h3 id="advanced-settings">Advanced settings</h3>
@@ -172,16 +157,16 @@ Poisson._sample_n = _sample_n
 sess = ed.get_session()
 x = Poisson(rate=1.0)
 sess.run(x)
-## 1.0
+&lt;h2 id=&quot;1_0&quot;&gt;1.0&lt;/h2&gt;
 sess.run(x)
-## 4.0</code></pre>
+&lt;h2 id=&quot;4_0&quot;&gt;4.0&lt;/h2&gt;</code></pre>
 <p>(Note the function <code>np_sample</code> should broadcast correctly if you’d like to work with non-scalar parameters; it is not correct in this toy implementation.)</p>
 <p>Sometimes the random variable you’d like to work with does not even admit (easy) sampling, and you’re only using it as a likelihood “node” rather than as some prior to parameters of another random variable. You can avoid having to implement <code>_sample_n</code> altogether: after creating <code>CustomRandomVariable</code>, instantiate it with the <code>value</code> argument:</p>
 <pre class="python" language="Python"><code>x = CustomRandomVariable(custom_params=params, value=tf.zeros_like(params))</code></pre>
 <p>This fixes the associated value of the random variable to a bunch of zeros and avoids the <code>_sample_n</code> error that appears otherwise. Make sure that the value matches the desired shape of the random variable.</p>
-</div>
-</div>
-<div class="row" style="padding-bottom: 25%"> </div>
+    </div>
+  </div>
+  <div class="row" style="padding-bottom: 25%"> </div>
 </div>
 <script>
   hljs.initHighlightingOnLoad();

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Edward – ed.rbf</title>
+  <!-- Mobile Specific Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT -->
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <!-- Dynamically resize logo for mobile -->
+  <style type="text/css">
+  .logo-width {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15%;
+  }
+  /* Roughly the point when website is single column */
+  @media (max-width: 850px) {
+    .logo-width {
+      width: 50%;
+      box-sizing: border-box;
+      margin-bottom: 5%;
+    }
+  }
+  /* Downgrade API's header styles without explicitly modifying their type. */
+  div.nine.columns h1 { text-align: left; }
+  div.nine.columns h1 { font-size: 3.0rem; line-height: 1.25; letter-spacing: -.1rem; }
+  div.nine.columns h2 { font-size: 2.4rem; line-height: 1.3;  letter-spacing: -.1rem; }
+  div.nine.columns h3 { font-size: 2.4rem; line-height: 1.35; letter-spacing: -.08rem; }
+  div.nine.columns h4 { font-size: 1.8rem; line-height: 1.5;  letter-spacing: -.05rem; }
+  div.nine.columns h5 { font-size: 1.5rem; line-height: 1.6;  letter-spacing: 0; }
+  @media (min-width: 550px) {
+    div.nine.columns h1 { font-size: 3.6rem; }
+    div.nine.columns h2 { font-size: 3.0rem; }
+    div.nine.columns h3 { font-size: 3.0rem; }
+    div.nine.columns h4 { font-size: 2.5rem; }
+    div.nine.columns h5 { font-size: 1.5rem; }
+  }
+  </style>
+
+  <!-- KaTeX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/contrib/auto-render.min.js"></script>
+
+  <!-- highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css">
+
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="57x57" href="/icons/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/icons/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/icons/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/icons/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/icons/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/icons/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="/icons/android-chrome-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="/icons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16">
+  <link rel="manifest" href="/icons/manifest.json">
+  <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="/icons/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-TileImage" content="/icons/mstile-144x144.png">
+  <meta name="msapplication-config" content="/icons/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+</head>
+<body>
+<div class="container">
+  <div class="row" style="margin-top: 5%">
+    <div class="three columns">
+    <h1><a href="/">Edward</a></h1>
+    <a href="/">
+    <center>
+      <img src="/images/edward.png" class="logo-width" alt="Edward" />
+    </center>
+    </a>
+    <a class="button u-full-width" href="/api/">API</a>
+    <hr style="margin-top: 1rem; margin-bottom: 1.5rem;"/>
+    <a class="button u-full-width" href="/api/reference">Reference</a>
+    <a class="button u-full-width" href="/api/ed/criticisms.html">ed.criticisms</a>
+<a class="button u-full-width" href="/api/ed/inferences.html">ed.inferences</a>
+<a class="button u-full-width" href="/api/ed/models.html">ed.models</a>
+<a class="button u-full-width" href="/api/ed/util.html">ed.util</a>
+
+    <div class="row" style="padding-bottom: 5%"> </div>
+    <a class="button2 u-pull-right" style="padding-right:10%"
+      href="https://github.com/blei-lab/edward">
+      <span style="vertical-align:middle;">Github</span>&nbsp;
+      <img src="/images/github-mark.svg" style="vertical-align:middle;"
+      alt="Edward on Github" />
+    </a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    </div>
+    <div class="nine columns">
+
+<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<meta itemprop="name" content="ed.rbf" />
+</div>
+<h1 id="ed.rbf">ed.rbf</h1>
+<h3 id="aliases">Aliases:</h3>
+<ul>
+<li><code>ed.rbf</code></li>
+<li><code>ed.util.rbf</code></li>
+</ul>
+<pre class="python"><code>rbf(
+    X,
+    X2=None,
+    lengthscale=1.0,
+    variance=1.0
+)</code></pre>
+<p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/util/tensorflow.py"><code>edward/util/tensorflow.py</code></a>.</p>
+<p>Radial basis function kernel, also known as the squared exponential or exponentiated quadratic. It is defined as</p>
+<p><span class="math inline">\(k(x, x&#39;) = \sigma^2 \exp\Big(  -\frac{1}{2} \sum_{d=1}^D \frac{1}{\ell_d^2} (x_d - x&#39;_d)^2 \Big)\)</span></p>
+<p>for output variance <span class="math inline">\(\sigma^2\)</span> and lengthscale <span class="math inline">\(\ell^2\)</span>.</p>
+<p>The kernel is evaluated over all pairs of rows, <code>k(X[i, ], X2[j, ])</code>. If <code>X2</code> is not specified, then it evaluates over all pairs of rows in <code>X</code>, <code>k(X[i, ], X[j, ])</code>. The output is a matrix where each entry (i, j) is the kernel over the ith and jth rows.</p>
+<h4 id="args">Args:</h4>
+<ul>
+<li><b><code>X</code></b>: tf.Tensor. N x D matrix of N data points each with D features.</li>
+<li><b><code>X2</code></b>: tf.Tensor, optional. N x D matrix of N data points each with D features.</li>
+<li><b><code>lengthscale</code></b>: tf.Tensor, optional. Lengthscale parameter, a positive scalar or D-dimensional vector.</li>
+<li><b><code>variance</code></b>: tf.Tensor, optional. Output variance parameter, a positive scalar.</li>
+</ul>
+<h4 id="examples">Examples</h4>
+<pre class="python"><code>X = tf.random_normal([100, 5])
+K = ed.rbf(X)
+assert K.shape == (100, 100)</code></pre>
+    </div>
+  </div>
+  <div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>

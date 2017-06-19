@@ -1,20 +1,21 @@
 <!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
-<meta content="text/html; charset=utf-8" http-equiv="Content-Type"/>
-<meta content="text/css" http-equiv="Content-Style-Type"/>
-<meta content="pandoc" name="generator"/>
-<title>Edward – Composing Random Variables</title>
-<!-- Mobile Specific Metas -->
-<meta content="width=device-width, initial-scale=1" name="viewport">
-<!-- FONT -->
-<link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
-<!-- CSS -->
-<link href="/css/normalize.css" rel="stylesheet">
-<link href="/css/skeleton.css" rel="stylesheet">
-<!-- Dynamically resize logo for mobile -->
-<style type="text/css">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Edward – Composing Random Variables</title>
+  <!-- Mobile Specific Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT -->
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <!-- Dynamically resize logo for mobile -->
+  <style type="text/css">
   .logo-width {
     width: 100%;
     box-sizing: border-box;
@@ -28,104 +29,88 @@
       margin-bottom: 5%;
     }
   }
-  /* Docstrings. */
-  dl.class + dl.class, dl.function + dl.function {
-    /* Add border inbetween docstrings. */
-    border-top: 1px solid #E1E1E1;
-  }
-  dt { /* Add spacing for top border. */
-    margin-top: 1.0rem;
-  }
-  dd { /* Remove overall indenting in an entry. */
-    margin-left: 0.0rem;
-  }
-  dl th, dl td { /* Remove extraneous padding and decorations. */
-    padding: 0 15px 0 0;
-    border: none;
-  }
-  dt em, dt span.sig-paren { /* Keep style of declarations consistent. */
-    font-family: monospace, monospace;
-    font-style: normal;
-    font-size: 14px !important;
-  }
-  /* Attribute contents within a docstring. */
-  dd blockquote, dl blockquote, dt blockquote { /* Reduce margins. */
-    margin-left: 0.0rem;
-    margin-top: 0.0rem;
-    margin-bottom: 0.0rem;
-  }
-  dl td p { /* Reduce spacing. */
-    margin-bottom: 0.75rem;
-  }
-  dl td.field-body { /* Add indenting. */
-    padding-top: 0.75rem;
-    padding-left: 2.0rem;
-    display: block;
-  }
-  dl code { /* Keep code font size consistent with rest of contents. */
-    font-size: 90%;
+  /* Downgrade API's header styles without explicitly modifying their type. */
+  div.nine.columns h1 { text-align: left; }
+  div.nine.columns h1 { font-size: 3.0rem; line-height: 1.25; letter-spacing: -.1rem; }
+  div.nine.columns h2 { font-size: 2.4rem; line-height: 1.3;  letter-spacing: -.1rem; }
+  div.nine.columns h3 { font-size: 2.4rem; line-height: 1.35; letter-spacing: -.08rem; }
+  div.nine.columns h4 { font-size: 1.8rem; line-height: 1.5;  letter-spacing: -.05rem; }
+  div.nine.columns h5 { font-size: 1.5rem; line-height: 1.6;  letter-spacing: 0; }
+  @media (min-width: 550px) {
+    div.nine.columns h1 { font-size: 3.6rem; }
+    div.nine.columns h2 { font-size: 3.0rem; }
+    div.nine.columns h3 { font-size: 3.0rem; }
+    div.nine.columns h4 { font-size: 2.5rem; }
+    div.nine.columns h5 { font-size: 1.5rem; }
   }
   </style>
-<!-- KaTeX -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/katex.min.css" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.6.0/contrib/auto-render.min.js"></script>
-<!-- highlight.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css" rel="stylesheet">
-<!-- Favicon -->
-<link href="/icons/apple-touch-icon-57x57.png" rel="apple-touch-icon" sizes="57x57">
-<link href="/icons/apple-touch-icon-60x60.png" rel="apple-touch-icon" sizes="60x60">
-<link href="/icons/apple-touch-icon-72x72.png" rel="apple-touch-icon" sizes="72x72">
-<link href="/icons/apple-touch-icon-76x76.png" rel="apple-touch-icon" sizes="76x76">
-<link href="/icons/apple-touch-icon-114x114.png" rel="apple-touch-icon" sizes="114x114">
-<link href="/icons/apple-touch-icon-120x120.png" rel="apple-touch-icon" sizes="120x120">
-<link href="/icons/apple-touch-icon-144x144.png" rel="apple-touch-icon" sizes="144x144">
-<link href="/icons/apple-touch-icon-152x152.png" rel="apple-touch-icon" sizes="152x152">
-<link href="/icons/apple-touch-icon-180x180.png" rel="apple-touch-icon" sizes="180x180">
-<link href="/icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png">
-<link href="/icons/android-chrome-192x192.png" rel="icon" sizes="192x192" type="image/png">
-<link href="/icons/favicon-96x96.png" rel="icon" sizes="96x96" type="image/png">
-<link href="/icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png">
-<link href="/icons/manifest.json" rel="manifest">
-<link color="#5bbad5" href="/icons/safari-pinned-tab.svg" rel="mask-icon">
-<link href="/icons/favicon.ico" rel="shortcut icon">
-<meta content="#da532c" name="msapplication-TileColor">
-<meta content="/icons/mstile-144x144.png" name="msapplication-TileImage">
-<meta content="/icons/browserconfig.xml" name="msapplication-config">
-<meta content="#ffffff" name="theme-color">
-</meta></meta></meta></meta></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></link></meta></head>
+
+  <!-- KaTeX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/contrib/auto-render.min.js"></script>
+
+  <!-- highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css">
+
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="57x57" href="/icons/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/icons/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/icons/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/icons/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/icons/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/icons/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="/icons/android-chrome-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="/icons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16">
+  <link rel="manifest" href="/icons/manifest.json">
+  <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="/icons/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-TileImage" content="/icons/mstile-144x144.png">
+  <meta name="msapplication-config" content="/icons/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+</head>
 <body>
 <div class="container">
-<div class="row" style="margin-top: 5%">
-<div class="three columns">
-<h1><a href="/">Edward</a></h1>
-<a href="/">
-<center>
-<img alt="Edward" class="logo-width" src="/images/edward.png"/>
-</center>
-</a>
-<a class="button u-full-width" href="/getting-started">Getting Started</a>
-<a class="button u-full-width" href="/tutorials/">Tutorials</a>
-<a class="button u-full-width" href="/api/">API</a>
-<a class="button u-full-width" href="/community">Community</a>
-<a class="button u-full-width" href="/contributing">Contributing</a>
-<div class="row" style="padding-bottom: 5%"> </div>
-<a class="button2 u-pull-right" href="https://github.com/blei-lab/edward" style="padding-right:10%">
-<span style="vertical-align:middle;">Github</span> 
-      <img alt="Edward on Github" src="/images/github-mark.svg" style="vertical-align:middle;"/>
-</a>
-<div class="row" style="padding-bottom: 5%"> </div>
-</div>
-<div class="nine columns">
-<h2 id="api-and-documentation">API and Documentation</h2>
+  <div class="row" style="margin-top: 5%">
+    <div class="three columns">
+    <h1><a href="/">Edward</a></h1>
+    <a href="/">
+    <center>
+      <img src="/images/edward.png" class="logo-width" alt="Edward" />
+    </center>
+    </a>
+    <a class="button u-full-width" href="/api/">API</a>
+    <hr style="margin-top: 1rem; margin-bottom: 1.5rem;"/>
+    <a class="button u-full-width" href="/api/reference">Reference</a>
+    <a class="button u-full-width" href="/api/ed/criticisms.html">ed.criticisms</a>
+<a class="button u-full-width" href="/api/ed/inferences.html">ed.inferences</a>
+<a class="button u-full-width" href="/api/ed/models.html">ed.models</a>
+<a class="button u-full-width" href="/api/ed/util.html">ed.util</a>
+
+    <div class="row" style="padding-bottom: 5%"> </div>
+    <a class="button2 u-pull-right" style="padding-right:10%"
+      href="https://github.com/blei-lab/edward">
+      <span style="vertical-align:middle;">Github</span>&nbsp;
+      <img src="/images/github-mark.svg" style="vertical-align:middle;"
+      alt="Edward on Github" />
+    </a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    </div>
+    <div class="nine columns">
+<h1 id="api-and-documentation">API and Documentation</h1>
 <div class="row" style="padding-bottom: 5%">
 <div class="row" style="padding-bottom: 1%">
 <a class="button3" href="/api/data">Data</a>
 <a class="button3 button-primary" href="/api/model">Model</a>
 <a class="button3" href="/api/inference">Inference</a>
 <a class="button3" href="/api/criticism">Criticism</a>
-<a class="button3" href="/api/reference">Reference</a>
 </div>
 <div class="row">
 <a class="button4 button-primary" href="/api/model-compositionality">Compositionality</a>
@@ -143,7 +128,7 @@
 
 theta = Beta(1.0, 1.0)
 x = Bernoulli(tf.ones(50) * theta)</code></pre>
-<p><img alt="image" src="/images/beta_bernoulli.png" width="450"/><br/>
+<p><img src="/images/beta_bernoulli.png" alt="image" width="450" /><br />
 <span><em>Computational graph for a Beta-Bernoulli program.</em> </span></p>
 <p>The random variable <code>x</code> (<span class="math inline">\(\mathbf{x}\)</span>) is 50-dimensional, parameterized by the random tensor <span class="math inline">\(\theta^*\)</span>. Fetching <code>x</code> from a session runs the graph: it simulates from the generative process and outputs a binary vector (<span class="math inline">\(\mathbf{x}^*\)</span>) of <span class="math inline">\(50\)</span> elements.</p>
 <p>With computational graphs, it is also natural to build mutable states within the probabilistic program. As a typical use of computational graphs, such states can define model parameters, that is, parameters that we will always compute point estimates for and not be uncertain about. In TensorFlow, this is given by a <code>tf.Variable</code>.</p>
@@ -155,7 +140,7 @@ x = Bernoulli(tf.ones(50) * tf.sigmoid(theta))</code></pre>
 <h3 id="neural-networks">Neural Networks</h3>
 <p>As Edward uses TensorFlow, it is easy to construct neural networks for probabilistic modeling <span class="citation">(Rumelhart, McClelland, &amp; Group, 1988)</span>. For example, one can specify stochastic neural networks <span class="citation">(Neal, 1990)</span>; see the <a href="/tutorials/bayesian-neural-network">Bayesian neural network tutorial</a> for details.</p>
 <p>High-level libraries such as <a href="http://keras.io">Keras</a> and <a href="https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim">TensorFlow Slim</a> can be used to easily construct deep neural networks. We illustrate this with a deep generative model over binary data <span class="math inline">\(\{\mathbf{x}_n\}\in\{0,1\}^{N\times 28*28}\)</span>.</p>
-<p><img alt="image" src="/images/decoder.png" width="250"/></p>
+<p><img src="/images/decoder.png" alt="image" width="250" /></p>
 <p><span><em>Graphical representation of a deep generative model.</em></span></p>
 <p>The model specifies a generative process where for each <span class="math inline">\(n=1,\ldots,N\)</span>, <span class="math display">\[\begin{aligned}
 \mathbf{z}_n &amp;\sim \text{Normal}(\mathbf{z}_n \mid \mathbf{0}, \mathbf{I}), \\[1.5ex]
@@ -173,7 +158,7 @@ x = Bernoulli(logits=slim.fully_connected(h, 28 * 28, activation_fn=None))</code
 from keras.layers import Dense
 
 z = Normal(loc=tf.zeros([N, d]), scale=tf.ones([N, d]))
-h = Dense(256, activation='relu')(z)
+h = Dense(256, activation=&#39;relu&#39;)(z)
 x = Bernoulli(logits=Dense(28 * 28)(h))</code></pre>
 <p>Keras and TensorFlow Slim automatically manage TensorFlow variables, which serve as parameters of the high-level neural network layers. This saves the trouble of having to manage them manually. However, note that neural network parameters defined this way always serve as model parameters. That is, the parameters are not exposed to the user so we cannot be Bayesian about them with prior distributions.</p>
 <h3 id="bayesian-nonparametrics">Bayesian Nonparametrics</h3>
@@ -182,7 +167,7 @@ x = Bernoulli(logits=Dense(28 * 28)(h))</code></pre>
 <pre class="python" language="Python"><code>from edward.models import Bernoulli, Normal
 
 def kernel(X):
-  """Evaluate kernel over each pair of rows (data points) in the matrix."""
+  &quot;&quot;&quot;Evaluate kernel over each pair of rows (data points) in the matrix.&quot;&quot;&quot;
   return
 
 X = tf.placeholder(tf.float32, [N, D])
@@ -197,23 +182,23 @@ def plot_dirichlet_process(alpha):
     dp = DirichletProcess(alpha, Normal(0.0, 1.0))
     samples = sess.run(dp.sample(1000))
     plt.hist(samples, bins=100, range=(-3.0, 3.0))
-    plt.title("DP({0}, N(0, 1))".format(alpha))
+    plt.title(&quot;DP({0}, N(0, 1))&quot;.format(alpha))
     plt.show()
 
 # Dirichlet process with high concentration
 plot_dirichlet_process(1.0)
 # Dirichlet process with low concentration (more spread out)
 plot_dirichlet_process(50.0)</code></pre>
-<p><img alt="image" src="/images/dirichlet-process-fig0.png" width="350"/> <img alt="image" src="/images/dirichlet-process-fig1.png" width="350"/></p>
+<p><img src="/images/dirichlet-process-fig0.png" alt="image" width="350" /> <img src="/images/dirichlet-process-fig1.png" alt="image" width="350" /></p>
 <p>To see the essential component defining the <code>DirichletProcess</code>, see <a href="https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py"><code>examples/pp_dirichlet_process.py</code></a> in the Github repository. Its source implementation can be found at <a href="https://github.com/blei-lab/edward/blob/master/edward/models/dirichlet_process.py"><code>edward/models/dirichlet_process.py</code></a>.</p>
 <h3 id="probabilistic-programs">Probabilistic Programs</h3>
 <p>Probabilistic programs greatly expand the scope of probabilistic models <span class="citation">(Goodman, Mansinghka, Roy, Bonawitz, &amp; Tenenbaum, 2012)</span>. Formally, Edward is a Turing-complete probabilistic programming language. This means that Edward can represent any computable probability distribution.</p>
-<p><img alt="image" src="/images/dynamic_graph.png" width="450"/></p>
+<p><img src="/images/dynamic_graph.png" alt="image" width="450" /></p>
 <p><span><em>Computational graph for a probabilistic program with stochastic control flow.</em></span></p>
 <p>Random variables can be composed with control flow operations, enabling probabilistic programs with stochastic control flow. Stochastic control flow defines dynamic conditional dependencies, known in the literature as contingent or existential dependencies <span class="citation">(Mansinghka, Selsam, &amp; Perov, 2014; Wu, Li, Russell, &amp; Bodik, 2016)</span>. See above, where <span class="math inline">\(\mathbf{x}\)</span> may or may not depend on <span class="math inline">\(\mathbf{a}\)</span> for a given execution.</p>
 <p>Stochastic control flow produces difficulties for algorithms that leverage the graph structure; the relationship of conditional dependencies changes across execution traces. Importantly, the computational graph provides an elegant way of teasing out static conditional dependence structure (<span class="math inline">\(\mathbf{p}\)</span>) from dynamic dependence structure (<span class="math inline">\(\mathbf{a})\)</span>. We can perform model parallelism over the static structure with GPUs and batch training, and use generic computations to handle the dynamic structure.</p>
-<h3 class="unnumbered" id="references">References</h3>
-<div class="references" id="refs">
+<h3 id="references" class="unnumbered">References</h3>
+<div id="refs" class="references">
 <div id="ref-goodman2012church">
 <p>Goodman, N., Mansinghka, V., Roy, D. M., Bonawitz, K., &amp; Tenenbaum, J. B. (2012). Church: a language for generative models. In <em>Uncertainty in artificial intelligence</em>.</p>
 </div>
@@ -236,9 +221,9 @@ plot_dirichlet_process(50.0)</code></pre>
 <p>Wu, Y., Li, L., Russell, S., &amp; Bodik, R. (2016). Swift: Compiled inference for probabilistic programming languages. <em>ArXiv Preprint ArXiv:1606.09242</em>.</p>
 </div>
 </div>
-</div>
-</div>
-<div class="row" style="padding-bottom: 25%"> </div>
+    </div>
+  </div>
+  <div class="row" style="padding-bottom: 25%"> </div>
 </div>
 <script>
   hljs.initHighlightingOnLoad();
