@@ -1,18 +1,21 @@
 #!/bin/bash
 printf "Compiling Edward website.\n\n"
 docdir=$(pwd)
+outdir=$docdir/build
 tmpdir=/tmp/docs
+tmpdir2=/tmp/docs2
 
 echo "Clearing any previously built files."
-rm -rf build/
+rm -rf $outdir/
 printf "Done.\n\n"
 
 echo "Begin docstring generation."
-python parser/generate.py \
+python generate_api_navbar_and_symbols.py \
   --src_dir=$docdir/tex/ \
+  --out_dir=$tmpdir2/
+python parser/generate.py \
+  --src_dir=$tmpdir2/ \
   --output_dir=$tmpdir/
-python generate_api_navbar.py \
-  --src_dir=$tmpdir/
 python generate_api_toc.py \
     --src_dir=$docdir/tex/template-api.pandoc \
     --yaml_dir=$tmpdir/api/_toc.yaml \
@@ -20,12 +23,10 @@ python generate_api_toc.py \
 printf "Done.\n\n"
 
 echo "Begin pandoc compilation."
-# TODO recursively
-mkdir -p build/api/ed/{criticisms/,inferences/,models/,util/}
-mkdir -p build/tutorials
-cd $tmpdir/api
-for filename in {./,ed/,ed/criticisms/,ed/inferences/,ed/models/,ed/util/}*.md; do
-  echo api/$filename
+cd $tmpdir
+for filename in $(find api -name '*.md'); do
+  echo $filename
+  mkdir -p $outdir/$(dirname $filename)
   pandoc ${filename%.*}.md \
          --from=markdown+link_attributes+native_spans \
          --to=html \
@@ -36,10 +37,11 @@ for filename in {./,ed/,ed/criticisms/,ed/inferences/,ed/models/,ed/util/}*.md; 
          --csl=$docdir/tex/apa.csl \
          --title-prefix="Edward" \
          --template=$tmpdir/template.pandoc \
-         --output=$docdir/build/api/${filename%.*}.html
+         --output=$outdir/${filename%.*}.html
 done
-for filename in *.tex; do
-  echo api/$filename
+for filename in $(find api -name '*.tex'); do
+  echo $filename
+  mkdir -p $outdir/$(dirname $filename)
   pandoc ${filename%.*}.tex \
          --from=latex+link_attributes+native_spans \
          --to=html \
@@ -50,11 +52,11 @@ for filename in *.tex; do
          --csl=$docdir/tex/apa.csl \
          --title-prefix="Edward" \
          --template=$tmpdir/template.pandoc \
-         --output=$docdir/build/api/${filename%.*}.html
+         --output=$outdir/${filename%.*}.html
 done
-cd ..
 for filename in {./,tutorials/}*.tex; do
   echo $filename
+  mkdir -p $outdir/$(dirname $filename)
   pandoc ${filename%.*}.tex \
          --from=latex+link_attributes+native_spans \
          --to=html \
@@ -65,22 +67,23 @@ for filename in {./,tutorials/}*.tex; do
          --csl=$docdir/tex/apa.csl \
          --title-prefix="Edward" \
          --template=$docdir/tex/template.pandoc \
-         --output=$docdir/build/${filename%.*}.html
+         --output=$outdir/${filename%.*}.html
 done
 printf "Done.\n\n"
 
-cd $docdir
 echo "Begin postprocessing scripts."
+cd $docdir
 echo "./strip_p_in_li.py"
 python strip_p_in_li.py
 printf "Done.\n\n"
 
 echo "Begin copying index files."
-cp -r css/ build/
-cp -r icons/ build/
-cp -r images/ build/
-cp CNAME build/
+cp -r css/ $outdir/
+cp -r icons/ $outdir/
+cp -r images/ $outdir/
+cp CNAME $outdir/
 printf "Done.\n\n"
 
 # Clear intermediate docstring-generated files
-rm -rf /tmp/docs
+rm -rf $tmpdir
+rm -rf $tmpdir2

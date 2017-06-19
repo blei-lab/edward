@@ -1,4 +1,4 @@
-"""Autogenerate navbar.
+"""Autogenerate navbar and convert {{symbol}}s to a format for the parser.
 
 All pages in src_dir/api/ must be an element in PAGES. Otherwise the
 page will have no navbar.
@@ -16,6 +16,7 @@ import re
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--src_dir', type=str)
+parser.add_argument('--out_dir', type=str)
 args = parser.parse_args()
 
 # Note we don't strictly need the 'parent_pages' field. We can
@@ -196,33 +197,45 @@ def generate_navbar(page_data):
   return navbar
 
 
-def generate_tensorflow_distributions():
-  import edward.models
+def generate_models():
+  import edward.models as module
   from edward.models import RandomVariable
+  objs = [getattr(module, name) for name in dir(module)]
+  objs = [obj for obj in objs
+          if (isinstance(obj, type) and
+              issubclass(obj, RandomVariable) and
+              obj != RandomVariable
+              )
+          ]
+  objs = sorted(objs, key=lambda cls: cls.__name__)
 
-  models = [getattr(edward.models, name) for name in dir(edward.models)]
-  models = [model for model in models
-            if (isinstance(model, type) and
-                issubclass(model, RandomVariable) and
-                model != RandomVariable
-                )
-            ]
-  models = sorted(models, key=lambda cls: cls.__name__)
+  links = [('@{{ed.models.{}}}').format(cls.__name__) for cls in objs]
+  return '\n\item'.join(links)
 
-  stub = '/api/ed/models'
-  fragment = ('\\begin{{lstlisting}}[raw=html]'
-              '<a class="reference" '
-              'href="{stub}/{name}" title="edward.models.{name}">'
-              '<code class="xref py py-class docutils literal">'
-              '<span class="pre">ed.models.{name}</span>'
-              '</code>'
-              '</a>'
-              '\\end{{lstlisting}}')
 
-  links = [fragment.format(stub=stub, name=cls.__name__)
-           for cls in models]
+def generate_criticisms():
+  import edward.criticisms as module
+  objs = [getattr(module, name) for name in dir(module)]
+  objs = [obj for obj in objs
+          if (hasattr(obj, '__call__') or
+              isinstance(obj, type))
+          ]
+  objs = sorted(objs, key=lambda cls: cls.__name__)
 
-  # note the start and end li tag are provided from outside
+  links = [('@{{ed.criticisms.{}}}').format(cls.__name__) for cls in objs]
+  return '\n\item'.join(links)
+
+
+def generate_util():
+  import edward.util as module
+  objs = [getattr(module, name) for name in dir(module)]
+  objs = [obj for obj in objs
+          if (hasattr(obj, '__call__') or
+              isinstance(obj, type))
+          ]
+  objs = sorted(objs, key=lambda cls: cls.__name__)
+
+  links = [('@{{ed.util.{}}}').format(cls.__name__) for cls in objs]
   return '\n\item'.join(links)
 
 
@@ -232,9 +245,13 @@ def get_tensorflow_version():
 
 
 print("Starting autogeneration.")
+src_dir = os.path.expanduser(args.src_dir)
+out_dir = os.path.expanduser(args.out_dir)
+shutil.copytree(src_dir, out_dir)
+
 for page_data in PAGES:
   page_name = page_data['page']
-  path = os.path.join(args.src_dir, 'api', page_name)
+  path = os.path.join(out_dir, 'api', page_name)
   print(path)
 
   # Generate navigation bar.
@@ -246,9 +263,14 @@ for page_data in PAGES:
          ("File found for " + path + " but missing {{navbar}} tag.")
   document = document.replace('{{navbar}}', navbar)
 
-  if '{{tensorflow_distributions}}' in document:
-    document = document.replace('{{tensorflow_distributions}}',
-                                generate_tensorflow_distributions())
+  if '{{models}}' in document:
+    document = document.replace('{{models}}', generate_models())
+
+  if '{{criticisms}}' in document:
+    document = document.replace('{{criticisms}}', generate_criticisms())
+
+  if '{{util}}' in document:
+    document = document.replace('{{util}}', generate_util())
 
   if '{{tensorflow_version}}' in document:
     document = document.replace('{{tensorflow_version}}',

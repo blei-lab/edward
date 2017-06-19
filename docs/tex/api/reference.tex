@@ -2,23 +2,28 @@
 
 {{navbar}}
 
-\subsubsection{Models}
+There are four modules in Edward:
+\texttt{ed.criticisms},
+\texttt{ed.inferences},
+\texttt{ed.models},
+and
+\texttt{ed.util}.
 
-Most Edward random variables are light wrappers around distributions
-in TensorFlow. Therefore the list of available random variables
-depends on the TensorFlow version installed. For TensorFlow
-{{tensorflow_version}}, the following are available:
+\subsubsection{Criticism}
+
+\texttt{ed.criticisms} is comprised of functions. They operate on
+random variables in a model or they operate on NumPy arrays
+representing values drawn from the random variables.
 
 \begin{itemize}
-  \item @{ed.models.RandomVariable}
-  \item {{tensorflow_distributions}}
+  \item {{criticisms}}
 \end{itemize}
 
 \subsubsection{Inference}
 
-Inference is mostly comprised of classes. They are organized in a
-class hierarchy, where methods are shared via parent classes and
-\texttt{Inference} is the top-most base class.
+\texttt{ed.inferences} is mostly comprised of classes. They are
+organized in a class hierarchy, where methods are shared via parent
+classes and \texttt{Inference} is the top-most base class.
 
 \begin{itemize}
   \item @{ed.inferences.Inference}
@@ -53,18 +58,27 @@ class hierarchy, where methods are shared via parent classes and
     \item @{ed.inferences.SGLD}
     \item @{ed.inferences.SGHMC}
     \end{itemize}
-  \item @{ed.inferences.conjugacy.complete_conditional}
+  \item @{ed.inferences.complete_conditional}
 \end{itemize}
 
-\subsubsection{Criticism}
+\subsubsection{Models}
 
-Criticism is comprised of functions. They either operate on random
-variables in the model or NumPy arrays representing values drawn
-from the random variables.
+\texttt{ed.models} is comprised of random variables.
+The list of available random variables depends on the TensorFlow
+version installed. For TensorFlow {{tensorflow_version}}, the
+following are available:
 
 \begin{itemize}
-  \item @{ed.criticisms.evaluate}
-  \item @{ed.criticisms.ppc}
-  \item @{ed.criticisms.ppc_density_plot}
-  \item @{ed.criticisms.ppc_stat_hist_plot}
+  \item @{ed.models.RandomVariable}
+  \item {{models}}
+\end{itemize}
+
+\subsubsection{Utilities}
+
+\texttt{ed.util} is comprised of functions for miscellaneous usage.
+
+\begin{itemize}
+  \item {{util}}
+  \item @{ed.VERSION}
+  \item @{ed.__version__}
 \end{itemize}
