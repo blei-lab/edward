@@ -60,14 +60,14 @@ _suff_stat_to_dist['countable'][(('#x',),)] = (
 
 def complete_conditional(rv, cond_set=None):
   """Returns the conditional distribution `RandomVariable`
-  $p(\\text{rv} | \cdot)$.
+  $p(\\text{rv}\mid \cdot)$.
 
   This function tries to infer the conditional distribution of `rv`
   given `cond_set`, a set of other `RandomVariable`s in the graph. It
   will only be able to do this if
 
-  1. $p(\\text{rv} | \\text{cond_set})$ is in a tractable
-     exponential family; AND
+  1. $p(\\text{rv}\mid \\text{cond\_set})$ is in a tractable
+     exponential family; and
   2. the truth of assumption 1 is not obscured in the TensorFlow graph.
 
   In other words, this function will do its best to recognize conjugate
