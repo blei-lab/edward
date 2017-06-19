@@ -62,7 +62,8 @@ class GANInference(VariationalInference):
   def initialize(self, optimizer=None, optimizer_d=None,
                  global_step=None, global_step_d=None, var_list=None,
                  *args, **kwargs):
-    """Initialize inference algorithm.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computation graph.
 
     Args:
       optimizer: str or tf.train.Optimizer, optional.

@@ -81,7 +81,8 @@ class ImplicitKLqp(GANInference):
     super(GANInference, self).__init__(latent_vars, data)
 
   def initialize(self, ratio_loss='log', *args, **kwargs):
-    """Initialization.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computation graph.
 
     Args:
       ratio_loss: str or fn, optional.

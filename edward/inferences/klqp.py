@@ -51,7 +51,8 @@ class KLqp(VariationalInference):
     super(KLqp, self).__init__(*args, **kwargs)
 
   def initialize(self, n_samples=1, kl_scaling=None, *args, **kwargs):
-    """Initialization.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computation graph.
 
     Args:
       n_samples: int, optional.
@@ -136,7 +137,8 @@ class ReparameterizationKLqp(VariationalInference):
     super(ReparameterizationKLqp, self).__init__(*args, **kwargs)
 
   def initialize(self, n_samples=1, *args, **kwargs):
-    """Initialization.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computation graph.
 
     Args:
       n_samples: int, optional.
@@ -162,7 +164,8 @@ class ReparameterizationKLKLqp(VariationalInference):
     super(ReparameterizationKLKLqp, self).__init__(*args, **kwargs)
 
   def initialize(self, n_samples=1, kl_scaling=None, *args, **kwargs):
-    """Initialization.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computation graph.
 
     Args:
       n_samples: int, optional.
@@ -202,7 +205,8 @@ class ReparameterizationEntropyKLqp(VariationalInference):
     super(ReparameterizationEntropyKLqp, self).__init__(*args, **kwargs)
 
   def initialize(self, n_samples=1, *args, **kwargs):
-    """Initialization.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computation graph.
 
     Args:
       n_samples: int, optional.
@@ -229,7 +233,8 @@ class ScoreKLqp(VariationalInference):
     super(ScoreKLqp, self).__init__(*args, **kwargs)
 
   def initialize(self, n_samples=1, *args, **kwargs):
-    """Initialization.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computation graph.
 
     Args:
       n_samples: int, optional.
@@ -255,7 +260,8 @@ class ScoreKLKLqp(VariationalInference):
     super(ScoreKLKLqp, self).__init__(*args, **kwargs)
 
   def initialize(self, n_samples=1, kl_scaling=None, *args, **kwargs):
-    """Initialization.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computation graph.
 
     Args:
       n_samples: int, optional.
@@ -295,7 +301,8 @@ class ScoreEntropyKLqp(VariationalInference):
     super(ScoreEntropyKLqp, self).__init__(*args, **kwargs)
 
   def initialize(self, n_samples=1, *args, **kwargs):
-    """Initialization.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computation graph.
 
     Args:
       n_samples: int, optional.

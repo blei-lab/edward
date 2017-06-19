@@ -49,7 +49,8 @@ class HMC(MonteCarlo):
     super(HMC, self).__init__(*args, **kwargs)
 
   def initialize(self, step_size=0.25, n_steps=2, *args, **kwargs):
-    """Initialize inference algorithm.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computation graph.
 
     Args:
       step_size: float, optional.

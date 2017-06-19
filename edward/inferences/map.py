@@ -69,7 +69,7 @@ class MAP(VariationalInference):
 
     Args:
       latent_vars: list of RandomVariable or
-                    dict of RandomVariable to RandomVariable.
+                   dict of RandomVariable to RandomVariable.
         Collection of random variables to perform inference on. If
         list, each random variable will be implictly optimized
         using a `PointMass` random variable that is defined

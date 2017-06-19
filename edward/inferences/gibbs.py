@@ -47,7 +47,8 @@ class Gibbs(MonteCarlo):
     super(Gibbs, self).__init__(latent_vars, data)
 
   def initialize(self, scan_order='random', *args, **kwargs):
-    """Initialization.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computation graph.
 
     Args:
       scan_order: list or str, optional.

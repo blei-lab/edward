@@ -33,7 +33,8 @@ class VariationalInference(Inference):
 
   def initialize(self, optimizer=None, var_list=None, use_prettytensor=False,
                  global_step=None, *args, **kwargs):
-    """Initialize variational inference.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computation graph.
 
     Args:
       optimizer: str or tf.train.Optimizer, optional.
