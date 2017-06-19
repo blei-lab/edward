@@ -33,6 +33,19 @@ class Inference(object):
   To reset inference (e.g., internal variable counters incremented
   over training), fetch inference's reset ops from session with
   `sess.run(inference.reset)`.
+
+  #### Examples
+
+  ```python
+  mu = Normal(loc=tf.constant(0.0), scale=tf.constant(1.0))
+  x = Normal(loc=tf.ones(50) * mu, scale=tf.constant(1.0))
+
+  qmu_loc = tf.Variable(tf.random_normal([]))
+  qmu_scale = tf.nn.softplus(tf.Variable(tf.random_normal([])))
+  qmu = Normal(loc=qmu_loc, scale=qmu_scale)
+
+  inference = ed.Inference({mu: qmu}, data={x: tf.zeros(50)})
+  ```
   """
   def __init__(self, latent_vars=None, data=None):
     """Create an inference algorithm.
@@ -50,19 +63,6 @@ class Inference(object):
         `tf.Tensor`) used in the model to their realizations; and
         prior latent variables (of type `RandomVariable`) to posterior
         latent variables (of type `RandomVariable`).
-
-    #### Examples
-
-    ```python
-    mu = Normal(loc=tf.constant(0.0), scale=tf.constant(1.0))
-    x = Normal(loc=tf.ones(50) * mu, scale=tf.constant(1.0))
-
-    qmu_loc = tf.Variable(tf.random_normal([]))
-    qmu_scale = tf.nn.softplus(tf.Variable(tf.random_normal([])))
-    qmu = Normal(loc=qmu_loc, scale=qmu_scale)
-
-    inference = ed.Inference({mu: qmu}, data={x: tf.zeros(50)})
-    ```
     """
     sess = get_session()
     if latent_vars is None:

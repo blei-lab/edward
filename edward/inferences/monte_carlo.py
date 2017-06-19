@@ -20,6 +20,43 @@ class MonteCarlo(Inference):
   To build an algorithm inheriting from `MonteCarlo`, one must at the
   minimum implement `build_update`: it determines how to assign
   the samples in the `Empirical` approximations.
+
+  #### Notes
+
+  The number of Monte Carlo iterations is set according to the
+  minimum of all `Empirical` sizes.
+
+  Initialization is assumed from `params[0, :]`. This generalizes
+  initializing randomly and initializing from user input. Updates
+  are along this outer dimension, where iteration t updates
+  `params[t, :]` in each `Empirical` random variable.
+
+  No warm-up is implemented. Users must run MCMC for a long period
+  of time, then manually burn in the Empirical random variable.
+
+  #### Examples
+
+  Most explicitly, `MonteCarlo` is specified via a dictionary:
+
+  ```python
+  qpi = Empirical(params=tf.Variable(tf.zeros([T, K-1])))
+  qmu = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
+  qsigma = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
+  ed.MonteCarlo({pi: qpi, mu: qmu, sigma: qsigma}, data)
+  ```
+
+  The inferred posterior is comprised of `Empirical` random
+  variables with `T` samples. We also automate the specification
+  of `Empirical` random variables. One can pass in a list of
+  latent variables instead:
+
+  ```python
+  ed.MonteCarlo([beta], data)
+  ed.MonteCarlo([pi, mu, sigma], data)
+  ```
+
+  It defaults to `Empirical` random variables with 10,000 samples for
+  each dimension.
   """
   def __init__(self, latent_vars=None, data=None):
     """Create an inference algorithm.
@@ -37,43 +74,6 @@ class MonteCarlo(Inference):
         `RandomVariable` or `tf.Tensor`) to their realizations (of
         type `tf.Tensor`). It can also bind placeholders (of type
         `tf.Tensor`) used in the model to their realizations.
-
-    #### Examples
-
-    Most explicitly, `MonteCarlo` is specified via a dictionary:
-
-    ```python
-    qpi = Empirical(params=tf.Variable(tf.zeros([T, K-1])))
-    qmu = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
-    qsigma = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
-    ed.MonteCarlo({pi: qpi, mu: qmu, sigma: qsigma}, data)
-    ```
-
-    The inferred posterior is comprised of `Empirical` random
-    variables with `T` samples. We also automate the specification
-    of `Empirical` random variables. One can pass in a list of
-    latent variables instead:
-
-    ```python
-    ed.MonteCarlo([beta], data)
-    ed.MonteCarlo([pi, mu, sigma], data)
-    ```
-
-    It defaults to `Empirical` random variables with 10,000 samples for
-    each dimension.
-
-    #### Notes
-
-    The number of Monte Carlo iterations is set according to the
-    minimum of all `Empirical` sizes.
-
-    Initialization is assumed from `params[0, :]`. This generalizes
-    initializing randomly and initializing from user input. Updates
-    are along this outer dimension, where iteration t updates
-    `params[t, :]` in each `Empirical` random variable.
-
-    No warm-up is implemented. Users must run MCMC for a long period
-    of time, then manually burn in the Empirical random variable.
     """
     if isinstance(latent_vars, list):
       with tf.variable_scope("posterior"):

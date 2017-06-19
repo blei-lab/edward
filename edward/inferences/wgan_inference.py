@@ -21,31 +21,29 @@ class WGANInference(GANInference):
   Works for the class of implicit (and differentiable) probabilistic
   models. These models do not require a tractable density and assume
   only a program that generates samples.
+
+  #### Examples
+
+  ```python
+  z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
+  x = generative_network(z)
+
+  inference = ed.WGANInference({x: x_data}, discriminator)
+  ```
+
+  #### Notes
+
+  Argument-wise, the only difference from `GANInference` is
+  conceptual: the `discriminator` is better described as a test
+  function or critic. `WGANInference` continues to use
+  `discriminator` only to share methods and attributes with
+  `GANInference`.
   """
   def __init__(self, *args, **kwargs):
-    """Create an inference algorithm.
-
-    #### Examples
-
-    ```python
-    z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
-    x = generative_network(z)
-
-    inference = ed.WGANInference({x: x_data}, discriminator)
-    ```
-
-    #### Notes
-
-    Argument-wise, the only difference from `GANInference` is
-    conceptual: the `discriminator` is better described as a test
-    function or critic. `WGANInference` continues to use
-    `discriminator` only to share methods and attributes with
-    `GANInference`.
-    """
     super(WGANInference, self).__init__(*args, **kwargs)
 
   def initialize(self, penalty=10.0, clip=None, *args, **kwargs):
-    """Initialize Wasserstein GAN inference.
+    """Initialize inference algorithm.
 
     Args:
       penalty: float, optional.

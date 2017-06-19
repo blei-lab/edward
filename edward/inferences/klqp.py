@@ -54,7 +54,7 @@ class KLqp(VariationalInference):
     """Initialization.
 
     Args:
-      n_samples: int, optional>
+      n_samples: int, optional.
         Number of samples from variational model for calculating
         stochastic gradients.
       kl_scaling: dict of RandomVariable to float, optional.

@@ -29,6 +29,25 @@ class ImplicitKLqp(GANInference):
   All variational factors must be reparameterizable: each of the
   random variables (`rv`) satisfies `rv.is_reparameterized` and
   `rv.is_continuous`.
+
+  #### Notes
+
+  Unlike `GANInference`, `discriminator` takes dict's as input,
+  and must subset to the appropriate values through lexical scoping
+  from the previously defined model and latent variables. This is
+  necessary as the discriminator can take an arbitrary set of data,
+  latent, and global variables.
+
+  Note the type for `discriminator`'s output changes when one
+  passes in the `scale` argument to `initialize()`.
+
+  + If `scale` has at most one item, then `discriminator`
+  outputs a tensor whose multiplication with that element is
+  broadcastable. (For example, the output is a tensor and the single
+  scale factor is a scalar.)
+  + If `scale` has more than one item, then in order to scale
+  its corresponding output, `discriminator` must output a
+  dictionary of same size and keys as `scale`.
   """
   def __init__(self, latent_vars, data=None, discriminator=None,
                global_vars=None):
@@ -48,25 +67,6 @@ class ImplicitKLqp(GANInference):
         variables, shared across data points. These will not be
         encompassed in the ratio estimation problem, and will be
         estimated with tractable variational approximations.
-
-    #### Notes
-
-    Unlike `GANInference`, `discriminator` takes dict's as input,
-    and must subset to the appropriate values through lexical scoping
-    from the previously defined model and latent variables. This is
-    necessary as the discriminator can take an arbitrary set of data,
-    latent, and global variables.
-
-    Note the type for `discriminator`'s output changes when one
-    passes in the `scale` argument to `initialize()`.
-
-    + If `scale` has at most one item, then `discriminator`
-    outputs a tensor whose multiplication with that element is
-    broadcastable. (For example, the output is a tensor and the single
-    scale factor is a scalar.)
-    + If `scale` has more than one item, then in order to scale
-    its corresponding output, `discriminator` must output a
-    dictionary of same size and keys as `scale`.
     """
     if not callable(discriminator):
       raise TypeError("discriminator must be a callable function.")

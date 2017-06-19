@@ -16,6 +16,28 @@ class GANInference(VariationalInference):
   Works for the class of implicit (and differentiable) probabilistic
   models. These models do not require a tractable density and assume
   only a program that generates samples.
+
+  #### Notes
+
+  `GANInference` does not support latent variable inference. Note
+  that GAN-style training also samples from the prior: this does not
+  work well for latent variables that are shared across many data
+  points (global variables).
+
+  In building the computation graph for inference, the
+  discriminator's parameters can be accessed with the variable scope
+  "Disc".
+
+  GANs also only work for one observed random variable in `data`.
+
+  #### Examples
+
+  ```python
+  z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
+  x = generative_network(z)
+
+  inference = ed.GANInference({x: x_data}, discriminator)
+  ```
   """
   def __init__(self, data, discriminator):
     """Create an inference algorithm.
@@ -30,28 +52,6 @@ class GANInference(VariationalInference):
         Function (with parameters) to discriminate samples. It should
         output logit probabilities (real-valued) and not probabilities
         in $[0, 1]$.
-
-    #### Notes
-
-    `GANInference` does not support latent variable inference. Note
-    that GAN-style training also samples from the prior: this does not
-    work well for latent variables that are shared across many data
-    points (global variables).
-
-    In building the computation graph for inference, the
-    discriminator's parameters can be accessed with the variable scope
-    "Disc".
-
-    GANs also only work for one observed random variable in `data`.
-
-    #### Examples
-
-    ```python
-    z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
-    x = generative_network(z)
-
-    inference = ed.GANInference({x: x_data}, discriminator)
-    ```
     """
     if not callable(discriminator):
       raise TypeError("discriminator must be a callable function.")

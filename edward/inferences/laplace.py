@@ -26,41 +26,41 @@ class Laplace(MAP):
   This forms the mean of the normal approximation. We then compute the
   inverse Hessian at the mode of the posterior. This forms the
   covariance of the normal approximation.
+
+  #### Notes
+
+  If `MultivariateNormalDiag` or `Normal` random variables are
+  specified as approximations, then the Laplace approximation will
+  only produce the diagonal. This does not capture correlation among
+  the variables but it does not require a potentially expensive
+  matrix inversion.
+
+  #### Examples
+
+  ```python
+  X = tf.placeholder(tf.float32, [N, D])
+  w = Normal(loc=tf.zeros(D), scale=tf.ones(D))
+  y = Normal(loc=ed.dot(X, w), scale=tf.ones(N))
+
+  qw = MultivariateNormalTriL(
+      loc=tf.Variable(tf.random_normal([D])),
+      scale_tril=tf.Variable(tf.random_normal([D, D])))
+
+  inference = ed.Laplace({w: qw}, data={X: X_train, y: y_train})
+  ```
   """
   def __init__(self, latent_vars, data=None):
     """Create an inference algorithm.
 
     Args:
       latent_vars: list of RandomVariable or
-                    dict of RandomVariable to RandomVariable.
+                   dict of RandomVariable to RandomVariable.
         Collection of random variables to perform inference on. If list,
         each random variable will be implictly optimized using a
         `MultivariateNormalTriL` random variable that is defined
         internally (with unconstrained support). If dictionary, each
         random variable must be a `MultivariateNormalDiag`,
         `MultivariateNormalTriL`, or `Normal` random variable.
-
-    #### Notes
-
-    If `MultivariateNormalDiag` or `Normal` random variables are
-    specified as approximations, then the Laplace approximation will
-    only produce the diagonal. This does not capture correlation among
-    the variables but it does not require a potentially expensive
-    matrix inversion.
-
-    #### Examples
-
-    ```python
-    X = tf.placeholder(tf.float32, [N, D])
-    w = Normal(loc=tf.zeros(D), scale=tf.ones(D))
-    y = Normal(loc=ed.dot(X, w), scale=tf.ones(N))
-
-    qw = MultivariateNormalTriL(
-        loc=tf.Variable(tf.random_normal([D])),
-        scale_tril=tf.Variable(tf.random_normal([D, D])))
-
-    inference = ed.Laplace({w: qw}, data={X: X_train, y: y_train})
-    ```
     """
     if isinstance(latent_vars, list):
       with tf.variable_scope("posterior"):

@@ -40,6 +40,29 @@ class MAP(VariationalInference):
   $\\beta^* \sim q(\\beta)$. This is a lower bound to the
   marginal density $\log p(x, z)$, and it is exact if
   $q(\\beta) = p(\\beta \mid x)$ (up to stochasticity).
+
+  #### Examples
+
+  Most explicitly, `MAP` is specified via a dictionary:
+
+  ```python
+  qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
+  qmu = PointMass(params=tf.Variable(tf.zeros(K*D)))
+  qsigma = PointMass(params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))
+  ed.MAP({pi: qpi, mu: qmu, sigma: qsigma}, data)
+  ```
+
+  We also automate the specification of `PointMass` distributions,
+  so one can pass in a list of latent variables instead:
+
+  ```python
+  ed.MAP([beta], data)
+  ed.MAP([pi, mu, sigma], data)
+  ```
+
+  Currently, `MAP` can only instantiate `PointMass` random variables
+  with unconstrained support. To constrain their support, one must
+  manually pass in the `PointMass` family.
   """
   def __init__(self, latent_vars=None, data=None):
     """Create an inference algorithm.
@@ -52,29 +75,6 @@ class MAP(VariationalInference):
         using a `PointMass` random variable that is defined
         internally (with unconstrained support). If dictionary, each
         value in the dictionary must be a `PointMass` random variable.
-
-    #### Examples
-
-    Most explicitly, `MAP` is specified via a dictionary:
-
-    ```python
-    qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
-    qmu = PointMass(params=tf.Variable(tf.zeros(K*D)))
-    qsigma = PointMass(params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))
-    ed.MAP({pi: qpi, mu: qmu, sigma: qsigma}, data)
-    ```
-
-    We also automate the specification of `PointMass` distributions,
-    so one can pass in a list of latent variables instead:
-
-    ```python
-    ed.MAP([beta], data)
-    ed.MAP([pi, mu, sigma], data)
-    ```
-
-    Currently, `MAP` can only instantiate `PointMass` random variables
-    with unconstrained support. To constrain their support, one must
-    manually pass in the `PointMass` family.
     """
     if isinstance(latent_vars, list):
       with tf.variable_scope("posterior"):
