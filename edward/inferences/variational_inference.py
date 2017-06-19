@@ -145,7 +145,7 @@ class VariationalInference(Inference):
         Feed dictionary for a TensorFlow session run. It is used to feed
         placeholders that are not fed during initialization.
 
-    Returns;
+    Returns:
       dict.
       Dictionary of algorithm-specific information. In this case, the
       loss function value after one iteration.
