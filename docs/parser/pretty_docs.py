@@ -332,8 +332,14 @@ class _Metadata(object):
 
   def build_html(self):
     """Return the Metadata block as an Html string."""
+    parts = []
+    parts.append('---')
+    parts.append('pagetitle: {}'.format(self.name))
+    parts.append('---')
+    parts.append('\n')
+
     schema = 'http://developers.google.com/ReferenceObject'
-    parts = ['<div itemscope itemtype="%s">' % schema]
+    parts.append('<div itemscope itemtype="%s">' % schema)
 
     parts.append('<meta itemprop="name" content="%s" />' % self.name)
     for item in self._content:
