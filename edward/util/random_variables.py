@@ -79,7 +79,7 @@ def check_latent_vars(latent_vars):
                       "dtype: {}, {}".format(key.dtype, value.dtype))
 
 
-def _copy_context(ctx, context_matches):
+def _copy_context(ctx, context_matches, dict_swap, scope, copy_q):
   if ctx is None:
     return None
   elif ctx in context_matches:
@@ -95,7 +95,7 @@ def _copy_context(ctx, context_matches):
   for string in ctx._values:
     values.add(scope + '/' + string)
 
-  _copy_context(ctx.outer_context, context_matches)
+  _copy_context(ctx.outer_context, context_matches, dict_swap, scope, copy_q)
 
   # TODO is control_flow_context necessary? if so, also check out ctx.Enter()/Exit()
   # prev = graph._get_control_flow_context()
@@ -354,7 +354,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
       new_op._add_input(elem)
 
     # Copy the control flow context.
-    control_flow_context = _copy_context(op._get_control_flow_context(), {})
+    control_flow_context = _copy_context(op._get_control_flow_context(), {}, dict_swap, scope, copy_q)
     new_op._set_control_flow_context(control_flow_context)
 
     # Use Graph's private methods to add the op, following
