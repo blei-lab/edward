@@ -94,22 +94,29 @@ class Inference(object):
 
   @property
   def data(self):
+    """Data dictionary binding observed variables to their realizations."""
     return self._data
 
   @property
   def latent_vars(self):
+    """Latent variable dictionary binding model latent variables to
+    their inferred posterior."""
     return self._latent_vars
 
   @property
   def n_iter(self):
+    """Number of expected iterations for algorithm."""
     return self._n_iter
 
   @property
   def n_print(self):
+    """Number of iterations for each print progress."""
     return self._n_print
 
   @property
   def reset(self):
+    """Reset ops for inference's internal variables. Fetch this from
+    session in order to reset inference."""
     return self._reset
 
   def run(self, variables=None, use_coordinator=True, *args, **kwargs):
@@ -275,8 +282,6 @@ class Inference(object):
     if self._debug:
       self._op_check = tf.add_check_numerics_ops()
 
-    # Store reset ops which user can call. Subclasses should append
-    # any ops needed to reset internal variables in inference.
     self.reset = [tf.variables_initializer([self.t])]
 
   @abc.abstractmethod
