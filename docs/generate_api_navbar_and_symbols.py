@@ -129,7 +129,7 @@ def generate_navbar(page_data):
   def generate_top_navbar():
     # Create top of navbar. (Note this can be cached and not run within a loop.)
     top_navbar = """\\begin{abstract}
-\subsection{API and Documentation}
+\section{API and Documentation}
 \\begin{lstlisting}[raw=html]
 <div class="row" style="padding-bottom: 5%">
 <div class="row" style="padding-bottom: 1%">"""
