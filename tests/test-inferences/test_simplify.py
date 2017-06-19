@@ -7,6 +7,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.inferences.conjugacy.simplify import *
+from edward.inferences.conjugacy.simplify import _mul_n
 
 
 class test_simplify_class(tf.test.TestCase):

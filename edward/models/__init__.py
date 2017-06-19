@@ -8,9 +8,11 @@ from edward.models.dirichlet_process import *
 from edward.models.empirical import *
 from edward.models.param_mixture import *
 from edward.models.point_mass import *
-from edward.models.random_variable import *
+from edward.models.random_variable import RandomVariable
+from edward.models.random_variables import *
 
 from tensorflow.python.util.all_util import remove_undocumented
+from edward.models import random_variables as _module
 
 _allowed_symbols = [
     'DirichletProcess',
@@ -19,8 +21,11 @@ _allowed_symbols = [
     'PointMass',
     'RandomVariable',
 ]
+for name in dir(_module):
+  obj = getattr(_module, name)
+  if (isinstance(obj, type) and
+          issubclass(obj, RandomVariable) and
+          obj != RandomVariable):
+    _allowed_symbols.append(name)
 
 remove_undocumented(__name__, allowed_exception_list=_allowed_symbols)
-
-# Import after auto-sealing modules above; we manually seal the below.
-from edward.models.random_variables import *

@@ -33,7 +33,7 @@ _suff_stat_to_dist['binary'][(('#x',),)] = (
 _suff_stat_to_dist['01'][(('#Log', ('#One_minus', ('#x',))),
                           ('#Log', ('#x',)))] = (
     Beta, lambda p1, p2: {'concentration1': p2 + 1,
-                              'concentration0': p1 + 1})
+                          'concentration0': p1 + 1})
 _suff_stat_to_dist['categorical'][(('#OneHot', ('#x',),),)] = (
     Categorical, lambda p1: {'logits': p1})
 _suff_stat_to_dist['nonnegative'][(('#Log', ('#x',)),)] = (
