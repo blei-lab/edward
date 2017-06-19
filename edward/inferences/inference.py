@@ -92,6 +92,10 @@ class Inference(object):
             sess.run(var.initializer, {ph: value})
             self._data[key] = var
 
+    self._n_iter = None
+    self._n_print = None
+    self._n_reset = None
+
   @property
   def data(self):
     """Data dictionary binding observed variables to their realizations."""
