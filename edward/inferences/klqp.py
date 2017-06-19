@@ -26,26 +26,26 @@ class KLqp(VariationalInference):
 
   #### Notes
 
-  `KLqp` also optimizes any model parameters \\(p(z \mid x;
-  \\theta)\\). It does this by variational EM, minimizing
+  `KLqp` also optimizes any model parameters $p(z \mid x;
+  \\theta)$. It does this by variational EM, minimizing
 
   $\mathbb{E}_{q(z; \lambda)} [ \log p(x, z; \\theta) ]$
 
-  with respect to \\(\\theta\\).
+  with respect to $\\theta$.
 
-  In conditional inference, we infer \\(z\\) in \\(p(z, \\beta
-  \mid x)\\) while fixing inference over \\(\\beta\\) using another
-  distribution \\(q(\\beta)\\). During gradient calculation, instead
+  In conditional inference, we infer $z$ in $p(z, \\beta
+  \mid x)$ while fixing inference over $\\beta$ using another
+  distribution $q(\\beta)$. During gradient calculation, instead
   of using the model's density
 
   $\log p(x, z^{(s)}), z^{(s)} \sim q(z; \lambda),$
 
-  for each sample \\(s=1,\ldots,S\\), `KLqp` uses
+  for each sample $s=1,\ldots,S$, `KLqp` uses
 
   $\log p(x, z^{(s)}, \\beta^{(s)}),$
 
-  where \\(z^{(s)} \sim q(z; \lambda)\\) and \\(\\beta^{(s)}
-  \sim q(\\beta)\\).
+  where $z^{(s)} \sim q(z; \lambda)$ and $\\beta^{(s)}
+  \sim q(\\beta)$.
   """
   def __init__(self, *args, **kwargs):
     super(KLqp, self).__init__(*args, **kwargs)
@@ -64,8 +64,8 @@ class KLqp(VariationalInference):
         $\\alpha_p \mathbb{E}_{q(z\mid x, \lambda)} [
               \log q(z\mid x, \lambda) - \log p(z)],$
 
-        then pass {\\(p(z)\\): \\(\\alpha_p\\)} as `kl_scaling`,
-        where \\(\\alpha_p\\) is a float that specifies how much to
+        then pass {$p(z)$: $\\alpha_p$} as `kl_scaling`,
+        where $\\alpha_p$ is a float that specifies how much to
         scale the KL term.
     """
     if kl_scaling is None:
@@ -95,8 +95,8 @@ class KLqp(VariationalInference):
         \\text{KL}( q(z; \lambda) \| p(z) ),$
 
     where the KL term is computed analytically (Kingma and Welling,
-    2014). We compute this automatically when \\(p(z)\\) and
-    \\(q(z; \lambda)\\) are Normal.
+    2014). We compute this automatically when $p(z)$ and
+    $q(z; \lambda)$ are Normal.
     """
     is_reparameterizable = all([
         rv.reparameterization_type ==
@@ -175,8 +175,8 @@ class ReparameterizationKLKLqp(VariationalInference):
         $\\alpha_p \mathbb{E}_{q(z\mid x, \lambda)} [
               \log q(z\mid x, \lambda) - \log p(z)],$
 
-        then pass {\\(p(z)\\): \\(\\alpha_p\\)} as `kl_scaling`,
-        where \\(\\alpha_p\\) is a float that specifies how much to
+        then pass {$p(z)$: $\\alpha_p$} as `kl_scaling`,
+        where $\\alpha_p$ is a float that specifies how much to
         scale the KL term.
     """
     if kl_scaling is None:
@@ -268,8 +268,8 @@ class ScoreKLKLqp(VariationalInference):
         $\\alpha_p \mathbb{E}_{q(z\mid x, \lambda)} [
               \log q(z\mid x, \lambda) - \log p(z)],$
 
-        then pass {\\(p(z)\\): \\(\\alpha_p\\)} as `kl_scaling`,
-        where \\(\\alpha_p\\) is a float that specifies how much to
+        then pass {$p(z)$: $\\alpha_p$} as `kl_scaling`,
+        where $\\alpha_p$ is a float that specifies how much to
         scale the KL term.
     """
     if kl_scaling is None:
@@ -318,7 +318,7 @@ def build_reparam_loss_and_gradients(inference, var_list):
 
   based on the reparameterization trick (Kingma and Welling, 2014).
 
-  Computed by sampling from \\(q(z;\lambda)\\) and evaluating the
+  Computed by sampling from $q(z;\lambda)$ and evaluating the
   expectation using Monte Carlo sampling.
   """
   p_log_prob = [0.0] * inference.n_samples
@@ -382,7 +382,7 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
 
   It assumes the KL is analytic.
 
-  Computed by sampling from \\(q(z;\lambda)\\) and evaluating the
+  Computed by sampling from $q(z;\lambda)$ and evaluating the
   expectation using Monte Carlo sampling.
   """
   p_log_lik = [0.0] * inference.n_samples
@@ -439,7 +439,7 @@ def build_reparam_entropy_loss_and_gradients(inference, var_list):
 
   It assumes the entropy is analytic.
 
-  Computed by sampling from \\(q(z;\lambda)\\) and evaluating the
+  Computed by sampling from $q(z;\lambda)$ and evaluating the
   expectation using Monte Carlo sampling.
   """
   p_log_prob = [0.0] * inference.n_samples
@@ -493,7 +493,7 @@ def build_score_loss_and_gradients(inference, var_list):
   """Build loss function and gradients based on the score function
   estimator (Paisley et al., 2012).
 
-  Computed by sampling from \\(q(z;\lambda)\\) and evaluating the
+  Computed by sampling from $q(z;\lambda)$ and evaluating the
   expectation using Monte Carlo sampling.
   """
   p_log_prob = [0.0] * inference.n_samples
@@ -556,7 +556,7 @@ def build_score_kl_loss_and_gradients(inference, var_list):
 
   It assumes the KL is analytic.
 
-  Computed by sampling from \\(q(z;\lambda)\\) and evaluating the
+  Computed by sampling from $q(z;\lambda)$ and evaluating the
   expectation using Monte Carlo sampling.
   """
   p_log_lik = [0.0] * inference.n_samples
@@ -615,7 +615,7 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
 
   It assumes the entropy is analytic.
 
-  Computed by sampling from \\(q(z;\lambda)\\) and evaluating the
+  Computed by sampling from $q(z;\lambda)$ and evaluating the
   expectation using Monte Carlo sampling.
   """
   p_log_prob = [0.0] * inference.n_samples

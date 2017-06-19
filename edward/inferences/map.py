@@ -30,16 +30,16 @@ class MAP(VariationalInference):
   discrete optimization.
 
   This class also minimizes the loss with respect to any model
-  parameters \\(p(z \mid x; \\theta)\\).
+  parameters $p(z \mid x; \\theta)$.
 
-  In conditional inference, we infer \\(z\\) in \\(p(z, \\beta
-  \mid x)\\) while fixing inference over \\(\\beta\\) using another
-  distribution \\(q(\\beta)\\). `MAP` optimizes
-  \\(\mathbb{E}_{q(\\beta)} [ \log p(x, z, \\beta) ]\\), leveraging
-  a single Monte Carlo sample, \\(\log p(x, z, \\beta^*)\\), where
-  \\(\\beta^* \sim q(\\beta)\\). This is a lower bound to the
-  marginal density \\(\log p(x, z)\\), and it is exact if
-  \\(q(\\beta) = p(\\beta \mid x)\\) (up to stochasticity).
+  In conditional inference, we infer $z$ in $p(z, \\beta
+  \mid x)$ while fixing inference over $\\beta$ using another
+  distribution $q(\\beta)$. `MAP` optimizes
+  $\mathbb{E}_{q(\\beta)} [ \log p(x, z, \\beta) ]$, leveraging
+  a single Monte Carlo sample, $\log p(x, z, \\beta^*)$, where
+  $\\beta^* \sim q(\\beta)$. This is a lower bound to the
+  marginal density $\log p(x, z)$, and it is exact if
+  $q(\\beta) = p(\\beta \mid x)$ (up to stochasticity).
   """
   def __init__(self, latent_vars=None, data=None):
     """

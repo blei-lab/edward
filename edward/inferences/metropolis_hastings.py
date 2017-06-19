@@ -21,25 +21,25 @@ class MetropolisHastings(MonteCarlo):
 
   #### Notes
 
-  In conditional inference, we infer \\(z\\) in \\(p(z, \\beta
-  \mid x)\\) while fixing inference over \\(\\beta\\) using another
-  distribution \\(q(\\beta)\\).
+  In conditional inference, we infer $z$ in $p(z, \\beta
+  \mid x)$ while fixing inference over $\\beta$ using another
+  distribution $q(\\beta)$.
   To calculate the acceptance ratio, `MetropolisHastings` uses an
   estimate of the marginal density,
 
   $p(x, z) = \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
             \\approx p(x, z, \\beta^*)$
 
-  leveraging a single Monte Carlo sample, where \\(\\beta^* \sim
-  q(\\beta)\\). This is unbiased (and therefore asymptotically exact as a
-  pseudo-marginal method) if \\(q(\\beta) = p(\\beta \mid x)\\).
+  leveraging a single Monte Carlo sample, where $\\beta^* \sim
+  q(\\beta)$. This is unbiased (and therefore asymptotically exact as a
+  pseudo-marginal method) if $q(\\beta) = p(\\beta \mid x)$.
   """
   def __init__(self, latent_vars, proposal_vars, data=None):
     """
     Args:
       proposal_vars: dict of RandomVariable to RandomVariable.
         Collection of random variables to perform inference on; each is
-        binded to a proposal distribution \\(g(z' \mid z)\\).
+        binded to a proposal distribution $g(z' \mid z)$.
 
     #### Examples
 

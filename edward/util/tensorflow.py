@@ -46,7 +46,7 @@ def dot(x, y):
 
 
 def logit(x):
-  """Evaluate \\(\log(x / (1 - x))\\) elementwise.
+  """Evaluate $\log(x / (1 - x))$ elementwise.
 
   Args:
     x: tf.Tensor.
@@ -58,7 +58,7 @@ def logit(x):
 
   Raises:
     InvalidArgumentError.
-    If the input is not between \\((0,1)\\) elementwise.
+    If the input is not between $(0,1)$ elementwise.
   """
   x = tf.convert_to_tensor(x)
   dependencies = [tf.assert_positive(x),
@@ -75,7 +75,7 @@ def rbf(X, X2=None, lengthscale=1.0, variance=1.0):
   $k(x, x') = \sigma^2 \exp\Big(
       -\\frac{1}{2} \sum_{d=1}^D \\frac{1}{\ell_d^2} (x_d - x'_d)^2 \Big)$
 
-  for output variance \\(\sigma^2\\) and lengthscale \\(\ell^2\\).
+  for output variance $\sigma^2$ and lengthscale $\ell^2$.
 
   The kernel is evaluated over all pairs of rows, `k(X[i, ], X2[j, ])`.
   If `X2` is not specified, then it evaluates over all pairs
@@ -204,16 +204,16 @@ def get_control_variate_coef(f, h):
   """Returns scalar used by control variates method for variance reduction in
   MCMC methods.
 
-  If we have a statistic \\(m\\) unbiased estimator of \\(\mu\\) and
-  and another statistic \\(t\\) which is an unbiased estimator of
-  \\(\tau\\) then \\(m^* = m + c(t - \tau)\\) is also an unbiased
-  estimator of \\(\mu\\) for any coefficient \\(c\\).
+  If we have a statistic $m$ unbiased estimator of $\mu$ and
+  and another statistic $t$ which is an unbiased estimator of
+  $\tau$ then $m^* = m + c(t - \tau)$ is also an unbiased
+  estimator of $\mu$ for any coefficient $c$.
 
   This function calculates the optimal coefficient
 
   $\c^* = \frac{Cov(m,t)}{Var(t)}$
 
-  for minimizing the variance of \\(`m^*\\).
+  for minimizing the variance of $`m^*$.
 
   Args:
     f: tf.Tensor.

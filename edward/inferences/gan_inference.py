@@ -28,7 +28,7 @@ class GANInference(VariationalInference):
       discriminator: function.
         Function (with parameters) to discriminate samples. It should
         output logit probabilities (real-valued) and not probabilities
-        in \\([0, 1]\\).
+        in $[0, 1]$.
 
     #### Notes
 

@@ -18,9 +18,9 @@ def ppc(T, data, latent_vars=None, n_samples=100):
 
   $p(T\mid x) = \int p(T(x^{\\text{rep}})\mid z) p(z\mid x) dz$
 
-  by drawing replicated data sets \\(x^{\\text{rep}}\\) and
-  calculating \\(T(x^{\\text{rep}})\\) for each data set. Then it
-  compares it to \\(T(x)\\).
+  by drawing replicated data sets $x^{\\text{rep}}$ and
+  calculating $T(x^{\\text{rep}})$ for each data set. Then it
+  compares it to $T(x)$.
 
   If `data` is inputted with the prior predictive distribution, then
   it is a prior predictive check (Box, 1980).

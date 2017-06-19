@@ -15,11 +15,11 @@ except Exception as e:
 
 
 class distributions_DirichletProcess(Distribution):
-  """Dirichlet process \\(\alpha, H\\).
+  """Dirichlet process $\alpha, H$.
 
-  It has two parameters: a positive real value \\(\alpha\\), known
+  It has two parameters: a positive real value $\alpha$, known
   as the concentration parameter (`concentration`), and a base
-  distribution \\(H\\) (`base`).
+  distribution $H$ (`base`).
   """
   def __init__(self,
                concentration,

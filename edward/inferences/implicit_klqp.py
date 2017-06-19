@@ -18,13 +18,13 @@ class ImplicitKLqp(GANInference):
 
   $\\text{KL}( q(z, \\beta; \lambda) \| p(z, \\beta \mid x) ),$
 
-  where \\(z\\) are local variables associated to a data point and
-  \\(\\beta\\) are global variables shared across data points.
+  where $z$ are local variables associated to a data point and
+  $\\beta$ are global variables shared across data points.
 
   Global latent variables require `log_prob()` and need to return a
   random sample when fetched from the graph. Local latent variables
   and observed variables require only a random sample when fetched
-  from the graph. (This is true for both \\(p\\) and \\(q\\).)
+  from the graph. (This is true for both $p$ and $q$.)
 
   All variational factors must be reparameterizable: each of the
   random variables (`rv`) satisfies `rv.is_reparameterized` and
@@ -40,8 +40,8 @@ class ImplicitKLqp(GANInference):
         It takes three arguments: a data dict, local latent variable
         dict, and global latent variable dict. As with GAN
         discriminators, it can take a batch of data points and local
-        variables, of size \\(M\\), and output a vector of length
-        \\(M\\).
+        variables, of size $M$, and output a vector of length
+        $M$.
       global_vars: dict of RandomVariable to RandomVariable, optional.
         Identifying which variables in `latent_vars` are global
         variables, shared across data points. These will not be
@@ -108,16 +108,16 @@ class ImplicitKLqp(GANInference):
             r^*(x_n, z_n, \\beta) ] \Big).$
 
     We minimize it with respect to parameterized variational
-    families \\(q(z, \\beta; \lambda)\\).
+    families $q(z, \\beta; \lambda)$.
 
-    \\(r^*(x_n, z_n, \\beta)\\) is a function of a single data point
-    \\(x_n\\), single local variable \\(z_n\\), and all global
-    variables \\(\\beta\\). It is equal to the log-ratio
+    $r^*(x_n, z_n, \\beta)$ is a function of a single data point
+    $x_n$, single local variable $z_n$, and all global
+    variables $\\beta$. It is equal to the log-ratio
 
     $\log p(x_n, z_n\mid \\beta) - \log q(x_n, z_n\mid \\beta),$
 
-    where \\(q(x_n)\\) is the empirical data distribution. Rather
-    than explicit calculation, \\(r^*(x, z, \\beta)\\) is the
+    where $q(x_n)$ is the empirical data distribution. Rather
+    than explicit calculation, $r^*(x, z, \\beta)$ is the
     solution to a ratio estimation problem, minimizing the specified
     `ratio_loss`.
 
@@ -126,9 +126,9 @@ class ImplicitKLqp(GANInference):
 
     #### Notes
 
-    This also includes model parameters \\(p(x, z, \\beta; \\theta)\\)
+    This also includes model parameters $p(x, z, \\beta; \\theta)$
     and variational distributions with inference networks
-    \\(q(z\mid x)\\).
+    $q(z\mid x)$.
 
     There are a bunch of extensions we could easily do in this
     implementation:

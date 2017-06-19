@@ -20,26 +20,26 @@ class KLpq(VariationalInference):
 
   #### Notes
 
-  `KLpq` also optimizes any model parameters \\(p(z\mid x;
-  \\theta)\\). It does this by variational EM, minimizing
+  `KLpq` also optimizes any model parameters $p(z\mid x;
+  \\theta)$. It does this by variational EM, minimizing
 
   $\mathbb{E}_{p(z \mid x; \lambda)} [ \log p(x, z; \\theta) ]$
 
-  with respect to \\(\\theta\\).
+  with respect to $\\theta$.
 
-  In conditional inference, we infer \\(z` in \\(p(z, \\beta
-  \mid x)\\) while fixing inference over \\(\\beta\\) using another
-  distribution \\(q(\\beta)\\). During gradient calculation, instead
+  In conditional inference, we infer $z` in $p(z, \\beta
+  \mid x)$ while fixing inference over $\\beta$ using another
+  distribution $q(\\beta)$. During gradient calculation, instead
   of using the model's density
 
   $\log p(x, z^{(s)}), z^{(s)} \sim q(z; \lambda),$
 
-  for each sample \\(s=1,\ldots,S\\), `KLpq` uses
+  for each sample $s=1,\ldots,S$, `KLpq` uses
 
   $\log p(x, z^{(s)}, \\beta^{(s)}),$
 
-  where \\(z^{(s)} \sim q(z; \lambda)\\) and \\(\\beta^{(s)}
-  \sim q(\\beta)\\).
+  where $z^{(s)} \sim q(z; \lambda)$ and$\\beta^{(s)}
+  \sim q(\\beta)$.
   """
   def __init__(self, *args, **kwargs):
     super(KLpq, self).__init__(*args, **kwargs)
@@ -68,13 +68,13 @@ class KLpq(VariationalInference):
     $\\frac{1}{S} \sum_{s=1}^S [
       w_{\\text{norm}}(z^s; \lambda) (\log p(x, z^s) - \log q(z^s; \lambda) ],$
 
-    where for \\(z^s \sim q(z; \lambda)\\),
+    where for $z^s \sim q(z; \lambda)$,
 
     $w_{\\text{norm}}(z^s; \lambda) =
           w(z^s; \lambda) / \sum_{s=1}^S w(z^s; \lambda)$
 
-    normalizes the importance weights, \\(w(z^s; \lambda) = p(x,
-    z^s) / q(z^s; \lambda)\\).
+    normalizes the importance weights, $w(z^s; \lambda) = p(x,
+    z^s) / q(z^s; \lambda)$.
 
     This provides a gradient,
 
