@@ -188,10 +188,10 @@ class DocGeneratorVisitor(object):
       # We cannot use the duplicate mechanism for some constants, since e.g.,
       # id(c1) == id(c2) with c1=1, c2=1. This is unproblematic since constants
       # have no usable docstring and won't be documented automatically.
-      if (py_object is not None and
-          not isinstance(py_object, six.integer_types + six.string_types +
-                         (six.binary_type, six.text_type, float, complex, bool))
-          and py_object is not ()):
+      if (py_object is not None and not
+          isinstance(py_object, six.integer_types + six.string_types +
+                     (six.binary_type, six.text_type, float, complex, bool)) and
+              py_object is not ()):
         object_id = id(py_object)
         if object_id in reverse_index:
           master_name = reverse_index[object_id]

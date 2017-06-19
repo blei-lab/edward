@@ -152,8 +152,8 @@ def write_docs(output_dir, parser_config, yaml_toc):
       for module in modules:
         f.write('  - title: ' + module + '\n'
                 '    section:\n' + '    - title: Overview\n' +
-                '      path: /' + symbol_to_file[module]
-                + '\n')
+                '      path: /' + symbol_to_file[module] +
+                '\n')
 
         symbols_in_module = module_children.get(module, [])
         # Sort case-insensitive, if equal sort case sensitive (upper first)

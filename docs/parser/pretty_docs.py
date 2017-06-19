@@ -84,10 +84,10 @@ def _build_class_page(page_info):
   """Given a ClassPageInfo object Return the page as an md string."""
   meta_data = _Metadata(page_info.full_name)
   for item in itertools.chain(
-      page_info.classes,
-      page_info.properties,
-      page_info.methods,
-      page_info.other_members):
+          page_info.classes,
+          page_info.properties,
+          page_info.methods,
+          page_info.other_members):
     meta_data.append(item)
 
   parts = [meta_data.build_html()]
@@ -275,7 +275,7 @@ def _build_signature(obj_info):
     sig = obj_info.signature[0]
   else:
     sig = ',\n'.join('    %s' % sig_item for sig_item in obj_info.signature)
-    sig = '\n'+sig+'\n'
+    sig = '\n' + sig + '\n'
 
   return signature_template.format(name=obj_info.short_name, sig=sig)
 

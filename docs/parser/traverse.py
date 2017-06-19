@@ -44,7 +44,7 @@ def _traverse_internal(root, visit, stack, path):
   for name, child in children:
     # Do not descend into built-in modules
     if tf_inspect.ismodule(
-        child) and child.__name__ in sys.builtin_module_names:
+            child) and child.__name__ in sys.builtin_module_names:
       continue
 
     # Break cycles

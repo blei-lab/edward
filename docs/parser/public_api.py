@@ -64,7 +64,7 @@ class PublicAPIVisitor(object):
             'tensorboard',
         ],
 
-        ## Everything below here is legitimate.
+        # Everything below here is legitimate.
         # It'll stay, but it's not officially part of the API.
         'tf.app': ['flags'],
         # Imported for compatibility between py2/3.

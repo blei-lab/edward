@@ -75,8 +75,8 @@ def _get_raw_docstring(py_object):
   # For object instances, tf_inspect.getdoc does give us the docstring of their
   # type, which is not what we want. Only return the docstring if it is useful.
   if (tf_inspect.isclass(py_object) or tf_inspect.ismethod(py_object) or
-      tf_inspect.isfunction(py_object) or tf_inspect.ismodule(py_object) or
-      isinstance(py_object, property)):
+          tf_inspect.isfunction(py_object) or tf_inspect.ismodule(py_object) or
+          isinstance(py_object, property)):
     return tf_inspect.getdoc(py_object) or ''
   else:
     return ''
@@ -187,7 +187,7 @@ class ReferenceResolver(object):
       `string`, with "@{symbol}" references replaced by Markdown links.
     """
     return re.sub(SYMBOL_REFERENCE_RE,
-                  lambda match: self._one_ref(match.group(1),  # pylint: disable=g-long-lambda
+                  lambda match: self._one_ref(match.group(1),
                                               relative_path_to_root,
                                               style),
                   string)
@@ -329,7 +329,8 @@ class ReferenceResolver(object):
       hash_tag = ''
 
     if string in self._doc_index:
-      if not manual_link_text: link_text = self._doc_index[string].title
+      if not manual_link_text:
+        link_text = self._doc_index[string].title
       url = os.path.normpath(os.path.join(
           relative_path_to_root, '../..', self._doc_index[string].url))
       return '[%s](%s%s)' % (link_text, url, hash_tag)
@@ -402,8 +403,8 @@ def _gen_pairs(items):
     yield next(items), next(items)
 
 
-class _FunctionDetail(
-    collections.namedtuple('_FunctionDetail', ['keyword', 'header', 'items'])):
+class _FunctionDetail(collections.namedtuple(
+        '_FunctionDetail', ['keyword', 'header', 'items'])):
   """A simple class to contain function details.
 
   Composed of a "keyword", a possibly empty "header" string, and a possibly
@@ -565,7 +566,8 @@ def _get_arg_spec(func):
 
     argspec_defaults = list(argspec.defaults or ())
     if argspec.defaults and partial_args > first_default_arg:
-      argspec_defaults = list(argspec.defaults[partial_args-first_default_arg:])
+      argspec_defaults = list(
+          argspec.defaults[partial_args - first_default_arg:])
 
     first_default_arg = max(0, first_default_arg - partial_args)
     for kwarg in (func.keywords or []):
@@ -573,7 +575,7 @@ def _get_arg_spec(func):
         i = argspec_args.index(kwarg)
         argspec_args.pop(i)
         if i >= first_default_arg:
-          argspec_defaults.pop(i-first_default_arg)
+          argspec_defaults.pop(i - first_default_arg)
         else:
           first_default_arg -= 1
     return tf_inspect.ArgSpec(args=argspec_args,
@@ -639,8 +641,8 @@ def _generate_signature(func, reverse_index):
       # of the defaults.
       ast_defaults = [None] * len(argspec.defaults)
 
-    for arg, default, ast_default in zip(
-        argspec.args[first_arg_with_default:], argspec.defaults, ast_defaults):
+    for arg, default, ast_default in zip(argspec.args[first_arg_with_default:],
+                                         argspec.defaults, ast_defaults):
       if id(default) in reverse_index:
         default_text = reverse_index[id(default)]
       elif ast_default is not None:
@@ -687,7 +689,8 @@ def _get_guides_markdown(duplicate_names, guide_index, relative_path):
   all_guides = []
   for name in duplicate_names:
     all_guides.extend(guide_index.get(name, []))
-  if not all_guides: return ''
+  if not all_guides:
+    return ''
   prefix = '../' * (relative_path.count('/') + 3)
   links = sorted(set([guide_ref.make_md_link(prefix)
                       for guide_ref in all_guides]))
@@ -1081,14 +1084,14 @@ class _ClassPageInfo(object):
         # Omit methods defined by namedtuple.
         original_method = defining_class.__dict__[short_name]
         if (hasattr(original_method, '__module__') and
-            (original_method.__module__ or '').startswith('namedtuple')):
+                (original_method.__module__ or '').startswith('namedtuple')):
           continue
 
         # Some methods are often overridden without documentation. Because it's
         # obvious what they do, don't include them in the docs if there's no
         # docstring.
         if not child_doc.brief.strip() and short_name in [
-            '__str__', '__repr__', '__hash__', '__del__', '__copy__']:
+                '__str__', '__repr__', '__hash__', '__del__', '__copy__']:
           print('Skipping %s, defined in %s, no docstring.' % (child_name,
                                                                defining_class))
           continue
@@ -1108,7 +1111,7 @@ class _ClassPageInfo(object):
         # Exclude members defined by protobuf that are useless
         if issubclass(py_class, ProtoMessage):
           if (short_name.endswith('_FIELD_NUMBER') or
-              short_name in ['__slots__', 'DESCRIPTOR']):
+                  short_name in ['__slots__', 'DESCRIPTOR']):
             continue
 
         # TODO(wicke): We may want to also remember the object itself.
@@ -1284,7 +1287,7 @@ class ParserConfig(object):
     self.base_dir = base_dir
     self.defined_in_prefix = 'edward/'
     self.code_url_prefix = (
-        'https://github.com/blei-lab/edward/tree/master/edward/')  # pylint: disable=line-too-long
+        'https://github.com/blei-lab/edward/tree/master/edward/')
 
   def py_name_to_object(self, full_name):
     """Return the Python object for a Python symbol name."""
@@ -1328,7 +1331,7 @@ def docs_for_object(full_name, py_object, parser_config):
   # TODO(wicke): Once other pieces are ready, enable this also for partials.
   if (tf_inspect.ismethod(py_object) or tf_inspect.isfunction(py_object) or
       # Some methods in classes from extensions come in as routines.
-      tf_inspect.isroutine(py_object)):
+          tf_inspect.isroutine(py_object)):
     page_info = _FunctionPageInfo(master_name)
     page_info.set_signature(py_object, parser_config.reverse_index)
 
@@ -1515,7 +1518,7 @@ def generate_global_index(library_name, index, reference_resolver):
   symbol_links = []
   for full_name, py_object in six.iteritems(index):
     if (tf_inspect.ismodule(py_object) or tf_inspect.isfunction(py_object) or
-        tf_inspect.isclass(py_object)):
+            tf_inspect.isclass(py_object)):
       # In Python 3, unbound methods are functions, so eliminate those.
       if tf_inspect.isfunction(py_object):
         if full_name.count('.') == 0:
