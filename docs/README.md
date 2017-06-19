@@ -1,6 +1,6 @@
 # Edward website
 
-The back end of our website depends on [pandoc](http://pandoc.org). Pandoc lets us write stand-alone pages for documentation using LaTeX, with functional bibliographies. We also use a custom parser to auto-generate API documentation from the source code's docstrings.
+The back end of our website depends on [pandoc](http://pandoc.org). Pandoc lets us write stand-alone pages for documentation using LaTeX, with functional bibliographies. We also use a custom parser to generate API documentation from the source code's docstrings.
 
 The front end of our website depends on [skeleton.css](http://getskeleton.com/), [Google Fonts](https://www.google.com/fonts), [highlight.js](https://highlightjs.org/), and [KaTeX](https://khan.github.io/KaTeX/).
 
