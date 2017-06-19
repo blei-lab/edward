@@ -5,7 +5,7 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from edward.models import random_variables as rvs
+from edward.models.random_variables import *
 
 
 def _val_wrapper(f):
@@ -150,17 +150,17 @@ def poisson_log_prob(self, val):
   return result
 
 
-rvs.Bernoulli.conjugate_log_prob = bernoulli_log_prob
-rvs.Beta.conjugate_log_prob = beta_log_prob
-rvs.Binomial.conjugate_log_prob = binomial_log_prob
-rvs.Categorical.conjugate_log_prob = categorical_log_prob
-rvs.Chi2.conjugate_log_prob = chi2_log_prob
-rvs.Dirichlet.conjugate_log_prob = dirichlet_log_prob
-rvs.Exponential.conjugate_log_prob = exponential_log_prob
-rvs.Gamma.conjugate_log_prob = gamma_log_prob
-rvs.InverseGamma.conjugate_log_prob = inverse_gamma_log_prob
-rvs.Laplace.conjugate_log_prob = laplace_log_prob
-rvs.Multinomial.conjugate_log_prob = multinomial_log_prob
-rvs.MultivariateNormalDiag.conjugate_log_prob = mvn_diag_log_prob
-rvs.Normal.conjugate_log_prob = normal_log_prob
-rvs.Poisson.conjugate_log_prob = poisson_log_prob
+Bernoulli.conjugate_log_prob = bernoulli_log_prob
+Beta.conjugate_log_prob = beta_log_prob
+Binomial.conjugate_log_prob = binomial_log_prob
+Categorical.conjugate_log_prob = categorical_log_prob
+Chi2.conjugate_log_prob = chi2_log_prob
+Dirichlet.conjugate_log_prob = dirichlet_log_prob
+Exponential.conjugate_log_prob = exponential_log_prob
+Gamma.conjugate_log_prob = gamma_log_prob
+InverseGamma.conjugate_log_prob = inverse_gamma_log_prob
+Laplace.conjugate_log_prob = laplace_log_prob
+Multinomial.conjugate_log_prob = multinomial_log_prob
+MultivariateNormalDiag.conjugate_log_prob = mvn_diag_log_prob
+Normal.conjugate_log_prob = normal_log_prob
+Poisson.conjugate_log_prob = poisson_log_prob

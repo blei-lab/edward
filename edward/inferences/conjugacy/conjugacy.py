@@ -11,7 +11,7 @@ import time
 from collections import defaultdict
 from edward.inferences.conjugacy.simplify \
     import symbolic_suff_stat, full_simplify, expr_contains, reconstruct_expr
-from edward.models import random_variables as rvs
+from edward.models.random_variables import *
 from edward.util import copy, get_blanket
 
 
@@ -29,33 +29,33 @@ def normal_from_natural_params(p1, p2):
 
 _suff_stat_to_dist = defaultdict(dict)
 _suff_stat_to_dist['binary'][(('#x',),)] = (
-    rvs.Bernoulli, lambda p1: {'logits': p1})
+    Bernoulli, lambda p1: {'logits': p1})
 _suff_stat_to_dist['01'][(('#Log', ('#One_minus', ('#x',))),
                           ('#Log', ('#x',)))] = (
-    rvs.Beta, lambda p1, p2: {'concentration1': p2 + 1,
-                              'concentration0': p1 + 1})
+    Beta, lambda p1, p2: {'concentration1': p2 + 1,
+                          'concentration0': p1 + 1})
 _suff_stat_to_dist['categorical'][(('#OneHot', ('#x',),),)] = (
-    rvs.Categorical, lambda p1: {'logits': p1})
+    Categorical, lambda p1: {'logits': p1})
 _suff_stat_to_dist['nonnegative'][(('#Log', ('#x',)),)] = (
-    rvs.Chi2, lambda p1: {'df': 2.0 * (p1 + 1)})
+    Chi2, lambda p1: {'df': 2.0 * (p1 + 1)})
 _suff_stat_to_dist['simplex'][(('#Log', ('#x',)),)] = (
-    rvs.Dirichlet, lambda p1: {'concentration': p1 + 1})
+    Dirichlet, lambda p1: {'concentration': p1 + 1})
 _suff_stat_to_dist['nonnegative'][(('#x',),)] = (
-    rvs.Exponential, lambda p1: {'rate': -p1})
+    Exponential, lambda p1: {'rate': -p1})
 _suff_stat_to_dist['nonnegative'][(('#Log', ('#x',)),
                                    ('#x',))] = (
-    rvs.Gamma, lambda p1, p2: {'concentration': p1 + 1, 'rate': -p2})
+    Gamma, lambda p1, p2: {'concentration': p1 + 1, 'rate': -p2})
 _suff_stat_to_dist['nonnegative'][(('#CPow-1.0000e+00', ('#x',)),
                                    ('#Log', ('#x',)))] = (
-    rvs.InverseGamma, lambda p1, p2: {'concentration': -p2 - 1, 'rate': -p1})
+    InverseGamma, lambda p1, p2: {'concentration': -p2 - 1, 'rate': -p1})
 _suff_stat_to_dist['multivariate_real'][(('#CPow2.0000e+00', ('#x',)),
                                         ('#x',))] = (
-    rvs.MultivariateNormalDiag, mvn_diag_from_natural_params)
+    MultivariateNormalDiag, mvn_diag_from_natural_params)
 _suff_stat_to_dist['real'][(('#CPow2.0000e+00', ('#x',)),
                             ('#x',))] = (
-    rvs.Normal, normal_from_natural_params)
+    Normal, normal_from_natural_params)
 _suff_stat_to_dist['countable'][(('#x',),)] = (
-    rvs.Poisson, lambda p1: {'rate': tf.exp(p1)})
+    Poisson, lambda p1: {'rate': tf.exp(p1)})
 
 
 def complete_conditional(rv, cond_set=None):
