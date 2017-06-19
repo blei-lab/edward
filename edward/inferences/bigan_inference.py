@@ -17,31 +17,30 @@ class BiGANInference(GANInference):
   Works for the class of implicit (and differentiable) probabilistic
   models. These models do not require a tractable density and assume
   only a program that generates samples.
+
+  #### Notes
+
+  `BiGANInference` matches a mapping from data to latent variables and a
+  mapping from latent variables to data through a joint
+  discriminator.
+
+  In building the computation graph for inference, the
+  discriminator's parameters can be accessed with the variable scope
+  "Disc".
+  In building the computation graph for inference, the
+  encoder and decoder parameters can be accessed with the variable scope
+  "Gen".
+
+  #### Examples
+
+  ```python
+  with tf.variable_scope("Gen"):
+    xf = gen_data(z_ph)
+    zf = gen_latent(x_ph)
+  inference = ed.BiGANInference({z_ph: zf}, {xf: x_ph}, discriminator)
+  ```
   """
   def __init__(self, latent_vars, data, discriminator):
-    """
-    #### Notes
-
-    `BiGANInference` matches a mapping from data to latent variables and a
-    mapping from latent variables to data through a joint
-    discriminator.
-
-    In building the computation graph for inference, the
-    discriminator's parameters can be accessed with the variable scope
-    "Disc".
-    In building the computation graph for inference, the
-    encoder and decoder parameters can be accessed with the variable scope
-    "Gen".
-
-    #### Examples
-
-    ```python
-    with tf.variable_scope("Gen"):
-      xf = gen_data(z_ph)
-      zf = gen_latent(x_ph)
-    inference = ed.BiGANInference({z_ph: zf}, {xf: x_ph}, discriminator)
-    ```
-    """
     if not callable(discriminator):
       raise TypeError("discriminator must be a callable function.")
 

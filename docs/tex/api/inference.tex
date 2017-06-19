@@ -149,9 +149,38 @@ the latent variables; it uses samples from the prior.
 
 \begin{center}\rule{3in}{0.4pt}\end{center}
 
-{%sphinx
-
-.. autoclass:: edward.inferences.Inference
-   :members:
-
-%}
+\begin{itemize}
+  \item @{ed.inferences.Inference}
+  \item @{ed.inferences.VariationalInference}
+    \begin{itemize}
+    \item @{ed.inferences.KLqp}
+      \begin{itemize}
+      \item @{ed.inferences.ReparameterizationKLqp}
+      \item @{ed.inferences.ReparameterizationKLKLqp}
+      \item @{ed.inferences.ReparameterizationEntropyKLqp}
+      \item @{ed.inferences.ScoreKLqp}
+      \item @{ed.inferences.ScoreKLKLqp}
+      \item @{ed.inferences.ScoreEntropyKLqp}
+      \end{itemize}
+    \item @{ed.inferences.KLpq}
+    \item @{ed.inferences.GANInference}
+      \begin{itemize}
+      \item @{ed.inferences.BiGANInference}
+      \item @{ed.inferences.ImplicitKLqp}
+      \item @{ed.inferences.WGANInference}
+      \end{itemize}
+    \item @{ed.inferences.MAP}
+      \begin{itemize}
+      \item @{ed.inferences.Laplace}
+      \end{itemize}
+    \end{itemize}
+  \item @{ed.inferences.MonteCarlo}
+    \begin{itemize}
+    \item @{ed.inferences.Gibbs}
+    \item @{ed.inferences.MetropolisHastings}
+    \item @{ed.inferences.HMC}
+    \item @{ed.inferences.SGLD}
+    \item @{ed.inferences.SGHMC}
+    \end{itemize}
+  \item @{ed.inferences.conjugacy.complete_conditional}
+\end{itemize}

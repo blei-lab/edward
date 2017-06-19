@@ -1,2 +1,2 @@
 #!/bin/bash
-ghp-import -n -p .
+ghp-import -n -p build

@@ -33,7 +33,8 @@ class VariationalInference(Inference):
 
   def initialize(self, optimizer=None, var_list=None, use_prettytensor=False,
                  global_step=None, *args, **kwargs):
-    """Initialize variational inference.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computation graph.
 
     Args:
       optimizer: str or tf.train.Optimizer, optional.
@@ -138,14 +139,14 @@ class VariationalInference(Inference):
         tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=scope)))
 
   def update(self, feed_dict=None):
-    """Run one iteration of optimizer for variational inference.
+    """Run one iteration of optimization.
 
     Args:
       feed_dict: dict, optional.
         Feed dictionary for a TensorFlow session run. It is used to feed
         placeholders that are not fed during initialization.
 
-    Returns;
+    Returns:
       dict.
       Dictionary of algorithm-specific information. In this case, the
       loss function value after one iteration.
@@ -187,7 +188,7 @@ class VariationalInference(Inference):
     Any derived class of `VariationalInference` **must** implement
     this method.
 
-    Raises;
+    Raises:
       NotImplementedError.
     """
     raise NotImplementedError()

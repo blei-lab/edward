@@ -1,7 +1,7 @@
-"""Autogenerate navbar and docstrings.
+"""Autogenerate navbar and convert {{symbol}}s to a format for the parser.
 
-All pages in tex/api/ must be an element in PAGES. Otherwise the
-page will have no navbar or docstrings.
+All pages in src_dir/api/ must be an element in PAGES. Otherwise the
+page will have no navbar.
 
 The order of the navbar is given by the order of PAGES.
 """
@@ -9,9 +9,15 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import argparse
 import os
 import shutil
 import re
+
+parser = argparse.ArgumentParser()
+parser.add_argument('--src_dir', type=str)
+parser.add_argument('--out_dir', type=str)
+args = parser.parse_args()
 
 # Note we don't strictly need the 'parent_pages' field. We can
 # technically infer them based on the other pages' 'child_pages'. It
@@ -109,12 +115,6 @@ PAGES = [
         'parent_pages': [],
         'child_pages': [],
     },
-    # {
-    #     'page': 'util.tex',
-    #     'title': 'Utilities',
-    #     'parent_pages': [],
-    #     'child_pages': [],
-    # },
 ]
 
 
@@ -123,7 +123,7 @@ def generate_navbar(page_data):
   def generate_top_navbar():
     # Create top of navbar. (Note this can be cached and not run within a loop.)
     top_navbar = """\\begin{abstract}
-\subsection{API and Documentation}
+\section{API and Documentation}
 \\begin{lstlisting}[raw=html]
 <div class="row" style="padding-bottom: 5%">
 <div class="row" style="padding-bottom: 1%">"""
@@ -131,7 +131,8 @@ def generate_navbar(page_data):
       title = page_data['title']
       page_name = page_data['page']
       parent_pages = page_data['parent_pages']
-      if len(parent_pages) == 0 and page_name != 'index.tex':
+      if len(parent_pages) == 0 and \
+              page_name not in ['index.tex', 'reference.tex']:
         top_navbar += '\n'
         top_navbar += '<a class="button3" href="/api/'
         top_navbar += page_name.replace('.tex', '')
@@ -190,55 +191,46 @@ def generate_navbar(page_data):
   return navbar
 
 
-def generate_docstrings(page_data):
-  """Return a list of strings. Its size is the number of
-  sphinx-generated docstrings."""
-  page_name = page_data['page'][:-4]
-  path = os.path.join('build/html/', page_name + '.html')
-  document = open(path).read()
-  docstrings = re.findall(r'(?<=<p>{%sphinx</p>)(.*?)(?=<p>%}</p>)',
-                          document, flags=re.DOTALL)
-  if docstrings is None:
-    docstrings = []
+def generate_models():
+  import edward.models as module
+  from edward.models import RandomVariable
+  objs = [getattr(module, name) for name in dir(module)]
+  objs = [obj for obj in objs
+          if (isinstance(obj, type) and
+              issubclass(obj, RandomVariable) and
+              obj != RandomVariable
+              )
+          ]
+  objs = sorted(objs, key=lambda cls: cls.__name__)
 
-  for i in range(len(docstrings)):
-    docstrings[i] = "\\begin{lstlisting}[raw=html]\n" + \
-                    docstrings[i] + \
-                    "\\end{lstlisting}"
-
-  return docstrings
+  links = [('@{{ed.models.{}}}').format(cls.__name__) for cls in objs]
+  return '\n\item'.join(links)
 
 
-def generate_tensorflow_distributions():
-  import edward.models
-  from tensorflow.contrib import distributions
+def generate_criticisms():
+  import edward.criticisms as module
+  objs = [getattr(module, name) for name in dir(module)]
+  objs = [obj for obj in objs
+          if (hasattr(obj, '__call__') or
+              isinstance(obj, type))
+          ]
+  objs = sorted(objs, key=lambda cls: cls.__name__)
 
-  built_in_models = ['DirichletProcess', 'distributions_DirichletProcess',
-                     'Empirical', 'distributions_Empirical',
-                     'ParamMixture', 'distributions_ParamMixture',
-                     'PointMass', 'distributions_PointMass']
-  models = [getattr(edward.models, name) for name in dir(edward.models)]
-  models = [model for model in models
-            if (isinstance(model, type) and
-                issubclass(model, distributions.Distribution) and
-                model.__name__ not in built_in_models
-                )
-            ]
-  models = sorted(models, key=lambda cls: cls.__name__)
+  links = [('@{{ed.criticisms.{}}}').format(cls.__name__) for cls in objs]
+  return '\n\item'.join(links)
 
-  stub = 'https://www.tensorflow.org/api_docs/python/tf/contrib/distributions'
-  fragment = ('<a class="reference" '
-              'href="{stub}/{name}" title="edward.models.{name}">'
-              '<code class="xref py py-class docutils literal">'
-              '<span class="pre">edward.models.{name}</span>'
-              '</code>'
-              '</a>')
 
-  links = [fragment.format(stub=stub, name=cls.__name__)
-           for cls in models]
+def generate_util():
+  import edward.util as module
+  objs = [getattr(module, name) for name in dir(module)]
+  objs = [obj for obj in objs
+          if (hasattr(obj, '__call__') or
+              isinstance(obj, type))
+          ]
+  objs = sorted(objs, key=lambda cls: cls.__name__)
 
-  # note the start and end li tag are provided from outside
-  return '</li>\n<li>'.join(links)
+  links = [('@{{ed.util.{}}}').format(cls.__name__) for cls in objs]
+  return '\n\item'.join(links)
 
 
 def get_tensorflow_version():
@@ -247,28 +239,17 @@ def get_tensorflow_version():
 
 
 print("Starting autogeneration.")
-print("Populating build/ directory with files from tex/api/.")
-for subdir, dirs, fnames in os.walk('tex/api'):
-  for fname in fnames:
-    new_subdir = subdir.replace('tex/api', 'build')
-    if not os.path.exists(new_subdir):
-      os.makedirs(new_subdir)
-
-    if fname[-4:] == '.tex':
-      fpath = os.path.join(subdir, fname)
-      new_fpath = fpath.replace('tex/api', 'build')
-      shutil.copy(fpath, new_fpath)
+src_dir = os.path.expanduser(args.src_dir)
+out_dir = os.path.expanduser(args.out_dir)
+shutil.copytree(src_dir, out_dir)
 
 for page_data in PAGES:
   page_name = page_data['page']
-  path = os.path.join('build', page_name)
+  path = os.path.join(out_dir, 'api', page_name)
   print(path)
 
   # Generate navigation bar.
   navbar = generate_navbar(page_data)
-
-  # Generate docstrings.
-  docstrings = generate_docstrings(page_data)
 
   # Insert autogenerated content into page.
   document = open(path).read()
@@ -276,16 +257,14 @@ for page_data in PAGES:
          ("File found for " + path + " but missing {{navbar}} tag.")
   document = document.replace('{{navbar}}', navbar)
 
-  for i in range(len(docstrings)):
-    document = re.sub(r'(?<={%sphinx)(.*?)(?=%})', "",
-                      document, count=1, flags=re.DOTALL)
-    document = document.replace('{%sphinx%}', docstrings[i])
+  if '{{models}}' in document:
+    document = document.replace('{{models}}', generate_models())
 
-  # note: this tag is part of the sphinx section,
-  #       use single quotes to avoid clash
-  if '{{tensorflow_distributions}}' in document:
-    document = document.replace('{{tensorflow_distributions}}',
-                                generate_tensorflow_distributions())
+  if '{{criticisms}}' in document:
+    document = document.replace('{{criticisms}}', generate_criticisms())
+
+  if '{{util}}' in document:
+    document = document.replace('{{util}}', generate_util())
 
   if '{{tensorflow_version}}' in document:
     document = document.replace('{{tensorflow_version}}',

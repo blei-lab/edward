@@ -45,7 +45,8 @@ class KLpq(VariationalInference):
     super(KLpq, self).__init__(*args, **kwargs)
 
   def initialize(self, n_samples=1, *args, **kwargs):
-    """Initialization.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computation graph.
 
     Args:
       n_samples: int, optional.

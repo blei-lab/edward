@@ -33,25 +33,26 @@ class MetropolisHastings(MonteCarlo):
   leveraging a single Monte Carlo sample, where $\\beta^* \sim
   q(\\beta)$. This is unbiased (and therefore asymptotically exact as a
   pseudo-marginal method) if $q(\\beta) = p(\\beta \mid x)$.
+
+  #### Examples
+
+  ```python
+  z = Normal(loc=0.0, scale=1.0)
+  x = Normal(loc=tf.ones(10) * z, scale=1.0)
+
+  qz = Empirical(tf.Variable(tf.zeros(500)))
+  proposal_z = Normal(loc=z, scale=0.5)
+  data = {x: np.array([0.0] * 10, dtype=np.float32)}
+  inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
+  ```
   """
   def __init__(self, latent_vars, proposal_vars, data=None):
-    """
+    """Create an inference algorithm.
+
     Args:
       proposal_vars: dict of RandomVariable to RandomVariable.
         Collection of random variables to perform inference on; each is
         binded to a proposal distribution $g(z' \mid z)$.
-
-    #### Examples
-
-    ```python
-    z = Normal(loc=0.0, scale=1.0)
-    x = Normal(loc=tf.ones(10) * z, scale=1.0)
-
-    qz = Empirical(tf.Variable(tf.zeros(500)))
-    proposal_z = Normal(loc=z, scale=0.5)
-    data = {x: np.array([0.0] * 10, dtype=np.float32)}
-    inference = ed.MetropolisHastings({z: qz}, {z: proposal_z}, data)
-    ```
     """
     check_latent_vars(proposal_vars)
     self.proposal_vars = proposal_vars

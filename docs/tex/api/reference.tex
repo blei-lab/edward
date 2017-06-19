@@ -2,79 +2,83 @@
 
 {{navbar}}
 
-\subsubsection{Models}
-
-Most Edward random variables are light wrappers around distributions
-in TensorFlow. Therefore the list of available random variables
-depends on the TensorFlow version installed. For TensorFlow
-{{tensorflow_version}}, the following are available:
-
-{%sphinx
-
-* :class:`edward.models.RandomVariable`
-* :class:`edward.models.DirichletProcess`
-* :class:`edward.models.Empirical`
-* :class:`edward.models.ParamMixture`
-* :class:`edward.models.PointMass`
-* {{tensorflow_distributions}}
-
-%}
-
-\subsubsection{Inference}
-
-Inference is mostly comprised of classes. They are organized in a
-class hierarchy, where methods are shared via parent classes and
-\texttt{Inference} is the top-most base class.
-
-{%sphinx
-
-* :class:`edward.inferences.Inference`
-* :class:`edward.inferences.VariationalInference`
-
-  * :class:`edward.inferences.KLqp`
-
-    * :class:`edward.inferences.ReparameterizationKLqp`
-    * :class:`edward.inferences.ReparameterizationKLKLqp`
-    * :class:`edward.inferences.ReparameterizationEntropyKLqp`
-    * :class:`edward.inferences.ScoreKLqp`
-    * :class:`edward.inferences.ScoreKLKLqp`
-    * :class:`edward.inferences.ScoreEntropyKLqp`
-
-  * :class:`edward.inferences.KLpq`
-
-  * :class:`edward.inferences.GANInference`
-
-    * :class:`edward.inferences.BiGANInference`
-    * :class:`edward.inferences.ImplicitKLqp`
-    * :class:`edward.inferences.WGANInference`
-
-  * :class:`edward.inferences.MAP`
-
-    * :class:`edward.inferences.Laplace`
-
-* :class:`edward.inferences.MonteCarlo`
-
-  * :class:`edward.inferences.Gibbs`
-  * :class:`edward.inferences.MetropolisHastings`
-  * :class:`edward.inferences.HMC`
-  * :class:`edward.inferences.SGLD`
-  * :class:`edward.inferences.SGHMC`
-
-* :func:`edward.inferences.conjugacy.complete_conditional`
-
-%}
+There are four modules in Edward:
+\texttt{ed.criticisms},
+\texttt{ed.inferences},
+\texttt{ed.models},
+and
+\texttt{ed.util}.
 
 \subsubsection{Criticism}
 
-Criticism is comprised of functions. They either operate on random
-variables in the model or NumPy arrays representing values drawn
-from the random variables.
+\texttt{ed.criticisms} is comprised of functions. They operate on
+random variables in a model or they operate on NumPy arrays
+representing values drawn from the random variables.
 
-{%sphinx
+\begin{itemize}
+  \item {{criticisms}}
+\end{itemize}
 
-* :func:`edward.criticisms.evaluate`
-* :func:`edward.criticisms.ppc`
-* :func:`edward.criticisms.ppc_density_plot`
-* :func:`edward.criticisms.ppc_stat_hist_plot`
+\subsubsection{Inference}
 
-%}
+\texttt{ed.inferences} is mostly comprised of classes. They are
+organized in a class hierarchy, where methods are shared via parent
+classes and \texttt{Inference} is the top-most base class.
+
+\begin{itemize}
+  \item @{ed.inferences.Inference}
+  \item @{ed.inferences.VariationalInference}
+    \begin{itemize}
+    \item @{ed.inferences.KLqp}
+      \begin{itemize}
+      \item @{ed.inferences.ReparameterizationKLqp}
+      \item @{ed.inferences.ReparameterizationKLKLqp}
+      \item @{ed.inferences.ReparameterizationEntropyKLqp}
+      \item @{ed.inferences.ScoreKLqp}
+      \item @{ed.inferences.ScoreKLKLqp}
+      \item @{ed.inferences.ScoreEntropyKLqp}
+      \end{itemize}
+    \item @{ed.inferences.KLpq}
+    \item @{ed.inferences.GANInference}
+      \begin{itemize}
+      \item @{ed.inferences.BiGANInference}
+      \item @{ed.inferences.ImplicitKLqp}
+      \item @{ed.inferences.WGANInference}
+      \end{itemize}
+    \item @{ed.inferences.MAP}
+      \begin{itemize}
+      \item @{ed.inferences.Laplace}
+      \end{itemize}
+    \end{itemize}
+  \item @{ed.inferences.MonteCarlo}
+    \begin{itemize}
+    \item @{ed.inferences.Gibbs}
+    \item @{ed.inferences.MetropolisHastings}
+    \item @{ed.inferences.HMC}
+    \item @{ed.inferences.SGLD}
+    \item @{ed.inferences.SGHMC}
+    \end{itemize}
+  \item @{ed.inferences.complete_conditional}
+\end{itemize}
+
+\subsubsection{Models}
+
+\texttt{ed.models} is comprised of random variables.
+The list of available random variables depends on the TensorFlow
+version installed. For TensorFlow {{tensorflow_version}}, the
+following are available:
+
+\begin{itemize}
+  \item @{ed.models.RandomVariable}
+  \item {{models}}
+\end{itemize}
+
+\subsubsection{Utilities}
+
+\texttt{ed.util} is comprised of functions for miscellaneous usage.
+
+\begin{itemize}
+  \item {{util}}
+  \item @{ed.VERSION}
+  \item @{ed.__version__}
+\end{itemize}

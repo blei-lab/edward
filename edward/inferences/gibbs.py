@@ -15,26 +15,27 @@ from edward.util import check_latent_vars, get_session
 
 class Gibbs(MonteCarlo):
   """Gibbs sampling (Geman and Geman, 1984).
+
+  #### Examples
+
+  ```python
+  x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+
+  p = Beta(1.0, 1.0)
+  x = Bernoulli(probs=p, sample_shape=10)
+
+  qp = Empirical(tf.Variable(tf.zeros(500)))
+  inference = ed.Gibbs({p: qp}, data={x: x_data})
+  ```
   """
   def __init__(self, latent_vars, proposal_vars=None, data=None):
-    """
+    """Create an inference algorithm.
+
     Args:
       proposal_vars: dict of RandomVariable to RandomVariable, optional.
         Collection of random variables to perform inference on; each is
         binded to its complete conditionals which Gibbs cycles draws on.
         If not specified, default is to use `ed.complete_conditional`.
-
-    #### Examples
-
-    ```python
-    x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
-
-    p = Beta(1.0, 1.0)
-    x = Bernoulli(probs=p, sample_shape=10)
-
-    qp = Empirical(tf.Variable(tf.zeros(500)))
-    inference = ed.Gibbs({p: qp}, data={x: x_data})
-    ```
     """
     if proposal_vars is None:
       proposal_vars = {z: complete_conditional(z)
@@ -46,7 +47,9 @@ class Gibbs(MonteCarlo):
     super(Gibbs, self).__init__(latent_vars, data)
 
   def initialize(self, scan_order='random', *args, **kwargs):
-    """
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computation graph.
+
     Args:
       scan_order: list or str, optional.
         The scan order for each Gibbs update. If list, it is the
@@ -60,7 +63,7 @@ class Gibbs(MonteCarlo):
     return super(Gibbs, self).initialize(*args, **kwargs)
 
   def update(self, feed_dict=None):
-    """Run one iteration of Gibbs sampling.
+    """Run one iteration of sampling.
 
     Args:
       feed_dict: dict, optional.

@@ -31,20 +31,19 @@ class SGLD(MonteCarlo):
   leveraging a single Monte Carlo sample, where $\\beta^* \sim
   q(\\beta)$. This is unbiased (and therefore asymptotically exact as a
   pseudo-marginal method) if $q(\\beta) = p(\\beta \mid x)$.
+
+  #### Examples
+
+  ```python
+  z = Normal(loc=0.0, scale=1.0)
+  x = Normal(loc=tf.ones(10) * z, scale=1.0)
+
+  qz = Empirical(tf.Variable(tf.zeros(500)))
+  data = {x: np.array([0.0] * 10, dtype=np.float32)}
+  inference = ed.SGLD({z: qz}, data)
+  ```
   """
   def __init__(self, *args, **kwargs):
-    """
-    #### Examples
-
-    ```python
-    z = Normal(loc=0.0, scale=1.0)
-    x = Normal(loc=tf.ones(10) * z, scale=1.0)
-
-    qz = Empirical(tf.Variable(tf.zeros(500)))
-    data = {x: np.array([0.0] * 10, dtype=np.float32)}
-    inference = ed.SGLD({z: qz}, data)
-    ```
-    """
     super(SGLD, self).__init__(*args, **kwargs)
 
   def initialize(self, step_size=0.25, *args, **kwargs):

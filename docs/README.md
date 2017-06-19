@@ -1,6 +1,6 @@
 # Edward website
 
-The back end of our website depends on [pandoc](http://pandoc.org), [beautifulsoup](https://www.crummy.com/software/BeautifulSoup/), and [sphinx](http://www.sphinx-doc.org). This lets us write stand-alone pages for documentation using LaTeX, with functional bibliographies. It also lets us auto-generate API documentation from the source code's docstrings.
+The back end of our website depends on [pandoc](http://pandoc.org). Pandoc lets us write stand-alone pages for documentation using LaTeX, with functional bibliographies. We also use a custom parser to generate API documentation from the source code's docstrings.
 
 The front end of our website depends on [skeleton.css](http://getskeleton.com/), [Google Fonts](https://www.google.com/fonts), [highlight.js](https://highlightjs.org/), and [KaTeX](https://khan.github.io/KaTeX/).
 
@@ -12,7 +12,7 @@ All stand-alone pages are under `docs/tex`. These compile to HTML pages. Our cus
 
 + Install the dependencies
 ```{bash}
-pip install pandoc pandoc-attributes pandocfilters beautifulsoup4 sphinx numpydoc ghp-import
+pip install argparse beautifulsoup4 ghp-import pandoc pandoc-attributes pandocfilters PyYAML
 ```
 + You can build the website locally. Go to this `docs/` directory and run
 ```{bash}

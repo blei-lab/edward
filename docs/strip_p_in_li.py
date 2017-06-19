@@ -7,7 +7,7 @@ import glob
 
 from bs4 import BeautifulSoup
 
-paths = ("*.html", "api/*.html", "tutorials/*.html")
+paths = ("build/*.html", "build/api/*.html", "build/tutorials/*.html")
 filenames = []
 
 for path in paths:
