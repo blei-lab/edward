@@ -31,12 +31,6 @@ for entry in data_map['toc']:
   path = section[0]['path'] + '.html'
   toc += '<a class="button u-full-width" href="{}">{}</a>'.format(path, title)
   toc += '\n'
-  if len(section) > 1:
-    # TODO
-    # title = ''.join(title.split('.', 1)[2:])
-    # toc += '<a class="button2 u-full-width" href="{}">{}</a>'.format(path, title)
-    # toc += '\n'
-    pass
 
 document = open(src_dir).read()
 document = document.replace('{{toc}}', toc)
