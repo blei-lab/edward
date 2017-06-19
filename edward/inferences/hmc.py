@@ -61,8 +61,8 @@ class HMC(MonteCarlo):
       n_steps: int, optional.
         Number of steps of numerical integrator.
     """
-    self.step_size = step_size
-    self.n_steps = n_steps
+    self._step_size = step_size
+    self._n_steps = n_steps
     # store global scope for log joint calculations
     self._scope = tf.get_default_graph().unique_name("inference") + '/'
     return super(HMC, self).initialize(*args, **kwargs)
@@ -71,7 +71,7 @@ class HMC(MonteCarlo):
     """Note the updates assume each Empirical random variable is
     directly parameterized by `tf.Variable`s.
     """
-    old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
+    old_sample = {z: tf.gather(qz.params, tf.maximum(self._t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
     old_sample = OrderedDict(old_sample)
 
@@ -85,8 +85,8 @@ class HMC(MonteCarlo):
 
     # Simulate Hamiltonian dynamics.
     new_sample, new_r_sample = leapfrog(old_sample, old_r_sample,
-                                        self.step_size, self._log_joint,
-                                        self.n_steps)
+                                        self._step_size, self._log_joint,
+                                        self._n_steps)
 
     # Calculate acceptance ratio.
     ratio = tf.reduce_sum([0.5 * tf.reduce_sum(tf.square(r))
@@ -119,10 +119,10 @@ class HMC(MonteCarlo):
         # If z is an automatically unconstrained distribution,
         # transform samples back to original (constrained) space.
         qz_sample = z.bijector.inverse(qz_sample)
-      assign_ops.append(tf.scatter_update(variable, self.t, qz_sample))
+      assign_ops.append(tf.scatter_update(variable, self._t, qz_sample))
 
     # Increment n_accept (if accepted).
-    assign_ops.append(self.n_accept.assign_add(tf.where(accept, 1, 0)))
+    assign_ops.append(self._n_accept.assign_add(tf.where(accept, 1, 0)))
     return tf.group(*assign_ops)
 
   def _log_joint(self, z_sample):

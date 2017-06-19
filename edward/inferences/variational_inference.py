@@ -151,7 +151,8 @@ class VariationalInference(Inference):
         feed_dict[key] = value
 
     sess = get_session()
-    _, t, loss = sess.run([self._train, self._increment_t, self._loss], feed_dict)
+    _, t, loss = sess.run(
+        [self._train, self._increment_t, self._loss], feed_dict)
 
     if self._debug:
       sess.run(self._op_check, feed_dict)

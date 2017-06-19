@@ -59,9 +59,9 @@ class SGHMC(MonteCarlo):
       friction: float, optional.
         Constant scale on the friction term in the Hamiltonian system.
     """
-    self.step_size = step_size
-    self.friction = friction
-    self.v = {z: tf.Variable(tf.zeros(qz.params.shape[1:], dtype=qz.dtype))
+    self._step_size = step_size
+    self._friction = friction
+    self._v = {z: tf.Variable(tf.zeros(qz.params.shape[1:], dtype=qz.dtype))
               for z, qz in six.iteritems(self.latent_vars)}
     return super(SGHMC, self).initialize(*args, **kwargs)
 
@@ -69,12 +69,12 @@ class SGHMC(MonteCarlo):
     """Note the updates assume each Empirical random variable is
     directly parameterized by `tf.Variable`s.
     """
-    old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
+    old_sample = {z: tf.gather(qz.params, tf.maximum(self._t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
-    old_v_sample = {z: v for z, v in six.iteritems(self.v)}
+    old_v_sample = {z: v for z, v in six.iteritems(self._v)}
 
     # Simulate Hamiltonian dynamics with friction.
-    learning_rate = self.step_size * 0.01
+    learning_rate = self._step_size * 0.01
     grad_log_joint = tf.gradients(self._log_joint(old_sample),
                                   list(six.itervalues(old_sample)))
 
@@ -103,11 +103,11 @@ class SGHMC(MonteCarlo):
         # If z is an automatically unconstrained distribution,
         # transform samples back to original (constrained) space.
         qz_sample = z.bijector.inverse(qz_sample)
-      assign_ops.append(tf.scatter_update(variable, self.t, qz_sample))
-      assign_ops.append(tf.assign(self.v[z], v_sample[z]).op)
+      assign_ops.append(tf.scatter_update(variable, self._t, qz_sample))
+      assign_ops.append(tf.assign(self._v[z], v_sample[z]).op)
 
     # Increment n_accept.
-    assign_ops.append(self.n_accept.assign_add(1))
+    assign_ops.append(self._n_accept.assign_add(1))
     return tf.group(*assign_ops)
 
   def _log_joint(self, z_sample):

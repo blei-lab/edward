@@ -100,7 +100,7 @@ class MonteCarlo(Inference):
     self._n_accept_over_t = self._n_accept / self._t
     self._train = self._build_update()
 
-    self.reset.append(tf.variables_initializer([self.n_accept]))
+    self._reset.append(tf.variables_initializer([self.n_accept]))
 
     if self._logging:
       tf.summary.scalar("n_accept", self.n_accept,

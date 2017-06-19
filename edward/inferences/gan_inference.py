@@ -56,8 +56,13 @@ class GANInference(VariationalInference):
     if not callable(discriminator):
       raise TypeError("discriminator must be a callable function.")
 
-    self.discriminator = discriminator
+    self._discriminator = discriminator
     super(GANInference, self).__init__(None, data)
+
+  @property
+  def discriminator(self):
+    """Discriminator used to discriminate samples from the model."""
+    return self._discriminator
 
   def initialize(self, optimizer=None, optimizer_d=None,
                  global_step=None, global_step_d=None, var_list=None,
@@ -92,23 +97,23 @@ class GANInference(VariationalInference):
     # call grandparent's method; avoid parent (VariationalInference)
     super(VariationalInference, self).initialize(*args, **kwargs)
 
-    self.loss, grads_and_vars, self.loss_d, grads_and_vars_d = \
+    self._loss, grads_and_vars, self._loss_d, grads_and_vars_d = \
         self._build_loss_and_gradients(var_list)
 
     optimizer, global_step = _build_optimizer(optimizer, global_step)
     optimizer_d, global_step_d = _build_optimizer(optimizer_d, global_step_d)
 
-    self.train = optimizer.apply_gradients(grads_and_vars,
+    self._train = optimizer.apply_gradients(grads_and_vars,
                                            global_step=global_step)
-    self.train_d = optimizer_d.apply_gradients(grads_and_vars_d,
+    self._train_d = optimizer_d.apply_gradients(grads_and_vars_d,
                                                global_step=global_step_d)
 
-    if self.logging:
+    if self._logging:
       tf.summary.scalar("loss", self.loss,
                         collections=[self._summary_key])
       tf.summary.scalar("loss/discriminative", self.loss_d,
                         collections=[self._summary_key])
-      self.summarize = tf.summary.merge_all(key=self._summary_key)
+      self._summarize = tf.summary.merge_all(key=self._summary_key)
 
   def _build_loss_and_gradients(self, var_list):
     x_true = list(six.itervalues(self.data))[0]
@@ -119,7 +124,7 @@ class GANInference(VariationalInference):
     with tf.variable_scope("Disc", reuse=True):
       d_fake = self.discriminator(x_fake)
 
-    if self.logging:
+    if self._logging:
       tf.summary.histogram("discriminator_outputs",
                            tf.concat([d_true, d_fake], axis=0),
                            collections=[self._summary_key])
@@ -176,26 +181,26 @@ class GANInference(VariationalInference):
     sess = get_session()
     if variables is None:
       _, _, t, loss, loss_d = sess.run(
-          [self.train, self.train_d, self.increment_t, self.loss, self.loss_d],
+          [self._train, self._train_d, self._increment_t, self._loss, self._loss_d],
           feed_dict)
     elif variables == "Gen":
       _, t, loss = sess.run(
-          [self.train, self.increment_t, self.loss], feed_dict)
+          [self._train, self._increment_t, self._loss], feed_dict)
       loss_d = 0.0
     elif variables == "Disc":
       _, t, loss_d = sess.run(
-          [self.train_d, self.increment_t, self.loss_d], feed_dict)
+          [self._train_d, self._increment_t, self._loss_d], feed_dict)
       loss = 0.0
     else:
       raise NotImplementedError("variables must be None, 'Gen', or 'Disc'.")
 
-    if self.debug:
-      sess.run(self.op_check, feed_dict)
+    if self._debug:
+      sess.run(self._op_check, feed_dict)
 
-    if self.logging and self.n_print != 0:
+    if self._logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:
-        summary = sess.run(self.summarize, feed_dict)
-        self.train_writer.add_summary(summary, t)
+        summary = sess.run(self._summarize, feed_dict)
+        self._train_writer.add_summary(summary, t)
 
     return {'t': t, 'loss': loss, 'loss_d': loss_d}
 
@@ -205,7 +210,7 @@ class GANInference(VariationalInference):
     if self.n_print != 0:
       t = info_dict['t']
       if t == 1 or t % self.n_print == 0:
-        self.progbar.update(t, {'Gen Loss': info_dict['loss'],
+        self._progbar.update(t, {'Gen Loss': info_dict['loss'],
                                 'Disc Loss': info_dict['loss_d']})
 
 

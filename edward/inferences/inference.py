@@ -286,7 +286,7 @@ class Inference(object):
     if self._debug:
       self._op_check = tf.add_check_numerics_ops()
 
-    self.reset = [tf.variables_initializer([self.t])]
+    self._reset = [tf.variables_initializer([self._t])]
 
   @abc.abstractmethod
   def update(self, feed_dict=None):

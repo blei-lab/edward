@@ -68,8 +68,14 @@ class MetropolisHastings(MonteCarlo):
         binded to a proposal distribution $g(z' \mid z)$.
     """
     check_latent_vars(proposal_vars)
-    self.proposal_vars = proposal_vars
+    self._proposal_vars = proposal_vars
     super(MetropolisHastings, self).__init__(latent_vars, data)
+
+  @property
+  def proposal_vars(self):
+    """Proposal variable dictionary binding model latent variables to
+    their proposal distribution."""
+    return self._proposal_vars
 
   def initialize(self, *args, **kwargs):
     kwargs['auto_transform'] = False
@@ -79,7 +85,7 @@ class MetropolisHastings(MonteCarlo):
     """Note the updates assume each Empirical random variable is
     directly parameterized by `tf.Variable`s.
     """
-    old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
+    old_sample = {z: tf.gather(qz.params, tf.maximum(self._t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
     old_sample = OrderedDict(old_sample)
 
@@ -154,8 +160,8 @@ class MetropolisHastings(MonteCarlo):
     assign_ops = []
     for z, qz in six.iteritems(self.latent_vars):
       variable = qz.get_variables()[0]
-      assign_ops.append(tf.scatter_update(variable, self.t, sample[z]))
+      assign_ops.append(tf.scatter_update(variable, self._t, sample[z]))
 
     # Increment n_accept (if accepted).
-    assign_ops.append(self.n_accept.assign_add(tf.where(accept, 1, 0)))
+    assign_ops.append(self._n_accept.assign_add(tf.where(accept, 1, 0)))
     return tf.group(*assign_ops)

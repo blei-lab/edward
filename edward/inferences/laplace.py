@@ -109,13 +109,13 @@ class Laplace(MAP):
     # optimize `PointMass` random variables, which subsequently
     # optimizes location parameters of the normal approximations.
     latent_vars_normal = self.latent_vars.copy()
-    self.latent_vars = {z: PointMass(params=qz.loc)
+    self._latent_vars = {z: PointMass(params=qz.loc)
                         for z, qz in six.iteritems(latent_vars_normal)}
 
     super(Laplace, self).initialize(*args, **kwargs)
 
-    hessians = tf.hessians(self.loss, list(six.itervalues(self.latent_vars)))
-    self.finalize_ops = []
+    hessians = tf.hessians(self._loss, list(six.itervalues(self.latent_vars)))
+    self._finalize_ops = []
     for z, hessian in zip(six.iterkeys(self.latent_vars), hessians):
       qz = latent_vars_normal[z]
       if isinstance(qz, (MultivariateNormalDiag, Normal)):
@@ -125,9 +125,9 @@ class Laplace(MAP):
         scale_var = get_variables(qz.covariance())[0]
         scale = tf.matrix_inverse(tf.cholesky(hessian))
 
-      self.finalize_ops.append(scale_var.assign(scale))
+      self._finalize_ops.append(scale_var.assign(scale))
 
-    self.latent_vars = latent_vars_normal.copy()
+    self._latent_vars = latent_vars_normal.copy()
     del latent_vars_normal
 
   def finalize(self, feed_dict=None):

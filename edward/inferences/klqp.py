@@ -94,8 +94,8 @@ class KLqp(VariationalInference):
     if kl_scaling is None:
       kl_scaling = {}
 
-    self.n_samples = n_samples
-    self.kl_scaling = kl_scaling
+    self._n_samples = n_samples
+    self._kl_scaling = kl_scaling
     return super(KLqp, self).initialize(*args, **kwargs)
 
   def _build_loss_and_gradients(self, var_list):
@@ -105,7 +105,7 @@ class KLqp(VariationalInference):
         for rv in six.itervalues(self.latent_vars)])
     is_analytic_kl = all([isinstance(z, Normal) and isinstance(qz, Normal)
                           for z, qz in six.iteritems(self.latent_vars)])
-    if not is_analytic_kl and self.kl_scaling:
+    if not is_analytic_kl and self._kl_scaling:
       raise TypeError("kl_scaling must be None when using non-analytic KL term")
     if is_reparameterizable:
       if is_analytic_kl:
@@ -147,7 +147,7 @@ class ReparameterizationKLqp(VariationalInference):
         Number of samples from variational model for calculating
         stochastic gradients.
     """
-    self.n_samples = n_samples
+    self._n_samples = n_samples
     return super(ReparameterizationKLqp, self).initialize(*args, **kwargs)
 
   def _build_loss_and_gradients(self, var_list):
@@ -187,8 +187,8 @@ class ReparameterizationKLKLqp(VariationalInference):
     if kl_scaling is None:
       kl_scaling = {}
 
-    self.n_samples = n_samples
-    self.kl_scaling = kl_scaling
+    self._n_samples = n_samples
+    self._kl_scaling = kl_scaling
     return super(ReparameterizationKLKLqp, self).initialize(*args, **kwargs)
 
   def _build_loss_and_gradients(self, var_list):
@@ -215,7 +215,7 @@ class ReparameterizationEntropyKLqp(VariationalInference):
         Number of samples from variational model for calculating
         stochastic gradients.
     """
-    self.n_samples = n_samples
+    self._n_samples = n_samples
     return super(ReparameterizationEntropyKLqp, self).initialize(
         *args, **kwargs)
 
@@ -243,7 +243,7 @@ class ScoreKLqp(VariationalInference):
         Number of samples from variational model for calculating
         stochastic gradients.
     """
-    self.n_samples = n_samples
+    self._n_samples = n_samples
     return super(ScoreKLqp, self).initialize(*args, **kwargs)
 
   def _build_loss_and_gradients(self, var_list):
@@ -283,8 +283,8 @@ class ScoreKLKLqp(VariationalInference):
     if kl_scaling is None:
       kl_scaling = {}
 
-    self.n_samples = n_samples
-    self.kl_scaling = kl_scaling
+    self._n_samples = n_samples
+    self._kl_scaling = kl_scaling
     return super(ScoreKLKLqp, self).initialize(*args, **kwargs)
 
   def _build_loss_and_gradients(self, var_list):
@@ -311,7 +311,7 @@ class ScoreEntropyKLqp(VariationalInference):
         Number of samples from variational model for calculating
         stochastic gradients.
     """
-    self.n_samples = n_samples
+    self._n_samples = n_samples
     return super(ScoreEntropyKLqp, self).initialize(*args, **kwargs)
 
   def _build_loss_and_gradients(self, var_list):
