@@ -195,12 +195,21 @@
     *args,
     **kwargs
 )</code></pre>
-<p>Create a new random variable.</p>
+<p>Initialize a Mixture distribution.</p>
+<p>A <code>Mixture</code> is defined by a <code>Categorical</code> (<code>cat</code>, representing the mixture probabilities) and a list of <code>Distribution</code> objects all having matching dtype, batch shape, event shape, and continuity properties (the components).</p>
+<p>The <code>num_classes</code> of <code>cat</code> must be possible to infer at graph construction time and match <code>len(components)</code>.</p>
 <h4 id="args">Args:</h4>
 <ul>
-<li><b><code>sample_shape</code></b>: tf.TensorShape, optional. Shape of samples to draw from the random variable.</li>
-<li><b><code>value</code></b>: tf.Tensor, optional. Fixed tensor to associate with random variable. Must have shape <code>sample_shape + batch_shape + event_shape</code>.</li>
-<li><b><code>collections</code></b>: list, optional. Optional list of graph collections keys. The random variable is added to these collections. Defaults to [&quot;random_variables&quot;].</li>
+<li><b><code>cat</code></b>: A <code>Categorical</code> distribution instance, representing the probabilities of <code>distributions</code>.</li>
+<li><b><code>components</code></b>: A list or tuple of <code>Distribution</code> instances. Each instance must have the same type, be defined on the same domain, and have matching <code>event_shape</code> and <code>batch_shape</code>.</li>
+<li><b><code>validate_args</code></b>: Python <code>bool</code>, default <code>False</code>. If <code>True</code>, raise a runtime error if batch or event ranks are inconsistent between cat and any of the distributions. This is only checked if the ranks cannot be determined statically at graph construction time.</li>
+<li><b><code>allow_nan_stats</code></b>: Boolean, default <code>True</code>. If <code>False</code>, raise an exception if a statistic (e.g. mean/mode/etc...) is undefined for any batch member. If <code>True</code>, batch members with valid parameters leading to undefined statistics will return NaN for this statistic.</li>
+<li><b><code>name</code></b>: A name for this distribution (optional).</li>
+</ul>
+<h4 id="raises">Raises:</h4>
+<ul>
+<li><b><code>TypeError</code></b>: If cat is not a <code>Categorical</code>, or <code>components</code> is not a list or tuple, or the elements of <code>components</code> are not instances of <code>Distribution</code>, or do not have matching <code>dtype</code>.</li>
+<li><b><code>ValueError</code></b>: If <code>components</code> is an empty list or tuple, or its elements do not have a statically known event rank. If <code>cat.num_classes</code> cannot be inferred at graph creation time, or the constant value of <code>cat.num_classes</code> is not equal to <code>len(components)</code>, or all <code>components</code> and <code>cat</code> do not have matching static batch shapes, or all components do not have matching static event shapes.</li>
 </ul>
 <h3 id="__abs__">
 <code><strong>abs</strong></code>
@@ -637,7 +646,7 @@ with tf.Session() as sess:
 </ul>
 <h4 id="returns-16">Returns:</h4>
 <p><code>dict</code> of parameter name to <code>TensorShape</code>.</p>
-<h4 id="raises">Raises:</h4>
+<h4 id="raises-1">Raises:</h4>
 <ul>
 <li><b><code>ValueError</code></b>: if <code>sample_shape</code> is a <code>TensorShape</code> and is not fully defined.</li>
 </ul>

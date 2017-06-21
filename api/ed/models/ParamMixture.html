@@ -194,13 +194,25 @@
     *args,
     **kwargs
 )</code></pre>
-<p>Create a new random variable.</p>
+<p>Initialize a batch of mixture random variables.</p>
 <h4 id="args">Args:</h4>
 <ul>
-<li><b><code>sample_shape</code></b>: tf.TensorShape, optional. Shape of samples to draw from the random variable.</li>
-<li><b><code>value</code></b>: tf.Tensor, optional. Fixed tensor to associate with random variable. Must have shape <code>sample_shape + batch_shape + event_shape</code>.</li>
-<li><b><code>collections</code></b>: list, optional. Optional list of graph collections keys. The random variable is added to these collections. Defaults to [&quot;random_variables&quot;].</li>
+<li><b><code>mixing_weights</code></b>: tf.Tensor. (Normalized) weights whose inner (right-most) dimension matches the number of components.</li>
+<li><b><code>component_params</code></b>: dict. Parameters of the per-component distributions.</li>
+<li><b><code>component_dist</code></b>: RandomVariable. Distribution of each component. The outer (left-most) dimension of its batch shape when instantiated determines the number of components.</li>
 </ul>
+<h4 id="notes">Notes</h4>
+<p>Given <code>ParamMixture</code>'s <code>sample_shape</code>, <code>batch_shape</code>, and <code>event_shape</code>, its <code>components</code> has shape <code>sample_shape + [num_components] + batch_shape + event_shape</code>, and its <code>cat</code> has shape <code>sample_shape + batch_shape</code>.</p>
+<h4 id="examples">Examples</h4>
+<pre class="python"><code>probs = tf.ones(5) / 5.0
+params = {&#39;mu&#39;: tf.zeros(5), &#39;sigma&#39;: tf.ones(5)}
+x = ParamMixture(probs, params, Normal)
+assert x.shape == ()
+
+probs = tf.ones([2, 5]) / 5.0
+params = {&#39;p&#39;: tf.zeros([5, 2]) + 0.8}
+x = ParamMixture(probs, params, Bernoulli)
+assert x.shape == (2,)</code></pre>
 <h3 id="__abs__">
 <code><strong>abs</strong></code>
 </h3>
@@ -427,7 +439,7 @@
 <li><b><code>session</code></b>: tf.BaseSession, optional. The <code>tf.Session</code> to use to evaluate this random variable. If none, the default session is used.</li>
 <li><b><code>feed_dict</code></b>: dict, optional. A dictionary that maps <code>tf.Tensor</code> objects to feed values. See <code>tf.Session.run()</code> for a description of the valid feed values.</li>
 </ul>
-<h4 id="examples">Examples</h4>
+<h4 id="examples-1">Examples</h4>
 <pre class="python"><code>x = Normal(0.0, 1.0)
 with tf.Session() as sess:
   # Usage passing the session explicitly.

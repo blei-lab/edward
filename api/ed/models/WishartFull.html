@@ -234,12 +234,15 @@ dist.prob(x)  # Shape is [2, 2].
     *args,
     **kwargs
 )</code></pre>
-<p>Create a new random variable.</p>
+<p>Construct Wishart distributions.</p>
 <h4 id="args">Args:</h4>
 <ul>
-<li><b><code>sample_shape</code></b>: tf.TensorShape, optional. Shape of samples to draw from the random variable.</li>
-<li><b><code>value</code></b>: tf.Tensor, optional. Fixed tensor to associate with random variable. Must have shape <code>sample_shape + batch_shape + event_shape</code>.</li>
-<li><b><code>collections</code></b>: list, optional. Optional list of graph collections keys. The random variable is added to these collections. Defaults to [&quot;random_variables&quot;].</li>
+<li><b><code>df</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>. Degrees of freedom, must be greater than or equal to dimension of the scale matrix.</li>
+<li><b><code>scale</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>. The symmetric positive definite scale matrix of the distribution.</li>
+<li><b><code>cholesky_input_output_matrices</code></b>: Python <code>bool</code>. Any function which whose input or output is a matrix assumes the input is Cholesky and returns a Cholesky factored matrix. Example <code>log_prob</code> input takes a Cholesky and <code>sample_n</code> returns a Cholesky when <code>cholesky_input_output_matrices=True</code>.</li>
+<li><b><code>validate_args</code></b>: Python <code>bool</code>, default <code>False</code>. When <code>True</code> distribution parameters are checked for validity despite possibly degrading runtime performance. When <code>False</code> invalid inputs may silently render incorrect outputs.</li>
+<li><b><code>allow_nan_stats</code></b>: Python <code>bool</code>, default <code>True</code>. When <code>True</code>, statistics (e.g., mean, mode, variance) use the value &quot;<code>NaN</code>&quot; to indicate the result is undefined. When <code>False</code>, an exception is raised if one or more of the statistic's batch members are undefined.</li>
+<li><b><code>name</code></b>: Python <code>str</code> name prefixed to Ops created by this class.</li>
 </ul>
 <h3 id="__abs__">
 <code><strong>abs</strong></code>

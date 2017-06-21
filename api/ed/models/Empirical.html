@@ -192,13 +192,19 @@
     *args,
     **kwargs
 )</code></pre>
-<p>Create a new random variable.</p>
+<p>Initialize an <code>Empirical</code> random variable.</p>
 <h4 id="args">Args:</h4>
 <ul>
-<li><b><code>sample_shape</code></b>: tf.TensorShape, optional. Shape of samples to draw from the random variable.</li>
-<li><b><code>value</code></b>: tf.Tensor, optional. Fixed tensor to associate with random variable. Must have shape <code>sample_shape + batch_shape + event_shape</code>.</li>
-<li><b><code>collections</code></b>: list, optional. Optional list of graph collections keys. The random variable is added to these collections. Defaults to [&quot;random_variables&quot;].</li>
+<li><b><code>params</code></b>: tf.Tensor. Collection of samples. Its outer (left-most) dimension determines the number of samples.</li>
 </ul>
+<h4 id="examples">Examples</h4>
+<pre class="python"><code># 100 samples of a scalar
+x = Empirical(params=tf.zeros(100))
+assert x.shape == ()
+
+# 5 samples of a 2 x 3 matrix
+dp = Empirical(params=tf.zeros([5, 2, 3]))
+assert x.shape == (2, 3)</code></pre>
 <h3 id="__abs__">
 <code><strong>abs</strong></code>
 </h3>
@@ -421,7 +427,7 @@
 <li><b><code>session</code></b>: tf.BaseSession, optional. The <code>tf.Session</code> to use to evaluate this random variable. If none, the default session is used.</li>
 <li><b><code>feed_dict</code></b>: dict, optional. A dictionary that maps <code>tf.Tensor</code> objects to feed values. See <code>tf.Session.run()</code> for a description of the valid feed values.</li>
 </ul>
-<h4 id="examples">Examples</h4>
+<h4 id="examples-1">Examples</h4>
 <pre class="python"><code>x = Normal(0.0, 1.0)
 with tf.Session() as sess:
   # Usage passing the session explicitly.

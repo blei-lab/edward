@@ -229,12 +229,15 @@ dist.prob(counts)  # Shape [2]</code></pre>
     *args,
     **kwargs
 )</code></pre>
-<p>Create a new random variable.</p>
+<p>Initialize a batch of Multinomial distributions.</p>
 <h4 id="args">Args:</h4>
 <ul>
-<li><b><code>sample_shape</code></b>: tf.TensorShape, optional. Shape of samples to draw from the random variable.</li>
-<li><b><code>value</code></b>: tf.Tensor, optional. Fixed tensor to associate with random variable. Must have shape <code>sample_shape + batch_shape + event_shape</code>.</li>
-<li><b><code>collections</code></b>: list, optional. Optional list of graph collections keys. The random variable is added to these collections. Defaults to [&quot;random_variables&quot;].</li>
+<li><b><code>total_count</code></b>: Non-negative floating point tensor with shape broadcastable to <code>[N1,..., Nm]</code> with <code>m &gt;= 0</code>. Defines this as a batch of <code>N1 x ... x Nm</code> different Multinomial distributions. Its components should be equal to integer values.</li>
+<li><b><code>logits</code></b>: Floating point tensor representing the log-odds of a positive event with shape broadcastable to <code>[N1,..., Nm, k], m &gt;= 0</code>, and the same dtype as <code>total_count</code>. Defines this as a batch of <code>N1 x ... x Nm</code> different <code>k</code> class Multinomial distributions. Only one of <code>logits</code> or <code>probs</code> should be passed in.</li>
+<li><b><code>probs</code></b>: Positive floating point tensor with shape broadcastable to <code>[N1,..., Nm, k]</code> <code>m &gt;= 0</code> and same dtype as <code>total_count</code>. Defines this as a batch of <code>N1 x ... x Nm</code> different <code>k</code> class Multinomial distributions. <code>probs</code>'s components in the last portion of its shape should sum to <code>1</code>. Only one of <code>logits</code> or <code>probs</code> should be passed in.</li>
+<li><b><code>validate_args</code></b>: Python <code>bool</code>, default <code>False</code>. When <code>True</code> distribution parameters are checked for validity despite possibly degrading runtime performance. When <code>False</code> invalid inputs may silently render incorrect outputs.</li>
+<li><b><code>allow_nan_stats</code></b>: Python <code>bool</code>, default <code>True</code>. When <code>True</code>, statistics (e.g., mean, mode, variance) use the value &quot;<code>NaN</code>&quot; to indicate the result is undefined. When <code>False</code>, an exception is raised if one or more of the statistic's batch members are undefined.</li>
+<li><b><code>name</code></b>: Python <code>str</code> name prefixed to Ops created by this class.</li>
 </ul>
 <h3 id="__abs__">
 <code><strong>abs</strong></code>

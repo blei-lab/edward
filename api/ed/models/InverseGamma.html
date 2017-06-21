@@ -215,12 +215,19 @@ dist2 = InverseGamma(concentration=[3.0, 4.0], rate=[2.0, 3.0])</code></pre>
     *args,
     **kwargs
 )</code></pre>
-<p>Create a new random variable.</p>
+<p>Construct InverseGamma with <code>concentration</code> and <code>rate</code> parameters.</p>
+<p>The parameters <code>concentration</code> and <code>rate</code> must be shaped in a way that supports broadcasting (e.g. <code>concentration + rate</code> is a valid operation).</p>
 <h4 id="args">Args:</h4>
 <ul>
-<li><b><code>sample_shape</code></b>: tf.TensorShape, optional. Shape of samples to draw from the random variable.</li>
-<li><b><code>value</code></b>: tf.Tensor, optional. Fixed tensor to associate with random variable. Must have shape <code>sample_shape + batch_shape + event_shape</code>.</li>
-<li><b><code>collections</code></b>: list, optional. Optional list of graph collections keys. The random variable is added to these collections. Defaults to [&quot;random_variables&quot;].</li>
+<li><b><code>concentration</code></b>: Floating point tensor, the concentration params of the distribution(s). Must contain only positive values.</li>
+<li><b><code>rate</code></b>: Floating point tensor, the inverse scale params of the distribution(s). Must contain only positive values.</li>
+<li><b><code>validate_args</code></b>: Python <code>bool</code>, default <code>False</code>. When <code>True</code> distribution parameters are checked for validity despite possibly degrading runtime performance. When <code>False</code> invalid inputs may silently render incorrect outputs.</li>
+<li><b><code>allow_nan_stats</code></b>: Python <code>bool</code>, default <code>True</code>. When <code>True</code>, statistics (e.g., mean, mode, variance) use the value &quot;<code>NaN</code>&quot; to indicate the result is undefined. When <code>False</code>, an exception is raised if one or more of the statistic's batch members are undefined.</li>
+<li><b><code>name</code></b>: Python <code>str</code> name prefixed to Ops created by this class.</li>
+</ul>
+<h4 id="raises">Raises:</h4>
+<ul>
+<li><b><code>TypeError</code></b>: if <code>concentration</code> and <code>rate</code> are different dtypes.</li>
 </ul>
 <h3 id="__abs__">
 <code><strong>abs</strong></code>
@@ -640,7 +647,7 @@ with tf.Session() as sess:
 </ul>
 <h4 id="returns-15">Returns:</h4>
 <p><code>dict</code> of parameter name to <code>TensorShape</code>.</p>
-<h4 id="raises">Raises:</h4>
+<h4 id="raises-1">Raises:</h4>
 <ul>
 <li><b><code>ValueError</code></b>: if <code>sample_shape</code> is a <code>TensorShape</code> and is not fully defined.</li>
 </ul>

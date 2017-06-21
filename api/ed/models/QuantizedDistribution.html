@@ -209,12 +209,20 @@ j =          0     1     2</code></pre>
     *args,
     **kwargs
 )</code></pre>
-<p>Create a new random variable.</p>
+<p>Construct a Quantized Distribution representing <code>Y = ceiling(X)</code>.</p>
+<p>Some properties are inherited from the distribution defining <code>X</code>. Example: <code>allow_nan_stats</code> is determined for this <code>QuantizedDistribution</code> by reading the <code>distribution</code>.</p>
 <h4 id="args">Args:</h4>
 <ul>
-<li><b><code>sample_shape</code></b>: tf.TensorShape, optional. Shape of samples to draw from the random variable.</li>
-<li><b><code>value</code></b>: tf.Tensor, optional. Fixed tensor to associate with random variable. Must have shape <code>sample_shape + batch_shape + event_shape</code>.</li>
-<li><b><code>collections</code></b>: list, optional. Optional list of graph collections keys. The random variable is added to these collections. Defaults to [&quot;random_variables&quot;].</li>
+<li><b><code>distribution</code></b>: The base distribution class to transform. Typically an instance of <code>Distribution</code>.</li>
+<li><b><code>low</code></b>: <code>Tensor</code> with same <code>dtype</code> as this distribution and shape able to be added to samples. Should be a whole number. Default <code>None</code>. If provided, base distribution's <code>prob</code> should be defined at <code>low</code>.</li>
+<li><b><code>high</code></b>: <code>Tensor</code> with same <code>dtype</code> as this distribution and shape able to be added to samples. Should be a whole number. Default <code>None</code>. If provided, base distribution's <code>prob</code> should be defined at <code>high - 1</code>. <code>high</code> must be strictly greater than <code>low</code>.</li>
+<li><b><code>validate_args</code></b>: Python <code>bool</code>, default <code>False</code>. When <code>True</code> distribution parameters are checked for validity despite possibly degrading runtime performance. When <code>False</code> invalid inputs may silently render incorrect outputs.</li>
+<li><b><code>name</code></b>: Python <code>str</code> name prefixed to Ops created by this class.</li>
+</ul>
+<h4 id="raises">Raises:</h4>
+<ul>
+<li><b><code>TypeError</code></b>: If <code>dist_cls</code> is not a subclass of <code>Distribution</code> or continuous.</li>
+<li><b><code>NotImplementedError</code></b>: If the base distribution does not implement <code>cdf</code>.</li>
 </ul>
 <h3 id="__abs__">
 <code><strong>abs</strong></code>
@@ -657,7 +665,7 @@ with tf.Session() as sess:
 </ul>
 <h4 id="returns-15">Returns:</h4>
 <p><code>dict</code> of parameter name to <code>TensorShape</code>.</p>
-<h4 id="raises">Raises:</h4>
+<h4 id="raises-1">Raises:</h4>
 <ul>
 <li><b><code>ValueError</code></b>: if <code>sample_shape</code> is a <code>TensorShape</code> and is not fully defined.</li>
 </ul>

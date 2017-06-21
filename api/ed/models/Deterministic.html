@@ -216,12 +216,19 @@ constant.prob(x)
     *args,
     **kwargs
 )</code></pre>
-<p>Create a new random variable.</p>
+<p>Initialize a scalar <code>Deterministic</code> distribution.</p>
+<p>The <code>atol</code> and <code>rtol</code> parameters allow for some slack in <code>pmf</code>, <code>cdf</code> computations, e.g. due to floating-point error.</p>
+<pre><code>pmf(x; loc)
+  = 1, if Abs(x - loc) &lt;= atol + rtol * Abs(loc),
+  = 0, otherwise.</code></pre>
 <h4 id="args">Args:</h4>
 <ul>
-<li><b><code>sample_shape</code></b>: tf.TensorShape, optional. Shape of samples to draw from the random variable.</li>
-<li><b><code>value</code></b>: tf.Tensor, optional. Fixed tensor to associate with random variable. Must have shape <code>sample_shape + batch_shape + event_shape</code>.</li>
-<li><b><code>collections</code></b>: list, optional. Optional list of graph collections keys. The random variable is added to these collections. Defaults to [&quot;random_variables&quot;].</li>
+<li><b><code>loc</code></b>: Numeric <code>Tensor</code> of shape <code>[B1, ..., Bb]</code>, with <code>b &gt;= 0</code>. The point (or batch of points) on which this distribution is supported.</li>
+<li><b><code>atol</code></b>: Non-negative <code>Tensor</code> of same <code>dtype</code> as <code>loc</code> and broadcastable shape. The absolute tolerance for comparing closeness to <code>loc</code>. Default is <code>0</code>.</li>
+<li><b><code>rtol</code></b>: Non-negative <code>Tensor</code> of same <code>dtype</code> as <code>loc</code> and broadcastable shape. The relative tolerance for comparing closeness to <code>loc</code>. Default is <code>0</code>.</li>
+<li><b><code>validate_args</code></b>: Python <code>bool</code>, default <code>False</code>. When <code>True</code> distribution parameters are checked for validity despite possibly degrading runtime performance. When <code>False</code> invalid inputs may silently render incorrect outputs.</li>
+<li><b><code>allow_nan_stats</code></b>: Python <code>bool</code>, default <code>True</code>. When <code>True</code>, statistics (e.g., mean, mode, variance) use the value &quot;<code>NaN</code>&quot; to indicate the result is undefined. When <code>False</code>, an exception is raised if one or more of the statistic's batch members are undefined.</li>
+<li><b><code>name</code></b>: Python <code>str</code> name prefixed to Ops created by this class.</li>
 </ul>
 <h3 id="__abs__">
 <code><strong>abs</strong></code>

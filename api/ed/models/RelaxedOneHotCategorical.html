@@ -213,12 +213,16 @@ dist = RelaxedOneHotCategorical(temperature, logits=logits)</code></pre>
     *args,
     **kwargs
 )</code></pre>
-<p>Create a new random variable.</p>
+<p>Initialize RelaxedOneHotCategorical using class log-probabilities.</p>
 <h4 id="args">Args:</h4>
 <ul>
-<li><b><code>sample_shape</code></b>: tf.TensorShape, optional. Shape of samples to draw from the random variable.</li>
-<li><b><code>value</code></b>: tf.Tensor, optional. Fixed tensor to associate with random variable. Must have shape <code>sample_shape + batch_shape + event_shape</code>.</li>
-<li><b><code>collections</code></b>: list, optional. Optional list of graph collections keys. The random variable is added to these collections. Defaults to [&quot;random_variables&quot;].</li>
+<li><b><code>temperature</code></b>: An 0-D <code>Tensor</code>, representing the temperature of a set of RelaxedOneHotCategorical distributions. The temperature should be positive.</li>
+<li><b><code>logits</code></b>: An N-D <code>Tensor</code>, <code>N &gt;= 1</code>, representing the log probabilities of a set of RelaxedOneHotCategorical distributions. The first <code>N - 1</code> dimensions index into a batch of independent distributions and the last dimension represents a vector of logits for each class. Only one of <code>logits</code> or <code>probs</code> should be passed in.</li>
+<li><b><code>probs</code></b>: An N-D <code>Tensor</code>, <code>N &gt;= 1</code>, representing the probabilities of a set of RelaxedOneHotCategorical distributions. The first <code>N - 1</code> dimensions index into a batch of independent distributions and the last dimension represents a vector of probabilities for each class. Only one of <code>logits</code> or <code>probs</code> should be passed in.</li>
+<li><b><code>dtype</code></b>: The type of the event samples (default: int32).</li>
+<li><b><code>validate_args</code></b>: Unused in this distribution.</li>
+<li><b><code>allow_nan_stats</code></b>: Python <code>bool</code>, default <code>True</code>. If <code>False</code>, raise an exception if a statistic (e.g. mean/mode/etc...) is undefined for any batch member. If <code>True</code>, batch members with valid parameters leading to undefined statistics will return NaN for this statistic.</li>
+<li><b><code>name</code></b>: A name for this distribution (optional).</li>
 </ul>
 <h3 id="__abs__">
 <code><strong>abs</strong></code>
