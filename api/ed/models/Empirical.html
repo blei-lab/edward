@@ -112,6 +112,14 @@
 <h2 id="class-empirical">Class <code>Empirical</code></h2>
 <p>Inherits From: <a href="../../ed/RandomVariable"><code>RandomVariable</code></a></p>
 <p>Empirical random variable.</p>
+<h4 id="examples">Examples</h4>
+<pre class="python"><code># 100 samples of a scalar
+x = Empirical(params=tf.zeros(100))
+assert x.shape == ()
+
+# 5 samples of a 2 x 3 matrix
+dp = Empirical(params=tf.zeros([5, 2, 3]))
+assert x.shape == (2, 3)</code></pre>
 <h2 id="properties">Properties</h2>
 <h3 id="allow_nan_stats">
 <code>allow_nan_stats</code>
@@ -197,14 +205,6 @@
 <ul>
 <li><b><code>params</code></b>: tf.Tensor. Collection of samples. Its outer (left-most) dimension determines the number of samples.</li>
 </ul>
-<h4 id="examples">Examples</h4>
-<pre class="python"><code># 100 samples of a scalar
-x = Empirical(params=tf.zeros(100))
-assert x.shape == ()
-
-# 5 samples of a 2 x 3 matrix
-dp = Empirical(params=tf.zeros([5, 2, 3]))
-assert x.shape == (2, 3)</code></pre>
 <h3 id="__abs__">
 <code><strong>abs</strong></code>
 </h3>

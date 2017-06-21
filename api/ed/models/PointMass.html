@@ -113,6 +113,14 @@
 <p>Inherits From: <a href="../../ed/RandomVariable"><code>RandomVariable</code></a></p>
 <p>PointMass random variable.</p>
 <p>It is analogous to an Empirical random variable with one sample, but its parameter argument does not have an outer dimension.</p>
+<h4 id="examples">Examples</h4>
+<pre class="python"><code># scalar
+x = PointMass(params=28.3)
+assert x.shape == ()
+
+# 5 x 2 x 3 tensor
+dp = PointMass(params=tf.zeros([5, 2, 3]))
+assert x.shape == (5, 2, 3)</code></pre>
 <h2 id="properties">Properties</h2>
 <h3 id="allow_nan_stats">
 <code>allow_nan_stats</code>
@@ -194,14 +202,6 @@
 <ul>
 <li><b><code>params</code></b>: tf.Tensor. The location with all probability mass.</li>
 </ul>
-<h4 id="examples">Examples</h4>
-<pre class="python"><code># scalar
-x = PointMass(params=28.3)
-assert x.shape == ()
-
-# 5 x 2 x 3 tensor
-dp = PointMass(params=tf.zeros([5, 2, 3]))
-assert x.shape == (5, 2, 3)</code></pre>
 <h3 id="__abs__">
 <code><strong>abs</strong></code>
 </h3>

@@ -113,6 +113,15 @@
 <p>Inherits From: <a href="../../ed/RandomVariable"><code>RandomVariable</code></a></p>
 <p>Dirichlet process <span class="math inline">\(\mathcal{DP}(\alpha, H)\)</span>.</p>
 <p>It has two parameters: a positive real value <span class="math inline">\(\alpha\)</span>, known as the concentration parameter (<code>concentration</code>), and a base distribution <span class="math inline">\(H\)</span> (<code>base</code>).</p>
+<h4 id="examples">Examples</h4>
+<pre class="python"><code># scalar concentration parameter, scalar base distribution
+dp = DirichletProcess(0.1, Normal(loc=0.0, scale=1.0))
+assert dp.shape == ()
+
+# vector of concentration parameters, matrix of Exponentials
+dp = DirichletProcess(tf.constant([0.1, 0.4]),
+...                       Exponential(lam=tf.ones([5, 3])))
+assert dp.shape == (2, 5, 3)</code></pre>
 <h2 id="properties">Properties</h2>
 <h3 id="allow_nan_stats">
 <code>allow_nan_stats</code>
@@ -207,15 +216,6 @@
 <li><b><code>concentration</code></b>: tf.Tensor. Concentration parameter. Must be positive real-valued. Its shape determines the number of independent DPs (batch shape).</li>
 <li><b><code>base</code></b>: RandomVariable. Base distribution. Its shape determines the shape of an individual DP (event shape).</li>
 </ul>
-<h4 id="examples">Examples</h4>
-<pre class="python"><code># scalar concentration parameter, scalar base distribution
-dp = DirichletProcess(0.1, Normal(loc=0.0, scale=1.0))
-assert dp.shape == ()
-
-# vector of concentration parameters, matrix of Exponentials
-dp = DirichletProcess(tf.constant([0.1, 0.4]),
-...                       Exponential(lam=tf.ones([5, 3])))
-assert dp.shape == (2, 5, 3)</code></pre>
 <h3 id="__abs__">
 <code><strong>abs</strong></code>
 </h3>
