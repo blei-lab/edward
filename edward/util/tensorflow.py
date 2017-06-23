@@ -45,29 +45,6 @@ def dot(x, y):
     return tf.reshape(tf.matmul(mat, tf.expand_dims(vec, 1)), [-1])
 
 
-def logit(x):
-  """Evaluate $\log(x / (1 - x))$ elementwise.
-
-  Args:
-    x: tf.Tensor.
-      A n-D tensor.
-
-  Returns:
-    tf.Tensor.
-    A tensor of same shape as input.
-
-  Raises:
-    InvalidArgumentError.
-    If the input is not between $(0,1)$ elementwise.
-  """
-  x = tf.convert_to_tensor(x)
-  dependencies = [tf.assert_positive(x),
-                  tf.assert_less(x, 1.0)]
-  x = control_flow_ops.with_dependencies(dependencies, x)
-
-  return tf.log(x) - tf.log(1.0 - x)
-
-
 def rbf(X, X2=None, lengthscale=1.0, variance=1.0):
   """Radial basis function kernel, also known as the squared
   exponential or exponentiated quadratic. It is defined as
@@ -122,33 +99,6 @@ def rbf(X, X2=None, lengthscale=1.0, variance=1.0):
       2 * tf.matmul(X, X2, transpose_b=True)
   output = variance * tf.exp(-square / 2)
   return output
-
-
-def reduce_logmeanexp(input_tensor, axis=None, keep_dims=False):
-  """Computes log(mean(exp(elements across dimensions of a tensor))).
-
-  Args:
-    input_tensor: tf.Tensor.
-      The tensor to reduce. Should have numeric type.
-    axis: int or list of int, optional.
-      The dimensions to reduce. If `None` (the default), reduces all
-      dimensions.
-    keep_dims: bool, optional.
-      If true, retains reduced dimensions with length 1.
-
-  Returns:
-    tf.Tensor.
-    The reduced tensor.
-  """
-  logsumexp = tf.reduce_logsumexp(input_tensor, axis, keep_dims)
-  input_tensor = tf.convert_to_tensor(input_tensor)
-  n = input_tensor.shape.as_list()
-  if axis is None:
-    n = tf.cast(tf.reduce_prod(n), logsumexp.dtype)
-  else:
-    n = tf.cast(tf.reduce_prod(n[axis]), logsumexp.dtype)
-
-  return -tf.log(n) + logsumexp
 
 
 def to_simplex(x):

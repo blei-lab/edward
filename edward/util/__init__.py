@@ -25,11 +25,9 @@ _allowed_symbols = [
     'get_session',
     'get_siblings',
     'get_variables',
-    'logit',
     'Progbar',
     'random_variables',
     'rbf',
-    'reduce_logmeanexp',
     'set_seed',
     'to_simplex',
 ]
