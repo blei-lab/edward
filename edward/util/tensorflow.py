@@ -45,29 +45,6 @@ def dot(x, y):
     return tf.reshape(tf.matmul(mat, tf.expand_dims(vec, 1)), [-1])
 
 
-def logit(x):
-  """Evaluate $\log(x / (1 - x))$ elementwise.
-
-  Args:
-    x: tf.Tensor.
-      A n-D tensor.
-
-  Returns:
-    tf.Tensor.
-    A tensor of same shape as input.
-
-  Raises:
-    InvalidArgumentError.
-    If the input is not between $(0,1)$ elementwise.
-  """
-  x = tf.convert_to_tensor(x)
-  dependencies = [tf.assert_positive(x),
-                  tf.assert_less(x, 1.0)]
-  x = control_flow_ops.with_dependencies(dependencies, x)
-
-  return tf.log(x) - tf.log(1.0 - x)
-
-
 def rbf(X, X2=None, lengthscale=1.0, variance=1.0):
   """Radial basis function kernel, also known as the squared
   exponential or exponentiated quadratic. It is defined as
