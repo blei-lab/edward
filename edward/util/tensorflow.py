@@ -101,33 +101,6 @@ def rbf(X, X2=None, lengthscale=1.0, variance=1.0):
   return output
 
 
-def reduce_logmeanexp(input_tensor, axis=None, keep_dims=False):
-  """Computes log(mean(exp(elements across dimensions of a tensor))).
-
-  Args:
-    input_tensor: tf.Tensor.
-      The tensor to reduce. Should have numeric type.
-    axis: int or list of int, optional.
-      The dimensions to reduce. If `None` (the default), reduces all
-      dimensions.
-    keep_dims: bool, optional.
-      If true, retains reduced dimensions with length 1.
-
-  Returns:
-    tf.Tensor.
-    The reduced tensor.
-  """
-  logsumexp = tf.reduce_logsumexp(input_tensor, axis, keep_dims)
-  input_tensor = tf.convert_to_tensor(input_tensor)
-  n = input_tensor.shape.as_list()
-  if axis is None:
-    n = tf.cast(tf.reduce_prod(n), logsumexp.dtype)
-  else:
-    n = tf.cast(tf.reduce_prod(n[axis]), logsumexp.dtype)
-
-  return -tf.log(n) + logsumexp
-
-
 def to_simplex(x):
   """Transform real vector of length `(K-1)` to a simplex of dimension `K`
   using a backward stick breaking construction.

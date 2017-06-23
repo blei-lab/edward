@@ -14,8 +14,20 @@ import tensorflow as tf
 
 from edward.inferences import VariationalInference
 from edward.models import Bernoulli, Normal, RandomVariable
-from edward.util import copy, reduce_logmeanexp
+from edward.util import copy
 from scipy.special import expit
+
+
+def reduce_logmeanexp(input_tensor, axis=None, keep_dims=False):
+  logsumexp = tf.reduce_logsumexp(input_tensor, axis, keep_dims)
+  input_tensor = tf.convert_to_tensor(input_tensor)
+  n = input_tensor.shape.as_list()
+  if axis is None:
+    n = tf.cast(tf.reduce_prod(n), logsumexp.dtype)
+  else:
+    n = tf.cast(tf.reduce_prod(n[axis]), logsumexp.dtype)
+
+  return -tf.log(n) + logsumexp
 
 
 class IWVI(VariationalInference):
