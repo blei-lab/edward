@@ -65,7 +65,7 @@ inference_m.initialize(optimizer=optimizer)
 
 tf.global_variables_initializer().run()
 
-for _ in range(n_epoch):
+for _ in range(n_epoch - 1):
   avg_loss = 0.0
   for _ in range(n_iter_per_epoch):
     info_dict_e = inference_e.update()
