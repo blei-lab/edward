@@ -8,7 +8,7 @@ import tensorflow as tf
 from collections import OrderedDict
 from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import RandomVariable
-from edward.util import check_latent_vars, copy
+from edward.util import check_latent_vars, copy, get_unique_name_scope
 
 try:
   from edward.models import Uniform
@@ -89,8 +89,9 @@ class MetropolisHastings(MonteCarlo):
 
     dict_swap_old = dict_swap.copy()
     dict_swap_old.update(old_sample)
-    scope_old = 'inference_' + str(id(self)) + '/old'
-    scope_new = 'inference_' + str(id(self)) + '/new'
+    base_scope = get_unique_name_scope("inference")
+    scope_old = base_scope + 'old'
+    scope_new = base_scope + 'new'
 
     # Draw proposed sample and calculate acceptance ratio.
     new_sample = old_sample.copy()  # copy to ensure same order

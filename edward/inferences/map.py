@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from edward.inferences.variational_inference import VariationalInference
 from edward.models import RandomVariable, PointMass
-from edward.util import copy
+from edward.util import copy, get_unique_name_scope
 
 
 class MAP(VariationalInference):
@@ -97,7 +97,7 @@ class MAP(VariationalInference):
     """
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
-    scope = 'inference_' + str(id(self))
+    scope = get_unique_name_scope("inference")
     dict_swap = {z: qz.value()
                  for z, qz in six.iteritems(self.latent_vars)}
     for x, qx in six.iteritems(self.data):

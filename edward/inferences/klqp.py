@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from edward.inferences.variational_inference import VariationalInference
 from edward.models import RandomVariable
-from edward.util import copy
+from edward.util import copy, get_unique_name_scope
 
 try:
   from edward.models import Normal
@@ -330,10 +330,11 @@ def build_reparam_loss_and_gradients(inference, var_list):
   """
   p_log_prob = [0.0] * inference.n_samples
   q_log_prob = [0.0] * inference.n_samples
+  base_scope = get_unique_name_scope("inference")
   for s in range(inference.n_samples):
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
-    scope = 'inference_' + str(id(inference)) + '/' + str(s)
+    scope = base_scope + get_unique_name_scope("sample")
     dict_swap = {}
     for x, qx in six.iteritems(inference.data):
       if isinstance(x, RandomVariable):
@@ -394,10 +395,11 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
   expectation using Monte Carlo sampling.
   """
   p_log_lik = [0.0] * inference.n_samples
+  base_scope = get_unique_name_scope("inference")
   for s in range(inference.n_samples):
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
-    scope = 'inference_' + str(id(inference)) + '/' + str(s)
+    scope = base_scope + get_unique_name_scope("sample")
     dict_swap = {}
     for x, qx in six.iteritems(inference.data):
       if isinstance(x, RandomVariable):
@@ -452,10 +454,11 @@ def build_reparam_entropy_loss_and_gradients(inference, var_list):
   expectation using Monte Carlo sampling.
   """
   p_log_prob = [0.0] * inference.n_samples
+  base_scope = get_unique_name_scope("inference")
   for s in range(inference.n_samples):
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
-    scope = 'inference_' + str(id(inference)) + '/' + str(s)
+    scope = base_scope + get_unique_name_scope("sample")
     dict_swap = {}
     for x, qx in six.iteritems(inference.data):
       if isinstance(x, RandomVariable):
@@ -508,10 +511,11 @@ def build_score_loss_and_gradients(inference, var_list):
   """
   p_log_prob = [0.0] * inference.n_samples
   q_log_prob = [0.0] * inference.n_samples
+  base_scope = get_unique_name_scope("inference")
   for s in range(inference.n_samples):
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
-    scope = 'inference_' + str(id(inference)) + '/' + str(s)
+    scope = base_scope + get_unique_name_scope("sample")
     dict_swap = {}
     for x, qx in six.iteritems(inference.data):
       if isinstance(x, RandomVariable):
@@ -570,10 +574,11 @@ def build_score_kl_loss_and_gradients(inference, var_list):
   """
   p_log_lik = [0.0] * inference.n_samples
   q_log_prob = [0.0] * inference.n_samples
+  base_scope = get_unique_name_scope("inference")
   for s in range(inference.n_samples):
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
-    scope = 'inference_' + str(id(inference)) + '/' + str(s)
+    scope = base_scope + get_unique_name_scope("sample")
     dict_swap = {}
     for x, qx in six.iteritems(inference.data):
       if isinstance(x, RandomVariable):
@@ -629,10 +634,11 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
   """
   p_log_prob = [0.0] * inference.n_samples
   q_log_prob = [0.0] * inference.n_samples
+  base_scope = get_unique_name_scope("inference")
   for s in range(inference.n_samples):
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
-    scope = 'inference_' + str(id(inference)) + '/' + str(s)
+    scope = base_scope + get_unique_name_scope("sample")
     dict_swap = {}
     for x, qx in six.iteritems(inference.data):
       if isinstance(x, RandomVariable):

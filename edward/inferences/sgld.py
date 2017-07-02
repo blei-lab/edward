@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import RandomVariable
-from edward.util import copy
+from edward.util import copy, get_unique_name_scope
 
 try:
   from edward.models import Normal
@@ -99,7 +99,7 @@ class SGLD(MonteCarlo):
       z_sample: dict.
         Latent variable keys to samples.
     """
-    scope = 'inference_' + str(id(self))
+    scope = get_unique_name_scope("inference")
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
     dict_swap = z_sample.copy()
