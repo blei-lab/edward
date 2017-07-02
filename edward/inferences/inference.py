@@ -84,7 +84,7 @@ class Inference(object):
         elif isinstance(value, (float, list, int, np.ndarray, np.number, str)):
           # If value is a Python type, store it in the graph.
           # Assign its placeholder with the key's data type.
-          with tf.variable_scope("data"):
+          with tf.variable_scope(None, default_name="data"):
             ph = tf.placeholder(key.dtype, np.shape(value))
             var = tf.Variable(ph, trainable=False, collections=[])
             sess.run(var.initializer, {ph: value})

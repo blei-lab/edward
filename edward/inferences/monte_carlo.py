@@ -76,7 +76,7 @@ class MonteCarlo(Inference):
         `tf.Tensor`) used in the model to their realizations.
     """
     if isinstance(latent_vars, list):
-      with tf.variable_scope("posterior"):
+      with tf.variable_scope(None, default_name="posterior"):
         latent_vars = {rv: Empirical(params=tf.Variable(
             tf.zeros([1e4] + rv.batch_shape.as_list())))
             for rv in latent_vars}

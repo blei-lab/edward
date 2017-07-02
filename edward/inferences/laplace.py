@@ -63,7 +63,7 @@ class Laplace(MAP):
         `MultivariateNormalTriL`, or `Normal` random variable.
     """
     if isinstance(latent_vars, list):
-      with tf.variable_scope("posterior"):
+      with tf.variable_scope(None, default_name="posterior"):
         latent_vars = {rv: MultivariateNormalTriL(
             loc=tf.Variable(tf.random_normal(rv.batch_shape)),
             scale_tril=tf.Variable(tf.random_normal(

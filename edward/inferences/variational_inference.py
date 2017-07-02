@@ -123,8 +123,7 @@ class VariationalInference(Inference):
     elif not isinstance(optimizer, tf.train.Optimizer):
       raise TypeError("Optimizer must be str, tf.train.Optimizer, or None.")
 
-    scope = "optimizer_" + str(id(self))
-    with tf.variable_scope(scope):
+    with tf.variable_scope(None, default_name="optimizer") as scope:
       if not use_prettytensor:
         self.train = optimizer.apply_gradients(grads_and_vars,
                                                global_step=global_step)
@@ -136,7 +135,7 @@ class VariationalInference(Inference):
                                         var_list=var_list)
 
     self.reset.append(tf.variables_initializer(
-        tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=scope)))
+        tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=scope.name)))
 
   def update(self, feed_dict=None):
     """Run one iteration of optimization.

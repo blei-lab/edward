@@ -77,7 +77,7 @@ class MAP(VariationalInference):
         value in the dictionary must be a `PointMass` random variable.
     """
     if isinstance(latent_vars, list):
-      with tf.variable_scope("posterior"):
+      with tf.variable_scope(None, default_name="posterior"):
         latent_vars = {rv: PointMass(
             params=tf.Variable(tf.random_normal(rv.batch_shape)))
             for rv in latent_vars}
