@@ -16,7 +16,7 @@ class test_map_class(tf.test.TestCase):
       x_data = np.array([0.0] * 50, dtype=np.float32)
 
       mu = Normal(loc=0.0, scale=1.0)
-      x = Normal(loc=tf.ones(50) * mu, scale=1.0)
+      x = Normal(loc=mu, scale=1.0, sample_shape=50)
 
       qmu = PointMass(params=tf.Variable(1.0))
 
