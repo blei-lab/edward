@@ -365,9 +365,10 @@ def build_reparam_loss_and_gradients(inference, var_list):
   q_log_prob = tf.reduce_mean(q_log_prob)
 
   if inference.logging:
-    summary_key = 'summaries_' + str(id(inference))
-    tf.summary.scalar("loss/p_log_prob", p_log_prob, collections=[summary_key])
-    tf.summary.scalar("loss/q_log_prob", q_log_prob, collections=[summary_key])
+    tf.summary.scalar("loss/p_log_prob", p_log_prob,
+                      collections=[inference._summary_key])
+    tf.summary.scalar("loss/q_log_prob", q_log_prob,
+                      collections=[inference._summary_key])
 
   loss = -(p_log_prob - q_log_prob)
 
@@ -424,9 +425,10 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
       for z, qz in six.iteritems(inference.latent_vars)])
 
   if inference.logging:
-    summary_key = 'summaries_' + str(id(inference))
-    tf.summary.scalar("loss/p_log_lik", p_log_lik, collections=[summary_key])
-    tf.summary.scalar("loss/kl_penalty", kl_penalty, collections=[summary_key])
+    tf.summary.scalar("loss/p_log_lik", p_log_lik,
+                      collections=[inference._summary_key])
+    tf.summary.scalar("loss/kl_penalty", kl_penalty,
+                      collections=[inference._summary_key])
 
   loss = -(p_log_lik - kl_penalty)
 
@@ -485,9 +487,10 @@ def build_reparam_entropy_loss_and_gradients(inference, var_list):
       qz.entropy() for z, qz in six.iteritems(inference.latent_vars)])
 
   if inference.logging:
-    summary_key = 'summaries_' + str(id(inference))
-    tf.summary.scalar("loss/p_log_prob", p_log_prob, collections=[summary_key])
-    tf.summary.scalar("loss/q_entropy", q_entropy, collections=[summary_key])
+    tf.summary.scalar("loss/p_log_prob", p_log_prob,
+                      collections=[inference._summary_key])
+    tf.summary.scalar("loss/q_entropy", q_entropy,
+                      collections=[inference._summary_key])
 
   loss = -(p_log_prob + q_entropy)
 
@@ -541,11 +544,10 @@ def build_score_loss_and_gradients(inference, var_list):
   q_log_prob = tf.stack(q_log_prob)
 
   if inference.logging:
-    summary_key = 'summaries_' + str(id(inference))
     tf.summary.scalar("loss/p_log_prob", tf.reduce_mean(p_log_prob),
-                      collections=[summary_key])
+                      collections=[inference._summary_key])
     tf.summary.scalar("loss/q_log_prob", tf.reduce_mean(q_log_prob),
-                      collections=[summary_key])
+                      collections=[inference._summary_key])
 
   losses = p_log_prob - q_log_prob
   loss = -tf.reduce_mean(losses)
@@ -603,10 +605,10 @@ def build_score_kl_loss_and_gradients(inference, var_list):
       for z, qz in six.iteritems(inference.latent_vars)])
 
   if inference.logging:
-    summary_key = 'summaries_' + str(id(inference))
     tf.summary.scalar("loss/p_log_lik", tf.reduce_mean(p_log_lik),
-                      collections=[summary_key])
-    tf.summary.scalar("loss/kl_penalty", kl_penalty, collections=[summary_key])
+                      collections=[inference._summary_key])
+    tf.summary.scalar("loss/kl_penalty", kl_penalty,
+                      collections=[inference._summary_key])
 
   loss = -(tf.reduce_mean(p_log_lik) - kl_penalty)
   grads = tf.gradients(
@@ -666,12 +668,12 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
       qz.entropy() for z, qz in six.iteritems(inference.latent_vars)])
 
   if inference.logging:
-    summary_key = 'summaries_' + str(id(inference))
     tf.summary.scalar("loss/p_log_prob", tf.reduce_mean(p_log_prob),
-                      collections=[summary_key])
+                      collections=[inference._summary_key])
     tf.summary.scalar("loss/q_log_prob", tf.reduce_mean(q_log_prob),
-                      collections=[summary_key])
-    tf.summary.scalar("loss/q_entropy", q_entropy, collections=[summary_key])
+                      collections=[inference._summary_key])
+    tf.summary.scalar("loss/q_entropy", q_entropy,
+                      collections=[inference._summary_key])
 
   loss = -(tf.reduce_mean(p_log_prob) + q_entropy)
   grads = tf.gradients(

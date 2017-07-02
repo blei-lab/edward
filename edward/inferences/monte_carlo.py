@@ -103,9 +103,9 @@ class MonteCarlo(Inference):
     self.reset.append(tf.variables_initializer([self.n_accept]))
 
     if self.logging:
-      summary_key = 'summaries_' + str(id(self))
-      tf.summary.scalar("n_accept", self.n_accept, collections=[summary_key])
-      self.summarize = tf.summary.merge_all(key=summary_key)
+      tf.summary.scalar("n_accept", self.n_accept,
+                        collections=[self._summary_key])
+      self.summarize = tf.summary.merge_all(key=self._summary_key)
 
   def update(self, feed_dict=None):
     """Run one iteration of sampling.

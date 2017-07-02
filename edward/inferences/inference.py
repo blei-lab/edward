@@ -216,6 +216,7 @@ class Inference(object):
         logdir = os.path.join(
             logdir, datetime.strftime(datetime.utcnow(), "%Y%m%d_%H%M%S"))
 
+      self._summary_key = get_unique_name_scope("summaries")
       self._set_log_variables(log_vars)
       self.train_writer = tf.summary.FileWriter(logdir, tf.get_default_graph())
       self.summarize = tf.summary.merge_all()
@@ -295,7 +296,6 @@ class Inference(object):
         steps. If None, will log all variables. If `[]`, no variables
         will be logged.
     """
-    summary_key = 'summaries_' + str(id(self))
     if log_vars is None:
       log_vars = []
       for key in six.iterkeys(self.data):
@@ -313,11 +313,11 @@ class Inference(object):
       # Log all scalars.
       if len(var.shape) == 0:
         tf.summary.scalar("parameter/{}".format(var_name),
-                          var, collections=[summary_key])
+                          var, collections=[self._summary_key])
       elif len(var.shape) == 1 and var.shape[0] == 1:
         tf.summary.scalar("parameter/{}".format(var_name),
-                          var[0], collections=[summary_key])
+                          var[0], collections=[self._summary_key])
       else:
         # If var is multi-dimensional, log a histogram of its values.
         tf.summary.histogram("parameter/{}".format(var_name),
-                             var, collections=[summary_key])
+                             var, collections=[self._summary_key])
