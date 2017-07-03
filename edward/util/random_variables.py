@@ -203,7 +203,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
   # If an instance of the same name exists, return it.
   if isinstance(org_instance, RandomVariable):
     for rv in random_variables():
-      if new_name == rv.unique_name:
+      if new_name == rv.name:
         return rv
   elif isinstance(org_instance, (tf.Tensor, tf.Operation)):
     try:
