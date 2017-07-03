@@ -26,6 +26,14 @@ class test_saver_class(tf.test.TestCase):
       saver = tf.train.Saver()
       saver.export_meta_graph("/tmp/test_saver.meta")
 
+  def test_import_meta_graph(self):
+    with self.test_session() as sess:
+      new_saver = tf.train.import_meta_graph("tests/data/test_saver.meta")
+      new_saver.restore(sess, "tests/data/test_saver")
+      qmu_variable = tf.get_collection(
+          tf.GraphKeys.TRAINABLE_VARIABLES, scope="posterior")[0]
+      self.assertNotEqual(qmu_variable.eval(), 1.0)
+
   def test_restore(self):
     with self.test_session() as sess:
       x_data = np.array([0.0] * 50, dtype=np.float32)

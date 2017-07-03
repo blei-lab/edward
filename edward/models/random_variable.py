@@ -10,8 +10,6 @@ try:
 except Exception as e:
   raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
-RANDOM_VARIABLE_COLLECTION = "random_variables"
-
 
 class RandomVariable(object):
   """Base class for random variables.
@@ -81,14 +79,15 @@ class RandomVariable(object):
         `sample_shape + batch_shape + event_shape`.
       collections: list, optional.
         Optional list of graph collections keys. The random variable is
-        added to these collections. Defaults to ["random_variables"].
+        added to these collections. Defaults to `[ed.random_variables()]`.
       *args, **kwargs:
         Passed into parent `__init__`.
     """
     # pop and store RandomVariable-specific parameters in _kwargs
     sample_shape = kwargs.pop('sample_shape', ())
     value = kwargs.pop('value', None)
-    collections = kwargs.pop('collections', [RANDOM_VARIABLE_COLLECTION])
+    from edward.util.graphs import random_variables
+    collections = kwargs.pop('collections', [random_variables()])
 
     # store args, kwargs for easy graph copying
     self._args = args
@@ -98,7 +97,7 @@ class RandomVariable(object):
       self._kwargs['sample_shape'] = sample_shape
     if value is not None:
       self._kwargs['value'] = value
-    if collections != [RANDOM_VARIABLE_COLLECTION]:
+    if collections != [random_variables()]:
       self._kwargs['collections'] = collections
 
     super(RandomVariable, self).__init__(*args, **kwargs)
@@ -128,7 +127,7 @@ class RandomVariable(object):
       self._unique_name = ns
 
     for collection in collections:
-      tf.add_to_collection(collection, self)
+      collection.append(self)
 
   @property
   def sample_shape(self):
