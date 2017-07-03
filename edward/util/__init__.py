@@ -24,7 +24,6 @@ _allowed_symbols = [
     'get_parents',
     'get_session',
     'get_siblings',
-    'get_unique_name_scope',
     'get_variables',
     'Progbar',
     'random_variables',

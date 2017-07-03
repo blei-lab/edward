@@ -45,11 +45,6 @@ def dot(x, y):
     return tf.reshape(tf.matmul(mat, tf.expand_dims(vec, 1)), [-1])
 
 
-def get_unique_name_scope(prefix):
-  with tf.name_scope(prefix) as ns:
-    return ns
-
-
 def rbf(X, X2=None, lengthscale=1.0, variance=1.0):
   """Radial basis function kernel, also known as the squared
   exponential or exponentiated quadratic. It is defined as

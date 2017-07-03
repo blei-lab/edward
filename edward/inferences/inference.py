@@ -11,7 +11,7 @@ import os
 from datetime import datetime
 from edward.models import RandomVariable
 from edward.util import check_data, check_latent_vars, get_session, \
-    get_unique_name_scope, get_variables, Progbar
+    get_variables, Progbar
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -217,7 +217,7 @@ class Inference(object):
         logdir = os.path.join(
             logdir, datetime.strftime(datetime.utcnow(), "%Y%m%d_%H%M%S"))
 
-      self._summary_key = get_unique_name_scope("summaries")
+      self._summary_key = tf.get_default_graph().unique_name("summaries")
       self._set_log_variables(log_vars)
       self.train_writer = tf.summary.FileWriter(logdir, tf.get_default_graph())
     else:

@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from edward.inferences.variational_inference import VariationalInference
 from edward.models import RandomVariable
-from edward.util import copy, get_unique_name_scope
+from edward.util import copy
 
 
 class KLpq(VariationalInference):
@@ -84,11 +84,11 @@ class KLpq(VariationalInference):
     """
     p_log_prob = [0.0] * self.n_samples
     q_log_prob = [0.0] * self.n_samples
-    base_scope = get_unique_name_scope("inference")
+    base_scope = tf.get_default_graph().unique_name("inference") + '/'
     for s in range(self.n_samples):
       # Form dictionary in order to replace conditioning on prior or
       # observed variable with conditioning on a specific value.
-      scope = base_scope + get_unique_name_scope("sample")
+      scope = base_scope + tf.get_default_graph().unique_name("sample")
       dict_swap = {}
       for x, qx in six.iteritems(self.data):
         if isinstance(x, RandomVariable):

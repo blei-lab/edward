@@ -8,7 +8,7 @@ import tensorflow as tf
 from collections import OrderedDict
 from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import RandomVariable
-from edward.util import check_latent_vars, copy, get_unique_name_scope
+from edward.util import check_latent_vars, copy
 
 try:
   from edward.models import Uniform
@@ -89,7 +89,7 @@ class MetropolisHastings(MonteCarlo):
 
     dict_swap_old = dict_swap.copy()
     dict_swap_old.update(old_sample)
-    base_scope = get_unique_name_scope("inference")
+    base_scope = tf.get_default_graph().unique_name("inference") + '/'
     scope_old = base_scope + 'old'
     scope_new = base_scope + 'new'
 

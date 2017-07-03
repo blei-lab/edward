@@ -7,8 +7,7 @@ import tensorflow as tf
 
 from edward.inferences.gan_inference import GANInference
 from edward.models import RandomVariable
-from edward.util import \
-    check_latent_vars, copy, get_session, get_unique_name_scope
+from edward.util import check_latent_vars, copy, get_session
 
 
 class ImplicitKLqp(GANInference):
@@ -145,7 +144,7 @@ class ImplicitKLqp(GANInference):
     + analytic KL/swapping out the penalty term for the globals.
     """
     # Collect tensors used in calculation of losses.
-    scope = get_unique_name_scope("inference")
+    scope = tf.get_default_graph().unique_name("inference")
     qbeta_sample = {}
     pbeta_log_prob = 0.0
     qbeta_log_prob = 0.0

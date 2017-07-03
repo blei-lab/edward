@@ -8,7 +8,7 @@ import tensorflow as tf
 from collections import OrderedDict
 from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import RandomVariable
-from edward.util import copy, get_unique_name_scope
+from edward.util import copy
 
 try:
   from edward.models import Normal, Uniform
@@ -60,7 +60,8 @@ class HMC(MonteCarlo):
     """
     self.step_size = step_size
     self.n_steps = n_steps
-    self._scope = get_unique_name_scope("inference")  # for log joint computes
+    # store global scope for log joint calculations
+    self._scope = tf.get_default_graph().unique_name("inference") + '/'
     return super(HMC, self).initialize(*args, **kwargs)
 
   def build_update(self):
@@ -127,7 +128,7 @@ class HMC(MonteCarlo):
       z_sample: dict.
         Latent variable keys to samples.
     """
-    scope = self._scope + get_unique_name_scope("sample")
+    scope = self._scope + tf.get_default_graph().unique_name("sample")
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
     dict_swap = z_sample.copy()
