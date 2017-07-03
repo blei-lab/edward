@@ -9,18 +9,6 @@ import tensorflow as tf
 
 from edward.models.random_variable import _RANDOM_VARIABLE_COLLECTION
 
-save_stderr = sys.stderr
-
-try:
-  import os
-  sys.stderr = open(os.devnull, 'w')  # suppress keras import
-  from keras import backend as K
-  sys.stderr = save_stderr
-  have_keras = True
-except ImportError:
-  sys.stderr = save_stderr
-  have_keras = False
-
 
 def get_session():
   """Get the globally defined TensorFlow session.
@@ -37,6 +25,16 @@ def get_session():
   else:
     _ED_SESSION = tf.get_default_session()
 
+  save_stderr = sys.stderr
+  try:
+    import os
+    sys.stderr = open(os.devnull, 'w')  # suppress keras import
+    from keras import backend as K
+    sys.stderr = save_stderr
+    have_keras = True
+  except ImportError:
+    sys.stderr = save_stderr
+    have_keras = False
   if have_keras:
     K.set_session(_ED_SESSION)
 
