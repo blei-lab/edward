@@ -62,8 +62,8 @@ def lstm_cell(x, h, c, name=None, reuse=False):
                          dtype=tf.float32,
                          initializer=tf.orthogonal_initializer(1.0))
     b = tf.get_variable("bias", [nout * 4],
-                         dtype=tf.float32,
-                         initializer=tf.constant_initializer(0.0))
+                        dtype=tf.float32,
+                        initializer=tf.constant_initializer(0.0))
 
   z = tf.matmul(x, wx) + tf.matmul(h, wh) + b
   i, f, o, u = tf.split(z, 4, axis=1)
