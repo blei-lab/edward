@@ -1,8 +1,17 @@
 #!/usr/bin/env python
 """LSTM language model on text8.
 
-Default hyperparameters achieve ~79.4 NLL at epoch 50, ~76.1423 NLL at
+Default hyperparameters achieve ~78.4 NLL at epoch 50, ~76.1423 NLL at
 epoch 200; ~13s/epoch on Titan X (Pascal).
+
+Samples after 200 epochs:
+```
+e the classmaker was cut apart rome the charts sometimes known a
+hemical place baining examples of equipment accepted manner clas
+uetean meeting sought to exist as this waiting an excerpt for of
+erally enjoyed a film writer of unto one two volunteer humphrey
+y captured by the saughton river goodness where stones were nota
+```
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -25,7 +34,7 @@ n_iter_per_epoch = 250
 batch_size = 128
 hidden_size = 512
 timesteps = 64
-lr = 1e-3
+lr = 5e-3
 
 timestamp = datetime.strftime(datetime.utcnow(), "%Y%m%d_%H%M%S")
 hyperparam_str = '_'.join([
