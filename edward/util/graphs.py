@@ -7,6 +7,8 @@ import six
 import sys
 import tensorflow as tf
 
+from edward.models.random_variable import _RANDOM_VARIABLE_COLLECTION
+
 save_stderr = sys.stderr
 
 try:
@@ -47,11 +49,6 @@ def random_variables():
   Returns:
     list of RandomVariable.
   """
-  global _RANDOM_VARIABLE_COLLECTION
-  try:
-    _RANDOM_VARIABLE_COLLECTION
-  except NameError:
-    _RANDOM_VARIABLE_COLLECTION = []
   return _RANDOM_VARIABLE_COLLECTION
 
 
