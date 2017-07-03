@@ -230,7 +230,15 @@ def copy(org_instance, dict_swap=None, scope="copied",
 
     kwargs['name'] = new_name
     # Create new random variable with copied arguments.
-    new_rv = type(rv)(*args, **kwargs)
+    try:
+      new_rv = type(rv)(*args, **kwargs)
+    except ValueError:
+      # Handle case where parameters are copied under absolute name
+      # scope. This can cause an error when creating a new random
+      # variable as tf.identity name ops are called on parameters ("op
+      # with name already exists"). To avoid remove absolute name scope.
+      kwargs['name'] = new_name[:-1]
+      new_rv = type(rv)(*args, **kwargs)
     return new_rv
   elif isinstance(org_instance, tf.Tensor):
     tensor = org_instance
