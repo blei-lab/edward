@@ -89,8 +89,9 @@ class MetropolisHastings(MonteCarlo):
 
     dict_swap_old = dict_swap.copy()
     dict_swap_old.update(old_sample)
-    scope_old = 'inference_' + str(id(self)) + '/old'
-    scope_new = 'inference_' + str(id(self)) + '/new'
+    base_scope = tf.get_default_graph().unique_name("inference") + '/'
+    scope_old = base_scope + 'old'
+    scope_new = base_scope + 'new'
 
     # Draw proposed sample and calculate acceptance ratio.
     new_sample = old_sample.copy()  # copy to ensure same order

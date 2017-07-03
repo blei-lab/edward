@@ -84,10 +84,11 @@ class KLpq(VariationalInference):
     """
     p_log_prob = [0.0] * self.n_samples
     q_log_prob = [0.0] * self.n_samples
+    base_scope = tf.get_default_graph().unique_name("inference") + '/'
     for s in range(self.n_samples):
       # Form dictionary in order to replace conditioning on prior or
       # observed variable with conditioning on a specific value.
-      scope = 'inference_' + str(id(self)) + '/' + str(s)
+      scope = base_scope + tf.get_default_graph().unique_name("sample")
       dict_swap = {}
       for x, qx in six.iteritems(self.data):
         if isinstance(x, RandomVariable):
@@ -117,11 +118,10 @@ class KLpq(VariationalInference):
     q_log_prob = tf.stack(q_log_prob)
 
     if self.logging:
-      summary_key = 'summaries_' + str(id(self))
       tf.summary.scalar("loss/p_log_prob", tf.reduce_mean(p_log_prob),
-                        collections=[summary_key])
+                        collections=[self._summary_key])
       tf.summary.scalar("loss/q_log_prob", tf.reduce_mean(q_log_prob),
-                        collections=[summary_key])
+                        collections=[self._summary_key])
 
     log_w = p_log_prob - q_log_prob
     log_w_norm = log_w - tf.reduce_logsumexp(log_w)

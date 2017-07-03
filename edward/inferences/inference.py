@@ -10,8 +10,8 @@ import os
 
 from datetime import datetime
 from edward.models import RandomVariable
-from edward.util import check_data, check_latent_vars, get_session, Progbar
-from edward.util import get_variables
+from edward.util import check_data, check_latent_vars, get_session, \
+    get_variables, Progbar
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -84,7 +84,7 @@ class Inference(object):
         elif isinstance(value, (float, list, int, np.ndarray, np.number, str)):
           # If value is a Python type, store it in the graph.
           # Assign its placeholder with the key's data type.
-          with tf.variable_scope("data"):
+          with tf.variable_scope(None, default_name="data"):
             ph = tf.placeholder(key.dtype, np.shape(value))
             var = tf.Variable(ph, trainable=False, collections=[])
             sess.run(var.initializer, {ph: value})
@@ -213,12 +213,13 @@ class Inference(object):
     if logdir is not None:
       self.logging = True
       if log_timestamp:
+        logdir = os.path.expanduser(logdir)
         logdir = os.path.join(
             logdir, datetime.strftime(datetime.utcnow(), "%Y%m%d_%H%M%S"))
 
+      self._summary_key = tf.get_default_graph().unique_name("summaries")
       self._set_log_variables(log_vars)
       self.train_writer = tf.summary.FileWriter(logdir, tf.get_default_graph())
-      self.summarize = tf.summary.merge_all()
     else:
       self.logging = False
 
@@ -295,7 +296,6 @@ class Inference(object):
         steps. If None, will log all variables. If `[]`, no variables
         will be logged.
     """
-    summary_key = 'summaries_' + str(id(self))
     if log_vars is None:
       log_vars = []
       for key in six.iterkeys(self.data):
@@ -313,11 +313,11 @@ class Inference(object):
       # Log all scalars.
       if len(var.shape) == 0:
         tf.summary.scalar("parameter/{}".format(var_name),
-                          var, collections=[summary_key])
+                          var, collections=[self._summary_key])
       elif len(var.shape) == 1 and var.shape[0] == 1:
         tf.summary.scalar("parameter/{}".format(var_name),
-                          var[0], collections=[summary_key])
+                          var[0], collections=[self._summary_key])
       else:
         # If var is multi-dimensional, log a histogram of its values.
         tf.summary.histogram("parameter/{}".format(var_name),
-                             var, collections=[summary_key])
+                             var, collections=[self._summary_key])

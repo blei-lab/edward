@@ -155,6 +155,8 @@ def copy(org_instance, dict_swap=None, scope="copied",
 
   if dict_swap is None:
     dict_swap = {}
+  if scope[-1] != '/':
+    scope += '/'
 
   # Swap instance if in dictionary.
   if org_instance in dict_swap and replace_itself:
@@ -196,7 +198,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
           return variable
 
   graph = tf.get_default_graph()
-  new_name = scope + '/' + org_instance.name
+  new_name = scope + org_instance.name
 
   # If an instance of the same name exists, return it.
   if isinstance(org_instance, RandomVariable):

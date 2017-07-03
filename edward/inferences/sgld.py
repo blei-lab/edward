@@ -99,7 +99,7 @@ class SGLD(MonteCarlo):
       z_sample: dict.
         Latent variable keys to samples.
     """
-    scope = 'inference_' + str(id(self))
+    scope = tf.get_default_graph().unique_name("inference")
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
     dict_swap = z_sample.copy()

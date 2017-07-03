@@ -60,7 +60,8 @@ class HMC(MonteCarlo):
     """
     self.step_size = step_size
     self.n_steps = n_steps
-    self.scope_iter = 0  # a convenient counter for log joint calculations
+    # store global scope for log joint calculations
+    self._scope = tf.get_default_graph().unique_name("inference") + '/'
     return super(HMC, self).initialize(*args, **kwargs)
 
   def build_update(self):
@@ -127,8 +128,7 @@ class HMC(MonteCarlo):
       z_sample: dict.
         Latent variable keys to samples.
     """
-    self.scope_iter += 1
-    scope = 'inference_' + str(id(self)) + '/' + str(self.scope_iter)
+    scope = self._scope + tf.get_default_graph().unique_name("sample")
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
     dict_swap = z_sample.copy()

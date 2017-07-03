@@ -75,18 +75,17 @@ class VariationalInference(Inference):
     self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
 
     if self.logging:
-      summary_key = 'summaries_' + str(id(self))
-      tf.summary.scalar("loss", self.loss, collections=[summary_key])
+      tf.summary.scalar("loss", self.loss, collections=[self._summary_key])
       for grad, var in grads_and_vars:
         # replace colons which are an invalid character
         tf.summary.histogram("gradient/" +
                              var.name.replace(':', '/'),
-                             grad, collections=[summary_key])
+                             grad, collections=[self._summary_key])
         tf.summary.scalar("gradient_norm/" +
                           var.name.replace(':', '/'),
-                          tf.norm(grad), collections=[summary_key])
+                          tf.norm(grad), collections=[self._summary_key])
 
-      self.summarize = tf.summary.merge_all(key=summary_key)
+      self.summarize = tf.summary.merge_all(key=self._summary_key)
 
     if optimizer is None and global_step is None:
       # Default optimizer always uses a global step variable.
@@ -123,8 +122,7 @@ class VariationalInference(Inference):
     elif not isinstance(optimizer, tf.train.Optimizer):
       raise TypeError("Optimizer must be str, tf.train.Optimizer, or None.")
 
-    scope = "optimizer_" + str(id(self))
-    with tf.variable_scope(scope):
+    with tf.variable_scope(None, default_name="optimizer") as scope:
       if not use_prettytensor:
         self.train = optimizer.apply_gradients(grads_and_vars,
                                                global_step=global_step)
@@ -136,7 +134,7 @@ class VariationalInference(Inference):
                                         var_list=var_list)
 
     self.reset.append(tf.variables_initializer(
-        tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=scope)))
+        tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=scope.name)))
 
   def update(self, feed_dict=None):
     """Run one iteration of optimization.
@@ -166,9 +164,8 @@ class VariationalInference(Inference):
 
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:
-        if self.summarize is not None:
-          summary = sess.run(self.summarize, feed_dict)
-          self.train_writer.add_summary(summary, t)
+        summary = sess.run(self.summarize, feed_dict)
+        self.train_writer.add_summary(summary, t)
 
     return {'t': t, 'loss': loss}
 

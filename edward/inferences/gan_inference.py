@@ -104,12 +104,11 @@ class GANInference(VariationalInference):
                                                global_step=global_step_d)
 
     if self.logging:
-      summary_key = 'summaries_' + str(id(self))
       tf.summary.scalar("loss/discriminative", self.loss_d,
-                        collections=[summary_key])
+                        collections=[self._summary_key])
       tf.summary.scalar("loss/generative", self.loss,
-                        collections=[summary_key])
-      self.summarize = tf.summary.merge_all(key=summary_key)
+                        collections=[self._summary_key])
+      self.summarize = tf.summary.merge_all(key=self._summary_key)
 
   def build_loss_and_gradients(self, var_list):
     x_true = list(six.itervalues(self.data))[0]
@@ -121,10 +120,9 @@ class GANInference(VariationalInference):
       d_fake = self.discriminator(x_fake)
 
     if self.logging:
-      summary_key = 'summaries_' + str(id(self))
       tf.summary.histogram("discriminator_outputs",
                            tf.concat(d_true, d_fake, axis=0),
-                           collections=[summary_key])
+                           collections=[self._summary_key])
 
     loss_d = tf.nn.sigmoid_cross_entropy_with_logits(
         labels=tf.ones_like(d_true), logits=d_true) + \
@@ -196,9 +194,8 @@ class GANInference(VariationalInference):
 
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:
-        if self.summarize is not None:
-          summary = sess.run(self.summarize, feed_dict)
-          self.train_writer.add_summary(summary, t)
+        summary = sess.run(self.summarize, feed_dict)
+        self.train_writer.add_summary(summary, t)
 
     return {'t': t, 'loss': loss, 'loss_d': loss_d}
 

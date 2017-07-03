@@ -1,7 +1,9 @@
 #!/usr/bin/env python
-"""
-Generate `toy_data.tfrecords`.
-"""
+"""Generate `toy_data.tfrecords`."""
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
 import numpy as np
 import tensorflow as tf
 

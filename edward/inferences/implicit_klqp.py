@@ -144,7 +144,7 @@ class ImplicitKLqp(GANInference):
     + analytic KL/swapping out the penalty term for the globals.
     """
     # Collect tensors used in calculation of losses.
-    scope = 'inference_' + str(id(self))
+    scope = tf.get_default_graph().unique_name("inference")
     qbeta_sample = {}
     pbeta_log_prob = 0.0
     qbeta_log_prob = 0.0

@@ -76,7 +76,7 @@ class MonteCarlo(Inference):
         `tf.Tensor`) used in the model to their realizations.
     """
     if isinstance(latent_vars, list):
-      with tf.variable_scope("posterior"):
+      with tf.variable_scope(None, default_name="posterior"):
         latent_vars = {rv: Empirical(params=tf.Variable(
             tf.zeros([1e4] + rv.batch_shape.as_list())))
             for rv in latent_vars}
@@ -103,9 +103,9 @@ class MonteCarlo(Inference):
     self.reset.append(tf.variables_initializer([self.n_accept]))
 
     if self.logging:
-      summary_key = 'summaries_' + str(id(self))
-      tf.summary.scalar("n_accept", self.n_accept, collections=[summary_key])
-      self.summarize = tf.summary.merge_all(key=summary_key)
+      tf.summary.scalar("n_accept", self.n_accept,
+                        collections=[self._summary_key])
+      self.summarize = tf.summary.merge_all(key=self._summary_key)
 
   def update(self, feed_dict=None):
     """Run one iteration of sampling.

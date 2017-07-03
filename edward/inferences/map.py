@@ -77,7 +77,7 @@ class MAP(VariationalInference):
         value in the dictionary must be a `PointMass` random variable.
     """
     if isinstance(latent_vars, list):
-      with tf.variable_scope("posterior"):
+      with tf.variable_scope(None, default_name="posterior"):
         latent_vars = {rv: PointMass(
             params=tf.Variable(tf.random_normal(rv.batch_shape)))
             for rv in latent_vars}
@@ -97,7 +97,7 @@ class MAP(VariationalInference):
     """
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
-    scope = 'inference_' + str(id(self))
+    scope = tf.get_default_graph().unique_name("inference")
     dict_swap = {z: qz.value()
                  for z, qz in six.iteritems(self.latent_vars)}
     for x, qx in six.iteritems(self.data):
