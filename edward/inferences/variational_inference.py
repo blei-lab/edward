@@ -11,11 +11,6 @@ from edward.inferences.inference import Inference
 from edward.models import RandomVariable
 from edward.util import get_session, get_variables
 
-try:
-  import prettytensor as pt
-except ImportError:
-  pass
-
 
 @six.add_metaclass(abc.ABCMeta)
 class VariationalInference(Inference):
@@ -127,6 +122,7 @@ class VariationalInference(Inference):
         self.train = optimizer.apply_gradients(grads_and_vars,
                                                global_step=global_step)
       else:
+        import prettytensor as pt
         # Note PrettyTensor optimizer does not accept manual updates;
         # it autodiffs the loss directly.
         self.train = pt.apply_optimizer(optimizer, losses=[self.loss],

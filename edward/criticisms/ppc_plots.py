@@ -2,11 +2,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-try:
-  import seaborn as sns
-except ImportError:
-  pass
-
 
 def ppc_density_plot(y, y_rep):
   """Create 1D kernel density plot comparing data to samples from posterior.
@@ -20,6 +15,7 @@ def ppc_density_plot(y, y_rep):
   Returns:
     matplotlib axes
   """
+  import seaborn as sns
   ax = sns.kdeplot(y, color="maroon")
 
   n = y_rep.shape[0]
@@ -54,6 +50,7 @@ def ppc_stat_hist_plot(y_stats, yrep_stats, stat_name=None, **kwargs):
   Returns:
     matplotlib axes.
   """
+  import seaborn as sns
   ax = sns.distplot(yrep_stats, kde=False, label=r'$T(y_{rep})$', **kwargs)
 
   max_value = ax.get_ylim()[1]
