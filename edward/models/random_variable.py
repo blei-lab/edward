@@ -87,8 +87,7 @@ class RandomVariable(object):
     """
     # Force the Distribution class to always use the same name scope
     # when scoping its parameter names and also when calling any
-    # methods such as sample. This properly folds all random variable
-    # methods in the scope given by the name attribute.
+    # methods such as sample.
     name = kwargs.get('name', type(self).__name__)
     with tf.name_scope(name) as ns:
       kwargs['name'] = ns
