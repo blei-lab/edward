@@ -192,8 +192,8 @@ for epoch in range(n_epoch):
         feed_dict={x_ph_input: x_batch_input, x_ph_target: x_batch_target})
     avg_loss += info_dict['loss']
 
-  # Print average loss over epoch.
-  avg_loss /= n_iter_per_epoch
+  # Print average per-data point loss over epoch.
+  avg_loss /= (n_iter_per_epoch * batch_size)
   print("log p(x): {:0.8f}".format(avg_loss))
 
   # Generate samples from model.
