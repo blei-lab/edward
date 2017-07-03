@@ -158,96 +158,6 @@ class RandomVariable(object):
     return "<ed.RandomVariable '%s' shape=%s dtype=%s>" % (
         self.unique_name, self.shape, self.dtype.name)
 
-  def __add__(self, other):
-    return tf.add(self, other)
-
-  def __radd__(self, other):
-    return tf.add(other, self)
-
-  def __sub__(self, other):
-    return tf.subtract(self, other)
-
-  def __rsub__(self, other):
-    return tf.subtract(other, self)
-
-  def __mul__(self, other):
-    return tf.multiply(self, other)
-
-  def __rmul__(self, other):
-    return tf.multiply(other, self)
-
-  def __div__(self, other):
-    return tf.div(self, other)
-
-  __truediv__ = __div__
-
-  def __rdiv__(self, other):
-    return tf.div(other, self)
-
-  __rtruediv__ = __rdiv__
-
-  def __floordiv__(self, other):
-    return tf.floor(tf.div(self, other))
-
-  def __rfloordiv__(self, other):
-    return tf.floor(tf.div(other, self))
-
-  def __mod__(self, other):
-    return tf.mod(self, other)
-
-  def __rmod__(self, other):
-    return tf.mod(other, self)
-
-  def __lt__(self, other):
-    return tf.less(self, other)
-
-  def __le__(self, other):
-    return tf.less_equal(self, other)
-
-  def __gt__(self, other):
-    return tf.greater(self, other)
-
-  def __ge__(self, other):
-    return tf.greater_equal(self, other)
-
-  def __and__(self, other):
-    return tf.logical_and(self, other)
-
-  def __rand__(self, other):
-    return tf.logical_and(other, self)
-
-  def __or__(self, other):
-    return tf.logical_or(self, other)
-
-  def __ror__(self, other):
-    return tf.logical_or(other, self)
-
-  def __xor__(self, other):
-    return tf.logical_xor(self, other)
-
-  def __rxor__(self, other):
-    return tf.logical_xor(other, self)
-
-  def __getitem__(self, key):
-    """Subset the tensor associated to the random variable, not the
-    random variable itself."""
-    return self.value()[key]
-
-  def __pow__(self, other):
-    return tf.pow(self, other)
-
-  def __rpow__(self, other):
-    return tf.pow(other, self)
-
-  def __invert__(self):
-    return tf.logical_not(self)
-
-  def __neg__(self):
-    return tf.negative(self)
-
-  def __abs__(self):
-    return tf.abs(self)
-
   def __hash__(self):
     return id(self)
 
@@ -348,6 +258,37 @@ class RandomVariable(object):
     return self.shape
 
   @staticmethod
+  def _overload_all_operators():
+    """Register overloads for all operators."""
+    for operator in tf.Tensor.OVERLOADABLE_OPERATORS:
+      RandomVariable._overload_operator(operator)
+
+  @staticmethod
+  def _overload_operator(operator):
+    """Defer an operator overload to `tf.Tensor`.
+
+    We pull the operator out of tf.Tensor dynamically to avoid ordering issues.
+
+    Args:
+      operator: string. The operator name.
+    """
+    def _run_op(a, *args):
+      return getattr(tf.Tensor, operator)(a.value(), *args)
+    # Propagate __doc__ to wrapper
+    try:
+      _run_op.__doc__ = getattr(tf.Tensor, operator).__doc__
+    except AttributeError:
+      pass
+
+    setattr(RandomVariable, operator, _run_op)
+
+  # "This enables the Variable's overloaded "right" binary operators to
+  # run when the left operand is an ndarray, because it accords the
+  # Variable class higher priority than an ndarray, or a numpy matrix."
+  # Taken from implementation of tf.Tensor.
+  __array_priority__ = 100
+
+  @staticmethod
   def _session_run_conversion_fetch_function(tensor):
     return ([tensor.value()], lambda val: val[0])
 
@@ -368,6 +309,8 @@ class RandomVariable(object):
           "of type '%s'" % (dtype.name, v.dtype.name))
     return v.value()
 
+
+RandomVariable._overload_all_operators()
 
 register_session_run_conversion_functions(
     RandomVariable,
