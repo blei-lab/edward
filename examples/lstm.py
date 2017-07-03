@@ -20,7 +20,6 @@ from edward.util import maybe_download_and_extract, Progbar
 
 data_dir = "data/text8"
 log_dir = "log"
-out_dir = "out"
 n_epoch = 100
 n_iter_per_epoch = 250
 batch_size = 128
@@ -33,11 +32,8 @@ hyperparam_str = '_'.join([
     var + '_' + str(eval(var)).replace('.', '_')
     for var in ['batch_size', 'hidden_size', 'timesteps', 'lr']])
 log_dir = os.path.join(log_dir, timestamp + '_' + hyperparam_str)
-out_dir = os.path.join(out_dir, timestamp + '_' + hyperparam_str)
 if not os.path.exists(log_dir):
   os.makedirs(log_dir)
-if not os.path.exists(out_dir):
-  os.makedirs(out_dir)
 
 
 def text8(path):
@@ -152,7 +148,7 @@ def language_model_gen(batch_size):
 ed.set_seed(42)
 
 # DATA
-x_train, _, _ = text8(data_dir)
+x_train, _, x_test = text8(data_dir)
 vocab = string.ascii_lowercase + ' '
 vocab_size = len(vocab)
 encoder = dict(zip(vocab, range(vocab_size)))
@@ -167,7 +163,7 @@ with tf.variable_scope("language_model"):
   x = language_model(x_ph_input)
 
 with tf.variable_scope("language_model", reuse=True):
-  x_gen = language_model_gen(64)
+  x_gen = language_model_gen(5)
 
 # INFERENCE
 inference = ed.MAP({}, {x: x_ph_target})
@@ -200,13 +196,9 @@ for epoch in range(n_epoch):
   avg_loss /= n_iter_per_epoch
   print("log p(x): {:0.8f}".format(avg_loss))
 
-  # Generate and write samples from model.
+  # Generate samples from model.
   x_samples = sess.run(x_gen)
   samples = [''.join([decoder[xt] for xt in sample]) for sample in x_samples]
   print("Samples:")
-  for sample in samples[:5]:
+  for sample in samples:
     print(sample)
-  with open(os.path.join(out_dir, "samples.txt"), "a") as myfile:
-    myfile.write("\nEpoch: {0}\n".format(epoch))
-    for sample in samples[:5]:
-      myfile.write(sample + "\n")
