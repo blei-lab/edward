@@ -115,7 +115,10 @@ class MAP(VariationalInference):
 
     for x in six.iterkeys(self.data):
       if isinstance(x, RandomVariable):
-        x_copy = copy(x, dict_swap, scope=scope)
+        if dict_swap:
+          x_copy = copy(x, dict_swap, scope=scope)
+        else:
+          x_copy = x
         p_log_prob += tf.reduce_sum(
             self.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
 
