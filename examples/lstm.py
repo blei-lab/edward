@@ -29,7 +29,7 @@ from edward.util import maybe_download_and_extract, Progbar
 
 data_dir = "data/text8"
 log_dir = "log"
-n_epoch = 100
+n_epoch = 200
 n_iter_per_epoch = 250
 batch_size = 128
 hidden_size = 512
@@ -95,10 +95,12 @@ def generator(array, batch_size, encoder):
   """
   while True:
     imb = np.random.randint(0, len(array) - timesteps, batch_size)
-    out = np.asarray(
+    encoded = np.asarray(
         [[encoder[c] for c in array[i:(i + timesteps + 1)]] for i in imb],
         dtype=np.int32)
-    yield out
+    source = encoded[:, :timesteps]
+    target = encoded[:, 1:]
+    yield source, target
 
 
 def language_model(input):
@@ -118,8 +120,8 @@ def language_model(input):
   [batch_size, timesteps] -> [batch_size, timesteps]
   """
   x = tf.one_hot(input, depth=vocab_size, dtype=tf.float32)
-  h = tf.zeros([batch_size, hidden_size])
-  c = tf.zeros([batch_size, hidden_size])
+  h = tf.fill(tf.stack([tf.shape(x)[0], hidden_size]), 0.0)
+  c = tf.fill(tf.stack([tf.shape(x)[0], hidden_size]), 0.0)
   hs = []
   reuse = None
   for t in range(timesteps):
@@ -166,13 +168,21 @@ decoder = {v: k for k, v in encoder.items()}
 data = generator(x_train, batch_size, encoder)
 
 # MODEL
-x_ph_input = tf.placeholder(tf.int32, [None, timesteps])
+x_ph_source = tf.placeholder(tf.int32, [None, timesteps])
 x_ph_target = tf.placeholder(tf.int32, [None, timesteps])
 with tf.variable_scope("language_model"):
-  x = language_model(x_ph_input)
+  x = language_model(x_ph_source)
 
 with tf.variable_scope("language_model", reuse=True):
   x_gen = language_model_gen(5)
+
+imb = range(0, len(x_test) - (timesteps + 1), timesteps + 1)
+encoded_x_test = np.asarray(
+    [[encoder[c] for c in x_test[i:(i + timesteps + 1)]] for i in imb],
+    dtype=np.int32)
+test_size = encoded_x_test.shape[0]
+print("Test set shape: {}".format(encoded_x_test.shape))
+test_nll = -tf.reduce_sum(x.log_prob(x_ph_target))
 
 # INFERENCE
 inference = ed.MAP({}, {x: x_ph_target})
@@ -189,21 +199,29 @@ tf.global_variables_initializer().run()
 
 for epoch in range(n_epoch):
   print("Epoch: {0}".format(epoch))
-  avg_loss = 0.0
+  avg_nll = 0.0
 
   pbar = Progbar(n_iter_per_epoch)
   for t in range(1, n_iter_per_epoch + 1):
     pbar.update(t)
-    x_batch = next(data)
-    x_batch_input = x_batch[:, :timesteps]
-    x_batch_target = x_batch[:, 1:(timesteps + 1)]
-    info_dict = inference.update(
-        feed_dict={x_ph_input: x_batch_input, x_ph_target: x_batch_target})
-    avg_loss += info_dict['loss']
+    source, target = next(data)
+    info_dict = inference.update({x_ph_source: source, x_ph_target: target})
+    avg_nll += info_dict['loss']
 
   # Print average per-data point loss over epoch.
-  avg_loss /= (n_iter_per_epoch * batch_size)
-  print("log p(x): {:0.8f}".format(avg_loss))
+  avg_nll /= (n_iter_per_epoch * batch_size)
+  print("Train average NLL: {:0.8f}".format(avg_nll))
+
+  # Print per-data point log-likelihood on test set.
+  avg_nll = 0.0
+  for start in range(0, test_size, batch_size):
+    end = min(test_size, start + batch_size)
+    source = encoded_x_test[start:end, :timesteps]
+    target = encoded_x_test[start:end, 1:]
+    avg_nll += sess.run(test_nll, {x_ph_source: source, x_ph_target: target})
+
+  avg_nll /= test_size
+  print("Test average NLL: {:0.8f}".format(avg_nll))
 
   # Generate samples from model.
   x_samples = sess.run(x_gen)
