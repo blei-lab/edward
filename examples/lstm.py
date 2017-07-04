@@ -85,18 +85,18 @@ def lstm_cell(x, h, c, name=None, reuse=False):
   return h, c
 
 
-def generator(array, batch_size, encoder):
-  """Generate batch with respect to array (list)'s first axis, and encode
-  strings in array to integers, with shape [batch_size, timesteps + 1].
+def generator(input, batch_size, timesteps, encoder):
+  """Generate batch with respect to input (a list). Encode its
+  strings to integers, returning an array of shape [batch_size, timesteps + 1].
 
   Each data point has timesteps + 1 characters. We will
-  condition for 0 <= t <= timesteps as input and predict for 1 <= t <=
+  condition for 0 <= t < timesteps as input and predict for 1 <= t <
   timesteps + 1 as output.
   """
   while True:
-    imb = np.random.randint(0, len(array) - timesteps, batch_size)
+    imb = np.random.randint(0, len(input) - timesteps, batch_size)
     encoded = np.asarray(
-        [[encoder[c] for c in array[i:(i + timesteps + 1)]] for i in imb],
+        [[encoder[c] for c in input[i:(i + timesteps + 1)]] for i in imb],
         dtype=np.int32)
     source = encoded[:, :timesteps]
     target = encoded[:, 1:]
@@ -165,7 +165,7 @@ vocab_size = len(vocab)
 encoder = dict(zip(vocab, range(vocab_size)))
 decoder = {v: k for k, v in encoder.items()}
 
-data = generator(x_train, batch_size, encoder)
+data = generator(x_train, batch_size, timesteps, encoder)
 
 # MODEL
 x_ph_source = tf.placeholder(tf.int32, [None, timesteps])
@@ -224,8 +224,8 @@ for epoch in range(n_epoch):
   print("Test average NLL: {:0.8f}".format(avg_nll))
 
   # Generate samples from model.
-  x_samples = sess.run(x_gen)
-  samples = [''.join([decoder[xt] for xt in sample]) for sample in x_samples]
+  samples = sess.run(x_gen)
+  samples = [''.join([decoder[c] for c in sample]) for sample in samples]
   print("Samples:")
   for sample in samples:
     print(sample)
