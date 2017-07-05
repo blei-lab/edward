@@ -4,13 +4,15 @@ from __future__ import print_function
 
 import tensorflow as tf
 
+from collections import defaultdict
+
 try:
   from tensorflow.python.client.session import \
       register_session_run_conversion_functions
 except Exception as e:
   raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
-_RANDOM_VARIABLE_COLLECTION = []
+_RANDOM_VARIABLE_COLLECTION = defaultdict(list)
 
 
 class RandomVariable(object):
@@ -134,7 +136,7 @@ class RandomVariable(object):
     for collection in collections:
       if collection == "random_variables":
         collection = _RANDOM_VARIABLE_COLLECTION
-      collection.append(self)
+      collection[tf.get_default_graph()].append(self)
 
   @property
   def sample_shape(self):
