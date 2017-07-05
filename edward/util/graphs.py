@@ -41,13 +41,19 @@ def get_session():
   return _ED_SESSION
 
 
-def random_variables():
+def random_variables(graph=None):
   """Return all random variables in the TensorFlow graph.
+
+  Args:
+    graph: TensorFlow graph.
 
   Returns:
     list of RandomVariable.
   """
-  return _RANDOM_VARIABLE_COLLECTION
+  if graph is None:
+    graph = tf.get_default_graph()
+
+  return _RANDOM_VARIABLE_COLLECTION[graph]
 
 
 def set_seed(x):

@@ -4,13 +4,15 @@ from __future__ import print_function
 
 import tensorflow as tf
 
+from collections import defaultdict
+
 try:
   from tensorflow.python.client.session import \
       register_session_run_conversion_functions
 except Exception as e:
   raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
-_RANDOM_VARIABLE_COLLECTION = []
+_RANDOM_VARIABLE_COLLECTION = defaultdict(list)
 
 
 class RandomVariable(object):
@@ -85,6 +87,13 @@ class RandomVariable(object):
       *args, **kwargs:
         Passed into parent `__init__`.
     """
+    # Force the Distribution class to always use the same name scope
+    # when scoping its parameter names and also when calling any
+    # methods such as sample.
+    name = kwargs.get('name', type(self).__name__)
+    with tf.name_scope(name) as ns:
+      kwargs['name'] = ns
+
     # pop and store RandomVariable-specific parameters in _kwargs
     sample_shape = kwargs.pop('sample_shape', ())
     value = kwargs.pop('value', None)
@@ -124,13 +133,10 @@ class RandomVariable(object):
             "value argument or implement sample for {0}."
             .format(self.__class__.__name__))
 
-    with tf.name_scope(self.name) as ns:
-      self._unique_name = ns
-
     for collection in collections:
       if collection == "random_variables":
         collection = _RANDOM_VARIABLE_COLLECTION
-      collection.append(self)
+      collection[tf.get_default_graph()].append(self)
 
   @property
   def sample_shape(self):
@@ -142,15 +148,9 @@ class RandomVariable(object):
     """Shape of random variable."""
     return self._value.shape
 
-  @property
-  def unique_name(self):
-    """Name of random variable with its unique scoping name. Use
-    `name` to just get the name of the random variable."""
-    return self._unique_name
-
   def __str__(self):
     return "RandomVariable(\"%s\"%s%s%s)" % (
-        self.unique_name,
+        self.name,
         (", shape=%s" % self.shape)
         if self.shape.ndims is not None else "",
         (", dtype=%s" % self.dtype.name) if self.dtype else "",
@@ -158,7 +158,7 @@ class RandomVariable(object):
 
   def __repr__(self):
     return "<ed.RandomVariable '%s' shape=%s dtype=%s>" % (
-        self.unique_name, self.shape, self.dtype.name)
+        self.name, self.shape, self.dtype.name)
 
   def __hash__(self):
     return id(self)
