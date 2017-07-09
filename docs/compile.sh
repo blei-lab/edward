@@ -27,7 +27,7 @@ cd $tmpdir
 for filename in $(find api -name '*.md'); do
   echo $filename
   mkdir -p $outdir/$(dirname $filename)
-  pandoc ${filename%.*}.md \
+  pandoc $filename \
          --from=markdown+link_attributes+native_spans \
          --to=html \
          --filter=$docdir/pandoc-code2raw.py \
@@ -42,7 +42,7 @@ done
 for filename in $(find api -name '*.tex'); do
   echo $filename
   mkdir -p $outdir/$(dirname $filename)
-  pandoc ${filename%.*}.tex \
+  pandoc $filename \
          --from=latex+link_attributes+native_spans \
          --to=html \
          --filter=$docdir/pandoc-code2raw.py \
@@ -57,7 +57,7 @@ done
 for filename in {./,tutorials/}*.tex; do
   echo $filename
   mkdir -p $outdir/$(dirname $filename)
-  pandoc ${filename%.*}.tex \
+  pandoc $filename \
          --from=latex+link_attributes+native_spans \
          --to=html \
          --filter=$docdir/pandoc-code2raw.py \
