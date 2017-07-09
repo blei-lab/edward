@@ -40,6 +40,9 @@ install:
   - pip install nbformat nbconvert jupyter_client jupyter
   - python setup.py install
 script:
+  - for file in $(find . -type f -name "notebooks/*.ipynb"); do
+      jupyter nbconvert --template=tests/data/strip_markdown.tpl --to python $file;
+    done;
   - PYTHONPATH=$PWD:$PYTHONPATH pytest --cov=./ --pep8;
 
 after_success:
