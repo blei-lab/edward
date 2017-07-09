@@ -8,13 +8,13 @@ import os
 import sys
 import time
 import traceback
-import unittest
+import tensorflow as tf
 
 from nbconvert.preprocessors import ExecutePreprocessor
 from nbconvert.preprocessors.execute import CellExecutionError
 
 
-class test_notebooks(unittest.TestCase):
+class test_notebooks(tf.test.TestCase):
 
   def _exec_notebook(self, ep, notebook_filename, nbpath):
     with open(notebook_filename) as f:
@@ -33,7 +33,7 @@ class test_notebooks(unittest.TestCase):
     """ Test all notebooks except blacklist. """
     blacklist = ['gan.ipynb']
     pythonkernel = 'python' + str(sys.version_info[0])
-    nbpath = '../../docs/notebooks/'
+    nbpath = 'notebooks/'
     # see http://nbconvert.readthedocs.io/en/stable/execute_api.html
     ep = ExecutePreprocessor(timeout=120,
                              kernel_name=pythonkernel,
@@ -46,4 +46,4 @@ class test_notebooks(unittest.TestCase):
         print(notebook_filename, 'took %g seconds.' % (time.time() - t))
 
 if __name__ == '__main__':
-  unittest.main()
+  tf.test.main()
