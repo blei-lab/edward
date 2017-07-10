@@ -131,10 +131,12 @@ family.
 \begin{lstlisting}[language=Python]
 with tf.name_scope("posterior"):
   qw = Normal(loc=tf.Variable(tf.random_normal([D]), name="qw/loc"),
-              scale=tf.nn.softplus(tf.Variable(tf.random_normal([D]), name="qw/unconstrained_scale")),
+              scale=tf.nn.softplus(tf.Variable(tf.random_normal([D]),
+                                               name="qw/unconstrained_scale")),
               name="qw")
   qb = Normal(loc=tf.Variable(tf.random_normal([1]), name="qb/loc"),
-              scale=tf.nn.softplus(tf.Variable(tf.random_normal([1]), name="qb/unconstrained_scale")),
+              scale=tf.nn.softplus(tf.Variable(tf.random_normal([1]),
+                                               name="qb/unconstrained_scale")),
               name="qb")
 \end{lstlisting}
 

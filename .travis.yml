@@ -38,10 +38,12 @@ install:
   - pip install matplotlib seaborn
   - pip install tensorflow==1.2.0
   - pip install nbformat nbconvert jupyter_client jupyter
+  - pip install sklearn
   - python setup.py install
 script:
+  # Convert and preprocess Jupyter notebooks to Python files for PEP8.
   - for file in notebooks/*.ipynb; do
-      jupyter nbconvert --template=tests/data/strip_markdown.tpl --to python $file;
+      jupyter nbconvert --template=tests/data/strip_markdown.tpl --to python --stdout $file | grep -v '^get_ipython' | sed -e :a -e '/^\n*$/{$d;N;};/\n$/ba' > ${file%.*}py;
     done;
   - PYTHONPATH=$PWD:$PYTHONPATH pytest --cov=./ --pep8;
 

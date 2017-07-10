@@ -155,7 +155,8 @@ qz = Empirical(tf.Variable(tf.zeros([T, N], dtype=tf.int32)))
 Run Gibbs sampling. We write the training loop explicitly, so that we can track
 the cluster means as the sampler progresses.
 \begin{lstlisting}[language=Python]
-inference = ed.Gibbs({pi: qpi, mu: qmu, sigmasq: qsigmasq, z: qz}, data={x: x_train})
+inference = ed.Gibbs({pi: qpi, mu: qmu, sigmasq: qsigmasq, z: qz},
+                     data={x: x_train})
 inference.initialize()
 
 sess = ed.get_session()
