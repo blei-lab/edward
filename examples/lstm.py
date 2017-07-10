@@ -85,34 +85,26 @@ def lstm_cell(x, h, c, name=None, reuse=False):
   return h, c
 
 
-def generator(array, batch_size, encoder):
-  """Generate batch with respect to array (list)'s first axis, and encode
-  strings in array to integers, with shape [batch_size, timesteps + 1].
-
-  Each data point has timesteps + 1 characters. We will
-  condition for 0 <= t <= timesteps as input and predict for 1 <= t <=
-  timesteps + 1 as output.
+def generator(input, batch_size, timesteps, encoder):
+  """Generate batch with respect to input (a list). Encode its
+  strings to integers, returning an array of shape [batch_size, timesteps].
   """
   while True:
-    imb = np.random.randint(0, len(array) - timesteps, batch_size)
+    imb = np.random.randint(0, len(input) - timesteps, batch_size)
     encoded = np.asarray(
-        [[encoder[c] for c in array[i:(i + timesteps + 1)]] for i in imb],
+        [[encoder[c] for c in input[i:(i + timesteps)]] for i in imb],
         dtype=np.int32)
-    source = encoded[:, :timesteps]
-    target = encoded[:, 1:]
-    yield source, target
+    yield encoded
 
 
 def language_model(input):
-  """Form p(x[0], ..., x[timesteps]),
+  """Form p(x[0], ..., x[timesteps - 1]),
 
-  \prod_{t=1}^{timesteps} p(x[t] | x[:t]),
+  \prod_{t=0}^{timesteps - 1} p(x[t] | x[:t]),
 
-  where x = [x[0], ..., x[timesteps - 1]] is `input`. We do not
-  include p(x[0]) which is a constant wrt parameters. The input also
-  does not include the timesteps index. To calculate
-  the probability, we will call log_prob on
-  x = [x[1], ..., x[timesteps]].
+  To calculate the probability, we call log_prob on
+  x = [x[0], ..., x[timesteps - 1]] given
+  `input` = [0, x[0], ..., x[timesteps - 2]].
 
   We implement this separately from the generative model so the
   forward pass, e.g., embedding/dense layers, can be parallelized.
@@ -165,27 +157,28 @@ vocab_size = len(vocab)
 encoder = dict(zip(vocab, range(vocab_size)))
 decoder = {v: k for k, v in encoder.items()}
 
-data = generator(x_train, batch_size, encoder)
+data = generator(x_train, batch_size, timesteps, encoder)
 
 # MODEL
-x_ph_source = tf.placeholder(tf.int32, [None, timesteps])
-x_ph_target = tf.placeholder(tf.int32, [None, timesteps])
+x_ph = tf.placeholder(tf.int32, [None, timesteps])
 with tf.variable_scope("language_model"):
-  x = language_model(x_ph_source)
+  # Shift input sequence to right by 1, [0, x[0], ..., x[timesteps - 2]].
+  x_ph_shift = tf.pad(x_ph, [[0, 0], [1, 0]])[:, :-1]
+  x = language_model(x_ph_shift)
 
 with tf.variable_scope("language_model", reuse=True):
   x_gen = language_model_gen(5)
 
-imb = range(0, len(x_test) - (timesteps + 1), timesteps + 1)
+imb = range(0, len(x_test) - timesteps, timesteps)
 encoded_x_test = np.asarray(
-    [[encoder[c] for c in x_test[i:(i + timesteps + 1)]] for i in imb],
+    [[encoder[c] for c in x_test[i:(i + timesteps)]] for i in imb],
     dtype=np.int32)
 test_size = encoded_x_test.shape[0]
 print("Test set shape: {}".format(encoded_x_test.shape))
-test_nll = -tf.reduce_sum(x.log_prob(x_ph_target))
+test_nll = -tf.reduce_sum(x.log_prob(x_ph))
 
 # INFERENCE
-inference = ed.MAP({}, {x: x_ph_target})
+inference = ed.MAP({}, {x: x_ph})
 
 optimizer = tf.train.AdamOptimizer(learning_rate=lr)
 inference.initialize(optimizer=optimizer, logdir=log_dir, log_timestamp=False)
@@ -204,8 +197,8 @@ for epoch in range(n_epoch):
   pbar = Progbar(n_iter_per_epoch)
   for t in range(1, n_iter_per_epoch + 1):
     pbar.update(t)
-    source, target = next(data)
-    info_dict = inference.update({x_ph_source: source, x_ph_target: target})
+    x_batch = next(data)
+    info_dict = inference.update({x_ph: x_batch})
     avg_nll += info_dict['loss']
 
   # Print average per-data point loss over epoch.
@@ -216,16 +209,15 @@ for epoch in range(n_epoch):
   avg_nll = 0.0
   for start in range(0, test_size, batch_size):
     end = min(test_size, start + batch_size)
-    source = encoded_x_test[start:end, :timesteps]
-    target = encoded_x_test[start:end, 1:]
-    avg_nll += sess.run(test_nll, {x_ph_source: source, x_ph_target: target})
+    x_batch = encoded_x_test[start:end]
+    avg_nll += sess.run(test_nll, {x_ph: x_batch})
 
   avg_nll /= test_size
   print("Test average NLL: {:0.8f}".format(avg_nll))
 
   # Generate samples from model.
-  x_samples = sess.run(x_gen)
-  samples = [''.join([decoder[xt] for xt in sample]) for sample in x_samples]
+  samples = sess.run(x_gen)
+  samples = [''.join([decoder[c] for c in sample]) for sample in samples]
   print("Samples:")
   for sample in samples:
     print(sample)

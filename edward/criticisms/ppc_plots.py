@@ -14,7 +14,20 @@ def ppc_density_plot(y, y_rep):
 
   Returns:
     matplotlib axes
+
+  #### Examples
+
+  ```python
+  import matplotlib.pyplot as plt
+
+  y = np.random.randn(20)
+  y_rep = np.random.randn(20, 20)
+
+  ed.ppc_density_plot(y, y_rep)
+  plt.show()
+  ```
   """
+  import matplotlib.pyplot as plt
   import seaborn as sns
   ax = sns.kdeplot(y, color="maroon")
 
@@ -23,8 +36,8 @@ def ppc_density_plot(y, y_rep):
   for i in range(n):
     ax = sns.kdeplot(y_rep[i, :], color="maroon", alpha=0.2, linewidth=0.8)
 
-  y_line = sns.plt.Line2D([], [], color='maroon', label='y')
-  y_rep_line = sns.plt.Line2D([], [], color='maroon', alpha=0.2, label='y_rep')
+  y_line = plt.Line2D([], [], color='maroon', label='y')
+  y_rep_line = plt.Line2D([], [], color='maroon', alpha=0.2, label='y_rep')
 
   handles = [y_line, y_rep_line]
   labels = ['y', r'$y_{rep}$']
@@ -49,17 +62,49 @@ def ppc_stat_hist_plot(y_stats, yrep_stats, stat_name=None, **kwargs):
 
   Returns:
     matplotlib axes.
+
+  #### Examples
+
+  ```python
+  import matplotlib.pyplot as plt
+
+  # DATA
+  x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
+
+  # MODEL
+  p = Beta(1.0, 1.0)
+  x = Bernoulli(probs=p, sample_shape=10)
+
+  # INFERENCE
+  qp = Beta(tf.nn.softplus(tf.Variable(tf.random_normal([]))),
+            tf.nn.softplus(tf.Variable(tf.random_normal([]))))
+
+  inference = ed.KLqp({p: qp}, data={x: x_data})
+  inference.run(n_iter=500)
+
+  # CRITICISM
+  x_post = ed.copy(x, {p: qp})
+  ppc_stats = ed.ppc(
+      lambda xs, zs: tf.reduce_mean(tf.cast(xs[x_post], tf.float32)),
+      data={x_post: x_data})
+
+  ed.ppc_stat_hist_plot(ppc_stats[1][1],
+                        ppc_stats[0],
+                        stat_name=r'$T \equiv$mean', bins=10)
+  plt.show()
+  ```
   """
+  import matplotlib.pyplot as plt
   import seaborn as sns
   ax = sns.distplot(yrep_stats, kde=False, label=r'$T(y_{rep})$', **kwargs)
 
   max_value = ax.get_ylim()[1]
 
-  sns.plt.vlines(y_stats, ymin=0.0, ymax=max_value, label='T(y)')
+  plt.vlines(y_stats, ymin=0.0, ymax=max_value, label='T(y)')
 
   if stat_name is not None:
-    sns.plt.legend(title=stat_name)
+    plt.legend(title=stat_name)
   else:
-    sns.plt.legend()
+    plt.legend()
 
   return ax

@@ -37,9 +37,11 @@ class Inference(object):
   #### Examples
 
   ```python
-  mu = Normal(loc=tf.constant(0.0), scale=tf.constant(1.0))
-  x = Normal(loc=tf.ones(50) * mu, scale=tf.constant(1.0))
+  # Set up probability model.
+  mu = Normal(loc=0.0, scale=1.0)
+  x = Normal(loc=mu, scale=1.0, sample_shape=50)
 
+  # Set up posterior approximation.
   qmu_loc = tf.Variable(tf.random_normal([]))
   qmu_scale = tf.nn.softplus(tf.Variable(tf.random_normal([])))
   qmu = Normal(loc=qmu_loc, scale=qmu_scale)
@@ -115,9 +117,7 @@ class Inference(object):
         Whether to start and stop queue runners during inference using a
         TensorFlow coordinator. For example, queue runners are necessary
         for batch training with file readers.
-      *args:
-        Passed into `initialize`.
-      **kwargs:
+      *args, **kwargs:
         Passed into `initialize`.
     """
     self.initialize(*args, **kwargs)

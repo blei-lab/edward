@@ -47,14 +47,6 @@ class test_keras_core_layers_class(tf.test.TestCase):
     with self.test_session():
       self.assertEqual(y.eval().shape, (100, 2, 10))
 
-  def test_merge(self):
-    shared_dense = layers.Dense(32)
-    x1 = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
-    x2 = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
-    encoded1 = shared_dense(x1)
-    encoded2 = shared_dense(x2)
-    merged_vector = layers.merge([encoded1, encoded2], mode='sum')
-
   def test_lambda(self):
     x = Normal(loc=tf.zeros([100, 10, 5]), scale=tf.ones([100, 10, 5]))
     y = layers.Lambda(lambda x: x ** 2)(x)
@@ -66,14 +58,6 @@ class test_keras_core_layers_class(tf.test.TestCase):
   def test_masking(self):
     x = Normal(loc=tf.zeros([100, 10, 5]), scale=tf.ones([100, 10, 5]))
     y = layers.Masking()(x)
-
-  def test_highway(self):
-    x = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
-    y = layers.Highway()(x)
-
-  def test_maxout_dense(self):
-    x = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
-    y = layers.MaxoutDense(5)(x)
 
 if __name__ == '__main__':
   tf.test.main()

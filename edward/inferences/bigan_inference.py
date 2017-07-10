@@ -49,7 +49,6 @@ class BiGANInference(GANInference):
     super(GANInference, self).__init__(latent_vars, data)
 
   def build_loss_and_gradients(self, var_list):
-
     x_true = list(six.itervalues(self.data))[0]
     x_fake = list(six.iterkeys(self.data))[0]
 

@@ -34,7 +34,6 @@ install:
   - source activate test-environment
   - pip install pep8 pytest-pep8 pytest-xdist
   - pip install python-coveralls pytest-cov
-  - pip install numpydoc
   - pip install keras==2.0.4
   - pip install matplotlib seaborn
   - pip install tensorflow==1.2.0

@@ -37,12 +37,11 @@ class HMC(MonteCarlo):
   #### Examples
 
   ```python
-  z = Normal(loc=0.0, scale=1.0)
-  x = Normal(loc=tf.ones(10) * z, scale=1.0)
+  mu = Normal(loc=0.0, scale=1.0)
+  x = Normal(loc=mu, scale=1.0, sample_shape=10)
 
-  qz = Empirical(tf.Variable(tf.zeros(500)))
-  data = {x: np.array([0.0] * 10, dtype=np.float32)}
-  inference = ed.HMC({z: qz}, data)
+  qmu = Empirical(tf.Variable(tf.zeros(500)))
+  inference = ed.HMC({mu: qmu}, {x: np.zeros(10, dtype=np.float32)})
   ```
   """
   def __init__(self, *args, **kwargs):

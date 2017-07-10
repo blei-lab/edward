@@ -104,9 +104,9 @@ class GANInference(VariationalInference):
                                                global_step=global_step_d)
 
     if self.logging:
-      tf.summary.scalar("loss/discriminative", self.loss_d,
+      tf.summary.scalar("loss", self.loss,
                         collections=[self._summary_key])
-      tf.summary.scalar("loss/generative", self.loss,
+      tf.summary.scalar("loss/discriminative", self.loss_d,
                         collections=[self._summary_key])
       self.summarize = tf.summary.merge_all(key=self._summary_key)
 
