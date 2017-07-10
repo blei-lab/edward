@@ -140,7 +140,8 @@ n_batch = int(N / M)
 n_epoch = 5
 
 inference = ed.KLqp({w: qw, b: qb}, data={y: y_ph})
-inference.initialize(n_iter=n_batch * n_epoch, n_samples=5, scale={y: N / M})
+inference.initialize(
+    n_iter=n_batch * n_epoch, n_samples=5, scale={y: N / M})
 tf.global_variables_initializer().run()
 
 for _ in range(inference.n_iter):

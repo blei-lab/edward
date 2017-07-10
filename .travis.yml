@@ -37,9 +37,17 @@ install:
   - pip install keras==2.0.4
   - pip install matplotlib seaborn
   - pip install tensorflow==1.2.0
+  - pip install nbformat nbconvert jupyter_client jupyter
+  - pip install sklearn
   - python setup.py install
 script:
-  - PYTHONPATH=$PWD:$PYTHONPATH pytest --cov=./ --pep8;
+  # Convert and preprocess Jupyter notebooks to Python files for PEP8.
+  - for file in notebooks/*.ipynb; do
+      if [ "$file" != "notebooks/iclr2017.ipynb" ]; then
+        jupyter nbconvert --template=tests/data/strip_markdown.tpl --to python --stdout $file | grep -v '^get_ipython' | sed '$d' > ${file%.*}.py;
+      fi
+    done;
+  - PYTHONPATH=$PWD:$PYTHONPATH pytest --cov=edward --pep8;
 
 after_success:
   - coveralls
