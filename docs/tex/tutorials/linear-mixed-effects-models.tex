@@ -15,14 +15,14 @@ An interactive version with Jupyter notebook is available
 We use the \texttt{InstEval} data set from the popular
 \href{http://lme4.r-forge.r-project.org}{lme4 R package}
 \citep{bates2015fitting}, located
-\href{https://github.com/blei-lab/edward/blob/master/examples/data/insteval.csv}{here}.
+\href{https://github.com/blei-lab/edward/blob/master/notebooks/data/insteval.csv}{here}.
 It is a data set of instructor evaluation ratings, where the inputs
 (covariates) include categories such as \texttt{students} and
 \texttt{departments}, and our response variable of interest is the
 instructor evaluation rating.
 
 \begin{lstlisting}[language=Python]
-data = pd.read_csv('../examples/data/insteval.csv')
+data = pd.read_csv('data/insteval.csv')
 data['dcodes'] = data['d'].astype('category').cat.codes
 data['deptcodes'] = data['dept'].astype('category').cat.codes
 data['s'] = data['s'] - 1
@@ -251,9 +251,9 @@ We can also compare our learned parameters to those estimated by R's
 `lme4`.
 
 \begin{lstlisting}[language=Python]
-student_effects_lme4 = pd.read_csv('../examples/data/insteval_student_ranefs_r.csv')
-instructor_effects_lme4 = pd.read_csv('../examples/data/insteval_instructor_ranefs_r.csv')
-dept_effects_lme4 = pd.read_csv('../examples/data/insteval_dept_ranefs_r.csv')
+student_effects_lme4 = pd.read_csv('data/insteval_student_ranefs_r.csv')
+instructor_effects_lme4 = pd.read_csv('data/insteval_instructor_ranefs_r.csv')
+dept_effects_lme4 = pd.read_csv('data/insteval_dept_ranefs_r.csv')
 
 student_effects_edward = q_eta_s.mean().eval()
 instructor_effects_edward = q_eta_d.mean().eval()
