@@ -106,7 +106,8 @@ K = 2  # number of components
 pi = Dirichlet(tf.ones(K))
 mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
 sigmasq = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
-x = ParamMixture(pi, {'loc': mu, 'scale_diag': tf.sqrt(sigmasq)}, MultivariateNormalDiag,
+x = ParamMixture(pi, {'loc': mu, 'scale_diag': tf.sqrt(sigmasq)},
+                 MultivariateNormalDiag,
                  sample_shape=N)
 z = x.cat
 \end{lstlisting}
