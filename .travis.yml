@@ -47,7 +47,7 @@ script:
         jupyter nbconvert --template=tests/data/strip_markdown.tpl --to python --stdout $file | grep -v '^get_ipython' | sed '$d' > ${file%.*}.py;
       fi
     done;
-  - PYTHONPATH=$PWD:$PYTHONPATH pytest --cov=./ --pep8;
+  - PYTHONPATH=$PWD:$PYTHONPATH pytest --cov=edward --pep8;
 
 after_success:
   - coveralls
