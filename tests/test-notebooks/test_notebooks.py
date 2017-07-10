@@ -16,8 +16,8 @@ from nbconvert.preprocessors.execute import CellExecutionError
 
 class test_notebooks(tf.test.TestCase):
 
-  def _exec_notebook(self, ep, notebook_filename):
-    with open(notebook_filename) as f:
+  def _exec_notebook(self, ep, filename):
+    with open(filename) as f:
       nb = nbformat.read(f, as_version=nbformat.current_nbformat)
       try:
         out = ep.preprocess(nb, {})
@@ -27,24 +27,24 @@ class test_notebooks(tf.test.TestCase):
         print('-' * 60)
         self.assertTrue(False,
                         'Error executing the notebook %s. See above for error.'
-                        % notebook_filename)
+                        % filename)
 
   def test_all_notebooks(self):
     """ Test all notebooks except blacklist. """
     blacklist = ['gan.ipynb', 'iclr2017.ipynb']
-    pythonkernel = 'python' + str(sys.version_info[0])
     nbpath = 'notebooks/'
     # see http://nbconvert.readthedocs.io/en/stable/execute_api.html
     ep = ExecutePreprocessor(timeout=120,
-                             kernel_name=pythonkernel,
+                             kernel_name='python' + str(sys.version_info[0]),
                              interrupt_on_timeout=True)
     os.chdir(nbpath)
-    lfiles = glob.glob("*.ipynb")
-    for notebook_filename in lfiles:
-      if notebook_filename not in blacklist:
-        t = time.time()
-        self._exec_notebook(ep, notebook_filename)
-        print(notebook_filename, 'took %g seconds.' % (time.time() - t))
+    files = glob.glob("*.ipynb")
+    for filename in files:
+      if filename not in blacklist:
+        start = time.time()
+        self._exec_notebook(ep, filename)
+        end = time.time()
+        print(filename, 'took %g seconds.' % (end - start))
 
 if __name__ == '__main__':
   tf.test.main()
