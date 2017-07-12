@@ -119,7 +119,7 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
       # Average over realizations of their probabilities, then predict
       # via argmax over probabilities.
       probs = [sess.run(output_key.probs, feed_dict) for _ in range(n_samples)]
-      probs = tf.add_n(probs) / tf.cast(n_samples, tf.float32)
+      probs = tf.add_n(probs) / tf.cast(n_samples, probs[0].dtype)
       if isinstance(output_key, binary_discrete):
         # make random prediction whenever probs is exactly 0.5
         random = tf.random_uniform(shape=tf.shape(probs))
@@ -129,8 +129,8 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
     else:
       # Monte Carlo estimate the mean of the posterior predictive.
       y_pred = [sess.run(output_key, feed_dict) for _ in range(n_samples)]
-      y_pred = tf.cast(tf.add_n(y_pred), tf.float32) / \
-          tf.cast(n_samples, tf.float32)
+      y_pred = tf.cast(tf.add_n(y_pred), y_pred[0].dtype) / \
+          tf.cast(n_samples, y_pred[0].dtype)
 
   # Evaluate y_true (according to y_pred if supervised) for all metrics.
   evaluations = []
@@ -179,7 +179,7 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
       # Monte Carlo estimate the log-density of the posterior predictive.
       tensor = tf.reduce_mean(output_key.log_prob(y_true))
       log_pred = [sess.run(tensor, feed_dict) for _ in range(n_samples)]
-      log_pred = tf.add_n(log_pred) / tf.cast(n_samples, tf.float32)
+      log_pred = tf.add_n(log_pred) / tf.cast(n_samples, tensor.dtype)
       evaluations += [log_pred]
     else:
       raise NotImplementedError("Metric is not implemented: {}".format(metric))
