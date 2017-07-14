@@ -16,6 +16,7 @@ from networkx import karate_club_graph
 
 ed.set_seed(42)
 
+
 def build_dataset():
     G = karate_club_graph()
     N = len(G.nodes())
@@ -65,7 +66,7 @@ for _ in range(inference.n_iter):
 inference.finalize()
 
 # CRITICISM
-Z_pred= qZ.mean().eval().argmax(axis=1)
+Z_pred = qZ.mean().eval().argmax(axis=1)
 print("Result (label filp can happen):")
 print("Predicted")
 print(Z_pred)
