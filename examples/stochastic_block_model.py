@@ -12,26 +12,34 @@ import tensorflow as tf
 
 from sklearn.metrics.cluster import adjusted_rand_score
 from edward.models import Bernoulli, Multinomial, Beta, Dirichlet, PointMass
+from networkx import karate_club_graph
 
 ed.set_seed(42)
 
+def build_dataset():
+    G = karate_club_graph()
+    N = len(G.nodes())
+    Z = np.zeros(N, dtype=np.int)
+    X = np.zeros((N, N))
 
-def build_dataset(Z, Pi):
-    return np.random.binomial(1, p=Z.dot(Pi).dot(Z.T))
+    for n in G.nodes(data=True):
+        node_id = n[0]
+        label = n[1]['club']
+        if label == 'Mr. Hi':
+            Z[node_id] = 0
+        elif label == 'Officer':
+            Z[node_id] = 1
+
+    for src, dst in G.edges():
+        X[src, dst] = 1
+
+    return X, Z
 
 
 # DATA
-gamma_true = np.array([0.3, 0.4, 0.3])
-Pi_true = np.array([[0.9, 0.1, 0.1],
-                    [0.1, 0.1, 0.7],
-                    [0.1, 0.7, 0.1]])
-
-N = 50  # number of vertices
-K = gamma_true.shape[0]  # number of clusters
-
-Z_true = np.random.multinomial(1, pvals=gamma_true, size=N)
-
-X_data = build_dataset(Z_true, Pi_true)
+X_data, Z_true = build_dataset()
+N = X_data.shape[0]  # number of vertices
+K = 2  # number of clusters
 
 # MODEL
 gamma = Dirichlet(concentration=tf.ones([K]))
@@ -46,7 +54,7 @@ qZ = PointMass(params=tf.nn.softmax(tf.Variable(tf.random_normal([N, K]))))
 
 inference = ed.MAP({gamma: qgamma, Pi: qPi, Z: qZ}, data={X: X_data})
 
-n_iter = 300
+n_iter = 100
 inference.initialize(n_iter=n_iter)
 
 tf.global_variables_initializer().run()
@@ -57,11 +65,10 @@ for _ in range(inference.n_iter):
 inference.finalize()
 
 # CRITICISM
-predicted = qZ.mean().eval().argmax(axis=1)
-answer = Z_true.argmax(axis=1)
+Z_pred= qZ.mean().eval().argmax(axis=1)
 print("Result (label filp can happen):")
 print("Predicted")
-print(predicted)
+print(Z_pred)
 print("True")
-print(answer)
-print("Adjusted Rand Index =", adjusted_rand_score(predicted, answer))
+print(Z_true)
+print("Adjusted Rand Index =", adjusted_rand_score(Z_pred, Z_true))
