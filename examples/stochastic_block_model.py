@@ -17,7 +17,7 @@ ed.set_seed(42)
 
 
 def build_dataset(Z, Pi):
-    return np.random.binomial(1, p = Z.dot(Pi).dot(Z.T))
+    return np.random.binomial(1, p=Z.dot(Pi).dot(Z.T))
 
 
 # DATA
@@ -26,45 +26,42 @@ Pi_true = np.array([[0.9, 0.1, 0.1],
                     [0.1, 0.1, 0.7],
                     [0.1, 0.7, 0.1]])
 
-N = 50 # number of vertices
-K = gamma_true.shape[0] # number of clusters
+N = 50  # number of vertices
+K = gamma_true.shape[0]  # number of clusters
 
-Z_true = np.random.multinomial(1, pvals = gamma_true, size = N)
+Z_true = np.random.multinomial(1, pvals=gamma_true, size=N)
 
 X_data = build_dataset(Z_true, Pi_true)
 
 # MODEL
-gamma = Dirichlet(concentration = tf.ones([K]))
-Pi = Beta(concentration0 = tf.ones([K, K]), concentration1 = tf.ones([K, K]))
-Z = Multinomial(total_count=1., probs = gamma, sample_shape = N)
-X = Bernoulli(probs = tf.matmul(Z, tf.matmul(Pi, tf.transpose(Z))))
+gamma = Dirichlet(concentration=tf.ones([K]))
+Pi = Beta(concentration0=tf.ones([K, K]), concentration1=tf.ones([K, K]))
+Z = Multinomial(total_count=1., probs=gamma, sample_shape=N)
+X = Bernoulli(probs=tf.matmul(Z, tf.matmul(Pi, tf.transpose(Z))))
 
 # INFERENCE (EM algorithm)
-qgamma = PointMass(params = tf.nn.softmax(tf.Variable(tf.random_normal([K]))))
-qPi = PointMass(params = tf.nn.sigmoid(tf.Variable(tf.random_normal([K, K]))))
-qZ = PointMass(params = tf.nn.softmax(tf.Variable(tf.random_normal([N, K]))))
+qgamma = PointMass(params=tf.nn.softmax(tf.Variable(tf.random_normal([K]))))
+qPi = PointMass(params=tf.nn.sigmoid(tf.Variable(tf.random_normal([K, K]))))
+qZ = PointMass(params=tf.nn.softmax(tf.Variable(tf.random_normal([N, K]))))
 
-inference_e = ed.MAP({Z: qZ}, data = {X: X_data, gamma: qgamma, Pi: qPi})
-inference_m = ed.MAP({gamma: qgamma, Pi: qPi}, data = {X: X_data, Z: qZ})
+inference = ed.MAP({gamma: qgamma, Pi: qPi, Z: qZ}, data={X: X_data})
 
 n_iter = 300
-inference_e.initialize(n_iter=n_iter)
-inference_m.initialize(n_iter=n_iter)
+inference.initialize(n_iter=n_iter)
 
 tf.global_variables_initializer().run()
 
-for _ in range(inference_e.n_iter):
-    info_dict  = inference_e.update()
-    inference_e.print_progress(info_dict)
-    inference_m.update()
-inference_e.finalize()
-inference_m.finalize()
+for _ in range(inference.n_iter):
+    info_dict = inference.update()
+    inference.print_progress(info_dict)
+inference.finalize()
 
 # CRITICISM
-Z_predicted = qZ.mean().eval().argmax(axis=1)
+predicted = qZ.mean().eval().argmax(axis=1)
+answer = Z_true.argmax(axis=1)
 print("Result (label filp can happen):")
 print("Predicted")
-print(Z_predicted)
+print(predicted)
 print("True")
-print(Z_true.argmax(axis=1))
-print("ARI (Adjusted Rand Index) =", adjusted_rand_score(Z_predicted, Z_true.argmax(axis=1)))
+print(answer)
+print("Adjusted Rand Index =", adjusted_rand_score(predicted, answer))
