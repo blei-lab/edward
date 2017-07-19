@@ -104,7 +104,7 @@ Let's build the model in Edward, fixing $\sigma_w,\sigma_b,\sigma_y=1$.
 with tf.name_scope("model"):
   X = tf.placeholder(tf.float32, [N, D], name="X")
   w = Normal(loc=tf.zeros(D, name="weights/loc"),
-             scale=tf.ones(D, name="weights/loc"),
+             scale=tf.ones(D, name="weights/scale"),
              name="weights")
   b = Normal(loc=tf.zeros(1, name="bias/loc"),
              scale=tf.ones(1, name="bias/scale"),
