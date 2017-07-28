@@ -12,33 +12,26 @@ import tensorflow as tf
 
 from sklearn.metrics.cluster import adjusted_rand_score
 from edward.models import Bernoulli, Multinomial, Beta, Dirichlet, PointMass
-from networkx import karate_club_graph
 
 ed.set_seed(42)
 
 
-def build_dataset():
-    G = karate_club_graph()
-    N = len(G.nodes())
-    Z = np.zeros(N, dtype=np.int)
+def build_dataset(label_filepath, graph_filepath):
+    Z = np.loadtxt(label_filepath, dtype=np.int)
+    N = Z.shape[0]
+
     X = np.zeros((N, N))
-
-    for n in G.nodes(data=True):
-        node_id = n[0]
-        label = n[1]['club']
-        if label == 'Mr. Hi':
-            Z[node_id] = 0
-        elif label == 'Officer':
-            Z[node_id] = 1
-
-    for src, dst in G.edges():
+    for line in open(graph_filepath, 'r'):
+        src, dst = map(int, line.strip().split(' '))
         X[src, dst] = 1
 
     return X, Z
 
 
 # DATA
-X_data, Z_true = build_dataset()
+label_filepath = 'data/karate_labels.txt'
+graph_filepath = 'data/karate_edgelist.txt'
+X_data, Z_true = build_dataset(label_filepath, graph_filepath)
 N = X_data.shape[0]  # number of vertices
 K = 2  # number of clusters
 
