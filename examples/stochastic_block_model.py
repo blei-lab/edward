@@ -17,15 +17,15 @@ ed.set_seed(42)
 
 
 def build_dataset(label_filepath, graph_filepath):
-    Z = np.loadtxt(label_filepath, dtype=np.int)
-    N = Z.shape[0]
+  Z = np.loadtxt(label_filepath, dtype=np.int)
+  N = Z.shape[0]
 
-    X = np.zeros((N, N))
-    for line in open(graph_filepath, 'r'):
-        src, dst = map(int, line.strip().split(' '))
-        X[src, dst] = 1
+  X = np.zeros((N, N))
+  for line in open(graph_filepath, 'r'):
+    src, dst = map(int, line.strip().split(' '))
+    X[src, dst] = 1
 
-    return X, Z
+  return X, Z
 
 
 # DATA
@@ -54,8 +54,8 @@ inference.initialize(n_iter=n_iter)
 tf.global_variables_initializer().run()
 
 for _ in range(inference.n_iter):
-    info_dict = inference.update()
-    inference.print_progress(info_dict)
+  info_dict = inference.update()
+  inference.print_progress(info_dict)
 inference.finalize()
 
 # CRITICISM
