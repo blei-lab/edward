@@ -62,7 +62,7 @@ class HMCDA(MonteCarlo):
     """
     self.scope_iter = 0  # a convenient counter for log joint calculations
 
-    # Find intial ϵ
+    # Find intial epsilon
     step_size = self.find_good_eps()
     sess = get_session()
     init_op = tf.global_variables_initializer()
@@ -134,7 +134,7 @@ class HMCDA(MonteCarlo):
     sample = {z: sample_value for z, sample_value in
               zip(six.iterkeys(new_sample), sample_values)}
 
-    # Use Dual Averaging to adapt ϵ
+    # Use Dual Averaging to adapt epsilon
     should_adapt = self.t <= self.n_adapt
     assign_ops = tf.cond(should_adapt,
                          lambda: self.adapt_step_size(alpha),
