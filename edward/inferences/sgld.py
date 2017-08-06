@@ -75,7 +75,7 @@ class SGLD(MonteCarlo):
       qz = self.latent_vars[z]
       event_shape = qz.event_shape
       normal = Normal(loc=tf.zeros(event_shape),
-                      scale=learning_rate * tf.ones(event_shape))
+                      scale=tf.sqrt(learning_rate) * tf.ones(event_shape))
       sample[z] = old_sample[z] + \
           0.5 * learning_rate * tf.convert_to_tensor(grad_log_p) + \
           normal.sample()
