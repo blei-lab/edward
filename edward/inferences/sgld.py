@@ -67,7 +67,8 @@ class SGLD(MonteCarlo):
                   for z, qz in six.iteritems(self.latent_vars)}
 
     # Simulate Langevin dynamics.
-    learning_rate = self.step_size / tf.cast(self.t + 1, tf.float32)
+    learning_rate = self.step_size / tf.pow(tf.cast(self.t + 1, tf.float32),
+                                            0.55)
     grad_log_joint = tf.gradients(self._log_joint(old_sample),
                                   list(six.itervalues(old_sample)))
     sample = {}
