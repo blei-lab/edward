@@ -22,9 +22,9 @@ class test_sgld_class(tf.test.TestCase):
 
       # analytic solution: N(loc=0.0, scale=\sqrt{1/51}=0.140)
       inference = ed.SGLD({mu: qmu}, data={x: x_data})
-      inference.run(step_size=0.2)
+      inference.run(step_size=0.10)
 
-      self.assertAllClose(qmu.mean().eval(), 0, rtol=1e-2, atol=1e-2)
+      self.assertAllClose(qmu.mean().eval(), 0, rtol=1e-2, atol=1.5e-2)
       self.assertAllClose(qmu.stddev().eval(), np.sqrt(1 / 51),
                           rtol=5e-2, atol=5e-2)
 
