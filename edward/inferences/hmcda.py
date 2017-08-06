@@ -61,7 +61,7 @@ class HMCDA(MonteCarlo):
       Target leapfrog length
     """
     self.scope_iter = 0  # a convenient counter for log joint calculations
-  
+
     # Find intial ϵ
     step_size = self.find_good_eps()
     sess = get_session()
@@ -71,19 +71,19 @@ class HMCDA(MonteCarlo):
 
     # Variables for Dual Averaging
     self.epsilon = tf.Variable(step_size, trainable=False)
-    self.mu = tf.cast(tf.log(10.0*step_size), tf.float32)
+    self.mu = tf.cast(tf.log(10.0 * step_size), tf.float32)
     self.epsilon_B = tf.Variable(1.0, trainable=False, name="epsilon_bar")
     self.H_B = tf.Variable(0.0, trainable=False, name="H_bar")
-    
+
     # Parameters for Dual Averaging
     self.n_adapt = n_adapt
     self.delta = tf.constant(delta, dtype=tf.float32)
     self.Lambda = tf.constant(Lambda)
-    
+
     self.gamma = tf.constant(0.05)
     self.t_0 = tf.constant(10)
     self.kappa = tf.constant(0.75)
-    
+
     return super(HMCDA, self).initialize(*args, **kwargs)
 
   def build_update(self):
@@ -97,7 +97,7 @@ class HMCDA(MonteCarlo):
     The updates assume each Empirical random variable is directly
     parameterized by ``tf.Variable``s.
     """
-    
+
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
     old_sample = OrderedDict(old_sample)
@@ -115,13 +115,11 @@ class HMCDA(MonteCarlo):
                                         self.epsilon, self._log_joint, L_m)
 
     # Calculate acceptance ratio.
-    ratio = tf.reduce_sum([0.5 * tf.reduce_sum(tf.square(r))
-                           for r in six.itervalues(old_r_sample)])
-    ratio -= tf.reduce_sum([0.5 * tf.reduce_sum(tf.square(r))
-                            for r in six.itervalues(new_r_sample)])
+    ratio = kinetic_energy(old_r_sample)
+    ratio -= kinetic_energy(new_r_sample)
     ratio += self._log_joint(new_sample)
     ratio -= self._log_joint(old_sample)
-    
+
     # Accept or reject sample.
     u = Uniform().sample()
     alpha = tf.minimum(1.0, tf.exp(ratio))
@@ -135,10 +133,12 @@ class HMCDA(MonteCarlo):
 
     sample = {z: sample_value for z, sample_value in
               zip(six.iterkeys(new_sample), sample_values)}
-    
+
     # Use Dual Averaging to adapt ϵ
     should_adapt = self.t <= self.n_adapt
-    assign_ops = tf.cond(should_adapt, lambda: self.adapt_step_size(alpha), lambda: self.do_not_adapt_step_size(alpha))
+    assign_ops = tf.cond(should_adapt,
+                         lambda: self.adapt_step_size(alpha),
+                         lambda: self.do_not_adapt_step_size(alpha))
 
     # Update Empirical random variables.
     for z, qz in six.iteritems(self.latent_vars):
@@ -147,8 +147,8 @@ class HMCDA(MonteCarlo):
 
     # Increment n_accept (if accepted).
     assign_ops.append(self.n_accept.assign_add(tf.where(accept, 1, 0)))
-    return tf.group(*assign_ops)    
-  
+    return tf.group(*assign_ops)
+
   def do_not_adapt_step_size(self, alpha):
     # Do not adapt step size but assign last running averaged epsilon to epsilon
     assign_ops = []
@@ -156,89 +156,97 @@ class HMCDA(MonteCarlo):
     assign_ops.append(self.epsilon_B.assign_add(0.0).op)
     assign_ops.append(tf.assign(self.epsilon, self.epsilon_B).op)
     return assign_ops
-  
+
   def adapt_step_size(self, alpha):
     # Adapt step size as described in Algorithm 5
     assign_ops = []
 
-    factor_H = tf.cast(1 / (self.t+1 + self.t_0),tf.float32)
-        
-    H_B = (1 - factor_H) * self.H_B + factor_H * (self.delta - alpha)
-    epsilon = tf.exp(self.mu - tf.sqrt(tf.cast(self.t+1,tf.float32)) / self.gamma * H_B)
+    factor_H = tf.cast(1 / (self.t + 1 + self.t_0), tf.float32)
 
-    t_powed = tf.pow(tf.cast(self.t+1,tf.float32), -self.kappa)
-    epsilon_B = tf.exp(t_powed * tf.log(epsilon) + (1 - t_powed) * tf.log(self.epsilon_B))
-    
+    H_B = (1 - factor_H) * self.H_B + factor_H * (self.delta - alpha)
+    epsilon = tf.exp(self.mu - tf.sqrt(tf.cast(self.t + 1, tf.float32)) /
+                     self.gamma * H_B)
+
+    t_powed = tf.pow(tf.cast(self.t + 1, tf.float32), -self.kappa)
+    epsilon_B = tf.exp(t_powed * tf.log(epsilon) +
+                       (1 - t_powed) * tf.log(self.epsilon_B))
+
     # Return ops containing the updates
     assign_ops.append(tf.assign(self.H_B, H_B).op)
     assign_ops.append(tf.assign(self.epsilon, epsilon).op)
     assign_ops.append(tf.assign(self.epsilon_B, epsilon_B).op)
     return assign_ops
-  
+
   def find_good_eps(self):
     # Heuristically find an inital espilon following Algorithm 4
-    
+
     # Sample momentum.
     old_r = OrderedDict()
-    
+
     for z, qz in six.iteritems(self.latent_vars):
       event_shape = qz.event_shape
       normal = Normal(loc=tf.zeros(event_shape), scale=tf.ones(event_shape))
       old_r[z] = normal.sample()
-    
+
     # Initialize espilon at 1.0
     epsilon = tf.Variable(1.0, trainable=False)
-    
+
     # Calculate log joint probability
     old_z = {z: tf.gather(qz.params, 0)
-                  for z, qz in six.iteritems(self.latent_vars)}
+             for z, qz in six.iteritems(self.latent_vars)}
     old_z = OrderedDict(old_z)
-    
-    log_p_joint = -tf.reduce_sum([0.5 * tf.reduce_sum(tf.square(r))
-                           for r in six.itervalues(old_r)]) + self._log_joint(old_z)
+
+    log_p_joint = -kinetic_energy(old_r)
+    log_p_joint += self._log_joint(old_z)
 
     new_sample, new_r_sample = leapfrog(old_z, old_r,
                                         epsilon, self._log_joint, 1)
-    
-    log_p_joint_prime = -tf.reduce_sum([0.5 * tf.reduce_sum(tf.square(r))
-                           for r in six.itervalues(new_r_sample)]) + self._log_joint(new_sample)
-  
+
+    log_p_joint_prime = -kinetic_energy(new_r_sample)
+    log_p_joint_prime += self._log_joint(new_sample)
+
     log_p_joint_diff = log_p_joint_prime - log_p_joint
 
     # See whether epsilon is too small or to big
     condition = log_p_joint_diff >= tf.log(0.5)
     a = 2.0 * tf.where(condition, 1.0, 0.0) - 1.0
 
-    # Save keys of tuple (z, r) so that we can rebuild the Dict inside the while_loop
+    # Save keys of (z, r) so that we can rebuild the Dict inside the while_loop
     keys_r = list(six.iterkeys(old_r))
     keys_z = list(six.iterkeys(old_z))
-    
-    k = tf.constant(0)
-    
-    def while_condition(k, epsilon_loop, log_p_joint_prime_loop, log_p_joint_loop, values_r, values_z):
-      pow_exp_log_p_joint_diff_loop = tf.pow(tf.exp(log_p_joint_prime_loop - log_p_joint_loop), a)
-      return tf.logical_and(k < 12, pow_exp_log_p_joint_diff_loop > tf.pow(2.0, -a))
 
-    def body(k, epsilon_loop, _, log_p_joint_loop, values_r, values_z):
+    k = tf.constant(0)
+
+    def while_condition(k, _, log_p_joint_prime_loop, log_p_joint, *args):
+      accep_big_enough = tf.pow(tf.exp(
+          log_p_joint_prime_loop - log_p_joint), a) > tf.pow(2.0, -a)
+      to_many_iterations = k < 12
+      return tf.logical_and(to_many_iterations, accep_big_enough)
+
+    def body(k, epsilon_loop, _, log_p_joint, values_r, values_z):
         new_epsilon_loop = tf.pow(2.0, a) * epsilon_loop
-        
+
         # Rebuild the Dicts inside the while_loop since we can only return lists
         old_z_loop = OrderedDict()
         old_r_loop = OrderedDict()
         for i, key in enumerate(values_z):
           old_z_loop[keys_z[i]] = values_z[i]
           old_r_loop[keys_r[i]] = values_r[i]
-        
-        new_z_loop, new_r_loop = leapfrog(old_z_loop, old_r_loop, new_epsilon_loop, self._log_joint, 1)
-        new_log_p_joint_prime_loop = -tf.reduce_sum([0.5 * tf.reduce_sum(tf.square(r))
-                           for r in six.itervalues(new_r_loop)]) + self._log_joint(new_z_loop)
 
-        return [k + 1, new_epsilon_loop, new_log_p_joint_prime_loop, log_p_joint_loop, values_r, values_z]
-    
+        new_z_loop, new_r_loop = leapfrog(old_z_loop, old_r_loop,
+                                          new_epsilon_loop, self._log_joint, 1)
+        new_log_p_joint_prime = -kinetic_energy(new_r_loop)
+        new_log_p_joint_prime += self._log_joint(new_z_loop)
+
+        return [k + 1, new_epsilon_loop, new_log_p_joint_prime,
+                log_p_joint, values_r, values_z]
+
     _, new_epsilon, _, _, _, _ = tf.while_loop(
         while_condition, body,
-        loop_vars=[k, epsilon, log_p_joint_prime, log_p_joint, list(six.itervalues(old_r.copy())), list(six.itervalues(old_z.copy()))])
-  
+        loop_vars=[k, epsilon, log_p_joint_prime, log_p_joint,
+                   list(six.itervalues(old_r.copy())),
+                   list(six.itervalues(old_z.copy()))])
+
     return new_epsilon
 
   def _log_joint(self, z_sample):
@@ -281,10 +289,11 @@ def leapfrog(z_old, r_old, step_size, log_joint, n_steps):
   z_new = z_old.copy()
   r_new = r_old.copy()
   keys_z_new = list(six.iterkeys(z_old.copy()))
-  first_grad_log_joint = tf.gradients(log_joint(z_new), list(six.itervalues(z_new)))
-  
+  first_grad_log_joint = tf.gradients(log_joint(z_new),
+                                      list(six.itervalues(z_new)))
+
   k = tf.constant(0)
-  
+
   def while_condition(k, v_z_new, v_r_new, grad_log_joint):
      # Stop when k < n_steps
      return k < n_steps
@@ -293,22 +302,30 @@ def leapfrog(z_old, r_old, step_size, log_joint, n_steps):
       z_new = OrderedDict()
       for i, key in enumerate(v_z_new):
         z, r = v_z_new[i], v_r_new[i]
-        z_new[keys_z_new[i]] = z # Rebuild the Dict
-        v_r_new[i] = r + 0.5 * step_size * tf.convert_to_tensor(grad_log_joint[i])
+        z_new[keys_z_new[i]] = z  # Rebuild the Dict
+        v_r_new[i] = r
+        v_r_new[i] += 0.5 * step_size * tf.convert_to_tensor(grad_log_joint[i])
         v_z_new[i] = z + step_size * v_r_new[i]
 
-      grad_log_joint = tf.gradients(log_joint(z_new),  list(six.itervalues(z_new)))
+      grad_log_joint = tf.gradients(log_joint(z_new),
+                                    list(six.itervalues(z_new)))
       for i, key in enumerate(v_z_new):
         v_r_new[i] += 0.5 * step_size * tf.convert_to_tensor(grad_log_joint[i])
       return [k + 1, v_z_new, v_r_new, grad_log_joint]
-  
+
   _, v_z_new, v_r_new, _ = tf.while_loop(
       while_condition, body,
-      loop_vars=[k, list(six.itervalues(z_new)), list(six.itervalues(r_new)), first_grad_log_joint])
-  
+      loop_vars=[k, list(six.itervalues(z_new)), list(six.itervalues(r_new)),
+                 first_grad_log_joint])
+
   # Rebuild the Dicts outside the while_loop since we can only pass lists
   for i, key in enumerate(six.iterkeys(z_new)):
     r_new[key] = v_r_new[i]
     z_new[key] = v_z_new[i]
 
   return z_new, r_new
+
+
+def kinetic_energy(momentum):
+  return tf.reduce_sum([0.5 * tf.reduce_sum(tf.square(r))
+                        for r in six.itervalues(momentum)])
