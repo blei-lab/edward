@@ -67,7 +67,8 @@ class SGLD(MonteCarlo):
                   for z, qz in six.iteritems(self.latent_vars)}
 
     # Simulate Langevin dynamics.
-    learning_rate = self.step_size / tf.cast(self.t + 1, tf.float32)
+    learning_rate = self.step_size / tf.pow(tf.cast(self.t + 1, tf.float32),
+                                            0.55)
     grad_log_joint = tf.gradients(self._log_joint(old_sample),
                                   list(six.itervalues(old_sample)))
     sample = {}
@@ -75,7 +76,7 @@ class SGLD(MonteCarlo):
       qz = self.latent_vars[z]
       event_shape = qz.event_shape
       normal = Normal(loc=tf.zeros(event_shape),
-                      scale=learning_rate * tf.ones(event_shape))
+                      scale=tf.sqrt(learning_rate) * tf.ones(event_shape))
       sample[z] = old_sample[z] + \
           0.5 * learning_rate * tf.convert_to_tensor(grad_log_p) + \
           normal.sample()
