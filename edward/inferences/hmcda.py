@@ -54,7 +54,7 @@ class HMCDA(MonteCarlo):
     Parameters
     ----------
     n_adapt : float
-      Number of samples with adaption for epsilon
+      Number of samples with adaptation for epsilon
     delta : float, optional
       Target accept rate
     Lambda : float, optional
@@ -62,7 +62,7 @@ class HMCDA(MonteCarlo):
     """
     self.scope_iter = 0  # a convenient counter for log joint calculations
 
-    # Find intial epsilon
+    # Find initial epsilon
     step_size = self.find_good_eps()
     sess = get_session()
     init_op = tf.global_variables_initializer()
@@ -89,15 +89,14 @@ class HMCDA(MonteCarlo):
   def build_update(self):
     """Simulate Hamiltonian dynamics using a numerical integrator.
     Correct for the integrator's discretization error using an
-    acceptance ratio. The initial value of espilon is heuristically chosen
-    with Algorithm 4
+    acceptance ratio. The initial value of epsilon is heuristically chosen
+    with Algorithm 4.
 
     Notes
     -----
     The updates assume each Empirical random variable is directly
     parameterized by ``tf.Variable``s.
     """
-
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
     old_sample = OrderedDict(old_sample)
@@ -123,7 +122,7 @@ class HMCDA(MonteCarlo):
     # Accept or reject sample.
     u = Uniform().sample()
     alpha = tf.minimum(1.0, tf.exp(ratio))
-    accept = u < alpha
+    accept = tf.log(u) < ratio
 
     sample_values = tf.cond(accept, lambda: list(six.itervalues(new_sample)),
                             lambda: list(six.itervalues(old_sample)))
@@ -137,8 +136,8 @@ class HMCDA(MonteCarlo):
     # Use Dual Averaging to adapt epsilon
     should_adapt = self.t <= self.n_adapt
     assign_ops = tf.cond(should_adapt,
-                         lambda: self.adapt_step_size(alpha),
-                         lambda: self.do_not_adapt_step_size(alpha))
+                         lambda: self._adapt_step_size(alpha),
+                         lambda: self._do_not__adapt_step_size(alpha))
 
     # Update Empirical random variables.
     for z, qz in six.iteritems(self.latent_vars):
@@ -149,15 +148,15 @@ class HMCDA(MonteCarlo):
     assign_ops.append(self.n_accept.assign_add(tf.where(accept, 1, 0)))
     return tf.group(*assign_ops)
 
-  def do_not_adapt_step_size(self, alpha):
+  def _do_not__adapt_step_size(self, alpha):
     # Do not adapt step size but assign last running averaged epsilon to epsilon
     assign_ops = []
-    assign_ops.append(self.H_B.assign_add(0.0).op)
-    assign_ops.append(self.epsilon_B.assign_add(0.0).op)
+    assign_ops.append(tf.assign(self.H_B, self.H_B).op)
+    assign_ops.append(tf.assign(self.epsilon_B, self.epsilon_B).op)
     assign_ops.append(tf.assign(self.epsilon, self.epsilon_B).op)
     return assign_ops
 
-  def adapt_step_size(self, alpha):
+  def _adapt_step_size(self, alpha):
     # Adapt step size as described in Algorithm 5
     assign_ops = []
 
