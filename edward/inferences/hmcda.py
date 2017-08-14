@@ -224,22 +224,22 @@ class HMCDA(MonteCarlo):
       return tf.logical_and(to_many_iterations, accep_big_enough)
 
     def body(k, epsilon_loop, _, log_p_joint, values_r, values_z):
-        new_epsilon_loop = tf.pow(2.0, a) * epsilon_loop
+      new_epsilon_loop = tf.pow(2.0, a) * epsilon_loop
 
-        # Rebuild the Dicts inside the while_loop since we can only return lists
-        old_z_loop = OrderedDict()
-        old_r_loop = OrderedDict()
-        for i, key in enumerate(values_z):
-          old_z_loop[keys_z[i]] = values_z[i]
-          old_r_loop[keys_r[i]] = values_r[i]
+      # Rebuild the Dicts inside the while_loop since we can only return lists
+      old_z_loop = OrderedDict()
+      old_r_loop = OrderedDict()
+      for i, key in enumerate(values_z):
+        old_z_loop[keys_z[i]] = values_z[i]
+        old_r_loop[keys_r[i]] = values_r[i]
 
-        new_z_loop, new_r_loop = leapfrog(old_z_loop, old_r_loop,
-                                          new_epsilon_loop, self._log_joint, 1)
-        new_log_p_joint_prime = -kinetic_energy(new_r_loop)
-        new_log_p_joint_prime += self._log_joint(new_z_loop)
+      new_z_loop, new_r_loop = leapfrog(old_z_loop, old_r_loop,
+                                        new_epsilon_loop, self._log_joint, 1)
+      new_log_p_joint_prime = -kinetic_energy(new_r_loop)
+      new_log_p_joint_prime += self._log_joint(new_z_loop)
 
-        return [k + 1, new_epsilon_loop, new_log_p_joint_prime,
-                log_p_joint, values_r, values_z]
+      return [k + 1, new_epsilon_loop, new_log_p_joint_prime,
+              log_p_joint, values_r, values_z]
 
     _, new_epsilon, _, _, _, _ = tf.while_loop(
         while_condition, body,
@@ -294,23 +294,22 @@ def leapfrog(z_old, r_old, step_size, log_joint, n_steps):
   k = tf.constant(0)
 
   def while_condition(k, v_z_new, v_r_new, grad_log_joint):
-     # Stop when k < n_steps
-     return k < n_steps
+    return k < n_steps
 
   def body(k, v_z_new, v_r_new, grad_log_joint):
-      z_new = OrderedDict()
-      for i, key in enumerate(v_z_new):
-        z, r = v_z_new[i], v_r_new[i]
-        z_new[keys_z_new[i]] = z  # Rebuild the Dict
-        v_r_new[i] = r
-        v_r_new[i] += 0.5 * step_size * tf.convert_to_tensor(grad_log_joint[i])
-        v_z_new[i] = z + step_size * v_r_new[i]
+    z_new = OrderedDict()
+    for i, key in enumerate(v_z_new):
+      z, r = v_z_new[i], v_r_new[i]
+      z_new[keys_z_new[i]] = z  # Rebuild the Dict
+      v_r_new[i] = r
+      v_r_new[i] += 0.5 * step_size * tf.convert_to_tensor(grad_log_joint[i])
+      v_z_new[i] = z + step_size * v_r_new[i]
 
-      grad_log_joint = tf.gradients(log_joint(z_new),
-                                    list(six.itervalues(z_new)))
-      for i, key in enumerate(v_z_new):
-        v_r_new[i] += 0.5 * step_size * tf.convert_to_tensor(grad_log_joint[i])
-      return [k + 1, v_z_new, v_r_new, grad_log_joint]
+    grad_log_joint = tf.gradients(log_joint(z_new),
+                                  list(six.itervalues(z_new)))
+    for i, key in enumerate(v_z_new):
+      v_r_new[i] += 0.5 * step_size * tf.convert_to_tensor(grad_log_joint[i])
+    return [k + 1, v_z_new, v_r_new, grad_log_joint]
 
   _, v_z_new, v_r_new, _ = tf.while_loop(
       while_condition, body,
