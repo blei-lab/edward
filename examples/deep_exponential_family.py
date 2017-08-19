@@ -63,15 +63,16 @@ def gamma_q(shape):
                         1.0 / min_scale))
   return rv
 
+
 def lognormal_q(shape):
   min_scale = 1e-5
   loc_init = tf.random_normal(shape)
   scale_init = 0.1 + tf.random_normal(shape)
   rv = TransformedDistribution(
-    distribution=Normal(
-        tf.Variable(loc_init),
-        tf.maximum(tf.nn.softplus(tf.Variable(scale_init)), min_scale)),
-    bijector=tf.contrib.distributions.bijectors.Exp())
+      distribution=Normal(
+          tf.Variable(loc_init),
+          tf.maximum(tf.nn.softplus(tf.Variable(scale_init)), min_scale)),
+      bijector=tf.contrib.distributions.bijectors.Exp())
   return rv
 
 
@@ -95,8 +96,15 @@ inference_m = ed.MAP({W0: qW0, W1: qW1, W2: qW2},
                      data={x: x_train, z1: qz1, z2: qz2, z3: qz3})
 optimizer_m = tf.train.RMSPropOptimizer(1e-4)
 optimizer_e = tf.train.RMSPropOptimizer(1e-4)
-# inference_e.initialize(optimizer=optimizer_e, n_iter=int(1e6), n_print=100, logdir='~/log/def')
-inference_e.initialize(optimizer=optimizer_e, n_iter=int(1e6), n_print=100, n_samples=50, logdir='~/log/def')
+# inference_e.initialize(optimizer=optimizer_e,
+#                        n_iter=int(1e6),
+#                        n_print=100,
+#                        logdir='~/log/def')
+inference_e.initialize(optimizer=optimizer_e,
+                       n_iter=int(1e6),
+                       n_print=100,
+                       n_samples=50,
+                       logdir='~/log/def')
 inference_m.initialize(optimizer=optimizer_m)
 
 # # to compute held-out perplexity during training

@@ -783,8 +783,7 @@ def build_score_rb_loss_and_gradients(inference, var_list):
 
   # Take gradients for each set of parameters in a variational factor.
   model_rvs = list(six.iterkeys(inference.latent_vars)) + \
-              [x for x in six.iterkeys(inference.data)
-               if isinstance(x, RandomVariable)]
+      [x for x in six.iterkeys(inference.data) if isinstance(x, RandomVariable)]
   grads = []
   grads_vars = []
   for z, qz in six.iteritems(inference.latent_vars):
@@ -792,15 +791,17 @@ def build_score_rb_loss_and_gradients(inference, var_list):
     pi_log_prob = [0.0] * inference.n_samples
     qi_log_prob = [0.0] * inference.n_samples
     for s in range(inference.n_samples):
-      qi_log_prob[s] = tf.reduce_sum([q_log_probs[s][rv] for rv in model_rvs_i
-                                      if rv in six.iterkeys(inference.latent_vars)])
+      qi_log_prob[s] = tf.reduce_sum([
+          q_log_probs[s][rv] for rv in model_rvs_i
+          if rv in six.iterkeys(inference.latent_vars)])
       pi_log_prob[s] = tf.reduce_sum([p_log_probs[s][rv] for rv in model_rvs_i])
 
     pi_log_prob = tf.stack(pi_log_prob)
     qi_log_prob = tf.stack(qi_log_prob)
     qz_vars = qz.get_variables(var_list)
     qz_grads = tf.gradients(
-        -tf.reduce_mean(qi_log_prob * tf.stop_gradient(pi_log_prob - qi_log_prob)),
+        -tf.reduce_mean(qi_log_prob *
+                        tf.stop_gradient(pi_log_prob - qi_log_prob)),
         qz_vars)
     grads.extend(qz_grads)
     grads_vars.extend(qz_vars)
