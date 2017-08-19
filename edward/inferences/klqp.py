@@ -122,7 +122,7 @@ class KLqp(VariationalInference):
       # elif is_analytic_entropy:
       #    return build_score_entropy_loss_and_gradients(self, var_list)
       else:
-        return build_score_loss_and_gradients(self, var_list)
+        return build_score_rb_loss_and_gradients(self, var_list)
 
 
 class ReparameterizationKLqp(VariationalInference):
