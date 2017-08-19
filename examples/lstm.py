@@ -201,9 +201,9 @@ for epoch in range(n_epoch):
     info_dict = inference.update({x_ph: x_batch})
     avg_nll += info_dict['loss']
 
-  # Print average per-data point loss over epoch.
-  avg_nll /= (n_iter_per_epoch * batch_size)
-  print("Train average NLL: {:0.8f}".format(avg_nll))
+  # Print average bits per character over epoch.
+  avg_nll /= (n_iter_per_epoch * batch_size * timesteps * np.log(2))
+  print("Train average bits/char: {:0.8f}".format(avg_nll))
 
   # Print per-data point log-likelihood on test set.
   avg_nll = 0.0
