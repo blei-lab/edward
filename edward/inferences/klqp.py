@@ -58,7 +58,7 @@ class KLqp(VariationalInference):
       n_samples: int, optional.
         Number of samples from variational model for calculating
         stochastic gradients.
-      kl_scaling: dict of RandomVariable to float, optional.
+      kl_scaling: dict of RandomVariable to tf.Tensor, optional.
         Provides option to scale terms when using ELBO with KL divergence.
         If the KL divergence terms are
 
@@ -66,8 +66,8 @@ class KLqp(VariationalInference):
               \log q(z\mid x, \lambda) - \log p(z)],$
 
         then pass {$p(z)$: $\\alpha_p$} as `kl_scaling`,
-        where $\\alpha_p$ is a float that specifies how much to
-        scale the KL term.
+        where $\\alpha_p$ is a tensor. Its shape must be broadcastable;
+        it is multiplied element-wise to the batchwise KL terms.
     """
     if kl_scaling is None:
       kl_scaling = {}
@@ -171,7 +171,7 @@ class ReparameterizationKLKLqp(VariationalInference):
       n_samples: int, optional.
         Number of samples from variational model for calculating
         stochastic gradients.
-      kl_scaling: dict of RandomVariable to float, optional.
+      kl_scaling: dict of RandomVariable to tf.Tensor, optional.
         Provides option to scale terms when using ELBO with KL divergence.
         If the KL divergence terms are
 
@@ -179,8 +179,8 @@ class ReparameterizationKLKLqp(VariationalInference):
               \log q(z\mid x, \lambda) - \log p(z)],$
 
         then pass {$p(z)$: $\\alpha_p$} as `kl_scaling`,
-        where $\\alpha_p$ is a float that specifies how much to
-        scale the KL term.
+        where $\\alpha_p$ is a tensor. Its shape must be broadcastable;
+        it is multiplied element-wise to the batchwise KL terms.
     """
     if kl_scaling is None:
       kl_scaling = {}
@@ -267,7 +267,7 @@ class ScoreKLKLqp(VariationalInference):
       n_samples: int, optional.
         Number of samples from variational model for calculating
         stochastic gradients.
-      kl_scaling: dict of RandomVariable to float, optional.
+      kl_scaling: dict of RandomVariable to tf.Tensor, optional.
         Provides option to scale terms when using ELBO with KL divergence.
         If the KL divergence terms are
 
@@ -275,8 +275,8 @@ class ScoreKLKLqp(VariationalInference):
               \log q(z\mid x, \lambda) - \log p(z)],$
 
         then pass {$p(z)$: $\\alpha_p$} as `kl_scaling`,
-        where $\\alpha_p$ is a float that specifies how much to
-        scale the KL term.
+        where $\\alpha_p$ is a tensor. Its shape must be broadcastable;
+        it is multiplied element-wise to the batchwise KL terms.
     """
     if kl_scaling is None:
       kl_scaling = {}
@@ -423,7 +423,7 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
   p_log_lik = tf.reduce_mean(p_log_lik)
 
   kl_penalty = tf.reduce_sum([
-      inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(kl_divergence(qz, z))
+      tf.reduce_sum(inference.kl_scaling.get(z, 1.0) * kl_divergence(qz, z))
       for z, qz in six.iteritems(inference.latent_vars)])
 
   if inference.logging:
@@ -487,7 +487,8 @@ def build_reparam_entropy_loss_and_gradients(inference, var_list):
   p_log_prob = tf.reduce_mean(p_log_prob)
 
   q_entropy = tf.reduce_sum([
-      qz.entropy() for z, qz in six.iteritems(inference.latent_vars)])
+      tf.reduce_sum(qz.entropy())
+      for z, qz in six.iteritems(inference.latent_vars)])
 
   if inference.logging:
     tf.summary.scalar("loss/p_log_prob", p_log_prob,
@@ -606,7 +607,7 @@ def build_score_kl_loss_and_gradients(inference, var_list):
   q_log_prob = tf.stack(q_log_prob)
 
   kl_penalty = tf.reduce_sum([
-      inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(kl_divergence(qz, z))
+      tf.reduce_sum(inference.kl_scaling.get(z, 1.0) * kl_divergence(qz, z))
       for z, qz in six.iteritems(inference.latent_vars)])
 
   if inference.logging:
@@ -671,7 +672,8 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
   q_log_prob = tf.stack(q_log_prob)
 
   q_entropy = tf.reduce_sum([
-      qz.entropy() for z, qz in six.iteritems(inference.latent_vars)])
+      tf.reduce_sum(qz.entropy())
+      for z, qz in six.iteritems(inference.latent_vars)])
 
   if inference.logging:
     tf.summary.scalar("loss/p_log_prob", tf.reduce_mean(p_log_prob),
