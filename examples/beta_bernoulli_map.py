@@ -18,7 +18,7 @@ x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 
 # MODEL
 p = Beta(1.0, 1.0)
-x = Bernoulli(tf.ones(10) * p)
+x = Bernoulli(probs=p, sample_shape=10)
 
 # INFERENCE
 qp_params = tf.sigmoid(tf.Variable(tf.random_normal([])))
@@ -26,3 +26,5 @@ qp = PointMass(params=qp_params)
 
 inference = ed.MAP({p: qp}, data={x: x_data})
 inference.run(n_iter=50)
+
+print("Fitted probability: {}".format(qp.eval()))
