@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from edward.inferences.variational_inference import VariationalInference
 from edward.models import RandomVariable
-from edward.util import copy
+from edward.util import copy, get_descendants
 
 try:
   from edward.models import Normal
@@ -628,7 +628,7 @@ def build_score_kl_loss_and_gradients(inference, var_list):
             if len(get_descendants(tf.convert_to_tensor(v), q_rvs)) != 0]
   q_grads = tf.gradients(
       -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl_penalty),
-      var_list)
+      q_vars)
   p_vars = [v for v in var_list if v not in q_vars]
   p_grads = tf.gradients(loss, p_vars)
   grads_and_vars = list(zip(q_grads, q_vars)) + list(zip(p_grads, p_vars))
@@ -702,7 +702,7 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
   q_grads = tf.gradients(
       -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) +
           q_entropy),
-      var_list)
+      q_vars)
   p_vars = [v for v in var_list if v not in q_vars]
   p_grads = tf.gradients(loss, p_vars)
   grads_and_vars = list(zip(q_grads, q_vars)) + list(zip(p_grads, p_vars))
