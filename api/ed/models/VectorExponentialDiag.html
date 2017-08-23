@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>Edward – ed.models.DirichletProcess</title>
+  <title>Edward – ed.models.VectorExponentialDiag</title>
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -106,22 +106,58 @@
     <div class="nine columns">
 
 <div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
-<meta itemprop="name" content="ed.models.DirichletProcess" /><meta itemprop="property" content="allow_nan_stats"/><meta itemprop="property" content="base"/><meta itemprop="property" content="batch_shape"/><meta itemprop="property" content="concentration"/><meta itemprop="property" content="dtype"/><meta itemprop="property" content="event_shape"/><meta itemprop="property" content="locs"/><meta itemprop="property" content="name"/><meta itemprop="property" content="parameters"/><meta itemprop="property" content="probs"/><meta itemprop="property" content="reparameterization_type"/><meta itemprop="property" content="sample_shape"/><meta itemprop="property" content="shape"/><meta itemprop="property" content="validate_args"/><meta itemprop="property" content="__abs__"/><meta itemprop="property" content="__add__"/><meta itemprop="property" content="__and__"/><meta itemprop="property" content="__bool__"/><meta itemprop="property" content="__div__"/><meta itemprop="property" content="__eq__"/><meta itemprop="property" content="__floordiv__"/><meta itemprop="property" content="__ge__"/><meta itemprop="property" content="__getitem__"/><meta itemprop="property" content="__gt__"/><meta itemprop="property" content="__init__"/><meta itemprop="property" content="__invert__"/><meta itemprop="property" content="__iter__"/><meta itemprop="property" content="__le__"/><meta itemprop="property" content="__lt__"/><meta itemprop="property" content="__matmul__"/><meta itemprop="property" content="__mod__"/><meta itemprop="property" content="__mul__"/><meta itemprop="property" content="__neg__"/><meta itemprop="property" content="__nonzero__"/><meta itemprop="property" content="__or__"/><meta itemprop="property" content="__pow__"/><meta itemprop="property" content="__radd__"/><meta itemprop="property" content="__rand__"/><meta itemprop="property" content="__rdiv__"/><meta itemprop="property" content="__rfloordiv__"/><meta itemprop="property" content="__rmatmul__"/><meta itemprop="property" content="__rmod__"/><meta itemprop="property" content="__rmul__"/><meta itemprop="property" content="__ror__"/><meta itemprop="property" content="__rpow__"/><meta itemprop="property" content="__rsub__"/><meta itemprop="property" content="__rtruediv__"/><meta itemprop="property" content="__rxor__"/><meta itemprop="property" content="__sub__"/><meta itemprop="property" content="__truediv__"/><meta itemprop="property" content="__xor__"/><meta itemprop="property" content="batch_shape_tensor"/><meta itemprop="property" content="cdf"/><meta itemprop="property" content="copy"/><meta itemprop="property" content="covariance"/><meta itemprop="property" content="entropy"/><meta itemprop="property" content="eval"/><meta itemprop="property" content="event_shape_tensor"/><meta itemprop="property" content="get_ancestors"/><meta itemprop="property" content="get_blanket"/><meta itemprop="property" content="get_children"/><meta itemprop="property" content="get_descendants"/><meta itemprop="property" content="get_parents"/><meta itemprop="property" content="get_shape"/><meta itemprop="property" content="get_siblings"/><meta itemprop="property" content="get_variables"/><meta itemprop="property" content="is_scalar_batch"/><meta itemprop="property" content="is_scalar_event"/><meta itemprop="property" content="log_cdf"/><meta itemprop="property" content="log_prob"/><meta itemprop="property" content="log_survival_function"/><meta itemprop="property" content="mean"/><meta itemprop="property" content="mode"/><meta itemprop="property" content="param_shapes"/><meta itemprop="property" content="param_static_shapes"/><meta itemprop="property" content="prob"/><meta itemprop="property" content="quantile"/><meta itemprop="property" content="sample"/><meta itemprop="property" content="stddev"/><meta itemprop="property" content="survival_function"/><meta itemprop="property" content="value"/><meta itemprop="property" content="variance"/><meta itemprop="property" content="__array_priority__"/>
+<meta itemprop="name" content="ed.models.VectorExponentialDiag" /><meta itemprop="property" content="allow_nan_stats"/><meta itemprop="property" content="batch_shape"/><meta itemprop="property" content="bijector"/><meta itemprop="property" content="distribution"/><meta itemprop="property" content="dtype"/><meta itemprop="property" content="event_shape"/><meta itemprop="property" content="loc"/><meta itemprop="property" content="name"/><meta itemprop="property" content="parameters"/><meta itemprop="property" content="reparameterization_type"/><meta itemprop="property" content="sample_shape"/><meta itemprop="property" content="scale"/><meta itemprop="property" content="shape"/><meta itemprop="property" content="validate_args"/><meta itemprop="property" content="__abs__"/><meta itemprop="property" content="__add__"/><meta itemprop="property" content="__and__"/><meta itemprop="property" content="__bool__"/><meta itemprop="property" content="__div__"/><meta itemprop="property" content="__eq__"/><meta itemprop="property" content="__floordiv__"/><meta itemprop="property" content="__ge__"/><meta itemprop="property" content="__getitem__"/><meta itemprop="property" content="__gt__"/><meta itemprop="property" content="__init__"/><meta itemprop="property" content="__invert__"/><meta itemprop="property" content="__iter__"/><meta itemprop="property" content="__le__"/><meta itemprop="property" content="__lt__"/><meta itemprop="property" content="__matmul__"/><meta itemprop="property" content="__mod__"/><meta itemprop="property" content="__mul__"/><meta itemprop="property" content="__neg__"/><meta itemprop="property" content="__nonzero__"/><meta itemprop="property" content="__or__"/><meta itemprop="property" content="__pow__"/><meta itemprop="property" content="__radd__"/><meta itemprop="property" content="__rand__"/><meta itemprop="property" content="__rdiv__"/><meta itemprop="property" content="__rfloordiv__"/><meta itemprop="property" content="__rmatmul__"/><meta itemprop="property" content="__rmod__"/><meta itemprop="property" content="__rmul__"/><meta itemprop="property" content="__ror__"/><meta itemprop="property" content="__rpow__"/><meta itemprop="property" content="__rsub__"/><meta itemprop="property" content="__rtruediv__"/><meta itemprop="property" content="__rxor__"/><meta itemprop="property" content="__sub__"/><meta itemprop="property" content="__truediv__"/><meta itemprop="property" content="__xor__"/><meta itemprop="property" content="batch_shape_tensor"/><meta itemprop="property" content="cdf"/><meta itemprop="property" content="copy"/><meta itemprop="property" content="covariance"/><meta itemprop="property" content="entropy"/><meta itemprop="property" content="eval"/><meta itemprop="property" content="event_shape_tensor"/><meta itemprop="property" content="get_ancestors"/><meta itemprop="property" content="get_blanket"/><meta itemprop="property" content="get_children"/><meta itemprop="property" content="get_descendants"/><meta itemprop="property" content="get_parents"/><meta itemprop="property" content="get_shape"/><meta itemprop="property" content="get_siblings"/><meta itemprop="property" content="get_variables"/><meta itemprop="property" content="is_scalar_batch"/><meta itemprop="property" content="is_scalar_event"/><meta itemprop="property" content="log_cdf"/><meta itemprop="property" content="log_prob"/><meta itemprop="property" content="log_survival_function"/><meta itemprop="property" content="mean"/><meta itemprop="property" content="mode"/><meta itemprop="property" content="param_shapes"/><meta itemprop="property" content="param_static_shapes"/><meta itemprop="property" content="prob"/><meta itemprop="property" content="quantile"/><meta itemprop="property" content="sample"/><meta itemprop="property" content="stddev"/><meta itemprop="property" content="survival_function"/><meta itemprop="property" content="value"/><meta itemprop="property" content="variance"/><meta itemprop="property" content="__array_priority__"/>
 </div>
-<h1 id="ed.models.dirichletprocess">ed.models.DirichletProcess</h1>
-<h2 id="class-dirichletprocess">Class <code>DirichletProcess</code></h2>
+<h1 id="ed.models.vectorexponentialdiag">ed.models.VectorExponentialDiag</h1>
+<h2 id="class-vectorexponentialdiag">Class <code>VectorExponentialDiag</code></h2>
 <p>Inherits From: <a href="../../ed/RandomVariable"><code>RandomVariable</code></a></p>
-<p>Dirichlet process <span class="math inline">\(\mathcal{DP}(\alpha, H)\)</span>.</p>
-<p>It has two parameters: a positive real value <span class="math inline">\(\alpha\)</span>, known as the concentration parameter (<code>concentration</code>), and a base distribution <span class="math inline">\(H\)</span> (<code>base</code>).</p>
+<p>The vectorization of the Exponential distribution on <code>R^k</code>.</p>
+<p>The vector exponential distribution is defined over a subset of <code>R^k</code>, and parameterized by a (batch of) length-<code>k</code> <code>loc</code> vector and a (batch of) <code>k x k</code> <code>scale</code> matrix: <code>covariance = scale @ scale.T</code>, where <code>@</code> denotes matrix-multiplication.</p>
+<h4 id="mathematical-details">Mathematical Details</h4>
+<p>The probability density function (pdf) is defined over the image of the <code>scale</code> matrix + <code>loc</code>, applied to the positive half-space: <code>Supp = {loc + scale @ x : x in R^k, x_1 &gt; 0, ..., x_k &gt; 0}</code>. On this set,</p>
+<pre class="none"><code>pdf(y; loc, scale) = exp(-||x||_1) / Z,  for y in Supp
+x = inv(scale) @ (y - loc),
+Z = |det(scale)|,</code></pre>
+<p>where:</p>
+<ul>
+<li><code>loc</code> is a vector in <code>R^k</code>,</li>
+<li><code>scale</code> is a linear operator in <code>R^{k x k}</code>, <code>cov = scale @ scale.T</code>,</li>
+<li><code>Z</code> denotes the normalization constant, and,</li>
+<li><code>||x||_1</code> denotes the <code>l1</code> norm of <code>x</code>, <code>sum_i |x_i|</code>.</li>
+</ul>
+<p>The VectorExponential distribution is a member of the <a href="https://en.wikipedia.org/wiki/Location-scale_family">location-scale family</a>, i.e., it can be constructed as,</p>
+<pre class="none"><code>X = (X_1, ..., X_k), each X_i ~ Exponential(rate=1)
+Y = (Y_1, ...,Y_k) = scale @ X + loc</code></pre>
+<h4 id="about-vectorexponential-and-vector-distributions-in-tensorflow.">About <code>VectorExponential</code> and <code>Vector</code> distributions in TensorFlow.</h4>
+<p>The <code>VectorExponential</code> is a non-standard distribution that has useful properties.</p>
+<p>The marginals <code>Y_1, ..., Y_k</code> are <em>not</em> Exponential random variables, due to the fact that the sum of Exponential random variables is not Exponential.</p>
+<p>Instead, <code>Y</code> is a vector whose components are linear combinations of Exponential random variables. Thus, <code>Y</code> lives in the vector space generated by <code>vectors</code> of Exponential distributions. This allows the user to decide the mean and covariance (by setting <code>loc</code> and <code>scale</code>), while preserving some properties of the Exponential distribution. In particular, the tails of <code>Y_i</code> will be (up to polynomial factors) exponentially decaying.</p>
+<p>To see this last statement, note that the pdf of <code>Y_i</code> is the convolution of the pdf of <code>k</code> independent Exponential random variables. One can then show by induction that distributions with exponential (up to polynomial factors) tails are closed under convolution.</p>
 <h4 id="examples">Examples</h4>
-<pre class="python"><code># scalar concentration parameter, scalar base distribution
-dp = DirichletProcess(0.1, Normal(loc=0.0, scale=1.0))
-assert dp.shape == ()
+<pre class="python"><code>ds = tf.contrib.distributions
+la = tf.contrib.linalg
 
-# vector of concentration parameters, matrix of Exponentials
-dp = DirichletProcess(tf.constant([0.1, 0.4]),
-                      Exponential(lam=tf.ones([5, 3])))
-assert dp.shape == (2, 5, 3)</code></pre>
+# Initialize a single 2-variate VectorExponential, supported on
+# {(x, y) in R^2 : x &gt; 0, y &gt; 0}.
+
+# The first component has pdf exp{-x}, the second 0.5 exp{-x / 2}
+vex = ds.VectorExponentialDiag(scale_diag=[1., 2.])
+
+# Compute the pdf of an`R^2` observation; return a scalar.
+vex.prob([3., 4.]).eval()  # shape: []
+
+# Initialize a 2-batch of 3-variate Vector Exponential&#39;s.
+loc = [[1., 2, 3],
+       [1., 0, 0]]              # shape: [2, 3]
+scale_diag = [[1., 2, 3],
+              [0.5, 1, 1.5]]     # shape: [2, 3]
+
+vex = ds.VectorExponentialDiag(loc, scale_diag)
+
+# Compute the pdf of two `R^3` observations; return a length-2 vector.
+x = [[1.9, 2.2, 3.1],
+     [10., 1.0, 9.0]]     # shape: [2, 3]
+vex.prob(x).eval()    # shape: [2]</code></pre>
 <h2 id="properties">Properties</h2>
 <h3 id="allow_nan_stats">
 <code>allow_nan_stats</code>
@@ -132,10 +168,6 @@ assert dp.shape == (2, 5, 3)</code></pre>
 <ul>
 <li><b><code>allow_nan_stats</code></b>: Python <code>bool</code>.</li>
 </ul>
-<h3 id="base">
-<code>base</code>
-</h3>
-<p>Base distribution used for drawing the atom locations.</p>
 <h3 id="batch_shape">
 <code>batch_shape</code>
 </h3>
@@ -146,10 +178,14 @@ assert dp.shape == (2, 5, 3)</code></pre>
 <ul>
 <li><b><code>batch_shape</code></b>: <code>TensorShape</code>, possibly unknown.</li>
 </ul>
-<h3 id="concentration">
-<code>concentration</code>
+<h3 id="bijector">
+<code>bijector</code>
 </h3>
-<p>Concentration parameter.</p>
+<p>Function transforming x =&gt; y.</p>
+<h3 id="distribution">
+<code>distribution</code>
+</h3>
+<p>Base distribution, p(x).</p>
 <h3 id="dtype">
 <code>dtype</code>
 </h3>
@@ -163,10 +199,10 @@ assert dp.shape == (2, 5, 3)</code></pre>
 <ul>
 <li><b><code>event_shape</code></b>: <code>TensorShape</code>, possibly unknown.</li>
 </ul>
-<h3 id="locs">
-<code>locs</code>
+<h3 id="loc">
+<code>loc</code>
 </h3>
-<p>Atom locations. It has shape [None] + batch_shape + event_shape, where the first dimension is the number of atoms, instantiated only as needed.</p>
+<p>The <code>loc</code> <code>Tensor</code> in <code>Y = scale @ X + loc</code>.</p>
 <h3 id="name">
 <code>name</code>
 </h3>
@@ -175,10 +211,6 @@ assert dp.shape == (2, 5, 3)</code></pre>
 <code>parameters</code>
 </h3>
 <p>Dictionary of parameters used to instantiate this <code>Distribution</code>.</p>
-<h3 id="probs">
-<code>probs</code>
-</h3>
-<p>Mixing proportions. It has shape [None] + batch_shape, where the first dimension is the number of atoms, instantiated only as needed.</p>
 <h3 id="reparameterization_type">
 <code>reparameterization_type</code>
 </h3>
@@ -190,6 +222,10 @@ assert dp.shape == (2, 5, 3)</code></pre>
 <code>sample_shape</code>
 </h3>
 <p>Sample shape of random variable.</p>
+<h3 id="scale">
+<code>scale</code>
+</h3>
+<p>The <code>scale</code> <code>LinearOperator</code> in <code>Y = scale @ X + loc</code>.</p>
 <h3 id="shape">
 <code>shape</code>
 </h3>
@@ -206,11 +242,30 @@ assert dp.shape == (2, 5, 3)</code></pre>
     *args,
     **kwargs
 )</code></pre>
-<p>Initialize a batch of Dirichlet processes.</p>
+<p>Construct Vector Exponential distribution supported on a subset of <code>R^k</code>.</p>
+<p>The <code>batch_shape</code> is the broadcast shape between <code>loc</code> and <code>scale</code> arguments.</p>
+<p>The <code>event_shape</code> is given by last dimension of the matrix implied by <code>scale</code>. The last dimension of <code>loc</code> (if provided) must broadcast with this.</p>
+<p>Recall that <code>covariance = scale @ scale.T</code>.</p>
+<pre class="none"><code>scale = diag(scale_diag + scale_identity_multiplier * ones(k))</code></pre>
+<p>where:</p>
+<ul>
+<li><code>scale_diag.shape = [k]</code>, and,</li>
+<li><code>scale_identity_multiplier.shape = []</code>.</li>
+</ul>
+<p>Additional leading dimensions (if any) will index batches.</p>
+<p>If both <code>scale_diag</code> and <code>scale_identity_multiplier</code> are <code>None</code>, then <code>scale</code> is the Identity matrix.</p>
 <h4 id="args">Args:</h4>
 <ul>
-<li><b><code>concentration</code></b>: tf.Tensor. Concentration parameter. Must be positive real-valued. Its shape determines the number of independent DPs (batch shape).</li>
-<li><b><code>base</code></b>: RandomVariable. Base distribution. Its shape determines the shape of an individual DP (event shape).</li>
+<li><b><code>loc</code></b>: Floating-point <code>Tensor</code>. If this is set to <code>None</code>, <code>loc</code> is implicitly <code>0</code>. When specified, may have shape <code>[B1, ..., Bb, k]</code> where <code>b &gt;= 0</code> and <code>k</code> is the event size.</li>
+<li><b><code>scale_diag</code></b>: Non-zero, floating-point <code>Tensor</code> representing a diagonal matrix added to <code>scale</code>. May have shape <code>[B1, ..., Bb, k]</code>, <code>b &gt;= 0</code>, and characterizes <code>b</code>-batches of <code>k x k</code> diagonal matrices added to <code>scale</code>. When both <code>scale_identity_multiplier</code> and <code>scale_diag</code> are <code>None</code> then <code>scale</code> is the <code>Identity</code>.</li>
+<li><b><code>scale_identity_multiplier</code></b>: Non-zero, floating-point <code>Tensor</code> representing a scaled-identity-matrix added to <code>scale</code>. May have shape <code>[B1, ..., Bb]</code>, <code>b &gt;= 0</code>, and characterizes <code>b</code>-batches of scaled <code>k x k</code> identity matrices added to <code>scale</code>. When both <code>scale_identity_multiplier</code> and <code>scale_diag</code> are <code>None</code> then <code>scale</code> is the <code>Identity</code>.</li>
+<li><b><code>validate_args</code></b>: Python <code>bool</code>, default <code>False</code>. When <code>True</code> distribution parameters are checked for validity despite possibly degrading runtime performance. When <code>False</code> invalid inputs may silently render incorrect outputs.</li>
+<li><b><code>allow_nan_stats</code></b>: Python <code>bool</code>, default <code>True</code>. When <code>True</code>, statistics (e.g., mean, mode, variance) use the value &quot;<code>NaN</code>&quot; to indicate the result is undefined. When <code>False</code>, an exception is raised if one or more of the statistic's batch members are undefined.</li>
+<li><b><code>name</code></b>: Python <code>str</code> name prefixed to Ops created by this class.</li>
+</ul>
+<h4 id="raises">Raises:</h4>
+<ul>
+<li><b><code>ValueError</code></b>: if at most <code>scale_identity_multiplier</code> is specified.</li>
 </ul>
 <h3 id="__abs__">
 <code><strong>abs</strong></code>
@@ -307,7 +362,7 @@ tf.complex_abs(x) ==&gt; [5.25594902, 6.60492229]</code></pre>
 </ul>
 <h4 id="returns-8">Returns:</h4>
 <p><code>x / y</code> rounded down (except possibly towards zero for negative integers).</p>
-<h4 id="raises">Raises:</h4>
+<h4 id="raises-1">Raises:</h4>
 <ul>
 <li><b><code>TypeError</code></b>: If the inputs are complex.</li>
 </ul>
@@ -366,7 +421,7 @@ print(foo[tf.newaxis].eval()) # =&gt; [[[1,2,3], [4,5,6], [7,8,9]]]</code></pre>
 </ul>
 <h4 id="returns-10">Returns:</h4>
 <p>The appropriate slice of &quot;tensor&quot;, based on &quot;slice_spec&quot;.</p>
-<h4 id="raises-1">Raises:</h4>
+<h4 id="raises-2">Raises:</h4>
 <ul>
 <li><b><code>ValueError</code></b>: If a slice range is negative size.</li>
 <li><b><code>TypeError</code></b>: If the slice indices aren't int, slice, or Ellipsis.</li>
@@ -508,7 +563,7 @@ d = tf.matmul(tf.matmul(a, b), [[10.], [11.]])</code></pre>
 <ul>
 <li><b><code>Note</code></b>: This is matrix product, not element-wise product.</li>
 </ul>
-<h4 id="raises-2">Raises:</h4>
+<h4 id="raises-3">Raises:</h4>
 <ul>
 <li><b><code>ValueError</code></b>: If transpose_a and adjoint_a, or transpose_b and adjoint_b are both set to True.</li>
 </ul>
@@ -664,7 +719,7 @@ tf.pow(x, y) ==&gt; [[256, 65536], [9, 27]]</code></pre>
 </ul>
 <h4 id="returns-23">Returns:</h4>
 <p><code>x / y</code> rounded down (except possibly towards zero for negative integers).</p>
-<h4 id="raises-3">Raises:</h4>
+<h4 id="raises-4">Raises:</h4>
 <ul>
 <li><b><code>TypeError</code></b>: If the inputs are complex.</li>
 </ul>
@@ -735,7 +790,7 @@ d = tf.matmul(tf.matmul(a, b), [[10.], [11.]])</code></pre>
 <ul>
 <li><b><code>Note</code></b>: This is matrix product, not element-wise product.</li>
 </ul>
-<h4 id="raises-4">Raises:</h4>
+<h4 id="raises-5">Raises:</h4>
 <ul>
 <li><b><code>ValueError</code></b>: If transpose_a and adjoint_a, or transpose_b and adjoint_b are both set to True.</li>
 </ul>
@@ -1066,6 +1121,11 @@ with tf.Session() as sess:
     name=&#39;log_prob&#39;
 )</code></pre>
 <p>Log probability density/mass function.</p>
+<p>Additional documentation from <code>VectorExponentialLinearOperator</code>:</p>
+<p><code>value</code> is a batch vector with compatible shape if <code>value</code> is a <code>Tensor</code> whose shape can be broadcast up to either:</p>
+<pre class="python"><code>self.batch_shape + self.event_shape</code></pre>
+<p>or</p>
+<pre class="python"><code>[M1, ..., Mm] + self.batch_shape + self.event_shape</code></pre>
 <h4 id="args-36">Args:</h4>
 <ul>
 <li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
@@ -1139,7 +1199,7 @@ with tf.Session() as sess:
 </ul>
 <h4 id="returns-41">Returns:</h4>
 <p><code>dict</code> of parameter name to <code>TensorShape</code>.</p>
-<h4 id="raises-5">Raises:</h4>
+<h4 id="raises-6">Raises:</h4>
 <ul>
 <li><b><code>ValueError</code></b>: if <code>sample_shape</code> is a <code>TensorShape</code> and is not fully defined.</li>
 </ul>
@@ -1151,6 +1211,11 @@ with tf.Session() as sess:
     name=&#39;prob&#39;
 )</code></pre>
 <p>Probability density/mass function.</p>
+<p>Additional documentation from <code>VectorExponentialLinearOperator</code>:</p>
+<p><code>value</code> is a batch vector with compatible shape if <code>value</code> is a <code>Tensor</code> whose shape can be broadcast up to either:</p>
+<pre class="python"><code>self.batch_shape + self.event_shape</code></pre>
+<p>or</p>
+<pre class="python"><code>[M1, ..., Mm] + self.batch_shape + self.event_shape</code></pre>
 <h4 id="args-40">Args:</h4>
 <ul>
 <li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>

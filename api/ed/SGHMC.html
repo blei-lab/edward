@@ -127,8 +127,7 @@
 x = Normal(loc=mu, scale=1.0, sample_shape=10)
 
 qmu = Empirical(tf.Variable(tf.zeros(500)))
-data = {x: np.zeros(10, dtype=np.float32)}
-inference = ed.SGHMC({mu: qmu}, data)</code></pre>
+inference = ed.SGHMC({mu: qmu}, {x: np.zeros(10, dtype=np.float32)})</code></pre>
 <h2 id="methods">Methods</h2>
 <h3 id="__init__">
 <code><strong>init</strong></code>

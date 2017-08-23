@@ -128,7 +128,7 @@ x_data = tf.constant([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])</code></pre>
 <pre class="python" language="Python"><code>filename_queue = tf.train.string_input_producer(...)
 reader = tf.SomeReader()
 ...</code></pre>
-<p>Represent the data as TensorFlow tensors, where the tensors are the output of data readers. During inference, each update will be automatically evaluated over new batch tensors represented through the data readers. As an example, see the <a href="https://github.com/blei-lab/edward/blob/master/tests/test-inferences/test_data.py">data unit test</a>.</p>
+<p>Represent the data as TensorFlow tensors, where the tensors are the output of data readers. During inference, each update will be automatically evaluated over new batch tensors represented through the data readers. As an example, see the <a href="https://github.com/blei-lab/edward/blob/master/tests/test-inferences/test_inference_data.py">data unit test</a>.</p>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

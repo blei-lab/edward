@@ -85,8 +85,8 @@
 <p>With linear mixed effects models, we wish to model a linear relationship for data points with inputs of varying type, categorized into subgroups, and associated to a real-valued output.</p>
 <p>We demonstrate with an example in Edward. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/linear_mixed_effects_models.ipynb">here</a>.</p>
 <h3 id="data">Data</h3>
-<p>We use the <code>InstEval</code> data set from the popular <a href="http://lme4.r-forge.r-project.org">lme4 R package</a> <span class="citation">(Bates, Mächler, Bolker, &amp; Walker, 2015)</span>, located <a href="https://github.com/blei-lab/edward/blob/master/examples/data/insteval.csv">here</a>. It is a data set of instructor evaluation ratings, where the inputs (covariates) include categories such as <code>students</code> and <code>departments</code>, and our response variable of interest is the instructor evaluation rating.</p>
-<pre class="python" language="Python"><code>data = pd.read_csv('../examples/data/insteval.csv')
+<p>We use the <code>InstEval</code> data set from the popular <a href="http://lme4.r-forge.r-project.org">lme4 R package</a> <span class="citation">(Bates, Mächler, Bolker, &amp; Walker, 2015)</span>. It is a data set of instructor evaluation ratings, where the inputs (covariates) include categories such as <code>students</code> and <code>departments</code>, and our response variable of interest is the instructor evaluation rating.</p>
+<pre class="python" language="Python"><code>data = pd.read_csv('data/insteval.csv')
 data['dcodes'] = data['d'].astype('category').cat.codes
 data['deptcodes'] = data['dept'].astype('category').cat.codes
 data['s'] = data['s'] - 1
@@ -144,10 +144,10 @@ eta_s = Normal(loc=tf.zeros(n_s), scale=sigma_s * tf.ones(n_s))
 eta_d = Normal(loc=tf.zeros(n_d), scale=sigma_d * tf.ones(n_d))
 eta_dept = Normal(loc=tf.zeros(n_dept), scale=sigma_dept * tf.ones(n_dept))
 
-yhat = tf.gather(eta_s, s_ph) + \
-    tf.gather(eta_d, d_ph) + \
-    tf.gather(eta_dept, dept_ph) + \
-    mu + service * service_ph
+yhat = (tf.gather(eta_s, s_ph) +
+        tf.gather(eta_d, d_ph) +
+        tf.gather(eta_dept, dept_ph) +
+        mu + service * service_ph)
 y = Normal(loc=yhat, scale=tf.ones(n_obs))</code></pre>
 <h3 id="inference">Inference</h3>
 <p>Given data, we aim to infer the model’s fixed and random effects. In this analysis, we use variational inference with the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure. We specify fully factorized normal approximations for the random effects and pass in all training data for inference. Under the algorithm, the fixed effects will be estimated under a variational EM scheme.</p>
@@ -208,9 +208,9 @@ for _ in range(inference.n_iter):
 <p><img alt="image" src="/images/linear-mixed-effects-models-fig0.png" width="450"/></p>
 <p>The residuals appear normally distributed with mean 0. The residuals appear normally distributed with mean 0. This is a good sanity check for the model.</p>
 <p>We can also compare our learned parameters to those estimated by R’s ‘lme4‘.</p>
-<pre class="python" language="Python"><code>student_effects_lme4 = pd.read_csv('../examples/data/insteval_student_ranefs_r.csv')
-instructor_effects_lme4 = pd.read_csv('../examples/data/insteval_instructor_ranefs_r.csv')
-dept_effects_lme4 = pd.read_csv('../examples/data/insteval_dept_ranefs_r.csv')
+<pre class="python" language="Python"><code>student_effects_lme4 = pd.read_csv('data/insteval_student_ranefs_r.csv')
+instructor_effects_lme4 = pd.read_csv('data/insteval_instructor_ranefs_r.csv')
+dept_effects_lme4 = pd.read_csv('data/insteval_dept_ranefs_r.csv')
 
 student_effects_edward = q_eta_s.mean().eval()
 instructor_effects_edward = q_eta_d.mean().eval()
@@ -222,7 +222,7 @@ plt.xlabel("Student Effects from lme4")
 plt.ylabel("Student Effects from edward")
 plt.scatter(student_effects_lme4["(Intercept)"],
             student_effects_edward,
-            alpha = 0.25)
+            alpha=0.25)
 plt.show()</code></pre>
 <p><img alt="image" src="/images/linear-mixed-effects-models-fig1.png" width="450"/></p>
 <pre class="python" language="Python"><code>plt.title("Instructor Effects Comparison")
@@ -232,7 +232,7 @@ plt.xlabel("Instructor Effects from lme4")
 plt.ylabel("Instructor Effects from edward")
 plt.scatter(instructor_effects_lme4["(Intercept)"],
             instructor_effects_edward,
-            alpha = 0.25)
+            alpha=0.25)
 plt.show()</code></pre>
 <p><img alt="image" src="/images/linear-mixed-effects-models-fig2.png" width="450"/></p>
 <p>Great! Our estimates for both student and instructor effects seem to match those from ‘lme4‘ closely. We have set up a slightly different model here (for example, our overall mean is regularized, as are our variances for student, department, and instructor effects, which is not true of ‘lme4‘s model), and we have a different inference method, so we should not expect to find exactly the same parameters as ‘lme4‘. But it is reassuring that they match up closely!</p>
@@ -247,7 +247,7 @@ plt.xlabel("Department Effects from lme4")
 plt.ylabel("Department Effects from edward")
 plt.scatter(dept_effects_and_intercept_lme4,
             dept_effects_and_intercept_edward,
-            s = 0.01*train.dept.value_counts())
+            s=0.01 * train.dept.value_counts())
 plt.show()</code></pre>
 <p><img alt="image" src="/images/linear-mixed-effects-models-fig3.png" width="450"/></p>
 <p>Our department effects do not match up nearly as well with those from ‘lme4‘. There are likely several reasons for this:</p>

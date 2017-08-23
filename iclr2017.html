@@ -207,7 +207,7 @@ x = generative_network(eps)
 
 # INFERENCE
 inference = ed.GANInference(data={x: x_train},
-    discriminator=discriminative_network)</code></pre>
+                            discriminator=discriminative_network)</code></pre>
 <p>For an example of it in use, see the <a href="/tutorials/gan">generative adversarial networks</a> tutorial.</p>
 <p><strong>Figure *</strong>. Variational EM <span class="citation">(Radford M. Neal &amp; Hinton, 1993)</span>. It performs inference on the model defined in Figure 5.</p>
 <pre language="python"><code>import edward as ed

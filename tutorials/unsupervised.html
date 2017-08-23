@@ -146,7 +146,8 @@ K = 2  # number of components
 pi = Dirichlet(tf.ones(K))
 mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
 sigmasq = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
-x = ParamMixture(pi, {&#39;loc&#39;: mu, &#39;scale_diag&#39;: tf.sqrt(sigmasq)}, MultivariateNormalDiag,
+x = ParamMixture(pi, {&#39;loc&#39;: mu, &#39;scale_diag&#39;: tf.sqrt(sigmasq)},
+                 MultivariateNormalDiag,
                  sample_shape=N)
 z = x.cat</code></pre>
 <p>The collapsed version marginalizes out the mixture assignments. We implement this with the <code>Mixture</code> random variable; it takes as input a Categorical distribution and a list of individual distribution components. It is the distribution of the mixture summing out the mixture assignments.</p>
@@ -172,7 +173,8 @@ qmu = Empirical(tf.Variable(tf.zeros([T, K, D])))
 qsigmasq = Empirical(tf.Variable(tf.ones([T, K, D])))
 qz = Empirical(tf.Variable(tf.zeros([T, N], dtype=tf.int32)))</code></pre>
 <p>Run Gibbs sampling. We write the training loop explicitly, so that we can track the cluster means as the sampler progresses.</p>
-<pre class="python" language="Python"><code>inference = ed.Gibbs({pi: qpi, mu: qmu, sigmasq: qsigmasq, z: qz}, data={x: x_train})
+<pre class="python" language="Python"><code>inference = ed.Gibbs({pi: qpi, mu: qmu, sigmasq: qsigmasq, z: qz},
+                     data={x: x_train})
 inference.initialize()
 
 sess = ed.get_session()
