@@ -135,6 +135,6 @@ class KLpq(VariationalInference):
         -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm)),
         q_vars)
     p_vars = [v for v in var_list if v not in q_vars]
-    p_grads = tf.gradients(loss, p_vars)
+    p_grads = tf.gradients(-loss, p_vars)
     grads_and_vars = list(zip(q_grads, q_vars)) + list(zip(p_grads, p_vars))
     return loss, grads_and_vars
