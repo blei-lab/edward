@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from edward.inferences.variational_inference import VariationalInference
 from edward.models import RandomVariable
-from edward.util import copy
+from edward.util import copy, get_descendants
 
 
 class KLpq(VariationalInference):
@@ -126,10 +126,15 @@ class KLpq(VariationalInference):
     log_w = p_log_prob - q_log_prob
     log_w_norm = log_w - tf.reduce_logsumexp(log_w)
     w_norm = tf.exp(log_w_norm)
-
     loss = tf.reduce_mean(w_norm * log_w)
-    grads = tf.gradients(
+
+    q_rvs = list(six.itervalues(self.latent_vars))
+    q_vars = [v for v in var_list
+              if len(get_descendants(tf.convert_to_tensor(v), q_rvs)) != 0]
+    q_grads = tf.gradients(
         -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm)),
-        var_list)
-    grads_and_vars = list(zip(grads, var_list))
+        q_vars)
+    p_vars = [v for v in var_list if v not in q_vars]
+    p_grads = tf.gradients(-loss, p_vars)
+    grads_and_vars = list(zip(q_grads, q_vars)) + list(zip(p_grads, p_vars))
     return loss, grads_and_vars

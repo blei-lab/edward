@@ -18,7 +18,7 @@ x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 
 # MODEL
 p = Beta(1.0, 1.0)
-x = Bernoulli(tf.ones(10) * p)
+x = Bernoulli(probs=p, sample_shape=10)
 
 # INFERENCE
 qp_a = tf.nn.softplus(tf.Variable(tf.random_normal([])))

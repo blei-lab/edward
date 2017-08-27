@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from edward.inferences.variational_inference import VariationalInference
 from edward.models import RandomVariable
-from edward.util import copy
+from edward.util import copy, get_descendants
 
 try:
   from edward.models import Normal
@@ -58,7 +58,7 @@ class KLqp(VariationalInference):
       n_samples: int, optional.
         Number of samples from variational model for calculating
         stochastic gradients.
-      kl_scaling: dict of RandomVariable to float, optional.
+      kl_scaling: dict of RandomVariable to tf.Tensor, optional.
         Provides option to scale terms when using ELBO with KL divergence.
         If the KL divergence terms are
 
@@ -66,8 +66,8 @@ class KLqp(VariationalInference):
               \log q(z\mid x, \lambda) - \log p(z)],$
 
         then pass {$p(z)$: $\\alpha_p$} as `kl_scaling`,
-        where $\\alpha_p$ is a float that specifies how much to
-        scale the KL term.
+        where $\\alpha_p$ is a tensor. Its shape must be broadcastable;
+        it is multiplied element-wise to the batchwise KL terms.
     """
     if kl_scaling is None:
       kl_scaling = {}
@@ -171,7 +171,7 @@ class ReparameterizationKLKLqp(VariationalInference):
       n_samples: int, optional.
         Number of samples from variational model for calculating
         stochastic gradients.
-      kl_scaling: dict of RandomVariable to float, optional.
+      kl_scaling: dict of RandomVariable to tf.Tensor, optional.
         Provides option to scale terms when using ELBO with KL divergence.
         If the KL divergence terms are
 
@@ -179,8 +179,8 @@ class ReparameterizationKLKLqp(VariationalInference):
               \log q(z\mid x, \lambda) - \log p(z)],$
 
         then pass {$p(z)$: $\\alpha_p$} as `kl_scaling`,
-        where $\\alpha_p$ is a float that specifies how much to
-        scale the KL term.
+        where $\\alpha_p$ is a tensor. Its shape must be broadcastable;
+        it is multiplied element-wise to the batchwise KL terms.
     """
     if kl_scaling is None:
       kl_scaling = {}
@@ -267,7 +267,7 @@ class ScoreKLKLqp(VariationalInference):
       n_samples: int, optional.
         Number of samples from variational model for calculating
         stochastic gradients.
-      kl_scaling: dict of RandomVariable to float, optional.
+      kl_scaling: dict of RandomVariable to tf.Tensor, optional.
         Provides option to scale terms when using ELBO with KL divergence.
         If the KL divergence terms are
 
@@ -275,8 +275,8 @@ class ScoreKLKLqp(VariationalInference):
               \log q(z\mid x, \lambda) - \log p(z)],$
 
         then pass {$p(z)$: $\\alpha_p$} as `kl_scaling`,
-        where $\\alpha_p$ is a float that specifies how much to
-        scale the KL term.
+        where $\\alpha_p$ is a tensor. Its shape must be broadcastable;
+        it is multiplied element-wise to the batchwise KL terms.
     """
     if kl_scaling is None:
       kl_scaling = {}
@@ -423,7 +423,7 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
   p_log_lik = tf.reduce_mean(p_log_lik)
 
   kl_penalty = tf.reduce_sum([
-      inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(kl_divergence(qz, z))
+      tf.reduce_sum(inference.kl_scaling.get(z, 1.0) * kl_divergence(qz, z))
       for z, qz in six.iteritems(inference.latent_vars)])
 
   if inference.logging:
@@ -487,7 +487,8 @@ def build_reparam_entropy_loss_and_gradients(inference, var_list):
   p_log_prob = tf.reduce_mean(p_log_prob)
 
   q_entropy = tf.reduce_sum([
-      qz.entropy() for z, qz in six.iteritems(inference.latent_vars)])
+      tf.reduce_sum(qz.entropy())
+      for z, qz in six.iteritems(inference.latent_vars)])
 
   if inference.logging:
     tf.summary.scalar("loss/p_log_prob", p_log_prob,
@@ -556,10 +557,15 @@ def build_score_loss_and_gradients(inference, var_list):
   losses = p_log_prob - q_log_prob
   loss = -tf.reduce_mean(losses)
 
-  grads = tf.gradients(
+  q_rvs = list(six.itervalues(inference.latent_vars))
+  q_vars = [v for v in var_list
+            if len(get_descendants(tf.convert_to_tensor(v), q_rvs)) != 0]
+  q_grads = tf.gradients(
       -tf.reduce_mean(q_log_prob * tf.stop_gradient(losses)),
-      var_list)
-  grads_and_vars = list(zip(grads, var_list))
+      q_vars)
+  p_vars = [v for v in var_list if v not in q_vars]
+  p_grads = tf.gradients(loss, p_vars)
+  grads_and_vars = list(zip(q_grads, q_vars)) + list(zip(p_grads, p_vars))
   return loss, grads_and_vars
 
 
@@ -606,7 +612,7 @@ def build_score_kl_loss_and_gradients(inference, var_list):
   q_log_prob = tf.stack(q_log_prob)
 
   kl_penalty = tf.reduce_sum([
-      inference.kl_scaling.get(z, 1.0) * tf.reduce_sum(kl_divergence(qz, z))
+      tf.reduce_sum(inference.kl_scaling.get(z, 1.0) * kl_divergence(qz, z))
       for z, qz in six.iteritems(inference.latent_vars)])
 
   if inference.logging:
@@ -616,10 +622,16 @@ def build_score_kl_loss_and_gradients(inference, var_list):
                       collections=[inference._summary_key])
 
   loss = -(tf.reduce_mean(p_log_lik) - kl_penalty)
-  grads = tf.gradients(
+
+  q_rvs = list(six.itervalues(inference.latent_vars))
+  q_vars = [v for v in var_list
+            if len(get_descendants(tf.convert_to_tensor(v), q_rvs)) != 0]
+  q_grads = tf.gradients(
       -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_lik)) - kl_penalty),
-      var_list)
-  grads_and_vars = list(zip(grads, var_list))
+      q_vars)
+  p_vars = [v for v in var_list if v not in q_vars]
+  p_grads = tf.gradients(loss, p_vars)
+  grads_and_vars = list(zip(q_grads, q_vars)) + list(zip(p_grads, p_vars))
   return loss, grads_and_vars
 
 
@@ -671,7 +683,8 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
   q_log_prob = tf.stack(q_log_prob)
 
   q_entropy = tf.reduce_sum([
-      qz.entropy() for z, qz in six.iteritems(inference.latent_vars)])
+      tf.reduce_sum(qz.entropy())
+      for z, qz in six.iteritems(inference.latent_vars)])
 
   if inference.logging:
     tf.summary.scalar("loss/p_log_prob", tf.reduce_mean(p_log_prob),
@@ -682,9 +695,15 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
                       collections=[inference._summary_key])
 
   loss = -(tf.reduce_mean(p_log_prob) + q_entropy)
-  grads = tf.gradients(
+
+  q_rvs = list(six.itervalues(inference.latent_vars))
+  q_vars = [v for v in var_list
+            if len(get_descendants(tf.convert_to_tensor(v), q_rvs)) != 0]
+  q_grads = tf.gradients(
       -(tf.reduce_mean(q_log_prob * tf.stop_gradient(p_log_prob)) +
           q_entropy),
-      var_list)
-  grads_and_vars = list(zip(grads, var_list))
+      q_vars)
+  p_vars = [v for v in var_list if v not in q_vars]
+  p_grads = tf.gradients(loss, p_vars)
+  grads_and_vars = list(zip(q_grads, q_vars)) + list(zip(p_grads, p_vars))
   return loss, grads_and_vars

@@ -18,7 +18,7 @@ x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 
 # MODEL
 p = Beta(1.0, 1.0)
-x = Bernoulli(tf.ones(10) * p)
+x = Bernoulli(probs=p, sample_shape=10)
 
 # INFERENCE
 qp_a = tf.nn.softplus(tf.Variable(tf.random_normal([])))
@@ -27,3 +27,5 @@ qp = Beta(qp_a, qp_b)
 
 inference = ed.KLqp({p: qp}, data={x: x_data})
 inference.run(n_iter=500)
+
+print("Posterior mean of probability: {}".format(qp.mean().eval()))

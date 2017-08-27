@@ -55,9 +55,7 @@ class VariationalInference(Inference):
       var_list = set()
       trainables = tf.trainable_variables()
       for z, qz in six.iteritems(self.latent_vars):
-        if isinstance(z, RandomVariable):
-          var_list.update(get_variables(z, collection=trainables))
-
+        var_list.update(get_variables(z, collection=trainables))
         var_list.update(get_variables(qz, collection=trainables))
 
       for x, qx in six.iteritems(self.data):
