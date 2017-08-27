@@ -80,7 +80,7 @@ class test_klqp_class(tf.test.TestCase):
     self._test_model_parameter(ed.ScoreKLKLqp, n_iter=50)
 
   def test_score_rb_klqp(self):
-    self._test(ed.ScoreRBKLqp, n_samples=5, n_iter=5000)
+    self._test_normal_normal(ed.ScoreRBKLqp, n_samples=5, n_iter=5000)
     self._test_model_parameter(ed.ScoreRBKLqp, n_iter=50)
 
 if __name__ == '__main__':
