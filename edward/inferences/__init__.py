@@ -40,6 +40,7 @@ _allowed_symbols = [
     'ScoreKLqp',
     'ScoreKLKLqp',
     'ScoreEntropyKLqp',
+    'ScoreRBKLqp',
     'Laplace',
     'MAP',
     'MetropolisHastings',
