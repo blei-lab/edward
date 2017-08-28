@@ -3,8 +3,21 @@
 apply it as a topic model on the collection of NIPS 2011 conference
 papers.
 
-ELBO converges to roughly ~2.3e6 with Gamma q, RBKLqp, and learning
-rate of 1e-4 after ~85k iterations / ~20 minutes on a Titan X (Pascal).
+Results are the following after 12 epochs. It takes ~2 minutes per
+epoch on a Titan X (Pascal).
+
+Negative log-likelihood <= 3738025.615
+Perplexity <= 266.623
+Topic 0: reasons posterior tion using similar tools university input computed refers
+Topic 1: expected since much related rate defined optimization vector thus neurons
+Topic 2: large linear given table shown true drop classification constraints current
+Topic 3: proposed processing estimated better values gaussian form test true setting
+Topic 4: see methods local several rate processing general vector enables section
+Topic 5: thus case methods image dataset models different instead new respectively
+Topic 6: based consider samples step object see kernel since problem training
+Topic 7: approaches linear computing show gaussian data expected analysis well proof
+Topic 8: fig point kernel bayesian solution applications results follows regression computer
+Topic 9: conference optimization training pages maximum learning dataset performance state inference
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -15,21 +28,41 @@ import numpy as np
 import os
 import tensorflow as tf
 
+from datetime import datetime
 from edward.models import Gamma, Poisson, Normal, PointMass, \
     TransformedDistribution
+from edward.util import Progbar
+from observations import nips
 
 ed.set_seed(42)
 
+data_dir = "~/data"
+logdir = '~/log/def/'
+data_dir = os.path.expanduser(data_dir)
+logdir = os.path.expanduser(logdir)
+
 # DATA
-DATA_DIR = "~/data/nips"
-DATA_DIR = os.path.expanduser(DATA_DIR)
-x_train = np.loadtxt(os.path.join(DATA_DIR, 'nips_train.csv'))
-x_test = np.loadtxt(os.path.join(DATA_DIR, 'nips_test.csv'))
+x_train, metadata = nips(data_dir)
+documents = metadata['columns']
+words = metadata['rows']
+
+# Subset to documents in 2011 and words appearing in at least two
+# documents and have a total word count of at least 10.
+doc_idx = [i for i, document in enumerate(documents)
+           if document.startswith('2011')]
+documents = [documents[doc] for doc in doc_idx]
+x_train = x_train[:, doc_idx]
+word_idx = np.logical_and(np.sum(x_train != 0, 1) >= 2,
+                          np.sum(x_train, 1) >= 10)
+words = [word for word, idx in zip(words, word_idx) if idx]
+x_train = x_train[word_idx, :]
+x_train = x_train.T
 
 N = x_train.shape[0]  # number of documents
 D = x_train.shape[1]  # vocabulary size
+K = [100, 30, 15]  # number of components per layer
 shape = 0.1  # gamma shape parameter
-K = [100, 40, 15]  # number of components per layer
+lr = 1e-4  # learning rate step-size
 
 # MODEL
 W2 = Gamma(0.1, 0.3, sample_shape=[K[2], K[1]])
@@ -54,7 +87,6 @@ def gamma_q(shape):
   # Parameterize Gamma q's via shape and scale, with softplus unconstraints.
   min_shape = 1e-3
   min_scale = 1e-5
-  # min_gamma_sample = 1e-10
   shape_init = 0.5 + 0.1 * tf.random_normal(shape)
   scale_init = 0.1 * tf.random_normal(shape)
   rv = Gamma(tf.maximum(tf.nn.softplus(tf.Variable(shape_init)),
@@ -64,65 +96,58 @@ def gamma_q(shape):
   return rv
 
 
-def lognormal_q(shape):
-  min_scale = 1e-5
-  loc_init = tf.random_normal(shape)
-  scale_init = 0.1 + tf.random_normal(shape)
-  rv = TransformedDistribution(
-      distribution=Normal(
-          tf.Variable(loc_init),
-          tf.maximum(tf.nn.softplus(tf.Variable(scale_init)), min_scale)),
-      bijector=tf.contrib.distributions.bijectors.Exp())
-  return rv
-
-
 qW2 = pointmass_q(W2.shape)
 qW1 = pointmass_q(W1.shape)
 qW0 = pointmass_q(W0.shape)
 qz3 = gamma_q(z3.shape)
 qz2 = gamma_q(z2.shape)
 qz1 = gamma_q(z1.shape)
-# qz3 = lognormal_q(z3.shape)
-# qz2 = lognormal_q(z2.shape)
-# qz1 = lognormal_q(z1.shape)
 
 # We apply variational EM with E-step over local variables
 # and M-step to point estimate the global weight matrices.
-# inference_e = ed.KLqp({z1: qz1, z2: qz2, z3: qz3},
-#                       data={x: x_train, W0: qW0, W1: qW1, W2: qW2})
-inference_e = ed.ScoreRBKLqp({z1: qz1, z2: qz2, z3: qz3},
-                             data={x: x_train, W0: qW0, W1: qW1, W2: qW2})
+inference_e = ed.KLqp({z1: qz1, z2: qz2, z3: qz3},
+                      data={x: x_train, W0: qW0, W1: qW1, W2: qW2})
 inference_m = ed.MAP({W0: qW0, W1: qW1, W2: qW2},
                      data={x: x_train, z1: qz1, z2: qz2, z3: qz3})
-optimizer_m = tf.train.RMSPropOptimizer(1e-4)
-optimizer_e = tf.train.RMSPropOptimizer(1e-4)
-# inference_e.initialize(optimizer=optimizer_e,
-#                        n_iter=int(1e6),
-#                        n_print=100,
-#                        logdir='~/log/def')
+optimizer_e = tf.train.RMSPropOptimizer(lr)
+optimizer_m = tf.train.RMSPropOptimizer(lr)
+timestamp = datetime.strftime(datetime.utcnow(), "%Y%m%d_%H%M%S")
+logdir += timestamp + '_' + '_'.join([str(ks) for ks in K]) + \
+          '_lr_' + str(lr)
 inference_e.initialize(optimizer=optimizer_e,
-                       n_iter=int(1e6),
                        n_print=100,
-                       n_samples=50,
-                       logdir='~/log/def')
+                       n_samples=30,
+                       logdir=logdir,
+                       log_timestamp=False)
 inference_m.initialize(optimizer=optimizer_m)
 
-# # to compute held-out perplexity during training
-# N_test = x_test.shape[1]
-# perplexity = tf.exp(tf.reduce_sum() / N_test)
-
-# sess = ed.get_session()
+sess = ed.get_session()
 tf.global_variables_initializer().run()
 
-for _ in range(inference_e.n_iter):
-  info_dict_e = inference_e.update()
-  info_dict_m = inference_m.update()
-  inference_e.print_progress(info_dict_e)
+n_epoch = 20
+n_iter_per_epoch = 10000
+for epoch in range(n_epoch):
+  print("Epoch {}".format(epoch))
+  nll = 0.0
 
-  # Training perplexity.
-  # avg_loss = avg_loss / n_iter_per_epoch
-  # avg_loss = avg_loss / M
-  # print("log p(x) >= {:0.3f}".format(avg_loss))
+  pbar = Progbar(n_iter_per_epoch)
+  for t in range(1, n_iter_per_epoch + 1):
+    pbar.update(t)
+    info_dict_e = inference_e.update()
+    info_dict_m = inference_m.update()
+    nll += info_dict_e['loss']
 
-  # Held-out perplexity.
-  # TODO
+  # Compute perplexity averaged over a number of training iterations.
+  # The model's negative log-likelihood of data is upper bounded by
+  # the variational objective.
+  nll = nll / n_iter_per_epoch
+  perplexity = np.exp(nll / np.sum(x_train))
+  print("Negative log-likelihood <= {:0.3f}".format(nll))
+  print("Perplexity <= {:0.3f}".format(perplexity))
+
+  # Print top 10 words for first 10 topics.
+  qW0_vals = sess.run(qW0)
+  for k in range(10):
+    top_words_idx = qW0_vals[k, :].argsort()[-10:][::-1]
+    top_words = " ".join([words[i] for i in top_words_idx])
+    print("Topic {}: {}".format(k, top_words))
