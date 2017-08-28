@@ -3,8 +3,32 @@
 apply it as a topic model on the collection of NIPS 2011 conference
 papers.
 
-Results are the following after 12 epochs. It takes ~2 minutes per
-epoch on a Titan X (Pascal).
+The loss function can sometimes erroneously output a negative value or
+NaN. This happens when the samples from the variational approximation
+are numerically zero, which causes Gamma log probs to output inf.
+
+With default settings (in particular, with log normal variational
+approximation), it takes ~62s per epoch on a Titan X (Pascal).
+Following results are on epoch 12.
+
+10000/10000 [100%] ██████████████████████████████ Elapsed: 62s
+Negative log-likelihood <= -1060649.607
+Perplexity <= 0.205
+Topic 0: let distribution set strategy distributions given learning information use property
+Topic 1: functions problem risk function submodular cut level clustering sets performance
+Topic 2: action value learning regret reward actions algorithm optimal state return
+Topic 3: posterior stochastic approach information based using prior mean divergence since
+Topic 4: player inference game propagation experts static query expert base variables
+Topic 5: algorithm set loss weak algorithms optimal submodular online cost setting
+Topic 6: sparse sparsity norm solution learning penalty greedy structure wise regularization
+Topic 7: learning training linear kernel using coding accuracy performance dataset based
+Topic 8: object categories image features examples classes images class objects visual
+Topic 9: data manifold matrix points dimensional point low linear gradient optimization
+
+A Gamma variational approximation produces worse results, which is
+likely due to the high variance in stochastic gradients. It takes ~2
+minutes per epoch on a Titan X (Pascal). Following results are on
+epoch 12.
 
 Negative log-likelihood <= 3738025.615
 Perplexity <= 266.623
@@ -61,6 +85,7 @@ x_train = x_train.T
 N = x_train.shape[0]  # number of documents
 D = x_train.shape[1]  # vocabulary size
 K = [100, 30, 15]  # number of components per layer
+q = 'lognormal'  # choice of q; 'lognormal' or 'gamma'
 shape = 0.1  # gamma shape parameter
 lr = 1e-4  # learning rate step-size
 
@@ -96,12 +121,29 @@ def gamma_q(shape):
   return rv
 
 
+def lognormal_q(shape):
+  min_scale = 1e-5
+  loc_init = tf.random_normal(shape)
+  scale_init = 0.1 * tf.random_normal(shape)
+  rv = TransformedDistribution(
+      distribution=Normal(
+          tf.Variable(loc_init),
+          tf.maximum(tf.nn.softplus(tf.Variable(scale_init)), min_scale)),
+      bijector=tf.contrib.distributions.bijectors.Exp())
+  return rv
+
+
 qW2 = pointmass_q(W2.shape)
 qW1 = pointmass_q(W1.shape)
 qW0 = pointmass_q(W0.shape)
-qz3 = gamma_q(z3.shape)
-qz2 = gamma_q(z2.shape)
-qz1 = gamma_q(z1.shape)
+if q == 'gamma':
+  qz3 = gamma_q(z3.shape)
+  qz2 = gamma_q(z2.shape)
+  qz1 = gamma_q(z1.shape)
+else:
+  qz3 = lognormal_q(z3.shape)
+  qz2 = lognormal_q(z2.shape)
+  qz1 = lognormal_q(z1.shape)
 
 # We apply variational EM with E-step over local variables
 # and M-step to point estimate the global weight matrices.
@@ -109,16 +151,19 @@ inference_e = ed.KLqp({z1: qz1, z2: qz2, z3: qz3},
                       data={x: x_train, W0: qW0, W1: qW1, W2: qW2})
 inference_m = ed.MAP({W0: qW0, W1: qW1, W2: qW2},
                      data={x: x_train, z1: qz1, z2: qz2, z3: qz3})
+
 optimizer_e = tf.train.RMSPropOptimizer(lr)
 optimizer_m = tf.train.RMSPropOptimizer(lr)
 timestamp = datetime.strftime(datetime.utcnow(), "%Y%m%d_%H%M%S")
 logdir += timestamp + '_' + '_'.join([str(ks) for ks in K]) + \
-          '_lr_' + str(lr)
-inference_e.initialize(optimizer=optimizer_e,
-                       n_print=100,
-                       n_samples=30,
-                       logdir=logdir,
-                       log_timestamp=False)
+          '_q_' + str(q) + '_lr_' + str(lr)
+kwargs = {'optimizer': optimizer_e,
+          'n_print': 100,
+          'logdir': logdir,
+          'log_timestamp': False}
+if q == 'gamma':
+  kwargs['n_samples'] = 30
+inference_e.initialize(**kwargs)
 inference_m.initialize(optimizer=optimizer_m)
 
 sess = ed.get_session()
