@@ -14,16 +14,26 @@ Following results are on epoch 12.
 10000/10000 [100%] ██████████████████████████████ Elapsed: 62s
 Negative log-likelihood <= -1060649.607
 Perplexity <= 0.205
-Topic 0: let distribution set strategy distributions given learning information use property
-Topic 1: functions problem risk function submodular cut level clustering sets performance
-Topic 2: action value learning regret reward actions algorithm optimal state return
-Topic 3: posterior stochastic approach information based using prior mean divergence since
-Topic 4: player inference game propagation experts static query expert base variables
-Topic 5: algorithm set loss weak algorithms optimal submodular online cost setting
-Topic 6: sparse sparsity norm solution learning penalty greedy structure wise regularization
-Topic 7: learning training linear kernel using coding accuracy performance dataset based
-Topic 8: object categories image features examples classes images class objects visual
-Topic 9: data manifold matrix points dimensional point low linear gradient optimization
+Topic 0: let distribution set strategy distributions given learning
+    information use property
+Topic 1: functions problem risk function submodular cut level
+    clustering sets performance
+Topic 2: action value learning regret reward actions algorithm optimal
+    state return
+Topic 3: posterior stochastic approach information based using prior
+    mean divergence since
+Topic 4: player inference game propagation experts static query expert
+    base variables
+Topic 5: algorithm set loss weak algorithms optimal submodular online
+    cost setting
+Topic 6: sparse sparsity norm solution learning penalty greedy
+    structure wise regularization
+Topic 7: learning training linear kernel using coding accuracy
+    performance dataset based
+Topic 8: object categories image features examples classes images
+    class objects visual
+Topic 9: data manifold matrix points dimensional point low linear
+    gradient optimization
 
 A Gamma variational approximation produces worse results, which is
 likely due to the high variance in stochastic gradients. It takes ~2
@@ -32,16 +42,26 @@ epoch 12.
 
 Negative log-likelihood <= 3738025.615
 Perplexity <= 266.623
-Topic 0: reasons posterior tion using similar tools university input computed refers
-Topic 1: expected since much related rate defined optimization vector thus neurons
-Topic 2: large linear given table shown true drop classification constraints current
-Topic 3: proposed processing estimated better values gaussian form test true setting
-Topic 4: see methods local several rate processing general vector enables section
-Topic 5: thus case methods image dataset models different instead new respectively
-Topic 6: based consider samples step object see kernel since problem training
-Topic 7: approaches linear computing show gaussian data expected analysis well proof
-Topic 8: fig point kernel bayesian solution applications results follows regression computer
-Topic 9: conference optimization training pages maximum learning dataset performance state inference
+Topic 0: reasons posterior tion using similar tools university input
+    computed refers
+Topic 1: expected since much related rate defined optimization vector
+    thus neurons
+Topic 2: large linear given table shown true drop classification
+    constraints current
+Topic 3: proposed processing estimated better values gaussian form
+    test true setting
+Topic 4: see methods local several rate processing general vector
+    enables section
+Topic 5: thus case methods image dataset models different instead new
+    respectively
+Topic 6: based consider samples step object see kernel since problem
+    training
+Topic 7: approaches linear computing show gaussian data expected
+    analysis well proof
+Topic 8: fig point kernel bayesian solution applications results
+    follows regression computer
+Topic 9: conference optimization training pages maximum learning
+    dataset performance state inference
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -156,7 +176,7 @@ optimizer_e = tf.train.RMSPropOptimizer(lr)
 optimizer_m = tf.train.RMSPropOptimizer(lr)
 timestamp = datetime.strftime(datetime.utcnow(), "%Y%m%d_%H%M%S")
 logdir += timestamp + '_' + '_'.join([str(ks) for ks in K]) + \
-          '_q_' + str(q) + '_lr_' + str(lr)
+    '_q_' + str(q) + '_lr_' + str(lr)
 kwargs = {'optimizer': optimizer_e,
           'n_print': 100,
           'logdir': logdir,
