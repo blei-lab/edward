@@ -45,7 +45,7 @@ class WakeSleep(VariationalInference):
 
   $\log p(x, z^{(s)}), z^{(s)} \sim q(z; \lambda),$
 
-  for each sample $s=1,\ldots,S$, `KLpq` uses
+  for each sample $s=1,\ldots,S$, `WakeSleep` uses
 
   $\log p(x, z^{(s)}, \\beta^{(s)}),$
 
@@ -71,7 +71,7 @@ class WakeSleep(VariationalInference):
     """
     self.n_samples = n_samples
     self.phase_q = phase_q
-    return super(KLpq, self).initialize(*args, **kwargs)
+    return super(WakeSleep, self).initialize(*args, **kwargs)
 
   def build_loss_and_gradients(self, var_list):
     p_log_prob = [0.0] * self.n_samples

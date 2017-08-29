@@ -23,7 +23,7 @@ class test_wakesleep_class(tf.test.TestCase):
 
       self.assertAllClose(p.eval(), 0.2, rtol=5e-2, atol=5e-2)
 
-  def test_klpq(self):
+  def test_wakesleep(self):
     self._test_model_parameter(ed.WakeSleep, n_iter=50)
 
 if __name__ == '__main__':
