@@ -155,6 +155,10 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
       evaluations += [categorical_crossentropy(y_true, y_pred)]
     elif metric == 'sparse_categorical_crossentropy':
       evaluations += [sparse_categorical_crossentropy(y_true, y_pred)]
+    elif metric == 'kl_divergence':
+      y_true_ = y_true / output_key.total_count
+      y_pred_ = probs
+      evaluations += [kl_divergence(y_true_, y_pred_)]
     elif metric == 'hinge':
       evaluations += [hinge(y_true, y_pred)]
     elif metric == 'squared_hinge':
@@ -289,6 +293,22 @@ def sparse_categorical_crossentropy(y_true, y_pred):
   y_pred = tf.cast(y_pred, tf.float32)
   return tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(
       logits=y_pred, labels=y_true))
+
+
+def kl_divergence(y_true, y_pred):
+  """Kullback-Leibler divergence between two probability distributions. A
+  vector of probabilities for `y_true`.
+
+  Args:
+    y_true: tf.Tensor.
+      Tensor of real values (probabilities) where the values in each row
+      of the outermost dimension sum to 1.
+    y_pred: tf.Tensor.
+      Same as `y_true`, and with the same shape.
+  """
+  y_true = tf.cast(y_true + 1.0, tf.float32)
+  y_pred = tf.cast(y_pred + 1.0, tf.float32)
+  return tf.reduce_mean(y_true * tf.log(y_true / y_pred))
 
 
 def hinge(y_true, y_pred):
