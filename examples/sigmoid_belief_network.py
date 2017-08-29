@@ -1,7 +1,6 @@
 #!/usr/bin/env python
-"""Sigmoid belief network (Neal, 1990) trained using the wake sleep
-algorithm (Hinton et al., 1995) on the Caltech 101 Silhouettes data
-set.
+"""Sigmoid belief network (Neal, 1990) trained on the Caltech 101
+Silhouettes data set.
 
 Default settings take ~143s / epoch on a Titan X (Pascal). Results on
 epoch 100:
@@ -9,10 +8,6 @@ Training negative log-likelihood: 209.443
 Test negative log-likelihood: 161.244
 
 Using n_train_samples=50 converges to test NLL of 157.824.
-
-TODO
-+ need reweighted wake sleep?
-+ need momentum optimizer?
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -87,10 +82,6 @@ for l in range(len(hidden_sizes)):
                              hidden_sizes[l], activation=None)
   qzs[l] = Bernoulli(logits=logits)
 
-# TODO
-# ValueError: cannot add op with name inference/sample/Bernoulli_7/sample/sample_shape as that name is already used
-# comes up with klqp too
-# inference = ed.WakeSleep({z: qz for z, qz in zip(zs, qzs)}, data={x: x_ph})
 inference = ed.KLqp({z: qz for z, qz in zip(zs, qzs)}, data={x: x_ph})
 optimizer = tf.train.AdamOptimizer(step_size)
 inference.initialize(optimizer=optimizer, n_samples=n_train_samples)
@@ -105,9 +96,6 @@ sess = ed.get_session()
 tf.global_variables_initializer().run()
 
 n_epoch = 100
-# TODO
-# Full pass over training data with any indivisible fraction rounded down.
-# n_iter_per_epoch = x_train.shape[0] // batch_size
 n_iter_per_epoch = 10000
 for epoch in range(n_epoch):
   print("Epoch {}".format(epoch))
