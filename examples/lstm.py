@@ -25,7 +25,8 @@ import tensorflow as tf
 
 from datetime import datetime
 from edward.models import Categorical
-from edward.util import maybe_download_and_extract, Progbar
+from edward.util import Progbar
+from observations import text8
 
 data_dir = "data/text8"
 log_dir = "log"
@@ -43,19 +44,6 @@ hyperparam_str = '_'.join([
 log_dir = os.path.join(log_dir, timestamp + '_' + hyperparam_str)
 if not os.path.exists(log_dir):
   os.makedirs(log_dir)
-
-
-def text8(path):
-  """Load the text8 data set (Mahoney, 2006)."""
-  path = os.path.expanduser(path)
-  url = 'http://mattmahoney.net/dc/text8.zip'
-  maybe_download_and_extract(path, url)
-  with open(os.path.join(path, 'text8')) as f:
-    text = f.read()
-  x_train = text[:int(90e6)]
-  x_valid = text[int(90e6):int(95e6)]
-  x_test = text[int(95e6):int(100e6)]
-  return x_train, x_valid, x_test
 
 
 def lstm_cell(x, h, c, name=None, reuse=False):

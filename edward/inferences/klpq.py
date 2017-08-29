@@ -21,7 +21,7 @@ class KLpq(VariationalInference):
   #### Notes
 
   `KLpq` also optimizes any model parameters $p(z\mid x;
-  \\theta)$. It does this by variational EM, minimizing
+  \\theta)$. It does this by variational EM, maximizing
 
   $\mathbb{E}_{p(z \mid x; \lambda)} [ \log p(x, z; \\theta) ]$
 
