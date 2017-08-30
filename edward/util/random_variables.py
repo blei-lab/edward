@@ -699,3 +699,19 @@ def get_variables(x, collection=None):
     nodes.update(node.op.inputs)
 
   return list(output)
+
+
+def compute_multinomial_mode(probs, total_count=1):
+  """Compute the mode of a multinomial random variable.
+
+  Args:
+    probs: 1-D Tensor of Multinomial class probabilities
+    total_count: number of trials in single Multinomial draw
+
+  #### Examples
+
+  ```python
+  add me
+  ```
+  """
+  raise NotImplementedError('implement me')

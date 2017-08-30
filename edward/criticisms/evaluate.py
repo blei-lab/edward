@@ -7,7 +7,7 @@ import six
 import tensorflow as tf
 
 from edward.models import RandomVariable
-from edward.util import check_data, get_session
+from edward.util import check_data, get_session, compute_multinomial_mode
 
 try:
   from edward.models import Bernoulli, Binomial, Categorical, \
@@ -115,6 +115,7 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
   if metrics != ['log_lik'] and metrics != ['log_likelihood']:
     binary_discrete = (Bernoulli, Binomial)
     categorical_discrete = (Categorical, Multinomial, OneHotCategorical)
+    total_count = getattr(output_key, 'total_count', 1)
     if isinstance(output_key, binary_discrete + categorical_discrete):
       # Average over realizations of their probabilities, then predict
       # via argmax over probabilities.
@@ -125,7 +126,10 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
         random = tf.random_uniform(shape=tf.shape(probs))
         y_pred = tf.round(tf.where(tf.equal(0.5, probs), random, probs))
       else:
-        y_pred = tf.argmax(probs, len(probs.shape) - 1)
+        y_pred = tf.cond(tf.greater(total_count, 1),
+          lambda: compute_multinomial_mode(probs, total_count),
+          lambda: tf.argmax(probs, len(probs.shape) - 1)
+        )
     else:
       # Monte Carlo estimate the mean of the posterior predictive.
       y_pred = [sess.run(output_key, feed_dict) for _ in range(n_samples)]
@@ -156,7 +160,7 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
     elif metric == 'sparse_categorical_crossentropy':
       evaluations += [sparse_categorical_crossentropy(y_true, y_pred)]
     elif metric == 'kl_divergence':
-      y_true_ = y_true / output_key.total_count
+      y_true_ = y_true / total_count
       y_pred_ = probs
       evaluations += [kl_divergence(y_true_, y_pred_)]
     elif metric == 'hinge':

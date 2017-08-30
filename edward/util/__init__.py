@@ -15,6 +15,7 @@ from tensorflow.python.util.all_util import remove_undocumented
 _allowed_symbols = [
     'check_data',
     'check_latent_vars',
+    'compute_multinomial_mode',
     'copy',
     'dot',
     'get_ancestors',
