@@ -31,6 +31,7 @@ all_regression_metrics = [
 all_specialized_input_output_metrics = [
     categorical_accuracy,
     sparse_categorical_crossentropy,
+    kl_divergence
 ]
 
 
@@ -67,6 +68,10 @@ class test_metrics_class(tf.test.TestCase):
         elif metric == sparse_categorical_crossentropy:
           y_true = tf.convert_to_tensor(np.random.randint(0, 5, (6)))
           y_pred = tf.random_normal([6, 7])
+          self.assertEqual(metric(y_true, y_pred).eval().shape, ())
+        elif metric == kl_divergence:
+          y_true = tf.nn.softmax(tf.random_normal([6, 7]), dim=1)
+          y_pred = tf.nn.softmax(tf.random_normal([6, 7]), dim=1)
           self.assertEqual(metric(y_true, y_pred).eval().shape, ())
         else:
           raise NotImplementedError()
