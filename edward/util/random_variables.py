@@ -213,17 +213,17 @@ def copy(org_instance, dict_swap=None, scope="copied",
     except:
       pass
 
-  # Preserve ordering of random variable copies. Random variables are
-  # always copied first (in parent -> child ordering) before any
-  # deterministic operations that depend on them.
+  # Preserve ordering of random variables. Random variables are always
+  # copied first (from parent -> child) before any deterministic
+  # operations that depend on them.
   if not replace_itself and \
       isinstance(org_instance, (RandomVariable, tf.Tensor, tf.Variable)):
     for v in get_parents(org_instance):
       # 'False' forces the top-most random variables to be copied
-      # first at all times. This may be slow: suppose x[1] -> ...
-      # -> x[T] and we call copy(x[T]). get_parents finds x[t-1] and
-      # calls copy again; this leads to calling get_parents and copy
-      # recursively on T many random variables.
+      # first. This may be slow: suppose x[1] -> ...  -> x[T] and we
+      # call copy(x[T]). get_parents finds x[t-1] and calls copy
+      # again; this leads to calling get_parents and copy on T many
+      # random variables.
       copy(v, dict_swap, scope, False, copy_q)
 
   if isinstance(org_instance, RandomVariable):
