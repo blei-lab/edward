@@ -217,7 +217,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
   # copied first (from parent -> child) before any deterministic
   # operations that depend on them.
   if not replace_itself and \
-      isinstance(org_instance, (RandomVariable, tf.Tensor, tf.Variable)):
+          isinstance(org_instance, (RandomVariable, tf.Tensor, tf.Variable)):
     for v in get_parents(org_instance):
       # 'False' forces the top-most random variables to be copied
       # first. This may be slow: suppose x[1] -> ...  -> x[T] and we
