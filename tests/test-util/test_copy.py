@@ -6,7 +6,7 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Categorical, Mixture, Normal
+from edward.models import Bernoulli, Categorical, Mixture, Normal
 
 
 class test_copy_class(tf.test.TestCase):
@@ -149,6 +149,31 @@ class test_copy_class(tf.test.TestCase):
       qx = Normal(10.0, 0.1)
       z_new = ed.copy(z, {x.value(): qx})
       self.assertGreater(z_new.eval(), 5.0)
+
+  def test_ordering_rv_tensor(self):
+    # Check that random variables are copied correctly in dependency
+    # structure.
+    with self.test_session() as sess:
+      ed.set_seed(12432)
+      x = Bernoulli(logits=0.0)
+      y = tf.cast(x, tf.float32)
+      y_new = ed.copy(y)
+      x_new = ed.copy(x)
+      x_new_val, y_new_val = sess.run([x_new, y_new])
+      self.assertEqual(x_new_val, y_new_val)
+
+  def test_ordering_rv_rv(self):
+    # Check that random variables are copied correctly in dependency
+    # structure.
+    with self.test_session() as sess:
+      ed.set_seed(21782)
+      x = Normal(loc=0.0, scale=10.0)
+      x_abs = tf.abs(x)
+      y = Normal(loc=x_abs, scale=1e-8)
+      y_new = ed.copy(y)
+      x_new = ed.copy(x)
+      x_new_val, y_new_val = sess.run([x_new, y_new])
+      self.assertAllClose(abs(x_new_val), y_new_val)
 
 
 if __name__ == '__main__':
