@@ -85,10 +85,10 @@ def inference_network(x):
 
 ed.set_seed(42)
 
-data_dir = "~/data"
-img_dir = "img"
-if not os.path.exists(img_dir):
-  os.makedirs(img_dir)
+data_dir = "/tmp/data"
+out_dir = "/tmp/out"
+if not os.path.exists(out_dir):
+  os.makedirs(out_dir)
 M = 128  # batch size during training
 d = 10  # latent dimension
 
@@ -135,6 +135,6 @@ for epoch in range(n_epoch):
   print("-log p(x) <= {:0.3f}".format(avg_loss))
 
   # Visualize hidden representations.
-  imgs = hidden_rep.eval()
+  images = hidden_rep.eval()
   for m in range(M):
-    imsave(os.path.join(img_dir, '%d.png') % m, imgs[m].reshape(28, 28))
+    imsave(os.path.join(out_dir, '%d.png') % m, images[m].reshape(28, 28))

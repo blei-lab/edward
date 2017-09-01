@@ -41,10 +41,10 @@ def generator(array, batch_size):
 
 ed.set_seed(42)
 
-data_dir = "~/data"
-img_dir = "img"
-if not os.path.exists(img_dir):
-  os.makedirs(img_dir)
+data_dir = "/tmp/data"
+out_dir = "/tmp/out"
+if not os.path.exists(out_dir):
+  os.makedirs(out_dir)
 batch_size = 24  # batch size during training
 hidden_sizes = [300, 100, 50, 10]  # hidden size per layer from bottom-up
 n_train_samples = 10  # number of samples for training via stochastic gradient
@@ -119,6 +119,6 @@ for epoch in range(n_epoch):
   print("Test negative log-likelihood: {:0.3f}".format(test_loss))
 
   # Prior predictive check.
-  imgs = sess.run(x, {x_ph: x_batch})  # feed ph to determine sample size
+  images = sess.run(x, {x_ph: x_batch})  # feed ph to determine sample size
   for m in range(batch_size):
-    imsave("{}/{}.png".format(img_dir, m), imgs[m].reshape(28, 28))
+    imsave("{}/{}.png".format(out_dir, m), images[m].reshape(28, 28))

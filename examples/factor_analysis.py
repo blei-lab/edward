@@ -12,9 +12,9 @@ import os
 import tensorflow as tf
 
 from edward.models import Bernoulli, Empirical, Normal
+from observations import mnist
 from scipy.misc import imsave
 from tensorflow.contrib import slim
-from tensorflow.examples.tutorials.mnist import input_data
 
 
 def generative_network(z):
@@ -30,19 +30,16 @@ def generative_network(z):
 
 ed.set_seed(42)
 
+data_dir = "/tmp/data"
+out_dir = "/tmp/out"
+if not os.path.exists(out_dir):
+  os.makedirs(out_dir)
 N = 1  # number of data points
 d = 10  # latent dimension
-DATA_DIR = "data/mnist"
-IMG_DIR = "img"
-
-if not os.path.exists(DATA_DIR):
-  os.makedirs(DATA_DIR)
-if not os.path.exists(IMG_DIR):
-  os.makedirs(IMG_DIR)
 
 # DATA
-mnist = input_data.read_data_sets(DATA_DIR, one_hot=True)
-x_train, _ = mnist.train.next_batch(N)
+(x_train, _), (x_test, _) = mnist(data_dir)
+x_train = x_train[:N]
 
 # MODEL
 z = Normal(loc=tf.zeros([N, d]), scale=tf.ones([N, d]))
@@ -81,6 +78,6 @@ for _ in range(n_epoch - 1):
   print("\nlog p(x) >= {:0.3f}".format(avg_loss))
 
   # Prior predictive check.
-  imgs = x.eval()
+  images = x.eval()
   for m in range(N):
-    imsave(os.path.join(IMG_DIR, '%d.png') % m, imgs[m].reshape(28, 28))
+    imsave(os.path.join(out_dir, '%d.png') % m, images[m].reshape(28, 28))

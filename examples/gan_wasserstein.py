@@ -19,8 +19,25 @@ import os
 import tensorflow as tf
 
 from edward.models import Uniform
+from observations import mnist
 from tensorflow.contrib import slim
-from tensorflow.examples.tutorials.mnist import input_data
+
+
+def generator(array, batch_size):
+  """Generate batch with respect to array's first axis."""
+  start = 0  # pointer to where we are in iteration
+  while True:
+    stop = start + batch_size
+    diff = stop - array.shape[0]
+    if diff <= 0:
+      batch = array[start:stop]
+      start += batch_size
+    else:
+      batch = np.concatenate((array[start:], array[:diff]))
+      start = diff
+    batch = batch.astype(np.float32) / 255.0  # normalize pixel intensities
+    batch = np.random.binomial(1, batch)  # binarize images
+    yield batch
 
 
 def generative_network(eps):
@@ -53,19 +70,16 @@ def plot(samples):
 
 ed.set_seed(42)
 
+data_dir = "/tmp/data"
+out_dir = "/tmp/out"
+if not os.path.exists(out_dir):
+  os.makedirs(out_dir)
 M = 128  # batch size during training
 d = 10  # latent dimension
 
-DATA_DIR = "data/mnist"
-IMG_DIR = "img"
-
-if not os.path.exists(DATA_DIR):
-  os.makedirs(DATA_DIR)
-if not os.path.exists(IMG_DIR):
-  os.makedirs(IMG_DIR)
-
 # DATA. MNIST batches are fed at training time.
-mnist = input_data.read_data_sets(DATA_DIR)
+(x_train, _), (x_test, _) = mnist(data_dir)
+x_train_generator = generator(x_train, M)
 x_ph = tf.placeholder(tf.float32, [M, 784])
 
 # MODEL
@@ -94,12 +108,12 @@ for t in range(inference.n_iter):
     samples = samples[idx, ]
 
     fig = plot(samples)
-    plt.savefig(os.path.join(IMG_DIR, '{}.png').format(
+    plt.savefig(os.path.join(out_dir, '{}.png').format(
         str(i).zfill(3)), bbox_inches='tight')
     plt.close(fig)
     i += 1
 
-  x_batch, _ = mnist.train.next_batch(M)
+  x_batch = next(x_train_generator)
   for _ in range(5):
     inference.update(feed_dict={x_ph: x_batch}, variables="Disc")
 

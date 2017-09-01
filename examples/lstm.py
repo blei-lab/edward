@@ -28,8 +28,8 @@ from edward.models import Categorical
 from edward.util import Progbar
 from observations import text8
 
-data_dir = "data/text8"
-log_dir = "log"
+data_dir = "/tmp/data"
+log_dir = "/tmp/log"
 n_epoch = 200
 batch_size = 128
 hidden_size = 512

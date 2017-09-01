@@ -5,9 +5,6 @@ References
 ----------
 http://edwardlib.org/tutorials/decoder
 http://edwardlib.org/tutorials/inference-networks
-
-TODO everywhere
-+ default choice for data_dir, logdir, img_dir
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -44,10 +41,10 @@ def generator(array, batch_size):
 
 ed.set_seed(42)
 
-data_dir = "~/data"
-img_dir = "img"
-if not os.path.exists(img_dir):
-  os.makedirs(img_dir)
+data_dir = "/tmp/data"
+out_dir = "/tmp/out"
+if not os.path.exists(out_dir):
+  os.makedirs(out_dir)
 M = 100  # batch size during training
 d = 2  # latent dimension
 
@@ -100,6 +97,6 @@ for epoch in range(n_epoch):
   # + need to do it over test iters/some batch size
 
   # Prior predictive check.
-  imgs = x.eval()
+  images = x.eval()
   for m in range(M):
-    imsave(os.path.join(IMG_DIR, '%d.png') % m, imgs[m].reshape(28, 28))
+    imsave(os.path.join(out_dir, '%d.png') % m, images[m].reshape(28, 28))
