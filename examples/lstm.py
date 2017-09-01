@@ -31,7 +31,6 @@ from observations import text8
 data_dir = "data/text8"
 log_dir = "log"
 n_epoch = 200
-n_iter_per_epoch = 250
 batch_size = 128
 hidden_size = 512
 timesteps = 64
@@ -178,7 +177,11 @@ for v in tf.trainable_variables():
 sess = ed.get_session()
 tf.global_variables_initializer().run()
 
-for epoch in range(n_epoch):
+# Double n_epoch and print progress every half an epoch.
+n_iter_per_epoch = int(len(x_train) / (batch_size * timesteps) / 2)
+epoch = 0.0
+for _ in range(n_epoch * 2):
+  epoch += 0.5
   print("Epoch: {0}".format(epoch))
   avg_nll = 0.0
 
