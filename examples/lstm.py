@@ -172,7 +172,7 @@ inference.initialize(optimizer=optimizer, logdir=log_dir, log_timestamp=False)
 
 print("Number of sets of parameters: {}".format(len(tf.trainable_variables())))
 print("Number of parameters: {}".format(
-  np.sum([np.prod(v.shape.as_list()) for v in tf.trainable_variables()])))
+    np.sum([np.prod(v.shape.as_list()) for v in tf.trainable_variables()])))
 for v in tf.trainable_variables():
   print(v)
 
