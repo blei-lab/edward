@@ -1,7 +1,5 @@
 #!/usr/bin/env python
-"""Stochastic Block Model
-
-"""
+"""Stochastic block model."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -12,8 +10,6 @@ import tensorflow as tf
 
 from sklearn.metrics.cluster import adjusted_rand_score
 from edward.models import Bernoulli, Multinomial, Beta, Dirichlet, PointMass
-
-ed.set_seed(42)
 
 
 def build_dataset(label_filepath, graph_filepath):
@@ -27,6 +23,8 @@ def build_dataset(label_filepath, graph_filepath):
 
   return X, Z
 
+
+ed.set_seed(42)
 
 # DATA
 label_filepath = 'data/karate_labels.txt'
@@ -56,6 +54,7 @@ tf.global_variables_initializer().run()
 for _ in range(inference.n_iter):
   info_dict = inference.update()
   inference.print_progress(info_dict)
+
 inference.finalize()
 
 # CRITICISM
