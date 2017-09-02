@@ -17,6 +17,8 @@ import tensorflow as tf
 from observations import mnist
 from tensorflow.contrib import slim
 
+leak = 0.2  # leak parameter for leakyReLU
+
 
 def generator(array, batch_size):
   """Generate batch with respect to array's first axis."""
@@ -36,13 +38,13 @@ def generator(array, batch_size):
 
 
 def leakyrelu(x, alpha=leak):
-    return tf.maximum(x, alpha * x)
+  return tf.maximum(x, alpha * x)
 
 
 def gen_latent(x, hidden_units):
   h = slim.fully_connected(x, hidden_units, activation_fn=leakyrelu)
   z = slim.fully_connected(h, d, activation_fn=None)
-  return z + np.random.normal(0, encoder_variance, np.shape(z))
+  return z + np.sqrt(encoder_variance) * np.random.normal(0.0, 1.0, np.shape(z))
 
 
 def gen_data(z, hidden_units):
@@ -52,7 +54,7 @@ def gen_data(z, hidden_units):
 
 
 def discriminative_network(x, y):
-  #  Discriminator must output probability in logits
+  # Discriminator must output probability in logits
   inputs = tf.concat([x, y], 1)
   h1 = slim.fully_connected(inputs, hidden_units, activation_fn=leakyrelu)
   logit = slim.fully_connected(h1, 1, activation_fn=None)
@@ -84,7 +86,6 @@ if not os.path.exists(out_dir):
   os.makedirs(out_dir)
 M = 100  # batch size during training
 d = 50  # latent dimension
-leak = 0.2  # leak parameter for leakyReLU
 hidden_units = 300
 encoder_variance = 0.01  # Set to 0 for deterministic encoder
 

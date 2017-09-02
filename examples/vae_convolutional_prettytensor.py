@@ -118,8 +118,9 @@ hidden_rep = tf.sigmoid(logits)
 tf.global_variables_initializer().run()
 
 n_epoch = 100
-n_iter_per_epoch = int(x_train.shape[0] / M)
-for epoch in range(n_epoch):
+n_iter_per_epoch = x_train.shape[0] // M
+for epoch in range(1, n_epoch + 1):
+  print("Epoch: {0}".format(epoch))
   avg_loss = 0.0
 
   pbar = Progbar(n_iter_per_epoch)

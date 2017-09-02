@@ -171,6 +171,8 @@ optimizer = tf.train.AdamOptimizer(learning_rate=lr)
 inference.initialize(optimizer=optimizer, logdir=log_dir, log_timestamp=False)
 
 print("Number of sets of parameters: {}".format(len(tf.trainable_variables())))
+print("Number of parameters: {}".format(
+  np.sum([np.prod(v.shape.as_list()) for v in tf.trainable_variables()])))
 for v in tf.trainable_variables():
   print(v)
 
@@ -178,7 +180,7 @@ sess = ed.get_session()
 tf.global_variables_initializer().run()
 
 # Double n_epoch and print progress every half an epoch.
-n_iter_per_epoch = int(len(x_train) / (batch_size * timesteps) / 2)
+n_iter_per_epoch = len(x_train) // (batch_size * timesteps * 2)
 epoch = 0.0
 for _ in range(n_epoch * 2):
   epoch += 0.5

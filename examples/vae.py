@@ -75,8 +75,9 @@ inference.initialize(optimizer=optimizer)
 tf.global_variables_initializer().run()
 
 n_epoch = 100
-n_iter_per_epoch = int(x_train.shape[0] / M)
-for epoch in range(n_epoch):
+n_iter_per_epoch = x_train.shape[0] // M
+for epoch in range(1, n_epoch + 1):
+  print("Epoch: {0}".format(epoch))
   avg_loss = 0.0
 
   pbar = Progbar(n_iter_per_epoch)
@@ -91,10 +92,6 @@ for epoch in range(n_epoch):
   avg_loss = avg_loss / n_iter_per_epoch
   avg_loss = avg_loss / M
   print("-log p(x) <= {:0.3f}".format(avg_loss))
-
-  # TODO
-  # + test loss
-  # + need to do it over test iters/some batch size
 
   # Prior predictive check.
   images = x.eval()
