@@ -723,27 +723,47 @@ def compute_multinomial_mode(probs, total_count=1):
     compute_multinomial_mode(probs, total_count)
     ```
     """
-    remaining_count = total_count
     uniform_prob = 1 / total_count
-    mode = tf.zeros_like(probs)
-    while remaining_count > 0:
-        if tf.count_nonzero(probs < uniform_prob) == tf.size(probs):
-            if remaining_count == 1:
-                assignment_idx = tf.argmax(probs)
-                mode[assignment_idx] += 1
-                break
-            else:
-                probs = softmax(probs)
-        assignment_idx_mask = _compute_assignment_idx_mask(probs, uniform_prob, remaining_count)
-        mode[assignment_idx_mask] += 1
-        probs[assignment_idx_mask] -= uniform_prob
-        remaining_count -= np.sum(assignment_idx_mask)
+    remaining_count = tf.Variable(total_count, tf.int32)
+    mode = tf.Variable(tf.zeros_like(probs), tf.int32)
+    probs = tf.Variable(probs, tf.float32)
+
+    mode, _, _, _ = tf.while_loop(
+        _multinomial_mode_cond,
+        _multinomial_mode_body,
+        loop_vars=[mode, probs, remaining_count, uniform_prob]
+    )
     return mode
 
 
-def _compute_assignment_idx_mask(probs, uniform_prob, remaining_count):
+def _multinomial_mode_cond(mode, probs, remaining_count, uniform_prob):
+    return tf.equal(remaining_count, 0)
+
+
+def _multinomial_mode_body(mode, probs, remaining_count, uniform_prob):
+    if tf.count_nonzero(probs < uniform_prob) == tf.size(probs):
+        if remaining_count == 1:
+            assignment_idx = tf.argmax(probs)
+            mode[assignment_idx] += 1
+            remaining_count -= 1
+            return mode, probs, remaining_count, uniform_prob
+        else:
+            probs = softmax(probs)
+
+    assignment_mask = _compute_assignment_mask(probs, uniform_prob, remaining_count)
+    assignment_indices = tf.squeeze(tf.where(assignment_mask))
+    update_shape = (tf.reduce_sum(tf.cast(assignment_mask, tf.int32)),)
+    mode_updates = tf.ones(update_shape)
+    probs_updates = -uniform_prob * tf.ones(update_shape)
+    mode = tf.scatter_add(mode, assignment_indices, mode_updates)
+    probs = tf.scatter_add(probs, assignment_indices, probs_updates)
+    remaining_count -= tf.size(assignment_indices)
+    return mode, probs, remaining_count, uniform_prob
+
+
+def _compute_assignment_mask(probs, uniform_prob, remaining_count):
     mask = probs > uniform_prob
-    overflow_count = tf.cast(tf.count_nonzero(mask) - remaining_count, tf.int32)
+    overflow_count = tf.cast(tf.count_nonzero(mask), tf.int32) - remaining_count
     cond = tf.logical_and(tf.greater_equal(overflow_count, 1),
         tf.less_equal(overflow_count, tf.size(probs))
     )
@@ -754,10 +774,17 @@ def _compute_assignment_idx_mask(probs, uniform_prob, remaining_count):
 
 
 def _flip_hot_indices_to_satisfy_remaining_count(mask, overflow_count):
-    hot_indices = tf.squeeze(tf.where(mask))
+    hot_indices = tf.cast(tf.squeeze(tf.where(mask)), tf.int32)
     uniform_sample = tf.random_uniform(shape=(1, tf.size(hot_indices)))
     top_k_indices = tf.squeeze(tf.nn.top_k(uniform_sample, k=overflow_count).indices)
     cold_indices = hot_indices[top_k_indices]
-    return mask
-    # return a thing that has orig. mask values, and omits the ones that are cold
-    # return tf.convert_to_tensor([v for i, v in ])
+
+    updates = tf.ones_like(top_k_indices)
+    shape = (tf.size(mask),)
+    # we can simplify this to scatter_update, here
+    # additionally, we should just be able to set things to 0, and not do the tf.mod
+    scatter = tf.scatter_nd(cold_indices, updates, shape)
+
+    mask = tf.cast(mask, tf.int32)
+    mask = tf.mod(mask + scatter, 2)
+    return tf.cast(mask, tf.bool)
