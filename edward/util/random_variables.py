@@ -702,16 +702,62 @@ def get_variables(x, collection=None):
 
 
 def compute_multinomial_mode(probs, total_count=1):
-  """Compute the mode of a multinomial random variable.
+    """Compute the mode of a multinomial random variable.
 
-  Args:
-    probs: 1-D Tensor of Multinomial class probabilities
-    total_count: number of trials in single Multinomial draw
+    Args:
+      probs: 1-D Tensor of Multinomial class probabilities
+      total_count: integer number of trials in single Multinomial draw
 
-  #### Examples
+    #### Examples
 
-  ```python
-  add me
-  ```
-  """
-  raise NotImplementedError('implement me')
+    ```python
+    # returns either tf.constant([2, 2, 1]), tf.constant([2, 1, 2]) or
+    # tf.constant([1, 2, 2])
+    probs = tf.constant(3 * [1/3])
+    total_count = 5
+    compute_multinomial_mode(probs, total_count)
+
+    # returns tf.constant([3, 2, 0])
+    probs = tf.constant(3 * [1/3])
+    total_count = 5
+    compute_multinomial_mode(probs, total_count)
+    ```
+    """
+    remaining_count = total_count
+    uniform_prob = 1 / total_count
+    mode = tf.zeros_like(probs)
+    while remaining_count > 0:
+        if tf.count_nonzero(probs < uniform_prob) == tf.size(probs):
+            if remaining_count == 1:
+                assignment_idx = tf.argmax(probs)
+                mode[assignment_idx] += 1
+                break
+            else:
+                probs = softmax(probs)
+        assignment_idx_mask = _compute_assignment_idx_mask(probs, uniform_prob, remaining_count)
+        mode[assignment_idx_mask] += 1
+        probs[assignment_idx_mask] -= uniform_prob
+        remaining_count -= np.sum(assignment_idx_mask)
+    return mode
+
+
+def _compute_assignment_idx_mask(probs, uniform_prob, remaining_count):
+    mask = probs > uniform_prob
+    overflow_count = tf.cast(tf.count_nonzero(mask) - remaining_count, tf.int32)
+    cond = tf.logical_and(tf.greater_equal(overflow_count, 1),
+        tf.less_equal(overflow_count, tf.size(probs))
+    )
+    return tf.cond(cond,
+      lambda: _flip_hot_indices_to_satisfy_remaining_count(mask, overflow_count),
+      lambda: mask
+    )
+
+
+def _flip_hot_indices_to_satisfy_remaining_count(mask, overflow_count):
+    hot_indices = tf.squeeze(tf.where(mask))
+    uniform_sample = tf.random_uniform(shape=(1, tf.size(hot_indices)))
+    top_k_indices = tf.squeeze(tf.nn.top_k(uniform_sample, k=overflow_count).indices)
+    cold_indices = hot_indices[top_k_indices]
+    return mask
+    # return a thing that has orig. mask values, and omits the ones that are cold
+    # return tf.convert_to_tensor([v for i, v in ])
