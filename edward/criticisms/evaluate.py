@@ -115,21 +115,22 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
   if metrics != ['log_lik'] and metrics != ['log_likelihood']:
     binary_discrete = (Bernoulli, Binomial)
     categorical_discrete = (Categorical, Multinomial, OneHotCategorical)
-    total_count = getattr(output_key, 'total_count', 1)
+    total_count = sess.run(getattr(output_key, 'total_count', tf.constant(1.)))
     if isinstance(output_key, binary_discrete + categorical_discrete):
       # Average over realizations of their probabilities, then predict
       # via argmax over probabilities.
       probs = [sess.run(output_key.probs, feed_dict) for _ in range(n_samples)]
-      probs = tf.add_n(probs) / tf.cast(n_samples, probs[0].dtype)
+      probs = np.sum(probs, axis=0) / n_samples
       if isinstance(output_key, binary_discrete):
         # make random prediction whenever probs is exactly 0.5
         random = tf.random_uniform(shape=tf.shape(probs))
         y_pred = tf.round(tf.where(tf.equal(0.5, probs), random, probs))
       else:
-        y_pred = tf.cond(tf.greater(total_count, 1),
-          lambda: compute_multinomial_mode(probs, total_count),
-          lambda: tf.argmax(probs, len(probs.shape) - 1)
-        )
+        if total_count > 1:
+          y_pred = tf.constant(compute_multinomial_mode(probs, total_count))
+        else:
+          y_pred = tf.argmax(probs, len(probs.shape) - 1)
+      probs = tf.constant(probs)
     else:
       # Monte Carlo estimate the mean of the posterior predictive.
       y_pred = [sess.run(output_key, feed_dict) for _ in range(n_samples)]
