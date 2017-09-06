@@ -117,7 +117,7 @@
 <li>Class <code>ed.inferences.WGANInference</code></li>
 </ul>
 <p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/inferences/wgan_inference.py"><code>edward/inferences/wgan_inference.py</code></a>.</p>
-<p>Parameter estimation with GAN-style training (Goodfellow et al., 2014), using the Wasserstein distance (Arjovsky et al., 2017).</p>
+<p>Parameter estimation with GAN-style training <span class="citation">(Goodfellow et al., 2014)</span>, using the Wasserstein distance <span class="citation">(Arjovsky, Chintala, &amp; Bottou, 2017)</span>.</p>
 <p>Works for the class of implicit (and differentiable) probabilistic models. These models do not require a tractable density and assume only a program that generates samples.</p>
 <h4 id="notes">Notes</h4>
 <p>Argument-wise, the only difference from <code>GANInference</code> is conceptual: the <code>discriminator</code> is better described as a test function or critic. <code>WGANInference</code> continues to use <code>discriminator</code> only to share methods and attributes with <code>GANInference</code>.</p>
@@ -155,7 +155,7 @@ inference = ed.WGANInference({x: x_data}, discriminator)</code></pre>
 <p>Initialize inference algorithm. It initializes hyperparameters and builds ops for the algorithm's computation graph.</p>
 <h4 id="args">Args:</h4>
 <ul>
-<li><b><code>penalty</code></b>: float, optional. Scalar value to enforce gradient penalty that ensures the gradients have norm equal to 1 (Gulrajani et al., 2017). Set to None (or 0.0) if using no penalty.</li>
+<li><b><code>penalty</code></b>: float, optional. Scalar value to enforce gradient penalty that ensures the gradients have norm equal to 1 <span class="citation">(Gulrajani, Ahmed, Arjovsky, Dumoulin, &amp; Courville, 2017)</span>. Set to None (or 0.0) if using no penalty.</li>
 <li><b><code>clip</code></b>: float, optional. Value to clip weights by. Default is no clipping.</li>
 </ul>
 <h3 id="print_progress">
@@ -196,6 +196,17 @@ inference = ed.WGANInference({x: x_data}, discriminator)</code></pre>
     feed_dict=None,
     variables=None
 )</code></pre>
+<div id="refs" class="references">
+<div id="ref-arjovsky2017wasserstein">
+<p>Arjovsky, M., Chintala, S., &amp; Bottou, L. (2017). Wasserstein GAN. In <em>International conference on machine learning</em>.</p>
+</div>
+<div id="ref-goodfellow2014generative">
+<p>Goodfellow, I., Pouget-Abadie, J., Mirza, M., Xu, B., Warde-Farley, D., Ozair, S., … Bengio, Y. (2014). Generative adversarial nets. In <em>Neural information processing systems</em>.</p>
+</div>
+<div id="ref-gulrajani2017improved">
+<p>Gulrajani, I., Ahmed, F., Arjovsky, M., Dumoulin, V., &amp; Courville, A. (2017). Improved Training of Wasserstein GANs. <em>ArXiv.org</em>. Retrieved from <a href="http://arxiv.org/abs/1704.00028v1" class="uri">http://arxiv.org/abs/1704.00028v1</a></p>
+</div>
+</div>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

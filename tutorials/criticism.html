@@ -101,7 +101,7 @@
 <pre class="python" language="Python"><code>x_post = ed.copy(x, {z: qz})</code></pre>
 <p>Here, we copy the likelihood node <code>x</code> in the graph and replace dependence on the prior <code>z</code> with dependence on the inferred posterior <code>qz</code>. We describe several techniques for model criticism.</p>
 <h3 id="point-evaluation">Point Evaluation</h3>
-<p>A point evaluation is a scalar-valued metric for assessing trained models <span class="citation">(Gneiting &amp; Raftery, 2007; Winkler, 1996)</span>. For example, we can assess models for classification by predicting the label for each observation in the data and comparing it to their true labels. Edward implements a variety of metrics, such as classification error and mean absolute error.</p>
+<p>A point evaluation is a scalar-valued metric for assessing trained models <span class="citation">(Gneiting &amp; Raftery, 2007; Winkler, 1994)</span>. For example, we can assess models for classification by predicting the label for each observation in the data and comparing it to their true labels. Edward implements a variety of metrics, such as classification error and mean absolute error.</p>
 <p>The <code>ed.evaluate()</code> method takes as input a set of metrics to evaluate, and a data dictionary. As with inference, the data dictionary binds the observed random variables in the model to realizations: in this case, it is the posterior predictive random variable of outputs <code>y_post</code> to <code>y_train</code> and a placeholder for inputs <code>x</code> to <code>x_train</code>.</p>
 <pre class="python" language="Python"><code>ed.evaluate(&#39;categorical_accuracy&#39;, data={y_post: y_train, x: x_train})
 ed.evaluate(&#39;mean_absolute_error&#39;, data={y_post: y_train, x: x_train})</code></pre>
@@ -158,8 +158,8 @@ ed.evaluate(&#39;log_likelihood&#39;, data={x_post: x_test})</code></pre>
 <div id="ref-rubin1984bayesianly">
 <p>Rubin, D. B. (1984). Bayesianly justifiable and relevant frequency calculations for the applied statistician. <em>The Annals of Statistics</em>, <em>12</em>(4), 1151–1172.</p>
 </div>
-<div id="ref-winkler1996scoring">
-<p>Winkler, R. L. (1996). Scoring rules and the evaluation of probabilities. <em>Test</em>, <em>5</em>(1), 1–60.</p>
+<div id="ref-winkler1994evaluating">
+<p>Winkler, R. L. (1994). Evaluating probabilities: Asymmetric scoring rules. <em>Management Science</em>, <em>40</em>(11), 1395–1405.</p>
 </div>
 </div>
     </div>

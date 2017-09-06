@@ -117,7 +117,7 @@
 <li>Class <code>ed.inferences.SGLD</code></li>
 </ul>
 <p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/inferences/sgld.py"><code>edward/inferences/sgld.py</code></a>.</p>
-<p>Stochastic gradient Langevin dynamics (Welling and Teh, 2011).</p>
+<p>Stochastic gradient Langevin dynamics <span class="citation">(Welling &amp; Teh, 2011)</span>.</p>
 <h4 id="notes">Notes</h4>
 <p>In conditional inference, we infer <span class="math inline">\(z\)</span> in <span class="math inline">\(p(z, \beta \mid x)\)</span> while fixing inference over <span class="math inline">\(\beta\)</span> using another distribution <span class="math inline">\(q(\beta)\)</span>. <code>SGLD</code> substitutes the model's log marginal density</p>
 <p><span class="math inline">\(\log p(x, z) = \log \mathbb{E}_{q(\beta)} [ p(x, z, \beta) ]  \approx \log p(x, z, \beta^*)\)</span></p>
@@ -201,6 +201,11 @@ inference = ed.SGLD({mu: qmu}, {x: np.zeros(10, dtype=np.float32)})</code></pre>
 <p>dict. Dictionary of algorithm-specific information. In this case, the acceptance rate of samples since (and including) this iteration.</p>
 <h4 id="notes-2">Notes</h4>
 <p>We run the increment of <code>t</code> separately from other ops. Whether the others op run with the <code>t</code> before incrementing or after incrementing depends on which is run faster in the TensorFlow graph. Running it separately forces a consistent behavior.</p>
+<div id="refs" class="references">
+<div id="ref-welling2011bayesian">
+<p>Welling, M., &amp; Teh, Y. W. (2011). Bayesian learning via stochastic gradient Langevin dynamics. In <em>International conference on machine learning</em>.</p>
+</div>
+</div>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

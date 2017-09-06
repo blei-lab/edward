@@ -117,7 +117,7 @@
 <li>Class <code>ed.inferences.Gibbs</code></li>
 </ul>
 <p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/inferences/gibbs.py"><code>edward/inferences/gibbs.py</code></a>.</p>
-<p>Gibbs sampling (Geman and Geman, 1984).</p>
+<p>Gibbs sampling <span class="citation">(S. Geman &amp; Geman, 1984)</span>.</p>
 <h4 id="examples">Examples</h4>
 <pre class="python"><code>x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 
@@ -206,6 +206,11 @@ inference = ed.Gibbs({p: qp}, data={x: x_data})</code></pre>
 </ul>
 <h4 id="returns">Returns:</h4>
 <p>dict. Dictionary of algorithm-specific information. In this case, the acceptance rate of samples since (and including) this iteration.</p>
+<div id="refs" class="references">
+<div id="ref-geman1984stochastic">
+<p>Geman, S., &amp; Geman, D. (1984). Stochastic relaxation, gibbs distributions, and the bayesian restoration of images. <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, (6), 721–741.</p>
+</div>
+</div>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

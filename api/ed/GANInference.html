@@ -117,7 +117,7 @@
 <li>Class <code>ed.inferences.GANInference</code></li>
 </ul>
 <p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/inferences/gan_inference.py"><code>edward/inferences/gan_inference.py</code></a>.</p>
-<p>Parameter estimation with GAN-style training (Goodfellow et al., 2014).</p>
+<p>Parameter estimation with GAN-style training <span class="citation">(Goodfellow et al., 2014)</span>.</p>
 <p>Works for the class of implicit (and differentiable) probabilistic models. These models do not require a tractable density and assume only a program that generates samples.</p>
 <h4 id="notes">Notes</h4>
 <p><code>GANInference</code> does not support latent variable inference. Note that GAN-style training also samples from the prior: this does not work well for latent variables that are shared across many data points (global variables).</p>
@@ -220,6 +220,11 @@ inference = ed.GANInference({x: x_data}, discriminator)</code></pre>
 <p>dict. Dictionary of algorithm-specific information. In this case, the iteration number and generative and discriminative losses.</p>
 <h4 id="notes-1">Notes</h4>
 <p>The outputted iteration number is the total number of calls to <code>update</code>. Each update may include updating only a subset of parameters.</p>
+<div id="refs" class="references">
+<div id="ref-goodfellow2014generative">
+<p>Goodfellow, I., Pouget-Abadie, J., Mirza, M., Xu, B., Warde-Farley, D., Ozair, S., … Bengio, Y. (2014). Generative adversarial nets. In <em>Neural information processing systems</em>.</p>
+</div>
+</div>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

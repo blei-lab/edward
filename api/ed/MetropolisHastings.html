@@ -117,7 +117,7 @@
 <li>Class <code>ed.inferences.MetropolisHastings</code></li>
 </ul>
 <p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/inferences/metropolis_hastings.py"><code>edward/inferences/metropolis_hastings.py</code></a>.</p>
-<p>Metropolis-Hastings (Metropolis et al., 1953; Hastings, 1970).</p>
+<p>Metropolis-Hastings <span class="citation">(Hastings, 1970; Metropolis, Rosenbluth, Rosenbluth, Teller, &amp; Teller, 1953)</span>.</p>
 <h4 id="notes">Notes</h4>
 <p>In conditional inference, we infer <span class="math inline">\(z\)</span> in <span class="math inline">\(p(z, \beta \mid x)\)</span> while fixing inference over <span class="math inline">\(\beta\)</span> using another distribution <span class="math inline">\(q(\beta)\)</span>. To calculate the acceptance ratio, <code>MetropolisHastings</code> uses an estimate of the marginal density,</p>
 <p><span class="math inline">\(p(x, z) = \mathbb{E}_{q(\beta)} [ p(x, z, \beta) ]  \approx p(x, z, \beta^*)\)</span></p>
@@ -208,6 +208,14 @@ inference = ed.MetropolisHastings({mu: qmu}, {mu: proposal_mu},
 <p>dict. Dictionary of algorithm-specific information. In this case, the acceptance rate of samples since (and including) this iteration.</p>
 <h4 id="notes-2">Notes</h4>
 <p>We run the increment of <code>t</code> separately from other ops. Whether the others op run with the <code>t</code> before incrementing or after incrementing depends on which is run faster in the TensorFlow graph. Running it separately forces a consistent behavior.</p>
+<div id="refs" class="references">
+<div id="ref-hastings1970monte">
+<p>Hastings, W. K. (1970). Monte Carlo sampling methods using Markov chains and their applications. <em>Biometrika</em>, <em>57</em>(1), 97–109.</p>
+</div>
+<div id="ref-metropolis1953equation">
+<p>Metropolis, N., Rosenbluth, A. W., Rosenbluth, M. N., Teller, A. H., &amp; Teller, E. (1953). Equation of state calculations by fast computing machines. <em>The Journal of Chemical Physics</em>, <em>21</em>(6), 1087–1092.</p>
+</div>
+</div>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

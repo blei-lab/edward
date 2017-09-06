@@ -121,7 +121,7 @@
 <p><span class="math inline">\(\text{KL}( q(z; \lambda) \| p(z \mid x) ).\)</span></p>
 <p>This class minimizes the objective by automatically selecting from a variety of black box inference techniques.</p>
 <h4 id="notes">Notes</h4>
-<p><code>KLqp</code> also optimizes any model parameters <span class="math inline">\(p(z \mid x; \theta)\)</span>. It does this by variational EM, minimizing</p>
+<p><code>KLqp</code> also optimizes any model parameters <span class="math inline">\(p(z \mid x; \theta)\)</span>. It does this by variational EM, maximizing</p>
 <p><span class="math inline">\(\mathbb{E}_{q(z; \lambda)} [ \log p(x, z; \theta) ]\)</span></p>
 <p>with respect to <span class="math inline">\(\theta\)</span>.</p>
 <p>In conditional inference, we infer <span class="math inline">\(z\)</span> in <span class="math inline">\(p(z, \beta \mid x)\)</span> while fixing inference over <span class="math inline">\(\beta\)</span> using another distribution <span class="math inline">\(q(\beta)\)</span>. During gradient calculation, instead of using the model's density</p>
@@ -145,13 +145,13 @@
 <p><span class="math inline">\(-\text{ELBO} =  -\mathbb{E}_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]\)</span></p>
 <p>KLqp supports</p>
 <ol style="list-style-type: decimal">
-<li>score function gradients (Paisley et al., 2012)</li>
-<li>reparameterization gradients (Kingma and Welling, 2014)</li>
+<li>score function gradients <span class="citation">(Paisley, Blei, &amp; Jordan, 2012)</span></li>
+<li>reparameterization gradients <span class="citation">(Kingma &amp; Welling, 2014)</span></li>
 </ol>
 <p>of the loss function.</p>
 <p>If the KL divergence between the variational model and the prior is tractable, then the loss function can be written as</p>
 <p><span class="math inline">\(-\mathbb{E}_{q(z; \lambda)}[\log p(x \mid z)] +  \text{KL}( q(z; \lambda) \| p(z) ),\)</span></p>
-<p>where the KL term is computed analytically (Kingma and Welling, 2014). We compute this automatically when <span class="math inline">\(p(z)\)</span> and <span class="math inline">\(q(z; \lambda)\)</span> are Normal.</p>
+<p>where the KL term is computed analytically <span class="citation">(Kingma &amp; Welling, 2014)</span>. We compute this automatically when <span class="math inline">\(p(z)\)</span> and <span class="math inline">\(q(z; \lambda)\)</span> are Normal.</p>
 <h3 id="finalize">
 <code>finalize</code>
 </h3>
@@ -170,9 +170,9 @@
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>n_samples</code></b>: int, optional. Number of samples from variational model for calculating stochastic gradients.</li>
-<li><p><b><code>kl_scaling</code></b>: dict of RandomVariable to float, optional. Provides option to scale terms when using ELBO with KL divergence. If the KL divergence terms are</p>
+<li><p><b><code>kl_scaling</code></b>: dict of RandomVariable to tf.Tensor, optional. Provides option to scale terms when using ELBO with KL divergence. If the KL divergence terms are</p>
 <p><span class="math inline">\(\alpha_p \mathbb{E}_{q(z\mid x, \lambda)} [  \log q(z\mid x, \lambda) - \log p(z)],\)</span></p>
-<p>then pass {<span class="math inline">\(p(z)\)</span>: <span class="math inline">\(\alpha_p\)</span>} as <code>kl_scaling</code>, where <span class="math inline">\(\alpha_p\)</span> is a float that specifies how much to scale the KL term.</p></li>
+<p>then pass {<span class="math inline">\(p(z)\)</span>: <span class="math inline">\(\alpha_p\)</span>} as <code>kl_scaling</code>, where <span class="math inline">\(\alpha_p\)</span> is a tensor. Its shape must be broadcastable; it is multiplied element-wise to the batchwise KL terms.</p></li>
 </ul>
 <h3 id="print_progress">
 <code>print_progress</code>
@@ -216,6 +216,14 @@
 </ul>
 <h4 id="returns">Returns:</h4>
 <p>dict. Dictionary of algorithm-specific information. In this case, the loss function value after one iteration.</p>
+<div id="refs" class="references">
+<div id="ref-kingma2014auto">
+<p>Kingma, D., &amp; Welling, M. (2014). Auto-encoding variational Bayes. In <em>International conference on learning representations</em>.</p>
+</div>
+<div id="ref-paisley2012variational">
+<p>Paisley, J., Blei, D. M., &amp; Jordan, M. I. (2012). Variational bayesian inference with stochastic search. In <em>International conference on machine learning</em>.</p>
+</div>
+</div>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

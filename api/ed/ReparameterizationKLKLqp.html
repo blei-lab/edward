@@ -150,9 +150,9 @@
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>n_samples</code></b>: int, optional. Number of samples from variational model for calculating stochastic gradients.</li>
-<li><p><b><code>kl_scaling</code></b>: dict of RandomVariable to float, optional. Provides option to scale terms when using ELBO with KL divergence. If the KL divergence terms are</p>
+<li><p><b><code>kl_scaling</code></b>: dict of RandomVariable to tf.Tensor, optional. Provides option to scale terms when using ELBO with KL divergence. If the KL divergence terms are</p>
 <p><span class="math inline">\(\alpha_p \mathbb{E}_{q(z\mid x, \lambda)} [  \log q(z\mid x, \lambda) - \log p(z)],\)</span></p>
-<p>then pass {<span class="math inline">\(p(z)\)</span>: <span class="math inline">\(\alpha_p\)</span>} as <code>kl_scaling</code>, where <span class="math inline">\(\alpha_p\)</span> is a float that specifies how much to scale the KL term.</p></li>
+<p>then pass {<span class="math inline">\(p(z)\)</span>: <span class="math inline">\(\alpha_p\)</span>} as <code>kl_scaling</code>, where <span class="math inline">\(\alpha_p\)</span> is a tensor. Its shape must be broadcastable; it is multiplied element-wise to the batchwise KL terms.</p></li>
 </ul>
 <h3 id="print_progress">
 <code>print_progress</code>

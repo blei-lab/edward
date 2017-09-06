@@ -117,7 +117,7 @@
 <li>Class <code>ed.inferences.ImplicitKLqp</code></li>
 </ul>
 <p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/inferences/implicit_klqp.py"><code>edward/inferences/implicit_klqp.py</code></a>.</p>
-<p>Variational inference with implicit probabilistic models (Tran et al., 2017).</p>
+<p>Variational inference with implicit probabilistic models <span class="citation">(Tran et al., 2017)</span>.</p>
 <p>It minimizes the KL divergence</p>
 <p><span class="math inline">\(\text{KL}( q(z, \beta; \lambda) \| p(z, \beta \mid x) ),\)</span></p>
 <p>where <span class="math inline">\(z\)</span> are local variables associated to a data point and <span class="math inline">\(\beta\)</span> are global variables shared across data points.</p>
@@ -156,7 +156,7 @@
 <p><span class="math inline">\(r^*(x_n, z_n, \beta)\)</span> is a function of a single data point <span class="math inline">\(x_n\)</span>, single local variable <span class="math inline">\(z_n\)</span>, and all global variables <span class="math inline">\(\beta\)</span>. It is equal to the log-ratio</p>
 <p><span class="math inline">\(\log p(x_n, z_n\mid \beta) - \log q(x_n, z_n\mid \beta),\)</span></p>
 <p>where <span class="math inline">\(q(x_n)\)</span> is the empirical data distribution. Rather than explicit calculation, <span class="math inline">\(r^*(x, z, \beta)\)</span> is the solution to a ratio estimation problem, minimizing the specified <code>ratio_loss</code>.</p>
-<p>Gradients are taken using the reparameterization trick (Kingma and Welling, 2014).</p>
+<p>Gradients are taken using the reparameterization trick <span class="citation">(Kingma &amp; Welling, 2014)</span>.</p>
 <h4 id="notes-1">Notes</h4>
 <p>This also includes model parameters <span class="math inline">\(p(x, z, \beta; \theta)\)</span> and variational distributions with inference networks <span class="math inline">\(q(z\mid x)\)</span>.</p>
 <p>There are a bunch of extensions we could easily do in this implementation:</p>
@@ -232,6 +232,14 @@
 <p>dict. Dictionary of algorithm-specific information. In this case, the iteration number and generative and discriminative losses.</p>
 <h4 id="notes-2">Notes</h4>
 <p>The outputted iteration number is the total number of calls to <code>update</code>. Each update may include updating only a subset of parameters.</p>
+<div id="refs" class="references">
+<div id="ref-kingma2014auto">
+<p>Kingma, D., &amp; Welling, M. (2014). Auto-encoding variational Bayes. In <em>International conference on learning representations</em>.</p>
+</div>
+<div id="ref-tran2017deep">
+<p>Tran, D., Hoffman, M. D., Saurous, R. A., Brevdo, E., Murphy, K., &amp; Blei, D. M. (2017). Deep probabilistic programming. In <em>International conference on learning representations</em>.</p>
+</div>
+</div>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

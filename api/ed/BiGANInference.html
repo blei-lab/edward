@@ -117,7 +117,7 @@
 <li>Class <code>ed.inferences.BiGANInference</code></li>
 </ul>
 <p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/inferences/bigan_inference.py"><code>edward/inferences/bigan_inference.py</code></a>.</p>
-<p>Adversarially Learned Inference (Dumoulin et al., 2017) or Bidirectional Generative Adversarial Networks (Donahue et al., 2017) for joint learning of generator and inference networks.</p>
+<p>Adversarially Learned Inference <span class="citation">(Dumoulin et al., 2017)</span> or Bidirectional Generative Adversarial Networks <span class="citation">(Donahue, Krähenbühl, &amp; Darrell, 2017)</span> for joint learning of generator and inference networks.</p>
 <p>Works for the class of implicit (and differentiable) probabilistic models. These models do not require a tractable density and assume only a program that generates samples.</p>
 <h4 id="notes">Notes</h4>
 <p><code>BiGANInference</code> matches a mapping from data to latent variables and a mapping from latent variables to data through a joint discriminator.</p>
@@ -214,6 +214,14 @@ inference = ed.BiGANInference({z_ph: zf}, {xf: x_ph}, discriminator)</code></pre
 <p>dict. Dictionary of algorithm-specific information. In this case, the iteration number and generative and discriminative losses.</p>
 <h4 id="notes-1">Notes</h4>
 <p>The outputted iteration number is the total number of calls to <code>update</code>. Each update may include updating only a subset of parameters.</p>
+<div id="refs" class="references">
+<div id="ref-donahue2017adversarial">
+<p>Donahue, J., Krähenbühl, P., &amp; Darrell, T. (2017). Adversarial Feature Learning. In <em>International conference on learning representations</em>.</p>
+</div>
+<div id="ref-dumuolin2017adversarially">
+<p>Dumoulin, V., Belghazi, I., Poole, B., Lamb, A., Arjovsky, M., Mastropietro, O., &amp; Courville, A. (2017). Adversarially Learned Inference. In <em>International conference on learning representations</em>.</p>
+</div>
+</div>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

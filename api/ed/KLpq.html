@@ -119,9 +119,9 @@
 <p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/inferences/klpq.py"><code>edward/inferences/klpq.py</code></a>.</p>
 <p>Variational inference with the KL divergence</p>
 <p><span class="math inline">\(\text{KL}( p(z \mid x) \| q(z) ).\)</span></p>
-<p>To perform the optimization, this class uses a technique from adaptive importance sampling (Cappe et al., 2008).</p>
+<p>To perform the optimization, this class uses a technique from adaptive importance sampling <span class="citation">(Oh &amp; Berger, 1992)</span>.</p>
 <h4 id="notes">Notes</h4>
-<p><code>KLpq</code> also optimizes any model parameters <span class="math inline">\(p(z\mid x; \theta)\)</span>. It does this by variational EM, minimizing</p>
+<p><code>KLpq</code> also optimizes any model parameters <span class="math inline">\(p(z\mid x; \theta)\)</span>. It does this by variational EM, maximizing</p>
 <p><span class="math inline">\(\mathbb{E}_{p(z \mid x; \lambda)} [ \log p(x, z; \theta) ]\)</span></p>
 <p>with respect to <span class="math inline">\(\theta\)</span>.</p>
 <p>In conditional inference, we infer $z` in <span class="math inline">\(p(z, \beta \mid x)\)</span> while fixing inference over <span class="math inline">\(\beta\)</span> using another distribution <span class="math inline">\(q(\beta)\)</span>. During gradient calculation, instead of using the model's density</p>
@@ -211,6 +211,11 @@
 </ul>
 <h4 id="returns">Returns:</h4>
 <p>dict. Dictionary of algorithm-specific information. In this case, the loss function value after one iteration.</p>
+<div id="refs" class="references">
+<div id="ref-oh1992adaptive">
+<p>Oh, M.-S., &amp; Berger, J. O. (1992). Adaptive importance sampling in Monte Carlo integration. <em>Journal of Statistical Computation and Simulation</em>, <em>41</em>(3-4), 143–168.</p>
+</div>
+</div>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

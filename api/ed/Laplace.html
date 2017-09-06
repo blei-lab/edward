@@ -117,7 +117,7 @@
 <li>Class <code>ed.inferences.Laplace</code></li>
 </ul>
 <p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/inferences/laplace.py"><code>edward/inferences/laplace.py</code></a>.</p>
-<p>Laplace approximation (Laplace, 1774).</p>
+<p>Laplace approximation <span class="citation">(Laplace, 1986)</span>.</p>
 <p>It approximates the posterior distribution using a multivariate normal distribution centered at the mode of the posterior.</p>
 <p>We implement this by running <code>MAP</code> to find the posterior mode. This forms the mean of the normal approximation. We then compute the inverse Hessian at the mode of the posterior. This forms the covariance of the normal approximation.</p>
 <h4 id="notes">Notes</h4>
@@ -210,6 +210,11 @@ inference = ed.Laplace({w: qw}, data={X: X_train, y: y_train})</code></pre>
 </ul>
 <h4 id="returns">Returns:</h4>
 <p>dict. Dictionary of algorithm-specific information. In this case, the loss function value after one iteration.</p>
+<div id="refs" class="references">
+<div id="ref-laplace1986memoir">
+<p>Laplace, P. S. (1986). Memoir on the probability of the causes of events. <em>Statistical Science</em>, <em>1</em>(3), 364–378.</p>
+</div>
+</div>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

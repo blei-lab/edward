@@ -122,7 +122,7 @@
 )</code></pre>
 <p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/criticisms/evaluate.py"><code>edward/criticisms/evaluate.py</code></a>.</p>
 <p>Evaluate fitted model using a set of metrics.</p>
-<p>A metric, or scoring rule (Winkler, 1994), is a function of observed data under the posterior predictive distribution. For example in supervised metrics such as classification accuracy, the observed data (true output) is compared to the posterior predictive's mean (predicted output). In unsupervised metrics such as log-likelihood, the probability of observing the data is calculated under the posterior predictive's log-density.</p>
+<p>A metric, or scoring rule <span class="citation">(Winkler, 1994)</span>, is a function of observed data under the posterior predictive distribution. For example in supervised metrics such as classification accuracy, the observed data (true output) is compared to the posterior predictive's mean (predicted output). In unsupervised metrics such as log-likelihood, the probability of observing the data is calculated under the posterior predictive's log-density.</p>
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>metrics</code></b>: list of str or str. List of metrics or a single metric: <code>'binary_accuracy'</code>, <code>'categorical_accuracy'</code>, <code>'sparse_categorical_accuracy'</code>, <code>'log_loss'</code> or <code>'binary_crossentropy'</code>, <code>'categorical_crossentropy'</code>, <code>'sparse_categorical_crossentropy'</code>, <code>'hinge'</code>, <code>'squared_hinge'</code>, <code>'mse'</code> or <code>'MSE'</code> or <code>'mean_squared_error'</code>, <code>'mae'</code> or <code>'MAE'</code> or <code>'mean_absolute_error'</code>, <code>'mape'</code> or <code>'MAPE'</code> or <code>'mean_absolute_percentage_error'</code>, <code>'msle'</code> or <code>'MSLE'</code> or <code>'mean_squared_logarithmic_error'</code>, <code>'poisson'</code>, <code>'cosine'</code> or <code>'cosine_proximity'</code>, <code>'log_lik'</code> or <code>'log_likelihood'</code>.</li>
@@ -149,6 +149,11 @@ ed.evaluate(&#39;binary_accuracy&#39;, data={y_post: y_train, x_ph: x_train})
 
 # mean squared error
 ed.evaluate(&#39;mean_squared_error&#39;, data={y: y_data, x: x_data})</code></pre>
+<div id="refs" class="references">
+<div id="ref-winkler1994evaluating">
+<p>Winkler, R. L. (1994). Evaluating probabilities: Asymmetric scoring rules. <em>Management Science</em>, <em>40</em>(11), 1395–1405.</p>
+</div>
+</div>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

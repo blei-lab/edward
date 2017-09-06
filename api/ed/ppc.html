@@ -121,11 +121,11 @@
     n_samples=100
 )</code></pre>
 <p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/criticisms/ppc.py"><code>edward/criticisms/ppc.py</code></a>.</p>
-<p>Posterior predictive check (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996).</p>
+<p>Posterior predictive check <span class="citation">(Gelman, Meng, &amp; Stern, 1996; Meng, 1994; Rubin, 1984)</span>.</p>
 <p>PPC's form an empirical distribution for the predictive discrepancy,</p>
 <p><span class="math inline">\(p(T\mid x) = \int p(T(x^{\text{rep}})\mid z) p(z\mid x) dz\)</span></p>
 <p>by drawing replicated data sets <span class="math inline">\(x^{\text{rep}}\)</span> and calculating <span class="math inline">\(T(x^{\text{rep}})\)</span> for each data set. Then it compares it to <span class="math inline">\(T(x)\)</span>.</p>
-<p>If <code>data</code> is inputted with the prior predictive distribution, then it is a prior predictive check (Box, 1980).</p>
+<p>If <code>data</code> is inputted with the prior predictive distribution, then it is a prior predictive check <span class="citation">(Box, 1980)</span>.</p>
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>T</code></b>: function. Discrepancy function, which takes a dictionary of data and dictionary of latent variables as input and outputs a <code>tf.Tensor</code>.</li>
@@ -157,6 +157,20 @@ ed.ppc(T, data={y_post: y_train, x_ph: x_train},
 # prior predictive check
 # run ppc on original x
 ed.ppc(T, data={x: x_train})</code></pre>
+<div id="refs" class="references">
+<div id="ref-box1980sampling">
+<p>Box, G. E. (1980). Sampling and Bayes’ inference in scientific modelling and robustness. <em>Journal of the Royal Statistical Society. Series A (General)</em>, 383–430.</p>
+</div>
+<div id="ref-gelman1996posterior">
+<p>Gelman, A., Meng, X.-L., &amp; Stern, H. (1996). Posterior predictive assessment of model fitness via realized discrepancies. <em>Statistica Sinica</em>, 733–760.</p>
+</div>
+<div id="ref-meng1994posterior">
+<p>Meng, X.-L. (1994). Posterior predictive <span class="math inline">\(p\)</span>-values. <em>The Annals of Statistics</em>, 1142–1160.</p>
+</div>
+<div id="ref-rubin1984bayesianly">
+<p>Rubin, D. B. (1984). Bayesianly justifiable and relevant frequency calculations for the applied statistician. <em>The Annals of Statistics</em>, <em>12</em>(4), 1151–1172.</p>
+</div>
+</div>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

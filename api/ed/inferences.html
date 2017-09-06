@@ -111,30 +111,58 @@
 <h1 id="module-ed.inferences">Module: ed.inferences</h1>
 <p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/inferences/__init__.py"><code>edward/inferences/__init__.py</code></a>.</p>
 <h2 id="classes">Classes</h2>
-<p><a href="../ed/BiGANInference"><code>class BiGANInference</code></a>: Adversarially Learned Inference (Dumoulin et al., 2017) or</p>
-<p><a href="../ed/GANInference"><code>class GANInference</code></a>: Parameter estimation with GAN-style training (Goodfellow et al.,</p>
-<p><a href="../ed/Gibbs"><code>class Gibbs</code></a>: Gibbs sampling (Geman and Geman, 1984).</p>
+<p><a href="../ed/BiGANInference"><code>class BiGANInference</code></a>: Adversarially Learned Inference <span class="citation">(Dumoulin et al., 2017)</span> or</p>
+<p><a href="../ed/GANInference"><code>class GANInference</code></a>: Parameter estimation with GAN-style training</p>
+<p><a href="../ed/Gibbs"><code>class Gibbs</code></a>: Gibbs sampling <span class="citation">(S. Geman &amp; Geman, 1984)</span>.</p>
 <p><a href="../ed/HMC"><code>class HMC</code></a>: Hamiltonian Monte Carlo, also known as hybrid Monte Carlo</p>
 <p><a href="../ed/ImplicitKLqp"><code>class ImplicitKLqp</code></a>: Variational inference with implicit probabilistic models</p>
 <p><a href="../ed/Inference"><code>class Inference</code></a>: Abstract base class for inference. All inference algorithms in</p>
 <p><a href="../ed/KLpq"><code>class KLpq</code></a>: Variational inference with the KL divergence</p>
 <p><a href="../ed/KLqp"><code>class KLqp</code></a>: Variational inference with the KL divergence</p>
-<p><a href="../ed/Laplace"><code>class Laplace</code></a>: Laplace approximation (Laplace, 1774).</p>
+<p><a href="../ed/Laplace"><code>class Laplace</code></a>: Laplace approximation <span class="citation">(Laplace, 1986)</span>.</p>
 <p><a href="../ed/MAP"><code>class MAP</code></a>: Maximum a posteriori.</p>
-<p><a href="../ed/MetropolisHastings"><code>class MetropolisHastings</code></a>: Metropolis-Hastings (Metropolis et al., 1953; Hastings, 1970).</p>
+<p><a href="../ed/MetropolisHastings"><code>class MetropolisHastings</code></a>: Metropolis-Hastings <span class="citation">(Hastings, 1970; Metropolis, Rosenbluth, Rosenbluth, Teller, &amp; Teller, 1953)</span>.</p>
 <p><a href="../ed/MonteCarlo"><code>class MonteCarlo</code></a>: Abstract base class for Monte Carlo. Specific Monte Carlo methods</p>
 <p><a href="../ed/ReparameterizationEntropyKLqp"><code>class ReparameterizationEntropyKLqp</code></a>: Variational inference with the KL divergence</p>
 <p><a href="../ed/ReparameterizationKLKLqp"><code>class ReparameterizationKLKLqp</code></a>: Variational inference with the KL divergence</p>
 <p><a href="../ed/ReparameterizationKLqp"><code>class ReparameterizationKLqp</code></a>: Variational inference with the KL divergence</p>
-<p><a href="../ed/SGHMC"><code>class SGHMC</code></a>: Stochastic gradient Hamiltonian Monte Carlo (Chen et al., 2014).</p>
-<p><a href="../ed/SGLD"><code>class SGLD</code></a>: Stochastic gradient Langevin dynamics (Welling and Teh, 2011).</p>
+<p><a href="../ed/SGHMC"><code>class SGHMC</code></a>: Stochastic gradient Hamiltonian Monte Carlo <span class="citation">(Chen, Fox, &amp; Guestrin, 2014)</span>.</p>
+<p><a href="../ed/SGLD"><code>class SGLD</code></a>: Stochastic gradient Langevin dynamics <span class="citation">(Welling &amp; Teh, 2011)</span>.</p>
 <p><a href="../ed/ScoreEntropyKLqp"><code>class ScoreEntropyKLqp</code></a>: Variational inference with the KL divergence</p>
 <p><a href="../ed/ScoreKLKLqp"><code>class ScoreKLKLqp</code></a>: Variational inference with the KL divergence</p>
 <p><a href="../ed/ScoreKLqp"><code>class ScoreKLqp</code></a>: Variational inference with the KL divergence</p>
+<p><a href="../ed/ScoreRBKLqp"><code>class ScoreRBKLqp</code></a>: Variational inference with the KL divergence</p>
 <p><a href="../ed/VariationalInference"><code>class VariationalInference</code></a>: Abstract base class for variational inference. Specific</p>
-<p><a href="../ed/WGANInference"><code>class WGANInference</code></a>: Parameter estimation with GAN-style training (Goodfellow et al.,</p>
+<p><a href="../ed/WGANInference"><code>class WGANInference</code></a>: Parameter estimation with GAN-style training</p>
+<p><a href="../ed/WakeSleep"><code>class WakeSleep</code></a>: Wake-Sleep algorithm <span class="citation">(Hinton, Dayan, Frey, &amp; Neal, 1995)</span>.</p>
 <h2 id="functions">Functions</h2>
 <p><a href="../ed/complete_conditional"><code>complete_conditional(...)</code></a>: Returns the conditional distribution <code>RandomVariable</code></p>
+<div id="refs" class="references">
+<div id="ref-chen2014stochastic">
+<p>Chen, T., Fox, E. B., &amp; Guestrin, C. (2014). Stochastic gradient Hamiltonian Monte Carlo. In <em>International conference on machine learning</em>.</p>
+</div>
+<div id="ref-dumuolin2017adversarially">
+<p>Dumoulin, V., Belghazi, I., Poole, B., Lamb, A., Arjovsky, M., Mastropietro, O., &amp; Courville, A. (2017). Adversarially Learned Inference. In <em>International conference on learning representations</em>.</p>
+</div>
+<div id="ref-geman1984stochastic">
+<p>Geman, S., &amp; Geman, D. (1984). Stochastic relaxation, gibbs distributions, and the bayesian restoration of images. <em>IEEE Transactions on Pattern Analysis and Machine Intelligence</em>, (6), 721–741.</p>
+</div>
+<div id="ref-hastings1970monte">
+<p>Hastings, W. K. (1970). Monte Carlo sampling methods using Markov chains and their applications. <em>Biometrika</em>, <em>57</em>(1), 97–109.</p>
+</div>
+<div id="ref-hinton1995wake">
+<p>Hinton, G. E., Dayan, P., Frey, B. J., &amp; Neal, R. M. (1995). The “wake-sleep” algorithm for unsupervised neural networks. <em>Science</em>.</p>
+</div>
+<div id="ref-laplace1986memoir">
+<p>Laplace, P. S. (1986). Memoir on the probability of the causes of events. <em>Statistical Science</em>, <em>1</em>(3), 364–378.</p>
+</div>
+<div id="ref-metropolis1953equation">
+<p>Metropolis, N., Rosenbluth, A. W., Rosenbluth, M. N., Teller, A. H., &amp; Teller, E. (1953). Equation of state calculations by fast computing machines. <em>The Journal of Chemical Physics</em>, <em>21</em>(6), 1087–1092.</p>
+</div>
+<div id="ref-welling2011bayesian">
+<p>Welling, M., &amp; Teh, Y. W. (2011). Bayesian learning via stochastic gradient Langevin dynamics. In <em>International conference on machine learning</em>.</p>
+</div>
+</div>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>
