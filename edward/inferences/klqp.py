@@ -84,8 +84,8 @@ class KLqp(VariationalInference):
 
     KLqp supports
 
-    1. score function gradients (Paisley et al., 2012)
-    2. reparameterization gradients (Kingma and Welling, 2014)
+    1. score function gradients [@paisley2012variational]
+    2. reparameterization gradients [@kingma2014auto]
 
     of the loss function.
 
@@ -95,9 +95,9 @@ class KLqp(VariationalInference):
     $-\mathbb{E}_{q(z; \lambda)}[\log p(x \mid z)] +
         \\text{KL}( q(z; \lambda) \| p(z) ),$
 
-    where the KL term is computed analytically (Kingma and Welling,
-    2014). We compute this automatically when $p(z)$ and
-    $q(z; \lambda)$ are Normal.
+    where the KL term is computed analytically [@kingma2014auto]. We
+    compute this automatically when $p(z)$ and $q(z; \lambda)$ are
+    Normal.
     """
     is_reparameterizable = all([
         rv.reparameterization_type ==
@@ -359,7 +359,7 @@ def build_reparam_loss_and_gradients(inference, var_list):
   $-\\text{ELBO} =
       -\mathbb{E}_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]$
 
-  based on the reparameterization trick (Kingma and Welling, 2014).
+  based on the reparameterization trick [@kingma2014auto].
 
   Computed by sampling from $q(z;\lambda)$ and evaluating the
   expectation using Monte Carlo sampling.
@@ -423,7 +423,7 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
     -\\text{ELBO} =  - ( \mathbb{E}_{q(z; \lambda)} [ \log p(x \mid z) ]
           + \\text{KL}(q(z; \lambda) \| p(z)) )
 
-  based on the reparameterization trick (Kingma and Welling, 2014).
+  based on the reparameterization trick [@kingma2014auto].
 
   It assumes the KL is analytic.
 
@@ -482,7 +482,7 @@ def build_reparam_entropy_loss_and_gradients(inference, var_list):
   $-\\text{ELBO} =  -( \mathbb{E}_{q(z; \lambda)} [ \log p(x , z) ]
           + \mathbb{H}(q(z; \lambda)) )$
 
-  based on the reparameterization trick (Kingma and Welling, 2014).
+  based on the reparameterization trick [@kingma2014auto].
 
   It assumes the entropy is analytic.
 
@@ -541,7 +541,7 @@ def build_reparam_entropy_loss_and_gradients(inference, var_list):
 
 def build_score_loss_and_gradients(inference, var_list):
   """Build loss function and gradients based on the score function
-  estimator (Paisley et al., 2012).
+  estimator [@paisley2012variational].
 
   Computed by sampling from $q(z;\lambda)$ and evaluating the
   expectation using Monte Carlo sampling.
@@ -607,7 +607,7 @@ def build_score_loss_and_gradients(inference, var_list):
 
 def build_score_kl_loss_and_gradients(inference, var_list):
   """Build loss function and gradients based on the score function
-  estimator (Paisley et al., 2012).
+  estimator [@paisley2012variational].
 
   It assumes the KL is analytic.
 
@@ -673,7 +673,7 @@ def build_score_kl_loss_and_gradients(inference, var_list):
 
 def build_score_entropy_loss_and_gradients(inference, var_list):
   """Build loss function and gradients based on the score function
-  estimator (Paisley et al., 2012).
+  estimator [@paisley2012variational].
 
   It assumes the entropy is analytic.
 
@@ -747,8 +747,8 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
 
 def build_score_rb_loss_and_gradients(inference, var_list):
   """Build loss function and gradients based on the score function
-  estimator (Paisley et al., 2012) and Rao-Blackwellization (Ranganath
-  et al., 2014).
+  estimator [@paisley2012variational] and Rao-Blackwellization
+  [@ranganath2014black].
 
   Computed by sampling from :math:`q(z;\lambda)` and evaluating the
   expectation using Monte Carlo sampling and Rao-Blackwellization.

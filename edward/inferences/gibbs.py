@@ -14,7 +14,7 @@ from edward.util import check_latent_vars, get_session
 
 
 class Gibbs(MonteCarlo):
-  """Gibbs sampling (Geman and Geman, 1984).
+  """Gibbs sampling [@geman1984stochastic].
 
   #### Examples
 

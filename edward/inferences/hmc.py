@@ -18,7 +18,7 @@ except Exception as e:
 
 class HMC(MonteCarlo):
   """Hamiltonian Monte Carlo, also known as hybrid Monte Carlo
-  (Duane et al., 1987; Neal, 2011).
+  [@duane1987hybrid; @neal2011mcmc].
 
   #### Notes
 

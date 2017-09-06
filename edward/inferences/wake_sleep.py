@@ -11,7 +11,7 @@ from edward.util import copy, get_descendants
 
 
 class WakeSleep(VariationalInference):
-  """Wake-Sleep algorithm (Hinton et al., 1995).
+  """Wake-Sleep algorithm [@hinton1995wake].
 
   Given a probability model $p(x, z; \\theta)$ and variational
   distribution $q(z\mid x; \\lambda)$, wake-sleep alternates between
@@ -24,7 +24,7 @@ class WakeSleep(VariationalInference):
   respect to variational parameters $\lambda$ using top-down
   "fantasy" samples $z\sim p(x, z; \\theta)$.
 
-  Hinton et al. (1995) justifies wake-sleep under the variational lower
+  @hinton1995wake justify wake-sleep under the variational lower
   bound of the description length,
 
   $\mathbb{E}_{q(z\mid x; \lambda)} [

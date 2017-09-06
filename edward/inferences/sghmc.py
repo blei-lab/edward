@@ -16,7 +16,7 @@ except Exception as e:
 
 
 class SGHMC(MonteCarlo):
-  """Stochastic gradient Hamiltonian Monte Carlo (Chen et al., 2014).
+  """Stochastic gradient Hamiltonian Monte Carlo [@chen2014stochastic].
 
   #### Notes
 
@@ -65,7 +65,7 @@ class SGHMC(MonteCarlo):
     integrator. Its discretization error goes to zero as the learning
     rate decreases.
 
-    Implements the update equations from (15) of Chen et al. (2014).
+    Implements the update equations from (15) of @chen2014stochastic.
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
