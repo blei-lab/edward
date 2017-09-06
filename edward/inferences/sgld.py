@@ -16,7 +16,7 @@ except Exception as e:
 
 
 class SGLD(MonteCarlo):
-  """Stochastic gradient Langevin dynamics (Welling and Teh, 2011).
+  """Stochastic gradient Langevin dynamics [@welling2011bayesian].
 
   #### Notes
 

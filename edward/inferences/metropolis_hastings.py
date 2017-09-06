@@ -17,7 +17,7 @@ except Exception as e:
 
 
 class MetropolisHastings(MonteCarlo):
-  """Metropolis-Hastings (Metropolis et al., 1953; Hastings, 1970).
+  """Metropolis-Hastings [@metropolis1953equation; @hastings1970monte].
 
   #### Notes
 

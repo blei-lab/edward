@@ -10,8 +10,8 @@ from edward.util import get_session
 
 
 class GANInference(VariationalInference):
-  """Parameter estimation with GAN-style training (Goodfellow et al.,
-  2014).
+  """Parameter estimation with GAN-style training
+  [@goodfellow2014generative].
 
   Works for the class of implicit (and differentiable) probabilistic
   models. These models do not require a tractable density and assume

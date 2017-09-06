@@ -17,7 +17,7 @@ except Exception as e:
 
 
 class Laplace(MAP):
-  """Laplace approximation (Laplace, 1774).
+  """Laplace approximation [@laplace1986memoir].
 
   It approximates the posterior distribution using a multivariate
   normal distribution centered at the mode of the posterior.

@@ -16,7 +16,7 @@ class KLpq(VariationalInference):
   $\\text{KL}( p(z \mid x) \| q(z) ).$
 
   To perform the optimization, this class uses a technique from
-  adaptive importance sampling (Cappe et al., 2008).
+  adaptive importance sampling [@oh1992adaptive].
 
   #### Notes
 
