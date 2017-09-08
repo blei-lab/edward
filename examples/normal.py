@@ -14,6 +14,7 @@ from edward.models import Empirical, MultivariateNormalTriL
 
 plt.style.use("ggplot")
 
+
 def mvn_plot_contours(z, label=False, ax=None):
   """Plot the contours of 2-d Normal or MultivariateNormal object.
   Scale the axes to show 3 standard deviations.
