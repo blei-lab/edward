@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-"""Correlated normal posterior. Inference with stochastic gradient Hamiltonian
-Monte Carlo.
+"""Correlated normal posterior. Inference with Hamiltonian Monte Carlo.
 """
 from __future__ import absolute_import
 from __future__ import division
@@ -14,7 +13,6 @@ from matplotlib import pyplot as plt
 from edward.models import Empirical, MultivariateNormalTriL
 
 plt.style.use("ggplot")
-
 
 def mvn_plot_contours(z, label=False, ax=None):
   """Plot the contours of 2-d Normal or MultivariateNormal object.
@@ -47,10 +45,10 @@ z = MultivariateNormalTriL(
     scale_tril=tf.cholesky(tf.constant([[1.0, 0.8], [0.8, 1.0]])))
 
 # INFERENCE
-qz = Empirical(params=tf.Variable(tf.random_normal([5000, 2])))
+qz = Empirical(params=tf.Variable(tf.random_normal([1000, 2])))
 
-inference = ed.SGHMC({z: qz})
-inference.run(step_size=0.02)
+inference = ed.HMC({z: qz})
+inference.run()
 
 # CRITICISM
 sess = ed.get_session()
