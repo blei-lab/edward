@@ -89,7 +89,9 @@
 <p>The data comes from <a href="http://www-personal.umich.edu/~mejn/netdata/">Mark Newman’s repository</a>. It is a weighted, directed network representing the neural network of the nematode <a href="https://en.wikipedia.org/wiki/Caenorhabditis_elegans">C. Elegans</a> compiled by <span class="citation">Watts &amp; Strogatz (1998)</span> using experimental data by <span class="citation">White, Southgate, Thomson, &amp; Brenner (1986)</span>.</p>
 <p>The neural network consists of around <span class="math inline">\(300\)</span> neurons. Each connection between neurons is associated with a weight (positive integer) capturing the strength of the connection.</p>
 <p>First, we load the data.</p>
-<pre class="python" language="Python"><code>x_train = np.load('data/celegans_brain.npy')</code></pre>
+<pre class="python" language="Python"><code>from observations import celegans
+
+x_train = celegans("~/data")</code></pre>
 <h3 id="model">Model</h3>
 <p>What can we learn about the neurons from their connectivity patterns? Using a latent space model <span class="citation">(Hoff et al., 2002)</span>, we will learn a latent embedding for each neuron to capture the similarities between them.</p>
 <p>Each neuron <span class="math inline">\(n\)</span> is a node in the network and is associated with a latent position <span class="math inline">\(z_n\in\mathbb{R}^K\)</span>. We place a Gaussian prior on each of the latent positions.</p>

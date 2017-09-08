@@ -92,15 +92,15 @@
 <p>In supervised learning, the task is to infer hidden structure from labeled data, comprised of training examples <span class="math inline">\(\{(x_n, y_n)\}\)</span>. Classification means the output <span class="math inline">\(y\)</span> takes discrete values.</p>
 <p>We demonstrate with an example in Edward. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/supervised_classification.ipynb">here</a>.</p>
 <h3 id="data">Data</h3>
-<p>We use the <a href="https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/crabs.html">crabs data set</a>, which consists of morphological measurements on a crab species. We are interested in predicting whether a given crab has the color form blue or orange.</p>
-<pre class="python" language="Python"><code>data = np.loadtxt(&#39;data/crabs_train.txt&#39;, delimiter=&#39;,&#39;)
-data[data[:, 0] == -1, 0] = 0  # replace -1 label with 0 label
+<p>We use the <a href="https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/crabs.html">crabs data set</a>, which consists of morphological measurements on a crab species. We are interested in predicting whether a given crab has the color form blue (encoded as 0) or orange (encoded as 1). We use all the numeric features in the dataset.</p>
+<pre class="python" language="Python"><code>from observations import crabs
 
-N = data.shape[0]  # number of data points
-D = data.shape[1] - 1  # number of features
+data, metadata = crabs(&quot;~/data&quot;)
+X_train = data[:100, 3:]
+y_train = data[:100, 1]
 
-X_train = data[:, 1:]
-y_train = data[:, 0]
+N = X_train.shape[0]  # number of data points
+D = X_train.shape[1]  # number of features
 
 print(&quot;Number of data points: {}&quot;.format(N))
 print(&quot;Number of features: {}&quot;.format(D))</code></pre>
