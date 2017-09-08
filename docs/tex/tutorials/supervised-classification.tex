@@ -17,16 +17,17 @@ We use the
 {crabs data set},
 which consists of morphological measurements on a crab species. We
 are interested in predicting whether a given crab has the color form
-blue or orange.
+blue (encoded as 0) or orange (encoded as 1). We use all the numeric features
+in the dataset.
 \begin{lstlisting}[language=Python]
-data = np.loadtxt('data/crabs_train.txt', delimiter=',')
-data[data[:, 0] == -1, 0] = 0  # replace -1 label with 0 label
+from observations import crabs
 
-N = data.shape[0]  # number of data points
-D = data.shape[1] - 1  # number of features
+data, metadata = crabs("~/data")
+X_train = data[:100, 3:]
+y_train = data[:100, 1]
 
-X_train = data[:, 1:]
-y_train = data[:, 0]
+N = X_train.shape[0]  # number of data points
+D = X_train.shape[1]  # number of features
 
 print("Number of data points: {}".format(N))
 print("Number of features: {}".format(D))

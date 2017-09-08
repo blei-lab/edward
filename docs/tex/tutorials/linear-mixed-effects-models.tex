@@ -21,16 +21,25 @@ It is a data set of instructor evaluation ratings, where the inputs
 instructor evaluation rating.
 
 \begin{lstlisting}[language=Python]
-data = pd.read_csv('data/insteval.csv')
+import pandas as pd
+from observations import insteval
+
+data, metadata = insteval("~/data")
+data = pd.DataFrame(data, columns=metadata['columns'])
+
+# s - students - 1:2972
+# d - instructors - codes that need to be remapped
+# dept also needs to be remapped
+data['s'] = data['s'] - 1
 data['dcodes'] = data['d'].astype('category').cat.codes
 data['deptcodes'] = data['dept'].astype('category').cat.codes
-data['s'] = data['s'] - 1
+data['y'] = data['y'].values.astype(float)
 
 train = data.sample(frac=0.8)
 test = data.drop(train.index)
 \end{lstlisting}
 
-In the code, we denote:
+The data set denotes:
 \begin{itemize}
 \item \texttt{students} as \texttt{s}
 \item \texttt{instructors} as \texttt{d}
@@ -39,10 +48,38 @@ In the code, we denote:
 \end{itemize}
 
 \begin{lstlisting}[language=Python]
-n_s = 2972  # number of students
-n_d = 1128  # number of instructors
-n_dept = 14  # number of departments
+s_train = train['s'].values
+d_train = train['dcodes'].values
+dept_train = train['deptcodes'].values
+y_train = train['y'].values
+service_train = train['service'].values
+n_obs_train = train.shape[0]
+
+s_test = test['s'].values
+d_test = test['dcodes'].values
+dept_test = test['deptcodes'].values
+y_test = test['y'].values
+service_test = test['service'].values
+n_obs_test = test.shape[0]
+\end{lstlisting}
+
+\begin{lstlisting}[language=Python]
+n_s = max(s_train) + 1  # number of students
+n_d = max(d_train) + 1  # number of instructors
+n_dept = max(dept_train) + 1  # number of departments
 n_obs = train.shape[0]  # number of observations
+
+print("Number of students: {}".format(n_s))
+print("Number of instructors: {}".format(n_d))
+print("Number of departments: {}".format(n_dept))
+print("Number of observations: {}".format(n_obs))
+\end{lstlisting}
+
+\begin{lstlisting}
+Number of students: 2972
+Number of instructors: 1128
+Number of departments: 14
+Number of observations: 58737
 \end{lstlisting}
 
 \subsubsection{Model}
