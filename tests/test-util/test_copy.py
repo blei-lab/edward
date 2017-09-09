@@ -11,6 +11,33 @@ from edward.models import Bernoulli, Categorical, Mixture, Normal
 
 class test_copy_class(tf.test.TestCase):
 
+  def test_scope(self):
+    with self.test_session():
+      x = tf.constant(2.0)
+      x_new = ed.copy(x, scope='new_scope')
+      self.assertTrue(x_new.name.startswith('new_scope'))
+
+  def test_replace_itself(self):
+    with self.test_session():
+      x = tf.constant(2.0)
+      y = tf.constant(3.0)
+      x_new = ed.copy(x, {x: y}, replace_itself=False)
+      self.assertEqual(x_new.eval(), 2.0)
+      x_new = ed.copy(x, {x: y}, replace_itself=True)
+      self.assertEqual(x_new.eval(), 3.0)
+
+  def test_copy_q(self):
+    with self.test_session() as sess:
+      x = tf.constant(2.0)
+      y = tf.random_normal([])
+      x_new = ed.copy(x, {x: y}, replace_itself=True, copy_q=False)
+      x_new_val, y_val = sess.run([x_new, y])
+      self.assertEqual(x_new_val, y_val)
+      x_new = ed.copy(x, {x: y}, replace_itself=True, copy_q=True)
+      x_new_val, x_val, y_val = sess.run([x_new, x, y])
+      self.assertNotEqual(x_new_val, x_val)
+      self.assertNotEqual(x_new_val, y_val)
+
   def test_placeholder(self):
     with self.test_session() as sess:
       x = tf.placeholder(tf.float32, name="CustomName")
