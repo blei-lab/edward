@@ -38,6 +38,16 @@ class test_copy_class(tf.test.TestCase):
       self.assertNotEqual(x_new_val, x_val)
       self.assertNotEqual(x_new_val, y_val)
 
+  def test_copy_parent_rvs(self):
+    with self.test_session() as sess:
+      x = Normal(0.0, 1.0)
+      y = tf.constant(3.0)
+      z = x * y
+      z_new = ed.copy(z, scope='no_copy_parent_rvs', copy_parent_rvs=False)
+      self.assertEqual(len(ed.random_variables()), 1)
+      z_new = ed.copy(z, scope='copy_parent_rvs', copy_parent_rvs=True)
+      self.assertEqual(len(ed.random_variables()), 2)
+
   def test_placeholder(self):
     with self.test_session() as sess:
       x = tf.placeholder(tf.float32, name="CustomName")
