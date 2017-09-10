@@ -727,9 +727,12 @@ def compute_multinomial_mode(probs, total_count=1):
   compute_multinomial_mode(probs, total_count)
   ```
   """
+  mode = np.zeros_like(probs, dtype=np.int32)
+  if total_count == 1:
+    mode[np.argmax(probs)] += 1
+    return list(mode)
   remaining_count = total_count
   uniform_prob = 1 / total_count
-  mode = np.zeros_like(probs, dtype=np.int32)
 
   while remaining_count > 0:
     if (probs < uniform_prob).all():
