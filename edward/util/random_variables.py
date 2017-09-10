@@ -87,7 +87,7 @@ def _copy_default(x, *args, **kwargs):
 
 
 def copy(org_instance, dict_swap=None, scope="copied",
-         replace_itself=False, copy_q=False):
+         replace_itself=False, copy_q=False, copy_parent_rvs=True):
   """Build a new node in the TensorFlow graph from `org_instance`,
   where any of its ancestors existing in `dict_swap` are
   replaced with `dict_swap`'s corresponding value.
@@ -115,9 +115,13 @@ def copy(org_instance, dict_swap=None, scope="copied",
     replace_itself: bool, optional
       Whether to replace `org_instance` itself if it exists in
       `dict_swap`. (This is used for the recursion.)
-    copy_q: bool, optional>
+    copy_q: bool, optional.
       Whether to copy the replaced tensors too (if not already
       copied within the new scope). Otherwise will reuse them.
+    copy_parent_rvs:
+      Whether to copy parent random variables `org_instance` depends
+      on. Otherwise will copy only the sample tensors and not the
+      random variable class itself.
 
   Returns:
     RandomVariable, tf.Variable, tf.Tensor, or tf.Operation.
@@ -213,20 +217,29 @@ def copy(org_instance, dict_swap=None, scope="copied",
     except:
       pass
 
+  # Preserve ordering of random variables. Random variables are always
+  # copied first (from parent -> child) before any deterministic
+  # operations that depend on them.
+  if copy_parent_rvs and \
+          isinstance(org_instance, (RandomVariable, tf.Tensor, tf.Variable)):
+    for v in get_parents(org_instance):
+      copy(v, dict_swap, scope, True, copy_q, True)
+
   if isinstance(org_instance, RandomVariable):
     rv = org_instance
 
     # If it has copiable arguments, copy them.
-    args = [_copy_default(arg, dict_swap, scope, True, copy_q)
+    args = [_copy_default(arg, dict_swap, scope, True, copy_q, False)
             for arg in rv._args]
 
     kwargs = {}
     for key, value in six.iteritems(rv._kwargs):
       if isinstance(value, list):
-        kwargs[key] = [_copy_default(v, dict_swap, scope, True, copy_q)
+        kwargs[key] = [_copy_default(v, dict_swap, scope, True, copy_q, False)
                        for v in value]
       else:
-        kwargs[key] = _copy_default(value, dict_swap, scope, True, copy_q)
+        kwargs[key] = _copy_default(
+            value, dict_swap, scope, True, copy_q, False)
 
     kwargs['name'] = new_name
     # Create new random variable with copied arguments.
@@ -250,7 +263,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
     # A tensor is one of the outputs of its underlying
     # op. Therefore copy the op itself.
     op = tensor.op
-    new_op = copy(op, dict_swap, scope, True, copy_q)
+    new_op = copy(op, dict_swap, scope, True, copy_q, False)
 
     output_index = op.outputs.index(tensor)
     new_tensor = new_op.outputs[output_index]
@@ -281,7 +294,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
 
     # If it has an original op, copy it.
     if op._original_op is not None:
-      original_op = copy(op._original_op, dict_swap, scope, True, copy_q)
+      original_op = copy(op._original_op, dict_swap, scope, True, copy_q, False)
     else:
       original_op = None
 
@@ -304,7 +317,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
     # If it has control inputs, copy them.
     control_inputs = []
     for x in op.control_inputs:
-      elem = copy(x, dict_swap, scope, True, copy_q)
+      elem = copy(x, dict_swap, scope, True, copy_q, False)
       if not isinstance(elem, tf.Operation):
         elem = tf.convert_to_tensor(elem)
 
@@ -314,7 +327,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
 
     # If it has inputs, copy them.
     for x in op.inputs:
-      elem = copy(x, dict_swap, scope, True, copy_q)
+      elem = copy(x, dict_swap, scope, True, copy_q, False)
       if not isinstance(elem, tf.Operation):
         elem = tf.convert_to_tensor(elem)
 
