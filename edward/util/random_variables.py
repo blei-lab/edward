@@ -735,7 +735,7 @@ def compute_multinomial_mode(probs, total_count=1):
     if (probs < uniform_prob).all():
       probs = softmax(probs)
     mask = probs >= uniform_prob
-    overflow_count = mask.sum() - remaining_count
+    overflow_count = int(mask.sum() - remaining_count)
     if overflow_count > 0:
       hot_indices = np.where(mask)[0]
       cold_indices = np.random.choice(hot_indices, overflow_count,
