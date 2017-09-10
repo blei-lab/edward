@@ -160,6 +160,8 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
       evaluations += [categorical_crossentropy(y_true, y_pred)]
     elif metric == 'sparse_categorical_crossentropy':
       evaluations += [sparse_categorical_crossentropy(y_true, y_pred)]
+    elif metric == 'multinomial_accuracy':
+      evaluations += [multinomial_accuracy(y_true, y_pred)]
     elif metric == 'kl_divergence':
       y_true_ = y_true / total_count
       y_pred_ = probs
@@ -298,6 +300,24 @@ def sparse_categorical_crossentropy(y_true, y_pred):
   y_pred = tf.cast(y_pred, tf.float32)
   return tf.reduce_mean(tf.nn.sparse_softmax_cross_entropy_with_logits(
       logits=y_pred, labels=y_true))
+
+
+def multinomial_accuracy(y_true, y_pred):
+  """Multinomial prediction accuracy. `y_true` is a tensor
+  of integers, where the outermost dimension gives a draw
+  from a Multinomial distribution.
+
+  NB: In evaluating the accuracy between two Multinomials
+  results may vary across evaluations. This is because Edward's
+  algorithm for computing `y_pred`, i.e. the Multinomial
+  mode, yields variable results if `any(isinstance(p, float)
+  for p in total_count * probs)` (where `probs` is a vector
+  of the predicted Multinomial probabilities).
+  """
+  y_true = tf.cast(y_true, tf.float32)
+  y_pred = tf.cast(y_pred, tf.float32)
+  import pdb; pdb.set_trace()
+  return tf.reduce_mean(tf.cast(tf.equal(y_true, y_pred), tf.float32))
 
 
 def kl_divergence(y_true, y_pred):
