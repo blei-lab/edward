@@ -28,7 +28,7 @@ for entry in data_map['toc']:
 
   section = entry['section']
   assert section[0]['title'] == 'Overview'
-  path = section[0]['path'] + '.html'
+  path = section[0]['path']
   toc += '<a class="button u-full-width" href="{}">{}</a>'.format(path, title)
   toc += '\n'
 
