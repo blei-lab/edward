@@ -27,13 +27,19 @@ cd $tmpdir
 for filename in $(find api -name '*.md'); do
   echo $filename
   mkdir -p $outdir/$(dirname $filename)
+  if [[ $filename == api/observations* ]]; then
+    # assume observations/ lives in same parent directory as edward/
+    bib=$docdir/../../observations/bib.bib
+  else
+    bib=$docdir/tex/bib.bib
+  fi
   pandoc $filename \
          --from=markdown+link_attributes+native_spans \
          --to=html \
          --filter=$docdir/pandoc-code2raw.py \
          --mathjax \
          --no-highlight \
-         --bibliography=$docdir/tex/bib.bib \
+         --bibliography=$bib \
          --csl=$docdir/tex/apa.csl \
          --title-prefix="Edward" \
          --template=$tmpdir/template.pandoc \
