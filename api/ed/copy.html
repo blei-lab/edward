@@ -89,11 +89,11 @@
     <a class="button u-full-width" href="/api/">API</a>
     <hr style="margin-top: 1rem; margin-bottom: 1.5rem;"/>
     <a class="button u-full-width" href="/api/reference">Reference</a>
-    <a class="button u-full-width" href="/api/ed/criticisms.html">ed.criticisms</a>
-<a class="button u-full-width" href="/api/ed/inferences.html">ed.inferences</a>
-<a class="button u-full-width" href="/api/ed/models.html">ed.models</a>
-<a class="button u-full-width" href="/api/ed/util.html">ed.util</a>
-<a class="button u-full-width" href="/api/observations.html">observations</a>
+    <a class="button u-full-width" href="/api/ed/criticisms">ed.criticisms</a>
+<a class="button u-full-width" href="/api/ed/inferences">ed.inferences</a>
+<a class="button u-full-width" href="/api/ed/models">ed.models</a>
+<a class="button u-full-width" href="/api/ed/util">ed.util</a>
+<a class="button u-full-width" href="/api/observations">observations</a>
 
     <div class="row" style="padding-bottom: 5%"> </div>
     <a class="button2 u-pull-right" style="padding-right:10%"
@@ -120,7 +120,8 @@
     dict_swap=None,
     scope=&#39;copied&#39;,
     replace_itself=False,
-    copy_q=False
+    copy_q=False,
+    copy_parent_rvs=True
 )</code></pre>
 <p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/util/random_variables.py"><code>edward/util/random_variables.py</code></a>.</p>
 <p>Build a new node in the TensorFlow graph from <code>org_instance</code>, where any of its ancestors existing in <code>dict_swap</code> are replaced with <code>dict_swap</code>'s corresponding value.</p>
@@ -132,7 +133,8 @@
 <li><b><code>dict_swap</code></b>: dict, optional. Random variables, variables, tensors, or operations to swap with. Its keys are what <code>org_instance</code> may depend on, and its values are the corresponding object (not necessarily of the same class instance, but must have the same type, e.g., float32) that is used in exchange.</li>
 <li><b><code>scope</code></b>: str, optional. A scope for the new node(s). This is used to avoid name conflicts with the original node(s).</li>
 <li><b><code>replace_itself</code></b>: bool, optional Whether to replace <code>org_instance</code> itself if it exists in <code>dict_swap</code>. (This is used for the recursion.)</li>
-<li><b><code>copy_q</code></b>: bool, optional&gt; Whether to copy the replaced tensors too (if not already copied within the new scope). Otherwise will reuse them.</li>
+<li><b><code>copy_q</code></b>: bool, optional. Whether to copy the replaced tensors too (if not already copied within the new scope). Otherwise will reuse them.</li>
+<li><b><code>copy_parent_rvs</code></b>: Whether to copy parent random variables <code>org_instance</code> depends on. Otherwise will copy only the sample tensors and not the random variable class itself.</li>
 </ul>
 <h4 id="returns">Returns:</h4>
 <p>RandomVariable, tf.Variable, tf.Tensor, or tf.Operation. The copied node.</p>
