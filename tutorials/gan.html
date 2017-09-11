@@ -102,7 +102,7 @@ out_dir = &quot;/tmp/out&quot;</code></pre>
 <p><img src="/images/gan-fig0.png" alt="image" width="450" /></p>
 <p>The goal is to build and infer a model that can generate high quality images of handwritten digits.</p>
 <p>During training we will feed batches of MNIST digits. We instantiate a TensorFlow placeholder with a fixed batch size of <span class="math inline">\(M\)</span> images.</p>
-<p>We also define a helper function to select the next batch of data points from the full set of examples. It keeps track of the current batch index and returns the next batch using the function <code>next()</code>. We will generate batches from <code>x_train_generator</code> during inference.</p>
+<p>We also define a helper function to select the next batch of data points from the full set of examples. It keeps track of the current batch index and returns the next batch using the function “next()“. We will generate batches from ‘x_train_generator‘ during inference.</p>
 <pre class="python" language="Python"><code>from observations import mnist
 
 def generator(array, batch_size):

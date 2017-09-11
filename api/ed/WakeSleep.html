@@ -128,11 +128,11 @@
 <p><span class="math inline">\(\mathbb{E}_{q(z\mid x; \lambda)} [  \log p(x, z; \theta) - \log q(z\mid x; \lambda)].\)</span></p>
 <p>Maximizing it with respect to <span class="math inline">\(\theta\)</span> corresponds to the wake phase. Instead of maximizing it with respect to <span class="math inline">\(\lambda\)</span> (which corresponds to minimizing <span class="math inline">\(\text{KL}(q\|p)\)</span>), the sleep phase corresponds to minimizing the reverse KL <span class="math inline">\(\text{KL}(p\|q)\)</span> in expectation over the data distribution.</p>
 <h4 id="notes">Notes</h4>
-<p>In conditional inference, we infer <span class="math inline">\(z\)</span> in <span class="math inline">\(p(z, \beta \mid x)\)</span> while fixing inference over <span class="math inline">\(\beta\)</span> using another distribution <span class="math inline">\(q(\beta)\)</span>. During gradient calculation, instead of using the model's density</p>
+<p>In conditional inference, we infer $z` in <span class="math inline">\(p(z, \beta \mid x)\)</span> while fixing inference over <span class="math inline">\(\beta\)</span> using another distribution <span class="math inline">\(q(\beta)\)</span>. During gradient calculation, instead of using the model's density</p>
 <p><span class="math inline">\(\log p(x, z^{(s)}), z^{(s)} \sim q(z; \lambda),\)</span></p>
 <p>for each sample <span class="math inline">\(s=1,\ldots,S\)</span>, <code>WakeSleep</code> uses</p>
 <p><span class="math inline">\(\log p(x, z^{(s)}, \beta^{(s)}),\)</span></p>
-<p>where <span class="math inline">\(z^{(s)} \sim q(z; \lambda)\)</span> and <span class="math inline">\(\beta^{(s)} \sim q(\beta)\)</span>.</p>
+<p>where <span class="math inline">\(z^{(s)} \sim q(z; \lambda)\)</span> and<span class="math inline">\(\beta^{(s)} \sim q(\beta)\)</span>.</p>
 <h2 id="methods">Methods</h2>
 <h3 id="__init__">
 <code><strong>init</strong></code>
