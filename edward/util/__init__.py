@@ -6,6 +6,7 @@ from __future__ import print_function
 
 from edward.util.download import *
 from edward.util.graphs import *
+from edward.util.metrics import *
 from edward.util.progbar import *
 from edward.util.random_variables import *
 from edward.util.tensorflow import *
@@ -33,6 +34,7 @@ _allowed_symbols = [
     'rbf',
     'set_seed',
     'to_simplex',
+    'with_binary_averaging'
 ]
 
 remove_undocumented(__name__, allowed_exception_list=_allowed_symbols)

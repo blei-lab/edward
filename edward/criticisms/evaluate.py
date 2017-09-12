@@ -7,7 +7,8 @@ import six
 import tensorflow as tf
 
 from edward.models import RandomVariable
-from edward.util import check_data, get_session, compute_multinomial_mode
+from edward.util import check_data, get_session, compute_multinomial_mode, \
+    with_binary_averaging
 
 try:
   from edward.models import Bernoulli, Binomial, Categorical, \
@@ -116,6 +117,7 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
     binary_discrete = (Bernoulli, Binomial)
     categorical_discrete = (Categorical, Multinomial, OneHotCategorical)
     total_count = sess.run(getattr(output_key, 'total_count', tf.constant(1.)))
+    n_dims = len(y_true.shape)
     if isinstance(output_key, binary_discrete + categorical_discrete):
       # Average over realizations of their probabilities, then predict
       # via argmax over probabilities.
@@ -136,6 +138,9 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
       y_pred = [sess.run(output_key, feed_dict) for _ in range(n_samples)]
       y_pred = tf.cast(tf.add_n(y_pred), y_pred[0].dtype) / \
           tf.cast(n_samples, y_pred[0].dtype)
+    if n_dims == 0:
+      y_true = tf.expand_dims(y_true, 0)
+      y_pred = tf.expand_dims(y_pred, 0)
 
   # Evaluate y_true (according to y_pred if supervised) for all metrics.
   evaluations = []
@@ -366,6 +371,7 @@ def squared_hinge(y_true, y_pred):
 # Regression metrics
 
 
+@with_binary_averaging
 def mean_squared_error(y_true, y_pred):
   """Mean squared error loss.
 
@@ -374,9 +380,10 @@ def mean_squared_error(y_true, y_pred):
     y_pred: tf.Tensor.
       Tensors of same shape and type.
   """
-  return tf.reduce_mean(tf.square(y_pred - y_true))
+  return tf.reduce_mean(tf.square(y_pred - y_true), axis=-1)
 
 
+@with_binary_averaging
 def mean_absolute_error(y_true, y_pred):
   """Mean absolute error loss.
 
@@ -385,9 +392,10 @@ def mean_absolute_error(y_true, y_pred):
     y_pred: tf.Tensor.
       Tensors of same shape and type.
   """
-  return tf.reduce_mean(tf.abs(y_pred - y_true))
+  return tf.reduce_mean(tf.abs(y_pred - y_true), axis=-1)
 
 
+@with_binary_averaging
 def mean_absolute_percentage_error(y_true, y_pred):
   """Mean absolute percentage error loss.
 
@@ -398,9 +406,10 @@ def mean_absolute_percentage_error(y_true, y_pred):
   """
   diff = tf.abs((y_true - y_pred) / tf.clip_by_value(tf.abs(y_true),
                                                      1e-8, np.inf))
-  return 100.0 * tf.reduce_mean(diff)
+  return 100.0 * tf.reduce_mean(diff, axis=-1)
 
 
+@with_binary_averaging
 def mean_squared_logarithmic_error(y_true, y_pred):
   """Mean squared logarithmic error loss.
 
@@ -411,7 +420,7 @@ def mean_squared_logarithmic_error(y_true, y_pred):
   """
   first_log = tf.log(tf.clip_by_value(y_pred, 1e-8, np.inf) + 1.0)
   second_log = tf.log(tf.clip_by_value(y_true, 1e-8, np.inf) + 1.0)
-  return tf.reduce_mean(tf.square(first_log - second_log))
+  return tf.reduce_mean(tf.square(first_log - second_log), axis=-1)
 
 
 def poisson(y_true, y_pred):
