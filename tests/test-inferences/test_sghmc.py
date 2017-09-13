@@ -9,7 +9,7 @@ import tensorflow as tf
 from edward.models import Normal, Empirical
 
 
-class test_sgld_class(tf.test.TestCase):
+class test_sghmc_class(tf.test.TestCase):
 
   def test_normalnormal_float32(self):
     with self.test_session() as sess:
@@ -21,7 +21,7 @@ class test_sgld_class(tf.test.TestCase):
       qmu = Empirical(params=tf.Variable(tf.ones(5000)))
 
       # analytic solution: N(loc=0.0, scale=\sqrt{1/51}=0.140)
-      inference = ed.SGLD({mu: qmu}, data={x: x_data})
+      inference = ed.SGHMC({mu: qmu}, data={x: x_data})
       inference.run(step_size=0.10)
 
       self.assertAllClose(qmu.mean().eval(), 0, rtol=1e-2, atol=1.5e-2)
@@ -41,7 +41,7 @@ class test_sgld_class(tf.test.TestCase):
       qmu = Empirical(params=tf.Variable(tf.ones(5000, dtype=tf.float64)))
 
       # analytic solution: N(loc=0.0, scale=\sqrt{1/51}=0.140)
-      inference = ed.SGLD({mu: qmu}, data={x: x_data})
+      inference = ed.SGHMC({mu: qmu}, data={x: x_data})
       inference.run(step_size=0.10)
 
       self.assertAllClose(qmu.mean().eval(), 0, rtol=1e-2, atol=1.5e-2)
