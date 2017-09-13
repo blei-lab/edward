@@ -54,9 +54,8 @@ class SGHMC(MonteCarlo):
       friction: float, optional.
         Constant scale on the friction term in the Hamiltonian system.
     """
-    dtype = list(six.iterkeys(self.latent_vars))[0].dtype
-    self.step_size = tf.cast(step_size, dtype=dtype)
-    self.friction = tf.cast(friction, dtype=dtype)
+    self.step_size = step_size
+    self.friction = friction
     self.v = {z: tf.Variable(tf.zeros(qz.params.shape[1:], dtype=qz.dtype))
               for z, qz in six.iteritems(self.latent_vars)}
     return super(SGHMC, self).initialize(*args, **kwargs)
@@ -83,9 +82,10 @@ class SGHMC(MonteCarlo):
     for z, grad_log_p in zip(six.iterkeys(old_sample), grad_log_joint):
       qz = self.latent_vars[z]
       event_shape = qz.event_shape
-      normal = Normal(loc=tf.zeros(event_shape, dtype=qz.dtype),
-                      scale=(tf.sqrt(learning_rate * self.friction) *
-                             tf.ones(event_shape, dtype=qz.dtype)))
+      normal = Normal(
+          loc=tf.zeros(event_shape, dtype=qz.dtype),
+          scale=(tf.sqrt(tf.cast(learning_rate * self.friction, qz.dtype)) *
+                 tf.ones(event_shape, dtype=qz.dtype)))
       sample[z] = old_sample[z] + old_v_sample[z]
       v_sample[z] = ((1.0 - 0.5 * self.friction) * old_v_sample[z] +
                      learning_rate * tf.convert_to_tensor(grad_log_p) +

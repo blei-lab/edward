@@ -51,8 +51,7 @@ class SGLD(MonteCarlo):
       step_size: float, optional.
         Constant scale factor of learning rate.
     """
-    dtype = list(six.iterkeys(self.latent_vars))[0].dtype
-    self.step_size = tf.cast(step_size, dtype=dtype)
+    self.step_size = step_size
     return super(SGLD, self).initialize(*args, **kwargs)
 
   def build_update(self):
@@ -76,9 +75,10 @@ class SGLD(MonteCarlo):
     for z, grad_log_p in zip(six.iterkeys(old_sample), grad_log_joint):
       qz = self.latent_vars[z]
       event_shape = qz.event_shape
-      normal = Normal(loc=tf.zeros(event_shape, dtype=qz.dtype),
-                      scale=(tf.sqrt(learning_rate) *
-                             tf.ones(event_shape, dtype=qz.dtype)))
+      normal = Normal(
+          loc=tf.zeros(event_shape, dtype=qz.dtype),
+          scale=(tf.sqrt(tf.cast(learning_rate * self.friction, qz.dtype)) *
+                 tf.ones(event_shape, dtype=qz.dtype)))
       sample[z] = old_sample[z] + \
           0.5 * learning_rate * tf.convert_to_tensor(grad_log_p) + \
           normal.sample()

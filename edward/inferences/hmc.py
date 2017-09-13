@@ -57,8 +57,7 @@ class HMC(MonteCarlo):
       n_steps: int, optional.
         Number of steps of numerical integrator.
     """
-    dtype = list(six.iterkeys(self.latent_vars))[0].dtype
-    self.step_size = tf.cast(step_size, dtype=dtype)
+    self.step_size = step_size
     self.n_steps = n_steps
     # store global scope for log joint calculations
     self._scope = tf.get_default_graph().unique_name("inference") + '/'
