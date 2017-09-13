@@ -57,7 +57,8 @@ class HMC(MonteCarlo):
       n_steps: int, optional.
         Number of steps of numerical integrator.
     """
-    self.step_size = step_size
+    dtype = list(six.iterkeys(self.latent_vars))[0].dtype
+    self.step_size = tf.constant(step_size, dtype=dtype)
     self.n_steps = n_steps
     # store global scope for log joint calculations
     self._scope = tf.get_default_graph().unique_name("inference") + '/'
@@ -81,7 +82,8 @@ class HMC(MonteCarlo):
     old_r_sample = OrderedDict()
     for z, qz in six.iteritems(self.latent_vars):
       event_shape = qz.event_shape
-      normal = Normal(loc=tf.zeros(event_shape), scale=tf.ones(event_shape))
+      normal = Normal(loc=tf.zeros(event_shape, dtype=qz.dtype),
+                      scale=tf.ones(event_shape, dtype=qz.dtype))
       old_r_sample[z] = normal.sample()
 
     # Simulate Hamiltonian dynamics.
@@ -98,7 +100,8 @@ class HMC(MonteCarlo):
     ratio -= self._log_joint(old_sample)
 
     # Accept or reject sample.
-    u = Uniform().sample()
+    u = Uniform(low=tf.constant(0.0, dtype=ratio.dtype),
+                high=tf.constant(1.0, dtype=ratio.dtype)).sample()
     accept = tf.log(u) < ratio
     sample_values = tf.cond(accept, lambda: list(six.itervalues(new_sample)),
                             lambda: list(six.itervalues(old_sample)))

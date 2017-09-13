@@ -51,7 +51,8 @@ class SGLD(MonteCarlo):
       step_size: float, optional.
         Constant scale factor of learning rate.
     """
-    self.step_size = step_size
+    dtype = list(six.iterkeys(self.latent_vars))[0].dtype
+    self.step_size = tf.constant(step_size, dtype=dtype)
     return super(SGLD, self).initialize(*args, **kwargs)
 
   def build_update(self):
@@ -67,16 +68,17 @@ class SGLD(MonteCarlo):
                   for z, qz in six.iteritems(self.latent_vars)}
 
     # Simulate Langevin dynamics.
-    learning_rate = self.step_size / tf.pow(tf.cast(self.t + 1, tf.float32),
-                                            0.55)
+    learning_rate = self.step_size / \
+        tf.pow(tf.cast(self.t + 1, self.step_size.dtype), 0.55)
     grad_log_joint = tf.gradients(self._log_joint(old_sample),
                                   list(six.itervalues(old_sample)))
     sample = {}
     for z, grad_log_p in zip(six.iterkeys(old_sample), grad_log_joint):
       qz = self.latent_vars[z]
       event_shape = qz.event_shape
-      normal = Normal(loc=tf.zeros(event_shape),
-                      scale=tf.sqrt(learning_rate) * tf.ones(event_shape))
+      normal = Normal(loc=tf.zeros(event_shape, dtype=qz.dtype),
+                      scale=(tf.sqrt(learning_rate) *
+                             tf.ones(event_shape, dtype=qz.dtype)))
       sample[z] = old_sample[z] + \
           0.5 * learning_rate * tf.convert_to_tensor(grad_log_p) + \
           normal.sample()
