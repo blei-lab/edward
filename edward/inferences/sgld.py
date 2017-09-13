@@ -52,7 +52,7 @@ class SGLD(MonteCarlo):
         Constant scale factor of learning rate.
     """
     dtype = list(six.iterkeys(self.latent_vars))[0].dtype
-    self.step_size = tf.constant(step_size, dtype=dtype)
+    self.step_size = tf.cast(step_size, dtype=dtype)
     return super(SGLD, self).initialize(*args, **kwargs)
 
   def build_update(self):
