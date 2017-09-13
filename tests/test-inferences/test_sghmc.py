@@ -22,7 +22,7 @@ class test_sghmc_class(tf.test.TestCase):
 
       # analytic solution: N(loc=0.0, scale=\sqrt{1/51}=0.140)
       inference = ed.SGHMC({mu: qmu}, data={x: x_data})
-      inference.run(step_size=0.10)
+      inference.run(step_size=0.025)
 
       self.assertAllClose(qmu.mean().eval(), 0, rtol=1e-2, atol=1.5e-2)
       self.assertAllClose(qmu.stddev().eval(), np.sqrt(1 / 51),
@@ -42,7 +42,7 @@ class test_sghmc_class(tf.test.TestCase):
 
       # analytic solution: N(loc=0.0, scale=\sqrt{1/51}=0.140)
       inference = ed.SGHMC({mu: qmu}, data={x: x_data})
-      inference.run(step_size=0.10)
+      inference.run(step_size=0.025)
 
       self.assertAllClose(qmu.mean().eval(), 0, rtol=1e-2, atol=1.5e-2)
       self.assertAllClose(qmu.stddev().eval(), np.sqrt(1 / 51),
