@@ -131,7 +131,8 @@ class MetropolisHastings(MonteCarlo):
         ratio -= tf.reduce_sum(x_zold.log_prob(dict_swap[x]))
 
     # Accept or reject sample.
-    u = Uniform().sample()
+    u = Uniform(low=tf.constant(0.0, dtype=ratio.dtype),
+                high=tf.constant(1.0, dtype=ratio.dtype)).sample()
     accept = tf.log(u) < ratio
     sample_values = tf.cond(accept, lambda: list(six.itervalues(new_sample)),
                             lambda: list(six.itervalues(old_sample)))
