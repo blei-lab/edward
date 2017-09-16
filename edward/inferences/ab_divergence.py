@@ -253,8 +253,6 @@ def build_reparam_loss_and_gradients(inference, var_list, alpha=1.0, beta=0.0, b
             logF = (logF + logF_max) / (1 - alpha)
             loss = tf.reduce_mean(logF)
 
-        loss = -loss
-
     # AB-objective:
     else:
         logF1 = tf.stack([(alpha + beta - 1) * q for q in q_log_prob])
@@ -285,7 +283,7 @@ def build_reparam_loss_and_gradients(inference, var_list, alpha=1.0, beta=0.0, b
 
         logF = tf.clip_by_value(logF, 0, np.inf)
 
-        loss = tf.reduce_mean(logF)
+        loss = -tf.reduce_mean(logF)
 
     if inference.logging:
         p_log_prob = tf.reduce_mean(p_log_prob)
