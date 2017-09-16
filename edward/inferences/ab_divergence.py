@@ -244,7 +244,7 @@ def build_reparam_loss_and_gradients(inference, var_list, alpha=1.0, beta=0.0, b
         logF = [p - q for p, q in zip(p_log_prob, q_log_prob)]
 
         if np.abs(alpha - 1.0) < 10e-3:
-            divergence = tf.reduce_mean(logF)
+            loss = tf.reduce_mean(logF)
         else:
             logF = tf.reshape(logF, [inference.n_samples, 1])
             logF = logF * (1 - alpha)
@@ -253,7 +253,7 @@ def build_reparam_loss_and_gradients(inference, var_list, alpha=1.0, beta=0.0, b
             logF = (logF + logF_max) / (1 - alpha)
             loss = tf.reduce_mean(logF)
 
-        divergence = -divergence
+        loss = -loss
 
     # AB-objective:
     else:
