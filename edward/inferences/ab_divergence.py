@@ -230,7 +230,6 @@ def build_reparam_loss_and_gradients(inference, var_list, alpha=1.0, beta=0.0, b
             p_log_prob[s] += tf.reduce_sum(
                 inference.scale.get(z, 1.0) * z_copy.log_prob(dict_swap[z]))
 
-
         for x in six.iterkeys(inference.data):
             if isinstance(x, RandomVariable):
                 x_copy = copy(x, dict_swap, scope=scope)
@@ -238,10 +237,22 @@ def build_reparam_loss_and_gradients(inference, var_list, alpha=1.0, beta=0.0, b
                     inference.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
         # print("p_log_prob= {}".format(p_log_prob))
 
-# Reduces to a Renyi divergence:
-    if isclose(alpha + beta, 5.0, abs_tol=1e-4):
-        # TODO
-        a = 0
+    # Reduces to a Renyi divergence:
+    if isclose(alpha + beta, 1.0, abs_tol=1e-4):
+
+        logF = [p - q for p, q in zip(p_log_prob, q_log_prob)]
+
+        if np.abs(alpha - 1.0) < 10e-3:
+            divergence = tf.reduce_mean(logF)
+        else:
+            logF = tf.reshape(logF, [inference.n_samples, 1])
+            logF = logF * (1 - alpha)
+            logF_max = tf.reduce_max(logF, 0)
+            logF = tf.log(tf.clip_by_value(tf.reduce_mean(tf.exp(logF - logF_max), 0), 1e-9, np.inf))
+            logF = (logF + logF_max) / (1 - alpha)
+            loss = tf.reduce_mean(logF)
+
+        divergence = -divergence
 
     # AB-objective:
     else:
