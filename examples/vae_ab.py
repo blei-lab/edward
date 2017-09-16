@@ -58,7 +58,7 @@ qz = Normal(loc=Dense(d)(hidden),
 # Bind p(x, z) and q(z | x) to the same TensorFlow placeholder for x.
 inference = AB_divergence({z: qz}, data={x: x_ph})
 optimizer = tf.train.RMSPropOptimizer(0.01, epsilon=1.0)
-inference.initialize(optimizer=optimizer, n_samples=20)
+inference.initialize(optimizer=optimizer, n_samples=20, alpha=alpha, beta=beta)
 
 sess = ed.get_session()
 tf.global_variables_initializer().run()

@@ -239,6 +239,7 @@ def build_reparam_loss_and_gradients(inference, var_list, alpha=1.0, beta=0.0, b
 
     # Reduces to a Renyi divergence:
     if isclose(alpha + beta, 1.0, abs_tol=1e-4):
+        print("special case")
 
         logF = [p - q for p, q in zip(p_log_prob, q_log_prob)]
 
