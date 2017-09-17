@@ -341,7 +341,6 @@ def build_reparam_loss_and_gradients(inference, var_list):
     Computed by sampling from $q(z;\lambda)$ and evaluating the
     expectation using Monte Carlo sampling.
     """
-    print("repar")
     p_log_prob = [0.0] * inference.n_samples
     q_log_prob = [0.0] * inference.n_samples
     base_scope = tf.get_default_graph().unique_name("inference") + '/'
@@ -375,7 +374,6 @@ def build_reparam_loss_and_gradients(inference, var_list):
                 x_copy = copy(x, dict_swap, scope=scope)
                 p_log_prob[s] += tf.reduce_sum(
                     inference.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
-        print("p_log_prob= {}".format(p_log_prob))
 
     p_log_prob = tf.reduce_mean(p_log_prob)
     q_log_prob = tf.reduce_mean(q_log_prob)

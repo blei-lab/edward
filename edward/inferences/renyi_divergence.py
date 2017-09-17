@@ -3,19 +3,24 @@ from __future__ import division
 from __future__ import print_function
 
 import six
+import numpy as np
 import tensorflow as tf
 
 from edward.inferences.variational_inference import VariationalInference
 from edward.models import RandomVariable
 from edward.util import copy
 
-import numpy as np
+try:
+    from edward.models import Normal
+    from tensorflow.contrib.distributions import kl_divergence
+except Exception as e:
+    raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
 class Renyi_divergence(VariationalInference):
     """Variational inference with the Renyi divergence
 
-    TODO $\\text{KL}( p(z \mid x) \| q(z) ).$
+    TODO $\\text{D}_{\alpha}(q(z) || p(z \mid x) )  = .$
 
     To perform the optimization, this class uses the techniques from
     Renyi Divergence Variational Inference (Y. Li & al, 2016)
@@ -37,9 +42,18 @@ class Renyi_divergence(VariationalInference):
         and builds ops for the algorithm's computation graph.
 
         Args:
-          n_samples: int, optional.
-            Number of samples from variational model for calculating
-            stochastic gradients.
+            n_samples: int, optional.
+                Number of samples from variational model for calculating
+                stochastic gradients.
+            batch_size: int, optional.
+                Number of data points per iterations.
+            alpha: float, optional.
+                Renyi divergence coefficient.
+            backward_pass: str, optional.
+                Backward pass mode to be used.
+                Options: 'min', 'max', 'full'
+                (see Renyi Divergence Variational Inference (Y. Li & al, 2016)
+                 section 4.2)
         """
         self.n_samples = n_samples
         self.batch_size = batch_size
@@ -64,6 +78,7 @@ class Renyi_divergence(VariationalInference):
                                        rv.reparameterization_type ==
                                        tf.contrib.distributions.FULLY_REPARAMETERIZED
                                        for rv in six.itervalues(self.latent_vars)])
+
         # Might not be useful, there's no analytic version
         is_analytic_kl = all([isinstance(z, Normal) and isinstance(qz, Normal)
                               for z, qz in six.iteritems(self.latent_vars)])
