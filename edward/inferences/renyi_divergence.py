@@ -20,13 +20,15 @@ except Exception as e:
 class Renyi_divergence(VariationalInference):
     """Variational inference with the Renyi divergence
 
-    TODO $\\text{D}_{\alpha}(q(z) || p(z \mid x) )  = .$
+    $ \text{D}_{R}^{(\alpha)}(q(z)||p(z \mid x))
+        = \frac{1}{\alpha-1} \log \int q(z)^{\alpha} p(z \mid x)^{1-\alpha} dz $
 
     To perform the optimization, this class uses the techniques from
     Renyi Divergence Variational Inference (Y. Li & al, 2016)
 
     #### Notes
-
+        - Renyi divergence does not have any analytic version.
+        - Renyi divergence does not have any version for non reparametrizable models.
     """
 
     def __init__(self, *args, **kwargs):
@@ -65,9 +67,8 @@ class Renyi_divergence(VariationalInference):
     def build_loss_and_gradients(self, var_list):
         """Wrapper for the Renyi ELBO function.
 
-        $\\text{ELBO}_{\alpha} =
-            \frac{1}{1-\alpha} \log
-                \mathbb{E}_{q(z; \lambda)} [ \big( \frac{\log p(x, z)}{q(z; \lambda)} \big)^{1-\alpha} ]
+        $ \mcalL_{R}^{\alpha}(q; x) =
+            \frac{1}{1-\alpha} \log \dsE_{q} \left[ \left( \frac{p(x, z)}{q(z)}\right)^{1-\alpha} \right] $
 
         It uses:
         1. Monte Carlo approximation of the ELBO (Y. Li & al, 2016)
@@ -79,35 +80,27 @@ class Renyi_divergence(VariationalInference):
                                        tf.contrib.distributions.FULLY_REPARAMETERIZED
                                        for rv in six.itervalues(self.latent_vars)])
 
-        # Might not be useful, there's no analytic version
-        is_analytic_kl = all([isinstance(z, Normal) and isinstance(qz, Normal)
-                              for z, qz in six.iteritems(self.latent_vars)])
-
-        if not is_analytic_kl and self.kl_scaling:
-            raise TypeError("kl_scaling must be None when using non-analytic KL term")
         if is_reparameterizable:
-            if is_analytic_kl:
-                return build_reparam_R_loss_and_gradients(self, var_list)
-            else:
-                return build_reparam_R_loss_and_gradients(self, var_list)
+            return build_reparam_R_loss_and_gradients(self, var_list)
         else:
             raise NotImplementedError("Variational Renyi inference only works with reparameterizable models")
 
 
-# See function ### 2 ###
 def build_reparam_R_loss_and_gradients(inference, var_list, alpha=1.0, backward_pass='full'):
     """Build loss function. Its automatic differentiation
     is a stochastic gradient of
 
-    TODO
-
-    $-\\text{ELBO} =
-        -\mathbb{E}_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]$
+    $ \mcalL_{R}^{\alpha}(q; x) =
+            \frac{1}{1-\alpha} \log \dsE_{q} \left[ \left( \frac{p(x, z)}{q(z)}\right)^{1-\alpha} \right] $
 
     based on the reparameterization trick (Kingma and Welling, 2014).
 
     Computed by sampling from $q(z;\lambda)$ and evaluating the
     expectation using Monte Carlo sampling.
+
+    ### Notes
+        See Renyi Divergence Variational Inference (Y. Li & al, 2016)
+        for more details.
     """
     p_log_prob = [0.0] * inference.n_samples
     q_log_prob = [0.0] * inference.n_samples
@@ -132,8 +125,6 @@ def build_reparam_R_loss_and_gradients(inference, var_list, alpha=1.0, backward_
             q_log_prob[s] += tf.reduce_sum(
                 inference.scale.get(z, 1.0) * qz_copy.log_prob(dict_swap[z]))
 
-        # print("q_log_prob= {}".format(q_log_prob))
-
         for z in six.iterkeys(inference.latent_vars):
             z_copy = copy(z, dict_swap, scope=scope)
             p_log_prob[s] += tf.reduce_sum(
@@ -144,9 +135,7 @@ def build_reparam_R_loss_and_gradients(inference, var_list, alpha=1.0, backward_
                 x_copy = copy(x, dict_swap, scope=scope)
                 p_log_prob[s] += tf.reduce_sum(
                     inference.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
-                # print("p_log_prob= {}".format(p_log_prob))
 
-    # Reduces to a Renyi divergence:
     logF = [p - q for p, q in zip(p_log_prob, q_log_prob)]
 
     if backward_pass == 'max':
