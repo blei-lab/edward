@@ -32,7 +32,7 @@ if not os.path.exists(IMG_DIR):
 
 ed.set_seed(42)
 
-M = 32  # batch size during training
+M = 100  # batch size during training
 d = 2  # latent dimension
 alpha = 0.5
 beta = 0.5

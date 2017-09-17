@@ -52,8 +52,8 @@ class AB_divergence(VariationalInference):
     def __init__(self, *args, **kwargs):
         super(AB_divergence, self).__init__(*args, **kwargs)
 
-    def initialize(self, n_samples=32, kl_scaling=None,
-                   alpha=.2, beta=0.5, batch_size=32, *args, **kwargs):
+    def initialize(self, n_samples=32, batch_size=32,
+                   alpha=.2, beta=0.5, *args, **kwargs):
         """Initialize inference algorithm. It initializes hyperparameters
         and builds ops for the algorithm's computation graph.
 
@@ -72,17 +72,10 @@ class AB_divergence(VariationalInference):
             where $\\alpha_p$ is a float that specifies how much to
             scale the KL term.
         """
-        # print("+++ in initialize ab_div")
-        # print("+++ n_samples = {}".format(n_samples))
-
-        if kl_scaling is None:
-            kl_scaling = {}
-
         self.n_samples = n_samples
-        self.kl_scaling = kl_scaling
+        self.batch_size = batch_size
         self.alpha = alpha
         self.beta = beta
-        self.batch_size = batch_size
         return super(AB_divergence, self).initialize(*args, **kwargs)
 
     def build_loss_and_gradients(self, var_list):
@@ -238,8 +231,7 @@ def build_reparam_loss_and_gradients(inference, var_list, alpha=1.0, beta=0.0, b
         # print("p_log_prob= {}".format(p_log_prob))
 
     # Reduces to a Renyi divergence:
-    if isclose(alpha + beta, 1.0, abs_tol=1e-4):
-        print("special case")
+    if isclose(alpha + beta, 1.0, abs_tol=1e-3):
 
         logF = [p - q for p, q in zip(p_log_prob, q_log_prob)]
 
@@ -252,20 +244,21 @@ def build_reparam_loss_and_gradients(inference, var_list, alpha=1.0, beta=0.0, b
             logF = tf.log(tf.clip_by_value(tf.reduce_mean(tf.exp(logF - logF_max), 0), 1e-9, np.inf))
             logF = (logF + logF_max) / (1 - alpha)
             loss = tf.reduce_mean(logF)
+        loss = -loss
 
     # AB-objective:
     else:
         logF1 = tf.stack([(alpha + beta - 1) * q for q in q_log_prob])
-        logF2 = [(alpha + beta) * p - q for p, q in zip(p_log_prob, q_log_prob)]
-        logF3 = [beta * p - (1 - alpha) * q for p, q in zip(p_log_prob, q_log_prob)]
+        logF2 = tf.stack([(alpha + beta) * p - q for p, q in zip(p_log_prob, q_log_prob)])
+        logF3 = tf.stack([beta * p - (1 - alpha) * q for p, q in zip(p_log_prob, q_log_prob)])
 
         # print("q_log_prob= {}".format(q_log_prob))
         # print("logF1= {}".format(logF1))
 
         # TODO Wrong should be n_samples, batch_size
-        logF1 = tf.reshape(logF1, [inference.n_samples, 1])
-        logF2 = tf.reshape(logF2, [inference.n_samples, 1])
-        logF3 = tf.reshape(logF3, [inference.n_samples, 1])
+        # logF1 = tf.reshape(logF1, [inference.n_samples, 1])
+        # logF2 = tf.reshape(logF2, [inference.n_samples, 1])
+        # logF3 = tf.reshape(logF3, [inference.n_samples, 1])
 
         # print("logF1= {}".format(logF1))
 
@@ -283,7 +276,7 @@ def build_reparam_loss_and_gradients(inference, var_list, alpha=1.0, beta=0.0, b
 
         logF = tf.clip_by_value(logF, 0, np.inf)
 
-        loss = -tf.reduce_mean(logF)
+        loss = tf.reduce_mean(logF)
 
     if inference.logging:
         p_log_prob = tf.reduce_mean(p_log_prob)
@@ -301,7 +294,7 @@ def build_reparam_loss_and_gradients(inference, var_list, alpha=1.0, beta=0.0, b
 #############
 ### UTILS ###
 #############
-def isclose(a, b, rel_tol=1e-06, abs_tol=0.0):
+def isclose(a, b, rel_tol=0.0, abs_tol=1e-3):
     r"""
     Almost equal
 

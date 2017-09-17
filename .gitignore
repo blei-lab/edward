@@ -100,3 +100,6 @@ docs/*.html
 # IDE related
 .idea/
 .vscode/
+
+# data:
+data/*

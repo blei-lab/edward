@@ -49,8 +49,6 @@ class VariationalInference(Inference):
           global_step: tf.Variable, optional.
             A TensorFlow variable to hold the global step.
         """
-        print("+++ in initialize var_inf")
-
         super(VariationalInference, self).initialize(*args, **kwargs)
 
         if var_list is None:
