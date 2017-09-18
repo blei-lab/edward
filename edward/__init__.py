@@ -79,6 +79,7 @@ _allowed_symbols = [
     'rbf',
     'set_seed',
     'to_simplex',
+    'transform',
     '__version__',
     'VERSION',
 ]

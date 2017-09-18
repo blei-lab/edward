@@ -30,6 +30,7 @@ _allowed_symbols = [
     'rbf',
     'set_seed',
     'to_simplex',
+    'transform'
 ]
 
 remove_undocumented(__name__, allowed_exception_list=_allowed_symbols)
