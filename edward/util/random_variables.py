@@ -702,8 +702,8 @@ def get_variables(x, collection=None):
 
 
 def softmax(vec):
-    numerator = np.exp(vec)
-    return numerator / numerator.sum(axis=0)
+  numerator = np.exp(vec)
+  return numerator / numerator.sum(axis=0)
 
 
 def compute_multinomial_mode(probs, total_count=1):
