@@ -752,9 +752,11 @@ def transform(x, *args, **kwargs):
     msg = "'{}' object has no 'support' so cannot be transformed.".format(
       type(x).__name__)
     raise ValueError(msg)
+    # TODO: Add supports to RandomVariables missing them
 
   if support == '01':
     bij = bijectors.Invert(bijectors.Sigmoid())
+  # TODO: add handling for general bounded supports on a <= x <= b
   elif support == 'nonnegative':
     bij = bijectors.Invert(bijectors.Softplus())
   elif support == 'simplex':
@@ -766,30 +768,3 @@ def transform(x, *args, **kwargs):
     raise NotImplementedError(msg)
 
   return TransformedDistribution(x, bij, *args, **kwargs)
-
-# TODO
-# add supports in models/random_variables.py
-# Gumbel
-# Logistic
-# StudentT
-# MultivariateNormalDiag
-# MultivariateNormalDiagWithSoftplusStDev
-# MultivariateNormalCholesky
-# MultivariateNormalFull
-# MultivariateNormalDiagPlusVDVT
-
-# Uniform
-# arbitrary bounds; should also be true for > 0 or <0 supports
-# use chain(affine with the others)
-
-# WishartCholesky
-# WishartFull
-
-# RelaxedBernoulli
-# RelaxedOneHotCategorical
-
-# should we support?
-# Mixture
-# TransformedDistribution
-# Empirical
-# PointMass
