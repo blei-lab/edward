@@ -749,8 +749,8 @@ def transform(x, *args, **kwargs):
   try:
     support = x.support
   except AttributeError as e:
-    msg = "'{}' object has no 'support' so cannot be transformed.".format(
-      type(x).__name__)
+    msg = """'{}' object has no 'support'
+             so cannot be transformed.""".format(type(x).__name__)
     raise ValueError(msg)
     # TODO: Add supports to RandomVariables missing them
 

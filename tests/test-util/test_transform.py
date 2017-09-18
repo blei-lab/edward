@@ -5,16 +5,10 @@ from __future__ import print_function
 import edward as ed
 import tensorflow as tf
 from collections import namedtuple
-from edward.models import (
-  Beta,
-  Dirichlet,
-  Gamma,
-  MultivariateNormalDiag,
-  Normal,
-  PointMass,
-  TransformedDistribution,
-)
+from edward.models import (Beta, Dirichlet, Gamma, MultivariateNormalDiag,
+                           Normal, PointMass, TransformedDistribution)
 from tensorflow.contrib.distributions import bijectors
+
 
 class test_transform_class(tf.test.TestCase):
 
