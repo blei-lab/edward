@@ -10,11 +10,13 @@ import tensorflow as tf
 
 def with_binary_averaging(metric):
   """
-  Inspired by scikit-learn's _average_binary_score function: http://bit.ly/2yhcABp.
+  Inspired by scikit-learn's _average_binary_score function:
+  http://bit.ly/2yhcABp.
 
   #TODO: Complete docstring (once we're happy with this function).
   """
   average_options = (None, 'micro', 'macro')
+
   @wraps(metric)
   def with_binary_averaging(*args, **kwargs):
     y_true, y_pred = args
