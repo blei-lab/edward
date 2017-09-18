@@ -5,6 +5,7 @@ from __future__ import print_function
 import edward as ed
 import tensorflow as tf
 
+<<<<<<< HEAD
 from collections import namedtuple
 from edward.models import (
   Beta,
@@ -15,6 +16,10 @@ from edward.models import (
   PointMass
 )
 from tensorflow.contrib.distributions import bijectors
+=======
+from edward.models import Beta, Dirichlet, Gamma, MultivariateNormalDiag, Normal
+from tensorflow.contrib.distributions import bijector
+>>>>>>> 12623e48cce2199d5f281e744696ffbedb758729
 
 
 class test_transform_class(tf.test.TestCase):
@@ -76,10 +81,3 @@ class test_transform_class(tf.test.TestCase):
 
 if __name__ == '__main__':
   tf.test.main()
-
-# edward/util/random_variables.py:768: in transform
-#     return TransformedDistribution(x, bij, *args, **kwargs)
-# edward/models/random_variables.py:21: in __init__
-#     _RandomVariable.__init__(self, *args, **kwargs)
-# edward/models/random_variable.py:128: in __init__
-#     self._value = self.sample(self._sample_shape)
