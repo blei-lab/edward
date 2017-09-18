@@ -4,8 +4,6 @@ from __future__ import print_function
 
 import edward as ed
 import tensorflow as tf
-
-<<<<<<< HEAD
 from collections import namedtuple
 from edward.models import (
   Beta,
@@ -13,14 +11,10 @@ from edward.models import (
   Gamma,
   MultivariateNormalDiag,
   Normal,
-  PointMass
+  PointMass,
+  TransformedDistribution,
 )
 from tensorflow.contrib.distributions import bijectors
-=======
-from edward.models import Beta, Dirichlet, Gamma, MultivariateNormalDiag, Normal
-from tensorflow.contrib.distributions import bijector
->>>>>>> 12623e48cce2199d5f281e744696ffbedb758729
-
 
 class test_transform_class(tf.test.TestCase):
 
@@ -40,24 +34,28 @@ class test_transform_class(tf.test.TestCase):
     with self.test_session():
       x = Beta(1.0, 1.0)
       y = ed.transform(x)
+      self.assertIsInstance(y, TransformedDistribution)
       y.eval()
 
   def test_nonnegative(self):
     with self.test_session():
       x = Gamma(1.0, 1.0)
       y = ed.transform(x)
+      self.assertIsInstance(y, TransformedDistribution)
       y.eval()
 
   def test_simplex(self):
     with self.test_session():
       x = Dirichlet(tf.zeros(5))
       y = ed.transform(x)
+      self.assertIsInstance(y, TransformedDistribution)
       y.eval()
 
   def test_real(self):
     with self.test_session():
       x = Normal(0.0, 1.0)
       y = ed.transform(x)
+      self.assertIsInstance(y, Normal)
       y.eval()
 
   def test_multivariate_real(self):
@@ -69,7 +67,7 @@ class test_transform_class(tf.test.TestCase):
   def test_no_support(self):
     with self.test_session():
       x = PointMass(1.0)
-      with self.assertRaises(NotImplementedError):
+      with self.assertRaises(ValueError):
         y = ed.transform(x)
 
   def test_unhandled_support(self):

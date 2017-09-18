@@ -7,18 +7,10 @@ import six
 import tensorflow as tf
 
 from copy import deepcopy
-<<<<<<< HEAD
 from edward.models.random_variable import RandomVariable
 from edward.models.random_variables import TransformedDistribution
 from edward.util.graphs import random_variables
 from tensorflow.contrib.distributions import bijectors
-=======
-from edward.models.random_variable import \
-    RandomVariable, RANDOM_VARIABLE_COLLECTION
-from edward.models.random_variables import TransformedDistribution
-from edward.util.graphs import random_variables
-from tensorflow.contrib.distributions import bijector
->>>>>>> 12623e48cce2199d5f281e744696ffbedb758729
 from tensorflow.core.framework import attr_value_pb2
 from tensorflow.python.framework.ops import set_shapes_for_outputs
 from tensorflow.python.util import compat
@@ -759,7 +751,7 @@ def transform(x, *args, **kwargs):
   except AttributeError as e:
     msg = "'{}' object has no 'support' so cannot be transformed.".format(
       type(x).__name__)
-    raise NotImplementedError(msg)
+    raise ValueError(msg)
 
   if support == '01':
     bij = bijectors.Invert(bijectors.Sigmoid())
@@ -771,6 +763,7 @@ def transform(x, *args, **kwargs):
     return x
   else:
     msg = "'transform' does not handle supports of type '{}'".format(support)
+    raise NotImplementedError(msg)
 
   return TransformedDistribution(x, bij, *args, **kwargs)
 
