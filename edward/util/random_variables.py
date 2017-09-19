@@ -723,15 +723,15 @@ def transform(x, *args, **kwargs):
   on the support of the provided random variable.
 
   Args:
-    x : RandomVariable
+    x : RandomVariable.
       Continuous random variable to transform.
-    *args, **kwargs : optional
+    *args, **kwargs : optional.
       Arguments to overwrite when forming the ``TransformedDistribution``.
       For example, one can manually specify the transformation by
       passing in the ``bijector`` argument.
 
-  Returns
-    RandomVariable
+  Returns:
+    RandomVariable.
     A ``TransformedDistribution`` random variable, or the provided random
     variable if no transformation was applied.
 
