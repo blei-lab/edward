@@ -100,8 +100,3 @@ docs/*.html
 # IDE related
 .idea/
 .vscode/
-
-# virtualenv
-.venv
-venv/
-ENV/
