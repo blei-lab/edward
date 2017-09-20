@@ -56,8 +56,6 @@ class test_transform_class(tf.test.TestCase):
       y = ed.transform(x)
       self.assertIsInstance(y, TransformedDistribution)
       sample = y.sample(10, seed=1).eval()
-      print(sample.shape)
-      print(sample)
       self.assertSamplePosNeg(sample)
 
   def test_real(self):
