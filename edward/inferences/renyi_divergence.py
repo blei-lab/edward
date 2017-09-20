@@ -181,6 +181,6 @@ def isclose(a, b, rel_tol=0.0, abs_tol=1e-3):
     :param b:
     :param rel_tol:
     :param abs_tol:
-    :return:
+    :return: Bool
     """
     return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)

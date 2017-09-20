@@ -103,3 +103,7 @@ docs/*.html
 
 # data:
 data/*
+
+# ab_div:
+examples/vae_ab.py
+edward/inferences/ab_divergence.py
