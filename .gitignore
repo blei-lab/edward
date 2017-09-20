@@ -105,5 +105,5 @@ docs/*.html
 data/*
 
 # ab_div:
-examples/vae_ab.py
-edward/inferences/ab_divergence.py
+# examples/vae_ab.py
+# edward/inferences/ab_divergence.py
