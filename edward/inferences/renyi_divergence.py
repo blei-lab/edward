@@ -81,7 +81,7 @@ class Renyi_divergence(VariationalInference):
                                        for rv in six.itervalues(self.latent_vars)])
 
         if is_reparameterizable:
-            return build_reparam_R_loss_and_gradients(self, var_list)
+            return build_reparam_R_loss_and_gradients(self, var_list, alpha=self.alpha)
         else:
             raise NotImplementedError("Variational Renyi inference only works with reparameterizable models")
 
