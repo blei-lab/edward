@@ -8,7 +8,9 @@ import tensorflow as tf
 
 from copy import deepcopy
 from edward.models.random_variable import RandomVariable
+from edward.models.random_variables import TransformedDistribution
 from edward.util.graphs import random_variables
+from tensorflow.contrib.distributions import bijectors
 from tensorflow.core.framework import attr_value_pb2
 from tensorflow.python.framework.ops import set_shapes_for_outputs
 from tensorflow.python.util import compat
@@ -712,3 +714,57 @@ def get_variables(x, collection=None):
     nodes.update(node.op.inputs)
 
   return list(output)
+
+
+def transform(x, *args, **kwargs):
+  """Transform a continuous random variable to the unconstrained space.
+
+  Transform selects among a number of defaults transformations which depend
+  on the support of the provided random variable.
+
+  Args:
+    x : RandomVariable.
+      Continuous random variable to transform.
+    *args, **kwargs : optional.
+      Arguments to overwrite when forming the ``TransformedDistribution``.
+      For example, one can manually specify the transformation by
+      passing in the ``bijector`` argument.
+
+  Returns:
+    RandomVariable.
+    A ``TransformedDistribution`` random variable, or the provided random
+    variable if no transformation was applied.
+
+  #### Examples
+
+  ```python
+  x = Gamma(1.0, 1.0)
+  y = ed.transform(x)
+  sess = tf.Session()
+  sess.run(y)
+  -2.2279539
+  ```
+  """
+  if len(args) != 0 or kwargs.get('bijector', None) is not None:
+    return TransformedDistribution(x, *args, **kwargs)
+
+  try:
+    support = x.support
+  except AttributeError as e:
+    msg = """'{}' object has no 'support'
+             so cannot be transformed.""".format(type(x).__name__)
+    raise ValueError(msg)
+
+  if support == '01':
+    bij = bijectors.Invert(bijectors.Sigmoid())
+  elif support == 'nonnegative':
+    bij = bijectors.Invert(bijectors.Softplus())
+  elif support == 'simplex':
+    bij = bijectors.Invert(bijectors.SoftmaxCentered(event_ndims=1))
+  elif support == 'real' or support == 'multivariate_real':
+    return x
+  else:
+    msg = "'transform' does not handle supports of type '{}'".format(support)
+    raise NotImplementedError(msg)
+
+  return TransformedDistribution(x, bij, *args, **kwargs)
