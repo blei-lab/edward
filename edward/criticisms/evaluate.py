@@ -117,7 +117,6 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
     binary_discrete = (Bernoulli, Binomial)
     categorical_discrete = (Categorical, Multinomial, OneHotCategorical)
     total_count = sess.run(getattr(output_key, 'total_count', tf.constant(1.)))
-    n_dims = len(y_true.shape)
     if isinstance(output_key, binary_discrete + categorical_discrete):
       # Average over realizations of their probabilities, then predict
       # via argmax over probabilities.
@@ -138,7 +137,7 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
       y_pred = [sess.run(output_key, feed_dict) for _ in range(n_samples)]
       y_pred = tf.cast(tf.add_n(y_pred), y_pred[0].dtype) / \
           tf.cast(n_samples, y_pred[0].dtype)
-    if n_dims == 0:
+    if len(y_true.shape) == 0:
       y_true = tf.expand_dims(y_true, 0)
       y_pred = tf.expand_dims(y_pred, 0)
 
