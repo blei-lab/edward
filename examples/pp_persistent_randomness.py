@@ -19,8 +19,7 @@ from edward.models import Categorical
 
 
 def eye_color(person):
-  random_variables = {x.name: x for x in
-                      tf.get_collection('_random_variable_collection_')}
+  random_variables = {x.name: x for x in ed.random_variables()}
   if person + '/' in random_variables:
     return random_variables[person + '/']
   else:
