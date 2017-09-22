@@ -11,7 +11,7 @@ import os
 from datetime import datetime
 from edward.models import RandomVariable
 from edward.util import check_data, check_latent_vars, get_session, \
-    get_variables, Progbar
+    get_variables, Progbar, transform
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -152,8 +152,9 @@ class Inference(object):
       self.coord.join(self.threads)
 
   @abc.abstractmethod
-  def initialize(self, n_iter=1000, n_print=None, scale=None, logdir=None,
-                 log_timestamp=True, log_vars=None, debug=False):
+  def initialize(self, n_iter=1000, n_print=None, scale=None,
+                 auto_transform=True, logdir=None, log_timestamp=True,
+                 log_vars=None, debug=False):
     """Initialize inference algorithm. It initializes hyperparameters
     and builds ops for the algorithm's computation graph.
 
@@ -175,6 +176,9 @@ class Inference(object):
         element-wise to the random variable. For example, this is useful
         for mini-batch scaling when inferring global variables, or
         applying masks on a random variable.
+      auto_transform: bool, optional.
+        Whether to automatically transform continuous latent variables
+        of unequal support to be on the unconstrained space.
       logdir: str, optional.
         Directory where event file will be written. For details,
         see `tf.summary.FileWriter`. Default is to log nothing.
@@ -209,6 +213,18 @@ class Inference(object):
       raise TypeError("scale must be a dict object.")
 
     self.scale = scale
+
+    if auto_transform:
+      latent_vars = self.latent_vars.copy()
+      self.latent_vars = {}
+      for z, qz in six.iteritems(latent_vars):
+        try:
+          if z.support != qz.support:
+            self.latent_vars[transform(z)] = transform(qz)
+          else:
+            self.latent_vars[z] = qz
+        except AttributeError:
+          self.latent_vars[z] = qz
 
     if logdir is not None:
       self.logging = True
