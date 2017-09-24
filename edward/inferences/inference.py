@@ -220,7 +220,14 @@ class Inference(object):
       for z, qz in six.iteritems(latent_vars):
         try:
           if z.support != qz.support:
-            self.latent_vars[transform(z)] = transform(qz)
+            z_transform = transform(z)
+            if qz.support == 'point':
+              from tensorflow.contrib.distributions import bijectors
+              qz_transform = transform(qz, bijectors.Invert(z_transform.bijector))
+              self.latent_vars[z] = qz_transform
+            else:
+              qz_transform = transform(qz)
+              self.latent_vars[z_transform] = qz_transform
           else:
             self.latent_vars[z] = qz
         except AttributeError:

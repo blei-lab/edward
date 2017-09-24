@@ -60,9 +60,10 @@ class MAP(VariationalInference):
   ed.MAP([pi, mu, sigma], data)
   ```
 
-  Currently, `MAP` can only instantiate `PointMass` random variables
-  with unconstrained support. To constrain their support, one must
-  manually pass in the `PointMass` family.
+  Like other `Inference` classes, `MAP` optimizes over latent
+  variables with constrained continuous support by transforming them
+  to the unconstrained space. The optimized point mass approximations
+  are the points transformed back to the original (constrained) space.
   """
   def __init__(self, latent_vars=None, data=None):
     """Create an inference algorithm.
@@ -71,10 +72,10 @@ class MAP(VariationalInference):
       latent_vars: list of RandomVariable or
                    dict of RandomVariable to RandomVariable.
         Collection of random variables to perform inference on. If
-        list, each random variable will be implictly optimized
-        using a `PointMass` random variable that is defined
-        internally (with unconstrained support). If dictionary, each
-        value in the dictionary must be a `PointMass` random variable.
+        list, each random variable will be implictly optimized using a
+        `PointMass` random variable that is defined internally. If
+        dictionary, each value in the dictionary must be a `PointMass`
+        random variable.
     """
     if isinstance(latent_vars, list):
       with tf.variable_scope(None, default_name="posterior"):

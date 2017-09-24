@@ -105,5 +105,6 @@ _candidate = distributions_PointMass
 __init__.__doc__ = _candidate.__init__.__doc__
 _globals = globals()
 _params = {'__doc__': _candidate.__doc__,
-           '__init__': __init__}
+           '__init__': __init__,
+           'support': 'point'}
 _globals[_name] = type(_name, (RandomVariable, _candidate), _params)
