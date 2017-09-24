@@ -7,7 +7,12 @@ import tensorflow as tf
 
 from edward.inferences.variational_inference import VariationalInference
 from edward.models import RandomVariable, PointMass
-from edward.util import copy
+from edward.util import copy, transform
+
+try:
+  from tensorflow.contrib.distributions import bijectors
+except Exception as e:
+  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
 class MAP(VariationalInference):
@@ -60,10 +65,10 @@ class MAP(VariationalInference):
   ed.MAP([pi, mu, sigma], data)
   ```
 
-  Like other `Inference` classes, `MAP` optimizes over latent
-  variables with constrained continuous support by transforming them
-  to the unconstrained space. The optimized point mass approximations
-  are the points transformed back to the original (constrained) space.
+  Note that for `MAP` to optimize over latent variables with
+  constrained continuous support, the point mass must be constrained
+  to have the same support while its free parameters are
+  unconstrained; see, e.g., `qsigma` above.
   """
   def __init__(self, latent_vars=None, data=None):
     """Create an inference algorithm.
@@ -73,15 +78,23 @@ class MAP(VariationalInference):
                    dict of RandomVariable to RandomVariable.
         Collection of random variables to perform inference on. If
         list, each random variable will be implictly optimized using a
-        `PointMass` random variable that is defined internally. If
-        dictionary, each value in the dictionary must be a `PointMass`
-        random variable.
+        `PointMass` random variable that is defined internally with
+        constrained support, has unconstrained free parameters, and is
+        initialized using standard normal draws. If dictionary, each
+        value in the dictionary must be a `PointMass` random variable
+        with the same support as the key.
     """
     if isinstance(latent_vars, list):
       with tf.variable_scope(None, default_name="posterior"):
-        latent_vars = {rv: PointMass(
-            params=tf.Variable(tf.random_normal(rv.batch_shape)))
-            for rv in latent_vars}
+        latent_vars_dict = {}
+        for z in latent_vars:
+          qz = PointMass(params=tf.Variable(tf.random_normal(z.batch_shape)))
+          if hasattr(z, 'support'):
+            z_transform = transform(z)
+            if hasattr(z_transform, 'bijector'):
+              qz = transform(qz, bijectors.Invert(z_transform.bijector))
+          latent_vars_dict[z] = qz
+        latent_vars = latent_vars_dict
     elif isinstance(latent_vars, dict):
       for qz in six.itervalues(latent_vars):
         if not isinstance(qz, PointMass):

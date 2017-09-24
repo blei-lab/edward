@@ -41,25 +41,6 @@ class test_inference_auto_transform_class(tf.test.TestCase):
       self.assertAllClose(stats[0], stats[1], rtol=1e-2, atol=1e-2)
       self.assertAllClose(stats[2], stats[3], rtol=1e-2, atol=1e-2)
 
-  def test_map(self):
-    with self.test_session() as sess:
-      x = Gamma(2.0, 0.5)
-      qx = PointMass(tf.Variable(0.5))
-
-      inference = ed.MAP({x: qx})
-      inference.initialize(auto_transform=True, n_iter=1000)
-      tf.global_variables_initializer().run()
-      for _ in range(inference.n_iter):
-        info_dict = inference.update()
-
-      # Check point estimate on constrained space has same
-      # mode as target distribution.
-      qx_transformed = TransformedDistribution(
-          distribution=qx,
-          bijector=tf.contrib.distributions.bijectors.Softplus())
-      stats = sess.run([x.mode(), qx_transformed])
-      self.assertAllClose(stats[0], stats[1], rtol=1e-5, atol=1e-5)
-
   def test_auto_transform_false(self):
     with self.test_session():
       # Match normal || softplus-inverse-normal distribution without
@@ -78,6 +59,38 @@ class test_inference_auto_transform_class(tf.test.TestCase):
         info_dict = inference.update()
 
       self.assertAllEqual(info_dict['loss'], np.nan)
+
+  def test_map_custom(self):
+    with self.test_session() as sess:
+      x = Gamma(2.0, 0.5)
+      qx = PointMass(tf.nn.softplus(tf.Variable(0.5)))
+
+      inference = ed.MAP({x: qx})
+      inference.initialize(auto_transform=True, n_iter=1000)
+      tf.global_variables_initializer().run()
+      for _ in range(inference.n_iter):
+        info_dict = inference.update()
+
+      # Check point estimate on constrained space has same
+      # mode as target distribution.
+      stats = sess.run([x.mode(), qx])
+      self.assertAllClose(stats[0], stats[1], rtol=1e-5, atol=1e-5)
+
+  def test_map_default(self):
+    with self.test_session() as sess:
+      x = Gamma(2.0, 0.5)
+
+      inference = ed.MAP([x])
+      inference.initialize(auto_transform=True, n_iter=1000)
+      tf.global_variables_initializer().run()
+      for _ in range(inference.n_iter):
+        info_dict = inference.update()
+
+      # Check point estimate on constrained space has same
+      # mode as target distribution.
+      qx = inference.latent_vars[x]
+      stats = sess.run([x.mode(), qx])
+      self.assertAllClose(stats[0], stats[1], rtol=1e-5, atol=1e-5)
 
 if __name__ == '__main__':
   ed.set_seed(124125)

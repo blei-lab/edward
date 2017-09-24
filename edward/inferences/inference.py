@@ -218,19 +218,10 @@ class Inference(object):
       latent_vars = self.latent_vars.copy()
       self.latent_vars = {}
       for z, qz in six.iteritems(latent_vars):
-        try:
-          if z.support != qz.support:
-            z_transform = transform(z)
-            if qz.support == 'point':
-              from tensorflow.contrib.distributions import bijectors
-              qz_transform = transform(qz, bijectors.Invert(z_transform.bijector))
-              self.latent_vars[z] = qz_transform
-            else:
-              qz_transform = transform(qz)
-              self.latent_vars[z_transform] = qz_transform
-          else:
-            self.latent_vars[z] = qz
-        except AttributeError:
+        if hasattr(z, 'support') and hasattr(qz, 'support') and \
+                z.support != qz.support and qz.support != 'point':
+          self.latent_vars[transform(z)] = transform(qz)
+        else:
           self.latent_vars[z] = qz
 
     if logdir is not None:
