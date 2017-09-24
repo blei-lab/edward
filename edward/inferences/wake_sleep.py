@@ -38,7 +38,7 @@ class WakeSleep(VariationalInference):
 
   #### Notes
 
-  In conditional inference, we infer $z` in $p(z, \\beta
+  In conditional inference, we infer $z$ in $p(z, \\beta
   \mid x)$ while fixing inference over $\\beta$ using another
   distribution $q(\\beta)$. During gradient calculation, instead
   of using the model's density
@@ -49,7 +49,7 @@ class WakeSleep(VariationalInference):
 
   $\log p(x, z^{(s)}, \\beta^{(s)}),$
 
-  where $z^{(s)} \sim q(z; \lambda)$ and$\\beta^{(s)}
+  where $z^{(s)} \sim q(z; \lambda)$ and $\\beta^{(s)}
   \sim q(\\beta)$.
   """
   def __init__(self, *args, **kwargs):
