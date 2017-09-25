@@ -334,9 +334,10 @@ def kl_divergence(y_true, y_pred):
     y_pred: tf.Tensor.
       Same as `y_true`, and with the same shape.
   """
-  y_true = tf.cast(y_true + 1.0, tf.float32)
-  y_pred = tf.cast(y_pred + 1.0, tf.float32)
-  return tf.reduce_mean(y_true * tf.log(y_true / y_pred))
+  y_true = tf.cast(y_true, tf.float32)
+  y_pred = tf.cast(y_pred, tf.float32)
+  summand = tf.where(tf.equal(y_true, 0.0), 0.0, y_true * (tf.log(y_true) - tf.log(y_pred)))
+  return tf.reduce_sum(summand)
 
 
 def hinge(y_true, y_pred):
