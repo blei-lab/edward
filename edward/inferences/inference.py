@@ -178,7 +178,10 @@ class Inference(object):
         applying masks on a random variable.
       auto_transform: bool, optional.
         Whether to automatically transform continuous latent variables
-        of unequal support to be on the unconstrained space.
+        of unequal support to be on the unconstrained space. It is
+        only applied if the argument is `True`, the latent variable
+        pair are `ed.RandomVariable`s with the `support` attribute,
+        the supports are both continuous and unequal.
       logdir: str, optional.
         Directory where event file will be written. For details,
         see `tf.summary.FileWriter`. Default is to log nothing.

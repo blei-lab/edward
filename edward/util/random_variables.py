@@ -761,7 +761,7 @@ def transform(x, *args, **kwargs):
     bij = bijectors.Invert(bijectors.Softplus())
   elif support == 'simplex':
     bij = bijectors.Invert(bijectors.SoftmaxCentered(event_ndims=1))
-  elif support == 'real' or support == 'multivariate_real':
+  elif support in ('real', 'multivariate_real'):
     return x
   else:
     msg = "'transform' does not handle supports of type '{}'".format(support)
