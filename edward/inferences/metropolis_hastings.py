@@ -34,6 +34,10 @@ class MetropolisHastings(MonteCarlo):
   q(\\beta)$. This is unbiased (and therefore asymptotically exact as a
   pseudo-marginal method) if $q(\\beta) = p(\\beta \mid x)$.
 
+  `MetropolisHastings` assumes the proposal distribution has the same
+  support as the prior. The `auto_transform` attribute in
+  the method `initialize()` is not applicable.
+
   #### Examples
 
   ```python

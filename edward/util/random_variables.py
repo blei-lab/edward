@@ -757,14 +757,19 @@ def transform(x, *args, **kwargs):
 
   if support == '01':
     bij = bijectors.Invert(bijectors.Sigmoid())
+    new_support = 'real'
   elif support == 'nonnegative':
     bij = bijectors.Invert(bijectors.Softplus())
+    new_support = 'real'
   elif support == 'simplex':
     bij = bijectors.Invert(bijectors.SoftmaxCentered(event_ndims=1))
+    new_support = 'multivariate_real'
   elif support in ('real', 'multivariate_real'):
     return x
   else:
     msg = "'transform' does not handle supports of type '{}'".format(support)
     raise NotImplementedError(msg)
 
-  return TransformedDistribution(x, bij, *args, **kwargs)
+  new_x = TransformedDistribution(x, bij, *args, **kwargs)
+  new_x.support = new_support
+  return new_x

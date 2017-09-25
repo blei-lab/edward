@@ -223,7 +223,10 @@ class Inference(object):
       for z, qz in six.iteritems(latent_vars):
         if hasattr(z, 'support') and hasattr(qz, 'support') and \
                 z.support != qz.support and qz.support != 'point':
-          self.latent_vars[transform(z)] = transform(qz)
+          if qz.support == 'points':  # don't transform empirical approx's
+            self.latent_vars[transform(z)] = qz
+          else:
+            self.latent_vars[transform(z)] = transform(qz)
         else:
           self.latent_vars[z] = qz
 
