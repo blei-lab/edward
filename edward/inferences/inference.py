@@ -217,16 +217,23 @@ class Inference(object):
 
     self.scale = scale
 
+    # Set of all latent variables binded to their transformation on
+    # the unconstrained space (if any).
+    self.transformations = {}
     if auto_transform:
       latent_vars = self.latent_vars.copy()
       self.latent_vars = {}
       for z, qz in six.iteritems(latent_vars):
         if hasattr(z, 'support') and hasattr(qz, 'support') and \
                 z.support != qz.support and qz.support != 'point':
+          z_transform = transform(z)
+          self.transformations[z] = z_transform
           if qz.support == 'points':  # don't transform empirical approx's
-            self.latent_vars[transform(z)] = qz
+            self.latent_vars[z_transform] = qz
           else:
-            self.latent_vars[transform(z)] = transform(qz)
+            qz_transform = transform(qz)
+            self.latent_vars[z_transform] = qz_transform
+            self.transformations[qz] = qz_transform
         else:
           self.latent_vars[z] = qz
       del latent_vars
