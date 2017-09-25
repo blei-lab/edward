@@ -753,7 +753,7 @@ def transform(x, *args, **kwargs):
   except AttributeError as e:
     msg = """'{}' object has no 'support'
              so cannot be transformed.""".format(type(x).__name__)
-    raise ValueError(msg)
+    raise AttributeError(msg)
 
   if support == '01':
     bij = bijectors.Invert(bijectors.Sigmoid())
@@ -768,7 +768,7 @@ def transform(x, *args, **kwargs):
     return x
   else:
     msg = "'transform' does not handle supports of type '{}'".format(support)
-    raise NotImplementedError(msg)
+    raise ValueError(msg)
 
   new_x = TransformedDistribution(x, bij, *args, **kwargs)
   new_x.support = new_support

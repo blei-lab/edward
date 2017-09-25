@@ -8,7 +8,7 @@ import tensorflow as tf
 
 from collections import namedtuple
 from edward.models import (Beta, Dirichlet, Gamma, MultivariateNormalDiag,
-                           Normal, PointMass, TransformedDistribution)
+                           Normal, Poisson, TransformedDistribution)
 from tensorflow.contrib.distributions import bijectors
 
 
@@ -75,15 +75,15 @@ class test_transform_class(tf.test.TestCase):
 
   def test_no_support(self):
     with self.test_session():
-      x = PointMass(1.0)
-      with self.assertRaises(ValueError):
+      x = Poisson(1.0)
+      with self.assertRaises(AttributeError):
         y = ed.transform(x)
 
   def test_unhandled_support(self):
     with self.test_session():
       FakeRV = namedtuple('FakeRV', ['support'])
       x = FakeRV(support='rational')
-      with self.assertRaises(NotImplementedError):
+      with self.assertRaises(ValueError):
         y = ed.transform(x)
 
 if __name__ == '__main__':
