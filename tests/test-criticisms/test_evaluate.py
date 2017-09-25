@@ -11,6 +11,8 @@ from edward.models import Bernoulli, Categorical, Multinomial, Normal
 
 class test_evaluate_class(tf.test.TestCase):
 
+  RANDOM_SEED = 12345
+
   def test_metrics(self):
     with self.test_session():
       x = Normal(loc=0.0, scale=1.0)
@@ -77,6 +79,54 @@ class test_evaluate_class(tf.test.TestCase):
       self.assertAllClose(
           1.0,
           ed.evaluate('multinomial_accuracy', {x: x_data}, n_samples=1))
+
+  def test_metrics_with_binary_averaging(self):
+    x = Multinomial(total_count=10.0, probs=tf.constant([0.2, 0.7, 0.1]))
+    x_data = tf.constant([5, 4, 1], dtype=x.dtype.as_numpy_dtype)
+    self.assertAllClose(
+        np.array([9.0, 4.0, 1.0]),
+        ed.evaluate([('mean_squared_error', {'average': None})],
+                    {x: x_data}, n_samples=1, seed=self.RANDOM_SEED))
+    x = Multinomial(total_count=10.0, probs=tf.constant([0.2, 0.7, 0.1]))
+    x_data = tf.constant([5, 4, 1], dtype=x.dtype.as_numpy_dtype)
+    self.assertAllClose(
+        4.6666665,
+        ed.evaluate([('mean_squared_error', {'average': 'macro'})],
+                    {x: x_data}, n_samples=1, seed=self.RANDOM_SEED))
+    x = Multinomial(total_count=10.0, probs=tf.constant([0.2, 0.7, 0.1]))
+    x_data = tf.constant([5, 4, 1], dtype=x.dtype.as_numpy_dtype)
+    self.assertAllClose(
+        4.6666665,
+        ed.evaluate([('mean_squared_error', {'average': 'micro'})],
+                    {x: x_data}, n_samples=1, seed=self.RANDOM_SEED))
+
+    x = Multinomial(total_count=10.0, probs=tf.constant([0.2, 0.7, 0.1]),
+                    sample_shape=5)
+    x_data = tf.constant(
+        [[2, 7, 1], [3, 6, 1], [3, 5, 2], [4, 4, 2], [2, 7, 1]],
+        dtype=x.dtype.as_numpy_dtype)
+    self.assertAllClose(
+        np.array([1.2, 1.4, 0.6]),
+        ed.evaluate([('mean_squared_error', {'average': None})],
+                    {x: x_data}, n_samples=1, seed=self.RANDOM_SEED))
+    x = Multinomial(total_count=10.0, probs=tf.constant([0.2, 0.7, 0.1]),
+                    sample_shape=5)
+    x_data = tf.constant(
+        [[2, 7, 1], [3, 6, 1], [3, 5, 2], [4, 4, 2], [2, 7, 1]],
+        dtype=x.dtype.as_numpy_dtype)
+    self.assertAllClose(
+        1.066666603088379,
+        ed.evaluate([('mean_squared_error', {'average': 'macro'})],
+                    {x: x_data}, n_samples=1, seed=self.RANDOM_SEED))
+    x = Multinomial(total_count=10.0, probs=tf.constant([0.2, 0.7, 0.1]),
+                    sample_shape=5)
+    x_data = tf.constant(
+        [[2, 7, 1], [3, 6, 1], [3, 5, 2], [4, 4, 2], [2, 7, 1]],
+        dtype=x.dtype.as_numpy_dtype)
+    self.assertAllClose(
+        1.0666667222976685,
+        ed.evaluate([('mean_squared_error', {'average': 'micro'})],
+                    {x: x_data}, n_samples=1, seed=self.RANDOM_SEED))
 
   def test_data(self):
     with self.test_session():

@@ -60,8 +60,8 @@ class test_metrics_class(tf.test.TestCase):
 
     # Micro-averaging
     micro_average = metric(y_true, y_pred, average='micro')
-    expected_micro_average = metric(tf.reshape(y_true, [-1]),
-                                    tf.reshape(y_pred, [-1]))
+    expected_micro_average = metric(tf.reshape(y_true, [1, -1]),
+                                    tf.reshape(y_pred, [1, -1]))
     self.assertAllEqual(micro_average.eval(), expected_micro_average.eval())
 
   def test_classification_metrics(self):
@@ -97,8 +97,8 @@ class test_metrics_class(tf.test.TestCase):
           y_pred = tf.random_normal([6, 7])
           self.assertEqual(metric(y_true, y_pred).eval().shape, ())
         elif metric == kl_divergence:
-          y_true = tf.nn.softmax(tf.random_normal([6, 7]), dim=1)
-          y_pred = tf.nn.softmax(tf.random_normal([6, 7]), dim=1)
+          y_true = tf.nn.softmax(tf.random_normal([6]))
+          y_pred = tf.nn.softmax(tf.random_normal([6]))
           self.assertEqual(metric(y_true, y_pred).eval().shape, ())
         else:
           raise NotImplementedError()

@@ -706,7 +706,7 @@ def softmax(vec):
   return numerator / numerator.sum(axis=0)
 
 
-def compute_multinomial_mode(probs, total_count=1):
+def compute_multinomial_mode(probs, total_count=1, seed=None):
   """Compute the mode of a Multinomial random variable.
 
   Args:
@@ -727,6 +727,7 @@ def compute_multinomial_mode(probs, total_count=1):
   compute_multinomial_mode(probs, total_count)
   ```
   """
+  random_state = np.random.RandomState(seed)
   mode = np.zeros_like(probs, dtype=np.int32)
   if total_count == 1:
     mode[np.argmax(probs)] += 1
@@ -741,8 +742,8 @@ def compute_multinomial_mode(probs, total_count=1):
     overflow_count = int(mask.sum() - remaining_count)
     if overflow_count > 0:
       hot_indices = np.where(mask)[0]
-      cold_indices = np.random.choice(hot_indices, overflow_count,
-                                      replace=False)
+      cold_indices = random_state.choice(hot_indices, overflow_count,
+                                         replace=False)
       mask[cold_indices] = False
     mode[mask] += 1
     probs[mask] -= uniform_prob

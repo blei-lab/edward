@@ -17,7 +17,7 @@ except Exception as e:
   raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
-def evaluate(metrics, data, n_samples=500, output_key=None):
+def evaluate(metrics, data, n_samples=500, output_key=None, seed=None):
   """Evaluate fitted model using a set of metrics.
 
   A metric, or scoring rule (Winkler, 1994), is a function of observed
@@ -128,7 +128,12 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
         y_pred = tf.round(tf.where(tf.equal(0.5, probs), random, probs))
       else:
         if total_count > 1:
-          y_pred = tf.constant(compute_multinomial_mode(probs, total_count))
+          mode = compute_multinomial_mode(probs, total_count, seed)
+          if len(output_key.sample_shape):
+            y_pred = tf.reshape(tf.tile(mode, output_key.sample_shape),
+                               [-1, len(probs)])
+          else:
+            y_pred = mode
         else:
           y_pred = tf.argmax(probs, len(probs.shape) - 1)
       probs = tf.constant(probs)
@@ -144,6 +149,10 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
   # Evaluate y_true (according to y_pred if supervised) for all metrics.
   evaluations = []
   for metric in metrics:
+    if isinstance(metric, tuple):
+      metric, params = metric
+    else:
+      params = {}
     if metric == 'accuracy' or metric == 'crossentropy':
       # automate binary or sparse cat depending on its support
       support = sess.run(tf.reduce_max(y_true), feed_dict)
@@ -153,43 +162,43 @@ def evaluate(metrics, data, n_samples=500, output_key=None):
         metric = 'sparse_categorical_' + metric
 
     if metric == 'binary_accuracy':
-      evaluations += [binary_accuracy(y_true, y_pred)]
+      evaluations += [binary_accuracy(y_true, y_pred, **params)]
     elif metric == 'categorical_accuracy':
-      evaluations += [categorical_accuracy(y_true, y_pred)]
+      evaluations += [categorical_accuracy(y_true, y_pred, **params)]
     elif metric == 'sparse_categorical_accuracy':
-      evaluations += [sparse_categorical_accuracy(y_true, y_pred)]
+      evaluations += [sparse_categorical_accuracy(y_true, y_pred, **params)]
     elif metric == 'log_loss' or metric == 'binary_crossentropy':
-      evaluations += [binary_crossentropy(y_true, y_pred)]
+      evaluations += [binary_crossentropy(y_true, y_pred, **params)]
     elif metric == 'categorical_crossentropy':
-      evaluations += [categorical_crossentropy(y_true, y_pred)]
+      evaluations += [categorical_crossentropy(y_true, y_pred, **params)]
     elif metric == 'sparse_categorical_crossentropy':
-      evaluations += [sparse_categorical_crossentropy(y_true, y_pred)]
+      evaluations += [sparse_categorical_crossentropy(y_true, y_pred, **params)]
     elif metric == 'multinomial_accuracy':
-      evaluations += [multinomial_accuracy(y_true, y_pred)]
+      evaluations += [multinomial_accuracy(y_true, y_pred, **params)]
     elif metric == 'kl_divergence':
       y_true_ = y_true / total_count
       y_pred_ = probs
-      evaluations += [kl_divergence(y_true_, y_pred_)]
+      evaluations += [kl_divergence(y_true_, y_pred_, **params)]
     elif metric == 'hinge':
-      evaluations += [hinge(y_true, y_pred)]
+      evaluations += [hinge(y_true, y_pred, **params)]
     elif metric == 'squared_hinge':
-      evaluations += [squared_hinge(y_true, y_pred)]
+      evaluations += [squared_hinge(y_true, y_pred, **params)]
     elif (metric == 'mse' or metric == 'MSE' or
           metric == 'mean_squared_error'):
-      evaluations += [mean_squared_error(y_true, y_pred)]
+      evaluations += [mean_squared_error(y_true, y_pred, **params)]
     elif (metric == 'mae' or metric == 'MAE' or
           metric == 'mean_absolute_error'):
-      evaluations += [mean_absolute_error(y_true, y_pred)]
+      evaluations += [mean_absolute_error(y_true, y_pred, **params)]
     elif (metric == 'mape' or metric == 'MAPE' or
           metric == 'mean_absolute_percentage_error'):
-      evaluations += [mean_absolute_percentage_error(y_true, y_pred)]
+      evaluations += [mean_absolute_percentage_error(y_true, y_pred, **params)]
     elif (metric == 'msle' or metric == 'MSLE' or
           metric == 'mean_squared_logarithmic_error'):
-      evaluations += [mean_squared_logarithmic_error(y_true, y_pred)]
+      evaluations += [mean_squared_logarithmic_error(y_true, y_pred, **params)]
     elif metric == 'poisson':
-      evaluations += [poisson(y_true, y_pred)]
+      evaluations += [poisson(y_true, y_pred, **params)]
     elif metric == 'cosine' or metric == 'cosine_proximity':
-      evaluations += [cosine_proximity(y_true, y_pred)]
+      evaluations += [cosine_proximity(y_true, y_pred, **params)]
     elif metric == 'log_lik' or metric == 'log_likelihood':
       # Monte Carlo estimate the log-density of the posterior predictive.
       tensor = tf.reduce_mean(output_key.log_prob(y_true))
@@ -336,7 +345,8 @@ def kl_divergence(y_true, y_pred):
   """
   y_true = tf.cast(y_true, tf.float32)
   y_pred = tf.cast(y_pred, tf.float32)
-  summand = tf.where(tf.equal(y_true, 0.0), 0.0, y_true * (tf.log(y_true) - tf.log(y_pred)))
+  zeros = tf.zeros(shape=(tf.shape(y_true)))
+  summand = tf.where(tf.equal(y_true, 0.0), zeros, y_true * (tf.log(y_true) - tf.log(y_pred)))
   return tf.reduce_sum(summand)
 
 
@@ -380,7 +390,7 @@ def mean_squared_error(y_true, y_pred):
     y_pred: tf.Tensor.
       Tensors of same shape and type.
   """
-  return tf.reduce_mean(tf.square(y_pred - y_true), axis=-1)
+  return tf.reduce_mean(tf.square(y_pred - y_true), axis=-2)
 
 
 @with_binary_averaging
@@ -392,7 +402,7 @@ def mean_absolute_error(y_true, y_pred):
     y_pred: tf.Tensor.
       Tensors of same shape and type.
   """
-  return tf.reduce_mean(tf.abs(y_pred - y_true), axis=-1)
+  return tf.reduce_mean(tf.abs(y_pred - y_true), axis=-2)
 
 
 @with_binary_averaging
@@ -406,7 +416,7 @@ def mean_absolute_percentage_error(y_true, y_pred):
   """
   diff = tf.abs((y_true - y_pred) / tf.clip_by_value(tf.abs(y_true),
                                                      1e-8, np.inf))
-  return 100.0 * tf.reduce_mean(diff, axis=-1)
+  return 100.0 * tf.reduce_mean(diff, axis=-2)
 
 
 @with_binary_averaging
@@ -420,7 +430,7 @@ def mean_squared_logarithmic_error(y_true, y_pred):
   """
   first_log = tf.log(tf.clip_by_value(y_pred, 1e-8, np.inf) + 1.0)
   second_log = tf.log(tf.clip_by_value(y_true, 1e-8, np.inf) + 1.0)
-  return tf.reduce_mean(tf.square(first_log - second_log), axis=-1)
+  return tf.reduce_mean(tf.square(first_log - second_log), axis=-2)
 
 
 def poisson(y_true, y_pred):
