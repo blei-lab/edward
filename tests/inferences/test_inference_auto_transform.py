@@ -67,7 +67,7 @@ class test_inference_auto_transform_class(tf.test.TestCase):
       qx = PointMass(tf.nn.softplus(tf.Variable(0.5)))
 
       inference = ed.MAP({x: qx})
-      inference.initialize(auto_transform=True, n_iter=1000)
+      inference.initialize(auto_transform=True, n_iter=500)
       tf.global_variables_initializer().run()
       for _ in range(inference.n_iter):
         info_dict = inference.update()
@@ -82,7 +82,7 @@ class test_inference_auto_transform_class(tf.test.TestCase):
       x = Gamma(2.0, 0.5)
 
       inference = ed.MAP([x])
-      inference.initialize(auto_transform=True, n_iter=1000)
+      inference.initialize(auto_transform=True, n_iter=500)
       tf.global_variables_initializer().run()
       for _ in range(inference.n_iter):
         info_dict = inference.update()
@@ -91,6 +91,23 @@ class test_inference_auto_transform_class(tf.test.TestCase):
       # target distribution.
       qx = inference.latent_vars[x]
       stats = sess.run([x.mode(), qx])
+      self.assertAllClose(stats[0], stats[1], rtol=1e-5, atol=1e-5)
+
+  def test_laplace_default(self):
+    with self.test_session() as sess:
+      x = Gamma([2.0], [0.5])
+
+      inference = ed.Laplace([x])
+      optimizer = tf.train.AdamOptimizer(0.2)
+      inference.initialize(auto_transform=True, n_iter=500)
+      tf.global_variables_initializer().run()
+      for _ in range(inference.n_iter):
+        info_dict = inference.update()
+
+      # Check approximation on constrained space has same mode as
+      # target distribution.
+      qx = inference.latent_vars[x]
+      stats = sess.run([x.mode(), qx.mean()])
       self.assertAllClose(stats[0], stats[1], rtol=1e-5, atol=1e-5)
 
   def test_hmc_custom(self):

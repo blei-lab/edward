@@ -68,7 +68,9 @@ class MAP(VariationalInference):
   Note that for `MAP` to optimize over latent variables with
   constrained continuous support, the point mass must be constrained
   to have the same support while its free parameters are
-  unconstrained; see, e.g., `qsigma` above.
+  unconstrained; see, e.g., `qsigma` above. This is different than
+  performing MAP on the unconstrained space: in general, the MAP of
+  the transform is not the transform of the MAP.
   """
   def __init__(self, latent_vars=None, data=None):
     """Create an inference algorithm.
@@ -88,13 +90,17 @@ class MAP(VariationalInference):
       with tf.variable_scope(None, default_name="posterior"):
         latent_vars_dict = {}
         for z in latent_vars:
-          qz = PointMass(params=tf.Variable(tf.random_normal(z.batch_shape)))
+          # Define point masses to have constrained support and
+          # unconstrained free parameters.
+          batch_event_shape = z.batch_shape.concatenate(z.event_shape)
+          params = tf.Variable(tf.random_normal(batch_event_shape))
           if hasattr(z, 'support'):
             z_transform = transform(z)
             if hasattr(z_transform, 'bijector'):
-              qz = transform(qz, bijectors.Invert(z_transform.bijector))
-          latent_vars_dict[z] = qz
+              params = z_transform.bijector.inverse(params)
+          latent_vars_dict[z] = PointMass(params=params)
         latent_vars = latent_vars_dict
+        del latent_vars_dict
     elif isinstance(latent_vars, dict):
       for qz in six.itervalues(latent_vars):
         if not isinstance(qz, PointMass):
