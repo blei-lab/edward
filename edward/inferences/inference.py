@@ -229,6 +229,7 @@ class Inference(object):
             self.latent_vars[transform(z)] = transform(qz)
         else:
           self.latent_vars[z] = qz
+      del latent_vars
 
     if logdir is not None:
       self.logging = True
