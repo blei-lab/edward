@@ -6,8 +6,8 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import (Empirical, Gamma, Normal, PointMass,
-    TransformedDistribution)
+from edward.models import (
+    Empirical, Gamma, Normal, PointMass, TransformedDistribution)
 
 
 class test_inference_auto_transform_class(tf.test.TestCase):

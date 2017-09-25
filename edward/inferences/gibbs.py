@@ -64,6 +64,7 @@ class Gibbs(MonteCarlo):
     """
     self.scan_order = scan_order
     self.feed_dict = {}
+    kwargs['auto_transform'] = False
     return super(Gibbs, self).initialize(*args, **kwargs)
 
   def update(self, feed_dict=None):

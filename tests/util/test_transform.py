@@ -7,8 +7,9 @@ import numpy as np
 import tensorflow as tf
 
 from collections import namedtuple
-from edward.models import (Beta, Dirichlet, Gamma, MultivariateNormalDiag,
-                           Normal, Poisson, TransformedDistribution)
+from edward.models import (
+    Beta, Dirichlet, DirichletProcess, Gamma, MultivariateNormalDiag,
+    Normal, Poisson, TransformedDistribution)
 from tensorflow.contrib.distributions import bijectors
 
 
@@ -75,7 +76,7 @@ class test_transform_class(tf.test.TestCase):
 
   def test_no_support(self):
     with self.test_session():
-      x = Poisson(1.0)
+      x = DirichletProcess(1.0, Normal(0.0, 1.0))
       with self.assertRaises(AttributeError):
         y = ed.transform(x)
 
