@@ -19,7 +19,7 @@ class VariationalInference(Inference):
   sharing methods such as a default optimizer.
 
   To build an algorithm inheriting from `VariaitonalInference`, one
-  must at the minimum implement `build_loss_and_gradients`: it
+  must at the minimum implement `_build_loss_and_gradients`: it
   determines the loss function and gradients to apply for a given
   optimizer.
   """
@@ -65,10 +65,10 @@ class VariationalInference(Inference):
 
       var_list = list(var_list)
 
-    self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
+    self._loss, grads_and_vars = self._build_loss_and_gradients(var_list)
 
-    if self.logging:
-      tf.summary.scalar("loss", self.loss, collections=[self._summary_key])
+    if self._logging:
+      tf.summary.scalar("loss", self._loss, collections=[self._summary_key])
       for grad, var in grads_and_vars:
         # replace colons which are an invalid character
         tf.summary.histogram("gradient/" +
@@ -78,7 +78,7 @@ class VariationalInference(Inference):
                           var.name.replace(':', '/'),
                           tf.norm(grad), collections=[self._summary_key])
 
-      self.summarize = tf.summary.merge_all(key=self._summary_key)
+      self._summarize = tf.summary.merge_all(key=self._summary_key)
 
     if optimizer is None and global_step is None:
       # Default optimizer always uses a global step variable.
@@ -117,15 +117,15 @@ class VariationalInference(Inference):
 
     with tf.variable_scope(None, default_name="optimizer") as scope:
       if not use_prettytensor:
-        self.train = optimizer.apply_gradients(grads_and_vars,
-                                               global_step=global_step)
+        self._train = optimizer.apply_gradients(grads_and_vars,
+                                                global_step=global_step)
       else:
         import prettytensor as pt
         # Note PrettyTensor optimizer does not accept manual updates;
         # it autodiffs the loss directly.
-        self.train = pt.apply_optimizer(optimizer, losses=[self.loss],
-                                        global_step=global_step,
-                                        var_list=var_list)
+        self._train = pt.apply_optimizer(optimizer, losses=[self.loss],
+                                         global_step=global_step,
+                                         var_list=var_list)
 
     self.reset.append(tf.variables_initializer(
         tf.get_collection(tf.GraphKeys.GLOBAL_VARIABLES, scope=scope.name)))
@@ -151,28 +151,29 @@ class VariationalInference(Inference):
         feed_dict[key] = value
 
     sess = get_session()
-    _, t, loss = sess.run([self.train, self.increment_t, self.loss], feed_dict)
+    _, t, loss = sess.run(
+        [self._train, self._increment_t, self._loss], feed_dict)
 
-    if self.debug:
-      sess.run(self.op_check, feed_dict)
+    if self._debug:
+      sess.run(self._op_check, feed_dict)
 
-    if self.logging and self.n_print != 0:
-      if t == 1 or t % self.n_print == 0:
-        summary = sess.run(self.summarize, feed_dict)
-        self.train_writer.add_summary(summary, t)
+    if self._logging and self._n_print != 0:
+      if t == 1 or t % self._n_print == 0:
+        summary = sess.run(self._summarize, feed_dict)
+        self._train_writer.add_summary(summary, t)
 
     return {'t': t, 'loss': loss}
 
   def print_progress(self, info_dict):
     """Print progress to output.
     """
-    if self.n_print != 0:
+    if self._n_print != 0:
       t = info_dict['t']
-      if t == 1 or t % self.n_print == 0:
-        self.progbar.update(t, {'Loss': info_dict['loss']})
+      if t == 1 or t % self._n_print == 0:
+        self._progbar.update(t, {'Loss': info_dict['loss']})
 
   @abc.abstractmethod
-  def build_loss_and_gradients(self, var_list):
+  def _build_loss_and_gradients(self, var_list):
     """Build loss function and its gradients. They will be leveraged
     in an optimizer to update the model and variational parameters.
 

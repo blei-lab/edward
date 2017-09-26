@@ -47,8 +47,14 @@ class Gibbs(MonteCarlo):
     else:
       check_latent_vars(proposal_vars)
 
-    self.proposal_vars = proposal_vars
+    self._proposal_vars = proposal_vars
     super(Gibbs, self).__init__(latent_vars, data)
+
+  @property
+  def proposal_vars(self):
+    """Proposal variable dictionary binding model latent variables to
+    their proposal distribution."""
+    return self._proposal_vars
 
   def initialize(self, scan_order='random', *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters
@@ -62,8 +68,8 @@ class Gibbs(MonteCarlo):
         `RandomVariable`s (this defines a blocked Gibbs sampler). If
         'random', will use a random order at each update.
     """
-    self.scan_order = scan_order
-    self.feed_dict = {}
+    self._scan_order = scan_order
+    self._feed_dict = {}
     kwargs['auto_transform'] = False
     return super(Gibbs, self).initialize(*args, **kwargs)
 
@@ -81,64 +87,61 @@ class Gibbs(MonteCarlo):
       acceptance rate of samples since (and including) this iteration.
     """
     sess = get_session()
-    if not self.feed_dict:
+    if not self._feed_dict:
       # Initialize feed for all conditionals to be the draws at step 0.
       samples = OrderedDict(self.latent_vars)
       inits = sess.run([qz.params[0] for qz in six.itervalues(samples)])
       for z, init in zip(six.iterkeys(samples), inits):
-        self.feed_dict[z] = init
+        self._feed_dict[z] = init
 
       for key, value in six.iteritems(self.data):
         if isinstance(key, tf.Tensor) and "Placeholder" in key.op.type:
-          self.feed_dict[key] = value
+          self._feed_dict[key] = value
         elif isinstance(key, RandomVariable) and \
                 isinstance(value, (tf.Tensor, tf.Variable)):
-          self.feed_dict[key] = sess.run(value)
+          self._feed_dict[key] = sess.run(value)
 
     if feed_dict is None:
       feed_dict = {}
 
-    feed_dict.update(self.feed_dict)
+    feed_dict.update(self._feed_dict)
 
     # Determine scan order.
-    if self.scan_order == 'random':
+    if self._scan_order == 'random':
       scan_order = list(six.iterkeys(self.latent_vars))
       random.shuffle(scan_order)
     else:  # list
-      scan_order = self.scan_order
+      scan_order = self._scan_order
 
     # Fetch samples by iterating over complete conditional draws.
     for z in scan_order:
       if isinstance(z, RandomVariable):
         draw = sess.run(self.proposal_vars[z], feed_dict)
         feed_dict[z] = draw
-        self.feed_dict[z] = draw
+        self._feed_dict[z] = draw
       else:  # list
         draws = sess.run([self.proposal_vars[zz] for zz in z], feed_dict)
         for zz, draw in zip(z, draws):
           feed_dict[zz] = draw
-          self.feed_dict[zz] = draw
+          self._feed_dict[zz] = draw
 
     # Assign the samples to the Empirical random variables.
-    _, accept_rate = sess.run([self.train, self.n_accept_over_t], feed_dict)
-    t = sess.run(self.increment_t)
+    _, accept_rate = sess.run([self._train, self._n_accept_over_t], feed_dict)
+    t = sess.run(self._increment_t)
 
-    if self.debug:
-      sess.run(self.op_check, feed_dict)
+    if self._debug:
+      sess.run(self._op_check, feed_dict)
 
-    if self.logging and self.n_print != 0:
+    if self._logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:
-        summary = sess.run(self.summarize, feed_dict)
-        self.train_writer.add_summary(summary, t)
+        summary = sess.run(self._summarize, feed_dict)
+        self._train_writer.add_summary(summary, t)
 
     return {'t': t, 'accept_rate': accept_rate}
 
-  def build_update(self):
-    """
-    #### Notes
-
-    The updates assume each Empirical random variable is directly
-    parameterized by `tf.Variable`s.
+  def _build_update(self):
+    """Note the updates assume each Empirical random variable is
+    directly parameterized by `tf.Variable`s.
     """
     # Update Empirical random variables according to the complete
     # conditionals. We will feed the conditionals when calling `update()`.
@@ -146,8 +149,8 @@ class Gibbs(MonteCarlo):
     for z, qz in six.iteritems(self.latent_vars):
       variable = qz.get_variables()[0]
       assign_ops.append(
-          tf.scatter_update(variable, self.t, self.proposal_vars[z]))
+          tf.scatter_update(variable, self._t, self.proposal_vars[z]))
 
     # Increment n_accept (if accepted).
-    assign_ops.append(self.n_accept.assign_add(1))
+    assign_ops.append(self._n_accept.assign_add(1))
     return tf.group(*assign_ops)

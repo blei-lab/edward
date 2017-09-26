@@ -55,18 +55,18 @@ class WGANInference(GANInference):
       clip: float, optional.
         Value to clip weights by. Default is no clipping.
     """
-    self.penalty = penalty
+    self._penalty = penalty
 
     super(WGANInference, self).initialize(*args, **kwargs)
 
-    self.clip_op = None
+    self._clip_op = None
     if clip is not None:
       var_list = tf.get_collection(
           tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
-      self.clip_op = [w.assign(tf.clip_by_value(w, -clip, clip))
+      self._clip_op = [w.assign(tf.clip_by_value(w, -clip, clip))
                       for w in var_list]
 
-  def build_loss_and_gradients(self, var_list):
+  def _build_loss_and_gradients(self, var_list):
     x_true = list(six.itervalues(self.data))[0]
     x_fake = list(six.iterkeys(self.data))[0]
     with tf.variable_scope("Disc"):
@@ -75,7 +75,7 @@ class WGANInference(GANInference):
     with tf.variable_scope("Disc", reuse=True):
       d_fake = self.discriminator(x_fake)
 
-    if self.penalty is None or self.penalty == 0:
+    if self._penalty is None or self._penalty == 0:
       penalty = 0.0
     else:
       eps = Uniform().sample(x_true.shape[0])
@@ -88,7 +88,7 @@ class WGANInference(GANInference):
       gradients = tf.gradients(d_interpolated, [x_interpolated])[0]
       slopes = tf.sqrt(tf.reduce_sum(tf.square(gradients),
                                      list(range(1, gradients.shape.ndims))))
-      penalty = self.penalty * tf.reduce_mean(tf.square(slopes - 1.0))
+      penalty = self._penalty * tf.reduce_mean(tf.square(slopes - 1.0))
 
     mean_true = tf.reduce_mean(d_true)
     mean_fake = tf.reduce_mean(d_fake)
@@ -110,7 +110,7 @@ class WGANInference(GANInference):
     info_dict = super(WGANInference, self).update(feed_dict, variables)
 
     sess = get_session()
-    if self.clip_op is not None and variables in (None, "Disc"):
-      sess.run(self.clip_op)
+    if self._clip_op is not None and variables in (None, "Disc"):
+      sess.run(self._clip_op)
 
     return info_dict

@@ -18,6 +18,33 @@ class KLpq(VariationalInference):
   To perform the optimization, this class uses a technique from
   adaptive importance sampling [@oh1992adaptive].
 
+  #### Implementation Details
+
+  The algorithm builds the loss function
+
+  $\\text{KL}( p(z \mid x) \| q(z) )
+    = \mathbb{E}_{p(z \mid x)} [ \log p(z \mid x) - \log q(z; \lambda) ]$
+
+  and stochastic gradients based on importance sampling.
+
+  The loss function can be estimated as
+
+  $\\frac{1}{S} \sum_{s=1}^S [
+    w_{\\text{norm}}(z^s; \lambda) (\log p(x, z^s) - \log q(z^s; \lambda) ],$
+
+  where for $z^s \sim q(z; \lambda)$,
+
+  $w_{\\text{norm}}(z^s; \lambda) =
+        w(z^s; \lambda) / \sum_{s=1}^S w(z^s; \lambda)$
+
+  normalizes the importance weights, $w(z^s; \lambda) = p(x,
+  z^s) / q(z^s; \lambda)$.
+
+  This provides a gradient,
+
+  $- \\frac{1}{S} \sum_{s=1}^S [
+    w_{\\text{norm}}(z^s; \lambda) \\nabla_{\lambda} \log q(z^s; \lambda) ].$
+
   #### Notes
 
   `KLpq` also optimizes any model parameters $p(z\mid x;
@@ -53,39 +80,14 @@ class KLpq(VariationalInference):
         Number of samples from variational model for calculating
         stochastic gradients.
     """
-    self.n_samples = n_samples
+    self._n_samples = n_samples
     return super(KLpq, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, var_list):
-    """Build loss function
-
-    $\\text{KL}( p(z \mid x) \| q(z) )
-      = \mathbb{E}_{p(z \mid x)} [ \log p(z \mid x) - \log q(z; \lambda) ]$
-
-    and stochastic gradients based on importance sampling.
-
-    The loss function can be estimated as
-
-    $\\frac{1}{S} \sum_{s=1}^S [
-      w_{\\text{norm}}(z^s; \lambda) (\log p(x, z^s) - \log q(z^s; \lambda) ],$
-
-    where for $z^s \sim q(z; \lambda)$,
-
-    $w_{\\text{norm}}(z^s; \lambda) =
-          w(z^s; \lambda) / \sum_{s=1}^S w(z^s; \lambda)$
-
-    normalizes the importance weights, $w(z^s; \lambda) = p(x,
-    z^s) / q(z^s; \lambda)$.
-
-    This provides a gradient,
-
-    $- \\frac{1}{S} \sum_{s=1}^S [
-      w_{\\text{norm}}(z^s; \lambda) \\nabla_{\lambda} \log q(z^s; \lambda) ].$
-    """
-    p_log_prob = [0.0] * self.n_samples
-    q_log_prob = [0.0] * self.n_samples
+  def _build_loss_and_gradients(self, var_list):
+    p_log_prob = [0.0] * self._n_samples
+    q_log_prob = [0.0] * self._n_samples
     base_scope = tf.get_default_graph().unique_name("inference") + '/'
-    for s in range(self.n_samples):
+    for s in range(self._n_samples):
       # Form dictionary in order to replace conditioning on prior or
       # observed variable with conditioning on a specific value.
       scope = base_scope + tf.get_default_graph().unique_name("sample")
@@ -117,7 +119,7 @@ class KLpq(VariationalInference):
     p_log_prob = tf.stack(p_log_prob)
     q_log_prob = tf.stack(q_log_prob)
 
-    if self.logging:
+    if self._logging:
       tf.summary.scalar("loss/p_log_prob", tf.reduce_mean(p_log_prob),
                         collections=[self._summary_key])
       tf.summary.scalar("loss/q_log_prob", tf.reduce_mean(q_log_prob),

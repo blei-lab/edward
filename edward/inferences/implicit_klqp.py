@@ -30,6 +30,48 @@ class ImplicitKLqp(GANInference):
   random variables (`rv`) satisfies `rv.is_reparameterized` and
   `rv.is_continuous`.
 
+  #### Implementation Details
+
+  The algorithm builds the loss function
+
+  $-\Big(\mathbb{E}_{q(\\beta)} [\log p(\\beta) - \log q(\\beta) ] +
+      \sum_{n=1}^N \mathbb{E}_{q(\\beta)q(z_n\mid\\beta)} [
+          r^*(x_n, z_n, \\beta) ] \Big).$
+
+  We minimize it with respect to parameterized variational
+  families $q(z, \\beta; \lambda)$.
+
+  $r^*(x_n, z_n, \\beta)$ is a function of a single data point
+  $x_n$, single local variable $z_n$, and all global
+  variables $\\beta$. It is equal to the log-ratio
+
+  $\log p(x_n, z_n\mid \\beta) - \log q(x_n, z_n\mid \\beta),$
+
+  where $q(x_n)$ is the empirical data distribution. Rather
+  than explicit calculation, $r^*(x, z, \\beta)$ is the
+  solution to a ratio estimation problem, minimizing the specified
+  `ratio_loss`.
+
+  Gradients are taken using the reparameterization trick
+  [@kingma2014auto].
+
+  #### Notes
+
+  This also includes model parameters $p(x, z, \\beta; \\theta)$
+  and variational distributions with inference networks
+  $q(z\mid x)$.
+
+  There are a bunch of extensions we could easily do in this
+  implementation:
+
+  + further factorizations can be used to better leverage the
+    graph structure for more complicated models;
+  + score function gradients for global variables;
+  + use more samples; this would require the `copy()` utility
+    function for q's as well, and an additional loop. we opt not to
+    because it complicates the code;
+  + analytic KL/swapping out the penalty term for the globals.
+
   #### Notes
 
   Unlike `GANInference`, `discriminator` takes dict's as input,
@@ -71,14 +113,20 @@ class ImplicitKLqp(GANInference):
     if not callable(discriminator):
       raise TypeError("discriminator must be a callable function.")
 
-    self.discriminator = discriminator
+    self._discriminator = discriminator
     if global_vars is None:
       global_vars = {}
 
     check_latent_vars(global_vars)
-    self.global_vars = global_vars
+    self._global_vars = global_vars
     # call grandparent's method; avoid parent (GANInference)
     super(GANInference, self).__init__(latent_vars, data)
+
+  @property
+  def global_vars(self):
+    """Global variable dictionary binding model global variables to
+    their inferred posterior."""
+    return self._global_vars
 
   def initialize(self, ratio_loss='log', *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters
@@ -92,57 +140,17 @@ class ImplicitKLqp(GANInference):
         with shape matching the shapes of the two inputs.
     """
     if callable(ratio_loss):
-      self.ratio_loss = ratio_loss
+      self._ratio_loss = ratio_loss
     elif ratio_loss == 'log':
-      self.ratio_loss = log_loss
+      self._ratio_loss = log_loss
     elif ratio_loss == 'hinge':
-      self.ratio_loss = hinge_loss
+      self._ratio_loss = hinge_loss
     else:
       raise ValueError('Ratio loss not found:', ratio_loss)
 
     return super(ImplicitKLqp, self).initialize(*args, **kwargs)
 
-  def build_loss_and_gradients(self, var_list):
-    """Build loss function
-
-    $-\Big(\mathbb{E}_{q(\\beta)} [\log p(\\beta) - \log q(\\beta) ] +
-        \sum_{n=1}^N \mathbb{E}_{q(\\beta)q(z_n\mid\\beta)} [
-            r^*(x_n, z_n, \\beta) ] \Big).$
-
-    We minimize it with respect to parameterized variational
-    families $q(z, \\beta; \lambda)$.
-
-    $r^*(x_n, z_n, \\beta)$ is a function of a single data point
-    $x_n$, single local variable $z_n$, and all global
-    variables $\\beta$. It is equal to the log-ratio
-
-    $\log p(x_n, z_n\mid \\beta) - \log q(x_n, z_n\mid \\beta),$
-
-    where $q(x_n)$ is the empirical data distribution. Rather
-    than explicit calculation, $r^*(x, z, \\beta)$ is the
-    solution to a ratio estimation problem, minimizing the specified
-    `ratio_loss`.
-
-    Gradients are taken using the reparameterization trick
-    [@kingma2014auto].
-
-    #### Notes
-
-    This also includes model parameters $p(x, z, \\beta; \\theta)$
-    and variational distributions with inference networks
-    $q(z\mid x)$.
-
-    There are a bunch of extensions we could easily do in this
-    implementation:
-
-    + further factorizations can be used to better leverage the
-      graph structure for more complicated models;
-    + score function gradients for global variables;
-    + use more samples; this would require the `copy()` utility
-      function for q's as well, and an additional loop. we opt not to
-      because it complicates the code;
-    + analytic KL/swapping out the penalty term for the globals.
-    """
+  def _build_loss_and_gradients(self, var_list):
     # Collect tensors used in calculation of losses.
     scope = tf.get_default_graph().unique_name("inference")
     qbeta_sample = {}
@@ -191,12 +199,12 @@ class ImplicitKLqp(GANInference):
 
     # Form ratio loss and ratio estimator.
     if len(self.scale) <= 1:
-      loss_d = tf.reduce_mean(self.ratio_loss(r_psample, r_qsample))
+      loss_d = tf.reduce_mean(self._ratio_loss(r_psample, r_qsample))
       scale = list(six.itervalues(self.scale))
       scale = scale[0] if scale else 1.0
       scaled_ratio = tf.reduce_sum(scale * r_qsample)
     else:
-      loss_d = [tf.reduce_mean(self.ratio_loss(r_psample[key], r_qsample[key]))
+      loss_d = [tf.reduce_mean(self._ratio_loss(r_psample[key], r_qsample[key]))
                 for key in six.iterkeys(self.scale)]
       loss_d = tf.reduce_sum(loss_d)
       scaled_ratio = [tf.reduce_sum(self.scale[key] * r_qsample[key])

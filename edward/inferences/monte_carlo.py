@@ -18,7 +18,7 @@ class MonteCarlo(Inference):
   inherit from `MonteCarlo`, sharing methods in this class.
 
   To build an algorithm inheriting from `MonteCarlo`, one must at the
-  minimum implement `build_update`: it determines how to assign
+  minimum implement `_build_update`: it determines how to assign
   the samples in the `Empirical` approximations.
 
   #### Notes
@@ -96,16 +96,16 @@ class MonteCarlo(Inference):
                                 qz in six.itervalues(self.latent_vars)])
     super(MonteCarlo, self).initialize(*args, **kwargs)
 
-    self.n_accept = tf.Variable(0, trainable=False, name="n_accept")
-    self.n_accept_over_t = self.n_accept / self.t
-    self.train = self.build_update()
+    self._n_accept = tf.Variable(0, trainable=False, name="n_accept")
+    self._n_accept_over_t = self._n_accept / self._t
+    self._train = self._build_update()
 
-    self.reset.append(tf.variables_initializer([self.n_accept]))
+    self._reset.append(tf.variables_initializer([self.n_accept]))
 
-    if self.logging:
+    if self._logging:
       tf.summary.scalar("n_accept", self.n_accept,
                         collections=[self._summary_key])
-      self.summarize = tf.summary.merge_all(key=self._summary_key)
+      self._summarize = tf.summary.merge_all(key=self._summary_key)
 
   def update(self, feed_dict=None):
     """Run one iteration of sampling.
@@ -135,29 +135,29 @@ class MonteCarlo(Inference):
         feed_dict[key] = value
 
     sess = get_session()
-    _, accept_rate = sess.run([self.train, self.n_accept_over_t], feed_dict)
-    t = sess.run(self.increment_t)
+    _, accept_rate = sess.run([self._train, self._n_accept_over_t], feed_dict)
+    t = sess.run(self._increment_t)
 
-    if self.debug:
-      sess.run(self.op_check, feed_dict)
+    if self._debug:
+      sess.run(self._op_check, feed_dict)
 
-    if self.logging and self.n_print != 0:
-      if t == 1 or t % self.n_print == 0:
-        summary = sess.run(self.summarize, feed_dict)
-        self.train_writer.add_summary(summary, t)
+    if self._logging and self._n_print != 0:
+      if t == 1 or t % self._n_print == 0:
+        summary = sess.run(self._summarize, feed_dict)
+        self._train_writer.add_summary(summary, t)
 
     return {'t': t, 'accept_rate': accept_rate}
 
   def print_progress(self, info_dict):
     """Print progress to output.
     """
-    if self.n_print != 0:
+    if self._n_print != 0:
       t = info_dict['t']
-      if t == 1 or t % self.n_print == 0:
-        self.progbar.update(t, {'Acceptance Rate': info_dict['accept_rate']})
+      if t == 1 or t % self._n_print == 0:
+        self._progbar.update(t, {'Acceptance Rate': info_dict['accept_rate']})
 
   @abc.abstractmethod
-  def build_update(self):
+  def _build_update(self):
     """Build update rules, returning an assign op for parameters in
     the `Empirical` random variables.
 
