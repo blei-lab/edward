@@ -108,6 +108,12 @@ class Inference(object):
     return self._latent_vars
 
   @property
+  def transformations(self):
+    """Set of all latent variables binded to their transformation on
+    the unconstrained space (if any)."""
+    return self._transformations
+
+  @property
   def n_iter(self):
     """Number of expected iterations for algorithm."""
     return self._n_iter
@@ -248,25 +254,23 @@ class Inference(object):
 
     self._scale = scale
 
-    # Set of all latent variables binded to their transformation on
-    # the unconstrained space (if any).
-    self.transformations = {}
+    self._transformations = {}
     if auto_transform:
       latent_vars = self.latent_vars.copy()
-      self.latent_vars = {}
+      self._latent_vars = {}
       for z, qz in six.iteritems(latent_vars):
         if hasattr(z, 'support') and hasattr(qz, 'support') and \
                 z.support != qz.support and qz.support != 'point':
           z_transform = transform(z)
-          self.transformations[z] = z_transform
+          self._transformations[z] = z_transform
           if qz.support == 'points':  # don't transform empirical approx's
-            self.latent_vars[z_transform] = qz
+            self._latent_vars[z_transform] = qz
           else:
             qz_transform = transform(qz)
-            self.latent_vars[z_transform] = qz_transform
-            self.transformations[qz] = qz_transform
+            self._latent_vars[z_transform] = qz_transform
+            self._transformations[qz] = qz_transform
         else:
-          self.latent_vars[z] = qz
+          self._latent_vars[z] = qz
       del latent_vars
 
     if logdir is not None:
