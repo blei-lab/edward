@@ -6,8 +6,10 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import (
-    Empirical, Gamma, Normal, PointMass, TransformedDistribution)
+from edward.models import (Empirical, Gamma, Normal, PointMass,
+                           TransformedDistribution)
+from edward.util import transform
+from tensorflow.contrib.distributions import bijectors
 
 
 class test_inference_auto_transform_class(tf.test.TestCase):
@@ -33,10 +35,9 @@ class test_inference_auto_transform_class(tf.test.TestCase):
       # target distribution.
       n_samples = 10000
       x_mean, x_var = tf.nn.moments(x.sample(n_samples), 0)
-      qx_transformed = TransformedDistribution(
-          distribution=qx,
-          bijector=tf.contrib.distributions.bijectors.Softplus())
-      qx_mean, qx_var = tf.nn.moments(qx_transformed.sample(n_samples), 0)
+      x_unconstrained = inference.transformations[x]
+      qx_constrained = transform(qx, bijectors.Invert(x_unconstrained.bijector))
+      qx_mean, qx_var = tf.nn.moments(qx_constrained.sample(n_samples), 0)
       stats = sess.run([x_mean, qx_mean, x_var, qx_var])
       self.assertAllClose(info_dict['loss'], 0.0, rtol=0.2, atol=0.2)
       self.assertAllClose(stats[0], stats[1], rtol=1e-2, atol=1e-2)
@@ -149,8 +150,7 @@ class test_inference_auto_transform_class(tf.test.TestCase):
 
       # Check approximation on constrained space has same moments as
       # target distribution.
-      # qx = inference.latent_vars[x]
-      qx = inference.latent_vars.values()[0]
+      qx = inference.latent_vars[inference.transformations[x]]
       n_samples = 10000
       x_mean, x_var = tf.nn.moments(x.sample(n_samples), 0)
       qx_mean, qx_var = tf.nn.moments(qx.params[500:], 0)
