@@ -34,6 +34,10 @@ class MetropolisHastings(MonteCarlo):
   q(\\beta)$. This is unbiased (and therefore asymptotically exact as a
   pseudo-marginal method) if $q(\\beta) = p(\\beta \mid x)$.
 
+  `MetropolisHastings` assumes the proposal distribution has the same
+  support as the prior. The `auto_transform` attribute in
+  the method `initialize()` is not applicable.
+
   #### Examples
 
   ```python
@@ -57,6 +61,10 @@ class MetropolisHastings(MonteCarlo):
     check_latent_vars(proposal_vars)
     self.proposal_vars = proposal_vars
     super(MetropolisHastings, self).__init__(latent_vars, data)
+
+  def initialize(self, *args, **kwargs):
+    kwargs['auto_transform'] = False
+    return super(MetropolisHastings, self).initialize(*args, **kwargs)
 
   def build_update(self):
     """Draw sample from proposal conditional on last sample. Then

@@ -120,5 +120,6 @@ _candidate = distributions_Empirical
 __init__.__doc__ = _candidate.__init__.__doc__
 _globals = globals()
 _params = {'__doc__': _candidate.__doc__,
-           '__init__': __init__}
+           '__init__': __init__,
+           'support': 'points'}
 _globals[_name] = type(_name, (RandomVariable, _candidate), _params)
