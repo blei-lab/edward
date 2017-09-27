@@ -66,7 +66,7 @@ class KLpq(VariationalInference):
 
     The loss function can be estimated as
 
-    $\\frac{1}{S} \sum_{s=1}^S [
+    $\sum_{s=1}^S [
       w_{\\text{norm}}(z^s; \lambda) (\log p(x, z^s) - \log q(z^s; \lambda) ],$
 
     where for $z^s \sim q(z; \lambda)$,
@@ -79,7 +79,7 @@ class KLpq(VariationalInference):
 
     This provides a gradient,
 
-    $- \\frac{1}{S} \sum_{s=1}^S [
+    $- \sum_{s=1}^S [
       w_{\\text{norm}}(z^s; \lambda) \\nabla_{\lambda} \log q(z^s; \lambda) ].$
     """
     p_log_prob = [0.0] * self.n_samples
@@ -126,13 +126,13 @@ class KLpq(VariationalInference):
     log_w = p_log_prob - q_log_prob
     log_w_norm = log_w - tf.reduce_logsumexp(log_w)
     w_norm = tf.exp(log_w_norm)
-    loss = tf.reduce_mean(w_norm * log_w)
+    loss = tf.reduce_sum(w_norm * log_w)
 
     q_rvs = list(six.itervalues(self.latent_vars))
     q_vars = [v for v in var_list
               if len(get_descendants(tf.convert_to_tensor(v), q_rvs)) != 0]
     q_grads = tf.gradients(
-        -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm)),
+        -tf.reduce_sum(q_log_prob * tf.stop_gradient(w_norm)),
         q_vars)
     p_vars = [v for v in var_list if v not in q_vars]
     p_grads = tf.gradients(-loss, p_vars)
