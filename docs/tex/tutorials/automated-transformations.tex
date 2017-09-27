@@ -119,6 +119,15 @@ For example, if the automated transformation from non-negative to
 reals is $\log$, then the constrained approximation is a LogNormal
 distribution.
 
+We visualize the densities of the distributions.
+
+\begin{lstlisting}[language=Python]
+sns.distplot(x.sample(50000).eval(), hist=False, label='x')
+sns.distplot(qx_constrained.sample(100000).eval(), hist=False, label='qx')
+\end{lstlisting}
+
+\includegraphics[width=600px]{/images/automated-transformations-0.png}
+
 \textbf{Gradient-based Monte Carlo.}
 Consider an Empirical approximation with 1000 samples
 and use the algorithm \href{/api/ed/HMC}{\texttt{ed.HMC}}.
@@ -156,6 +165,15 @@ obtain the constrained approximation, as it only applies to continuous
 distributions. Instead, we define a new Empirical distribution whose
 parameters (samples) are given by transforming all samples stored in
 the unconstrained approximation.
+
+We visualize the densities of the distributions.
+
+\begin{lstlisting}[language=Python]
+sns.distplot(x.sample(50000).eval(), hist=False, label='x')
+sns.distplot(qx_constrained.sample(100000).eval(), hist=False, label='qx')
+\end{lstlisting}
+
+\includegraphics[width=600px]{/images/automated-transformations-1.png}
 
 \subsubsection{Acknowledgements \& Remarks}
 
