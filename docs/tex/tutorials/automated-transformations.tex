@@ -138,7 +138,7 @@ Consider an Empirical approximation with 1000 samples
 and use the algorithm \href{/api/ed/HMC}{\texttt{ed.HMC}}.
 
 \begin{lstlisting}[language=Python]
-from edward.models import Normal
+from edward.models import Empirical
 
 qx = Empirical(params=tf.Variable(tf.random_normal([1000])))
 
