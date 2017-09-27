@@ -66,8 +66,9 @@ class RenyiDivergence(VariationalInference):
             stochastic gradients.
         alpha: float, optional.
             Renyi divergence coefficient. $\alpha \in \mathbb{R}$.
-            When $\alpha < 0$, the algorithm does not minimize the Renyi
-            divergence (see [@li2016renyi] - section 4.2)
+            When $\alpha < 0$, the algorithm still does something sensible but
+            does not minimize the Renyi divergence anymore.
+            (see [@li2016renyi] - section 4.2)
         backward_pass: str, optional.
             Backward pass mode to be used.
             Options: 'min', 'max', 'full'

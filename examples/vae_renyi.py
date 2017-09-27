@@ -3,8 +3,10 @@
 [@li2016renyi]
 
 #### Notes
-This example is almost exactly similar to example/vae.py. The only difference
-is the use of the Renyi objective.
+This example is almost exactly similar to example/vae.py.
+The only difference is the use of the Renyi objective.
+For $\alpha=1.0$, the Renyi objective is equivalent to the KL-objective and the
+normal VAE is obtained.
 
 References
 ----------
