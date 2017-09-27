@@ -29,9 +29,18 @@ class Renyi_divergence(VariationalInference):
 
     # Notes:
         - Renyi divergence does not have any analytic version.
-        - Renyi divergence does not have any version for non reparametrizable models.
+        - Renyi divergence does not have any version for non reparametrizable
+            models.
+        - backward_pass = 'max': (extreme case $\alpha \rightarrow -\infty$)
+            the algorithm chooses the sample that has the maximum unnormalised
+            importance weight. This does not minimize the Renyi divergence
+            anymore.
+        - backward_pass = 'min': (extreme case $\alpha \rightarrow +\infty$)
+            the algorithm chooses the sample that has the minimum unnormalised
+            importance weight. This does not minimize the Renyi divergence
+            anymore. This mode is not describe in the paper but implemented
+            in the publicly available implementation of the paper's experiments.
     """
-
     def __init__(self, *args, **kwargs):
         super(Renyi_divergence, self).__init__(*args, **kwargs)
 

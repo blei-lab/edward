@@ -34,8 +34,9 @@ ed.set_seed(42)
 
 M = 100  # batch size during training
 d = 2  # latent dimension
-alpha = 0.5
-n_samples = 5
+alpha = 0.5 # alpha values for reny divergence
+n_samples = 5   # number of samples used to estimate the Renyi ELBO
+backward_pass = 'max'   # Back propagation style ('min', 'max' or 'full')
 
 # DATA. MNIST batches are fed at training time.
 mnist = input_data.read_data_sets(DATA_DIR)
@@ -61,7 +62,7 @@ optimizer = tf.train.RMSPropOptimizer(0.01, epsilon=1.0)
 inference.initialize(optimizer=optimizer,
                      n_samples=n_samples,
                      alpha=alpha,
-                     backward_pass='full')
+                     backward_pass=backward_pass)
 sess = ed.get_session()
 tf.global_variables_initializer().run()
 
