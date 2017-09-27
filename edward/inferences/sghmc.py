@@ -95,13 +95,7 @@ class SGHMC(MonteCarlo):
     assign_ops = []
     for z, qz in six.iteritems(self.latent_vars):
       variable = qz.get_variables()[0]
-      qz_sample = sample[z]
-      if (hasattr(z, 'bijector') and hasattr(z, 'support') and
-              z.support in ('real', 'multivariate_real')):
-        # If z is an automatically unconstrained distribution,
-        # transform samples back to original (constrained) space.
-        qz_sample = z.bijector.inverse(qz_sample)
-      assign_ops.append(tf.scatter_update(variable, self.t, qz_sample))
+      assign_ops.append(tf.scatter_update(variable, self.t, sample[z]))
       assign_ops.append(tf.assign(self.v[z], v_sample[z]).op)
 
     # Increment n_accept.
