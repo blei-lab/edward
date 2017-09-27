@@ -103,3 +103,6 @@ docs/*.html
 
 # data:
 data/*
+
+# atom
+.remote-sync.json

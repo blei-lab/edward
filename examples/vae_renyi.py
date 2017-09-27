@@ -35,7 +35,6 @@ ed.set_seed(42)
 M = 100  # batch size during training
 d = 2  # latent dimension
 alpha = 0.5
-beta = 0.5
 
 # DATA. MNIST batches are fed at training time.
 mnist = input_data.read_data_sets(DATA_DIR)
@@ -61,7 +60,7 @@ optimizer = tf.train.RMSPropOptimizer(0.01, epsilon=1.0)
 inference.initialize(optimizer=optimizer,
                      n_samples=32,
                      batch_size=32,
-                     alpha=0.2,
+                     alpha=alpha,
                      backward_pass='full')
 sess = ed.get_session()
 tf.global_variables_initializer().run()
