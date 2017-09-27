@@ -96,6 +96,8 @@ class Renyi_divergence(VariationalInference):
             for rv in six.itervalues(self.latent_vars)])
 
         if is_reparameterizable:
+            print(self.alpha)
+
             p_log_prob = [0.0] * self.n_samples
             q_log_prob = [0.0] * self.n_samples
             base_scope = tf.get_default_graph().unique_name("inference") + '/'
