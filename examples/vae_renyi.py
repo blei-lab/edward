@@ -11,7 +11,7 @@ from __future__ import division
 from __future__ import print_function
 
 import edward as ed
-from edward.inferences.renyi_divergence import Renyi_divergence
+from edward.inferences.renyi_divergence import RenyiDivergence
 import numpy as np
 import os
 import tensorflow as tf
@@ -26,15 +26,15 @@ DATA_DIR = "data/mnist"
 IMG_DIR = "img"
 
 if not os.path.exists(DATA_DIR):
-    os.makedirs(DATA_DIR)
+  os.makedirs(DATA_DIR)
 if not os.path.exists(IMG_DIR):
-    os.makedirs(IMG_DIR)
+  os.makedirs(IMG_DIR)
 
 ed.set_seed(42)
 
 M = 100  # batch size during training
 d = 2  # latent dimension
-alpha = 0.5     # alpha values for reny divergence
+alpha = 0.5     # alpha values for renyi divergence
 n_samples = 5   # number of samples used to estimate the Renyi ELBO
 backward_pass = 'max'   # Back propagation style ('min', 'max' or 'full')
 
@@ -57,7 +57,7 @@ qz = Normal(loc=Dense(d)(hidden),
             scale=Dense(d, activation='softplus')(hidden))
 
 # Bind p(x, z) and q(z | x) to the same TensorFlow placeholder for x.
-inference = Renyi_divergence({z: qz}, data={x: x_ph})
+inference = RenyiDivergence({z: qz}, data={x: x_ph})
 optimizer = tf.train.RMSPropOptimizer(0.01, epsilon=1.0)
 inference.initialize(optimizer=optimizer,
                      n_samples=n_samples,
@@ -69,23 +69,23 @@ tf.global_variables_initializer().run()
 n_epoch = 100
 n_iter_per_epoch = 1000
 for epoch in range(n_epoch):
-    avg_loss = 0.0
+  avg_loss = 0.0
 
-    pbar = Progbar(n_iter_per_epoch)
-    for t in range(1, n_iter_per_epoch + 1):
-        pbar.update(t)
-        x_train, _ = mnist.train.next_batch(M)
-        x_train = np.random.binomial(1, x_train)
-        info_dict = inference.update(feed_dict={x_ph: x_train})
-        avg_loss += info_dict['loss']
+  pbar = Progbar(n_iter_per_epoch)
+  for t in range(1, n_iter_per_epoch + 1):
+    pbar.update(t)
+    x_train, _ = mnist.train.next_batch(M)
+    x_train = np.random.binomial(1, x_train)
+    info_dict = inference.update(feed_dict={x_ph: x_train})
+    avg_loss += info_dict['loss']
 
-    # Print a lower bound to the average marginal likelihood for an
-    # image.
-    avg_loss = avg_loss / n_iter_per_epoch
-    avg_loss = avg_loss / M
-    print("log p(x) >= {:0.3f}".format(avg_loss))
+  # Print a lower bound to the average marginal likelihood for an
+  # image.
+  avg_loss = avg_loss / n_iter_per_epoch
+  avg_loss = avg_loss / M
+  print("log p(x) >= {:0.3f}".format(avg_loss))
 
-    # Prior predictive check.
-    imgs = sess.run(x)
-    for m in range(M):
-        imsave(os.path.join(IMG_DIR, '%d.png') % m, imgs[m].reshape(28, 28))
+  # Prior predictive check.
+  imgs = sess.run(x)
+  for m in range(M):
+    imsave(os.path.join(IMG_DIR, '%d.png') % m, imgs[m].reshape(28, 28))
