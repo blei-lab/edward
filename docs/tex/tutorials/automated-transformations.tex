@@ -2,12 +2,11 @@
 
 \subsection{Automated Transformations}
 
-Automated transformations enable inference algorithms originally
-restricted to unconstrained latent spaces to handle variables with
-constrained continuous support. For example, automated transformations
-are core to gradient-based Monte Carlo and variational inference with
-reparameterization gradients when using models with Gamma or
-Dirichlet priors.
+Automated transformations provide convenient handling of constrained
+continuous variables during inference by transforming them to an
+unconstrained space. Automated transformations are crucial for
+expanding the scope of algorithm classes such as gradient-based Monte
+Carlo and variational inference with reparameterization gradients.
 
 A Jupyter notebook version of this tutorial is available
 \href{http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/automated_transformations.ipynb}{here}.
@@ -21,14 +20,14 @@ It takes as input a (possibly constrained) continuous random variable
 $\mathbf{x}$, defaults to a choice of transformation $T$, and returns a
 \href{/api/ed/models/TransformedDistribution}
 {\texttt{TransformedDistribution}}
-$\mathbf{y}$ with unconstrained support.
+$\mathbf{y}=T(\mathbf{x})$ with unconstrained support.
 An optional argument allows you to manually specify the transformation.
 
 The returned random variable $\mathbf{y}$'s density is the original
 random variable $\mathbf{x}$'s density adjusted by the determinant of
 the Jacobian of the inverse transformation \citep{casella2002statistical},
 
-$$p(\mathbf{y}) = p(\mathbf{x}) |~\mathrm{det} J_{T^{-1}}(\mathbf{y}) |.$$
+$$p(\mathbf{y}) = p(\mathbf{x})~|\mathrm{det}~J_{T^{-1}}(\mathbf{y}) |.$$
 
 Intuitively, the Jacobian describes how a transformation warps unit
 volumes across spaces. This matters for transformations of random
@@ -37,8 +36,6 @@ to one.
 
 \subsubsection{Automated Transformations in Inference}
 
-% We then describe how it's used across
-% many different inference algorithms.
 To use automated transformations during inference, set the flag
 argument \texttt{auto_transform=True} in \texttt{inference.initialize}
 (or the all-encompassing method \texttt{inference.run}):
@@ -69,19 +66,20 @@ inference with latent variables of non-negative support occur
 frequently: for example, this appears when applying topic models with a deep exponential
 family where we might use a normal variational
 approximation to implicitly approximate latent variables with Gamma
-priors rather than explicitly define a non-negative variational approximation (
+priors (in
 \href{https://github.com/blei-lab/edward/blob/master/examples/deep_exponential_family.py}
-{\texttt{examples/deep_exponential_family.py}}).
+{\texttt{examples/deep_exponential_family.py}},
+we explicitly define a non-negative variational approximation).
 
 \textbf{Variational inference.}
 Consider a Normal variational approximation
-and use the algorithm \texttt{ed.KLqp}.
+and use the algorithm \href{/api/ed/KLqp}{\texttt{ed.KLqp}}.
 
 \begin{lstlisting}[language=Python]
 from edward.models import Normal
 
-x = Normal(loc=tf.Variable(tf.random_normal([])),
-           scale=tf.nn.softplus(tf.Variable(tf.random_normal([]))))
+qx = Normal(loc=tf.Variable(tf.random_normal([])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([]))))
 
 inference = ed.KLqp({x: qx})
 inference.run()
@@ -123,22 +121,23 @@ distribution.
 
 \textbf{Gradient-based Monte Carlo.}
 Consider an Empirical approximation with 1000 samples
-and use the algorithm \texttt{ed.HMC}.
+and use the algorithm \href{/api/ed/HMC}{\texttt{ed.HMC}}.
 
 \begin{lstlisting}[language=Python]
 from edward.models import Normal
 
-x = Empirical(params=tf.Variable(tf.random_normal([1000])))
+qx = Empirical(params=tf.Variable(tf.random_normal([1000])))
 
 inference = ed.HMC({x: qx})
-inference.run()
+inference.run(step_size=0.8)
 \end{lstlisting}
 
 Gamma and Empirical have unequal support so Gamma is transformed to
 the unconstrained space; by implementation, discrete delta
 distributions such as Empirical and PointMass are not transformed.
-\texttt{ed.HMC} then simulates Hamiltonian dynamics and writes the
-unconstrained samples to the empirical distribution.
+\texttt{ed.HMC} then simulates Hamiltonian
+dynamics and writes the unconstrained samples to the empirical
+distribution.
 
 In order to obtain the approximation on the original (constrained)
 support, we again take the inverse of the target distribution's
@@ -162,8 +161,8 @@ the unconstrained approximation.
 
 Automated transformations have largely been popularized by Stan,
 particularly for Hamiltonian Monte Carlo \citep{carpenter2016stan}.
-This design is inspired by Stan's but with the key distinction of
-providing users flexibility to wield transformations and manipulate
+This design is inspired by Stan's. However, a key distinction is Edward
+provides users flexibility to wield transformations and manipulate
 results in either the original (constrained) or inferred
 (unconstrained) space.
 
