@@ -719,16 +719,21 @@ def get_variables(x, collection=None):
 def transform(x, *args, **kwargs):
   """Transform a continuous random variable to the unconstrained space.
 
-  Transform selects among a number of defaults transformations which depend
-  on the support of the provided random variable.
+  `transform` selects among a number of default transformations which
+  depend on the support of the provided random variable:
+
+  + $[0, 1]$ (e.g., Beta): Inverse of sigmoid.
+  + $[0, \infty)$ (e.g., Gamma): Inverse of softplus.
+  + Simplex (e.g., Dirichlet): Inverse of softmax-centered.
+  + $(-\infty, \infty)$ (e.g., Normal, MultivariateNormalTriL): None.
 
   Args:
-    x : RandomVariable.
+    x: RandomVariable.
       Continuous random variable to transform.
-    *args, **kwargs : optional.
+    *args, **kwargs: optional.
       Arguments to overwrite when forming the ``TransformedDistribution``.
-      For example, one can manually specify the transformation by
-      passing in the ``bijector`` argument.
+      For example, manually specify the transformation by passing in
+      the ``bijector`` argument.
 
   Returns:
     RandomVariable.
@@ -753,18 +758,23 @@ def transform(x, *args, **kwargs):
   except AttributeError as e:
     msg = """'{}' object has no 'support'
              so cannot be transformed.""".format(type(x).__name__)
-    raise ValueError(msg)
+    raise AttributeError(msg)
 
   if support == '01':
     bij = bijectors.Invert(bijectors.Sigmoid())
+    new_support = 'real'
   elif support == 'nonnegative':
     bij = bijectors.Invert(bijectors.Softplus())
+    new_support = 'real'
   elif support == 'simplex':
     bij = bijectors.Invert(bijectors.SoftmaxCentered(event_ndims=1))
-  elif support == 'real' or support == 'multivariate_real':
+    new_support = 'multivariate_real'
+  elif support in ('real', 'multivariate_real'):
     return x
   else:
     msg = "'transform' does not handle supports of type '{}'".format(support)
-    raise NotImplementedError(msg)
+    raise ValueError(msg)
 
-  return TransformedDistribution(x, bij, *args, **kwargs)
+  new_x = TransformedDistribution(x, bij, *args, **kwargs)
+  new_x.support = new_support
+  return new_x

@@ -25,7 +25,7 @@ from edward.models import Bernoulli
 
 
 def geometric(p):
-    cond = tf.cast(Bernoulli(p), tf.bool)
+    cond = tf.cast(Bernoulli(probs=p), tf.bool)
 
     def fn1():
       return tf.constant(0)

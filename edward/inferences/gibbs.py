@@ -16,6 +16,10 @@ from edward.util import check_latent_vars, get_session
 class Gibbs(MonteCarlo):
   """Gibbs sampling [@geman1984stochastic].
 
+  Note `Gibbs` assumes the proposal distribution has the same
+  support as the prior. The `auto_transform` attribute in
+  the method `initialize()` is not applicable.
+
   #### Examples
 
   ```python
@@ -60,6 +64,7 @@ class Gibbs(MonteCarlo):
     """
     self.scan_order = scan_order
     self.feed_dict = {}
+    kwargs['auto_transform'] = False
     return super(Gibbs, self).initialize(*args, **kwargs)
 
   def update(self, feed_dict=None):
