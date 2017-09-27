@@ -45,12 +45,12 @@ class RenyiDivergence(VariationalInference):
 
   def __init__(self, *args, **kwargs):
 
+    super(RenyiDivergence, self).__init__(*args, **kwargs)
+
     self.is_reparameterizable = all([
       rv.reparameterization_type ==
       tf.contrib.distributions.FULLY_REPARAMETERIZED
       for rv in six.itervalues(self.latent_vars)])
-
-    super(RenyiDivergence, self).__init__(*args, **kwargs)
 
   def initialize(self,
                  n_samples=32,
