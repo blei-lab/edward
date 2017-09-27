@@ -90,13 +90,13 @@ transforms both to the unconstrained space; normal is already
 unconstrained so only Gamma is transformed. \texttt{ed.KLqp} then
 optimizes with
 \href{/api/klqp}{reparameterization gradients}.
-This means the normal distribution's parameters are optimized to match
+This means the Normal distribution's parameters are optimized to match
 the transformed (unconstrained) Gamma distribution.
 
 Oftentimes we'd like the approximation on the original (constrained)
 space. This was never needed for inference, so we must explicitly
 build it by first obtaining the target distribution's transformation
-and then inverting it:
+and then inverting the transformation:
 
 \begin{lstlisting}[language=Python]
 from tensorflow.contrib.distributions import bijectors
@@ -106,20 +106,25 @@ x_transform = x_unconstrained.bijector  # transformed prior's transformation
 qx_constrained = ed.transform(qx, bijectors.Invert(x_transform))
 \end{lstlisting}
 
-The set of transformed distributions is given by
+The set of transformations is given by
 \texttt{inference.transformations}, which is a dictionary with keys
 given by any constrained latent variables and values given by their
-transformed distribution. We then use the
+transformed distribution. We use the
 \href{https://www.tensorflow.org/versions/master/api_docs/python/tf/distributions/bijectors}{\texttt{bijectors}}
 module in \texttt{tf.distributions} in order to handle invertible
 transformations.
+
 \texttt{qx_unconstrained} is a random variable distributed
 according to a inverse-transformed (constrained) normal distribution.
 For example, if the automated transformation from non-negative to
 reals is $\log$, then the constrained approximation is a LogNormal
-distribution.
+distribution; here, the default transformation is the inverse of
+$\textrm{softplus}$.
 
-We visualize the densities of the distributions.
+We can visualize the densities of the distributions.
+The figure below shows that the inverse-transformed normal
+distribution has lighter tails than the Gamma but is overall a
+good fit.
 
 \begin{lstlisting}[language=Python]
 sns.distplot(x.sample(50000).eval(), hist=False, label='x')
@@ -166,7 +171,9 @@ distributions. Instead, we define a new Empirical distribution whose
 parameters (samples) are given by transforming all samples stored in
 the unconstrained approximation.
 
-We visualize the densities of the distributions.
+We can visualize the densities of the distributions.
+The figure below indicates that the samples accurately fit the Gamma
+distribution up to simulation error.
 
 \begin{lstlisting}[language=Python]
 sns.distplot(x.sample(50000).eval(), hist=False, label='x')
