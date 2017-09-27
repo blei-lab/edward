@@ -719,16 +719,21 @@ def get_variables(x, collection=None):
 def transform(x, *args, **kwargs):
   """Transform a continuous random variable to the unconstrained space.
 
-  Transform selects among a number of defaults transformations which depend
-  on the support of the provided random variable.
+  `transform` selects among a number of default transformations which
+  depend on the support of the provided random variable:
+
+  + $[0, 1]$ (e.g., Beta): Inverse of sigmoid.
+  + $[0, \infty)$ (e.g., Gamma): Inverse of softplus.
+  + Simplex (e.g., Dirichlet): Inverse of softmax-centered.
+  + $(-\infty, \infty)$ (e.g., Normal, MultivariateNormalTriL): None.
 
   Args:
-    x : RandomVariable.
+    x: RandomVariable.
       Continuous random variable to transform.
-    *args, **kwargs : optional.
+    *args, **kwargs: optional.
       Arguments to overwrite when forming the ``TransformedDistribution``.
-      For example, one can manually specify the transformation by
-      passing in the ``bijector`` argument.
+      For example, manually specify the transformation by passing in
+      the ``bijector`` argument.
 
   Returns:
     RandomVariable.
