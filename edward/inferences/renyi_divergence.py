@@ -37,7 +37,6 @@ class Renyi_divergence(VariationalInference):
 
     def initialize(self,
                    n_samples=32,
-                   batch_size=32,
                    alpha=1.,
                    backward_pass='full',
                    *args, **kwargs):
@@ -48,8 +47,6 @@ class Renyi_divergence(VariationalInference):
             n_samples: int, optional.
                 Number of samples from variational model for calculating
                 stochastic gradients.
-            batch_size: int, optional.
-                Number of data points per iterations.
             alpha: float, optional.
                 Renyi divergence coefficient.
             backward_pass: str, optional.
@@ -159,8 +156,7 @@ class Renyi_divergence(VariationalInference):
             grads_and_vars=list(zip(grads, var_list))
             return loss, grads_and_vars
         else:
-            raise NotImplementedError(
-                "Variational Renyi inference only works with reparameterizable models")
+            raise NotImplementedError("Variational Renyi inference only works with reparameterizable models")
 
 
 #############

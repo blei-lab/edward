@@ -35,6 +35,7 @@ ed.set_seed(42)
 M = 100  # batch size during training
 d = 2  # latent dimension
 alpha = 0.5
+n_samples = 5
 
 # DATA. MNIST batches are fed at training time.
 mnist = input_data.read_data_sets(DATA_DIR)
@@ -58,8 +59,7 @@ qz = Normal(loc=Dense(d)(hidden),
 inference = Renyi_divergence({z: qz}, data={x: x_ph})
 optimizer = tf.train.RMSPropOptimizer(0.01, epsilon=1.0)
 inference.initialize(optimizer=optimizer,
-                     n_samples=32,
-                     batch_size=32,
+                     n_samples=n_samples,
                      alpha=alpha,
                      backward_pass='full')
 sess = ed.get_session()
