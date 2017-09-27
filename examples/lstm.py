@@ -25,12 +25,12 @@ import tensorflow as tf
 
 from datetime import datetime
 from edward.models import Categorical
-from edward.util import maybe_download_and_extract, Progbar
+from edward.util import Progbar
+from observations import text8
 
-data_dir = "data/text8"
-log_dir = "log"
+data_dir = "/tmp/data"
+log_dir = "/tmp/log"
 n_epoch = 200
-n_iter_per_epoch = 250
 batch_size = 128
 hidden_size = 512
 timesteps = 64
@@ -43,19 +43,6 @@ hyperparam_str = '_'.join([
 log_dir = os.path.join(log_dir, timestamp + '_' + hyperparam_str)
 if not os.path.exists(log_dir):
   os.makedirs(log_dir)
-
-
-def text8(path):
-  """Load the text8 data set (Mahoney, 2006)."""
-  path = os.path.expanduser(path)
-  url = 'http://mattmahoney.net/dc/text8.zip'
-  maybe_download_and_extract(path, url)
-  with open(os.path.join(path, 'text8')) as f:
-    text = f.read()
-  x_train = text[:int(90e6)]
-  x_valid = text[int(90e6):int(95e6)]
-  x_test = text[int(95e6):int(100e6)]
-  return x_train, x_valid, x_test
 
 
 def lstm_cell(x, h, c, name=None, reuse=False):
@@ -184,13 +171,19 @@ optimizer = tf.train.AdamOptimizer(learning_rate=lr)
 inference.initialize(optimizer=optimizer, logdir=log_dir, log_timestamp=False)
 
 print("Number of sets of parameters: {}".format(len(tf.trainable_variables())))
+print("Number of parameters: {}".format(
+    np.sum([np.prod(v.shape.as_list()) for v in tf.trainable_variables()])))
 for v in tf.trainable_variables():
   print(v)
 
 sess = ed.get_session()
 tf.global_variables_initializer().run()
 
-for epoch in range(n_epoch):
+# Double n_epoch and print progress every half an epoch.
+n_iter_per_epoch = len(x_train) // (batch_size * timesteps * 2)
+epoch = 0.0
+for _ in range(n_epoch * 2):
+  epoch += 0.5
   print("Epoch: {0}".format(epoch))
   avg_nll = 0.0
 

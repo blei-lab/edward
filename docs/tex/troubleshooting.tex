@@ -38,7 +38,17 @@ for details, including how to set up NVIDIA software for TensorFlow with GPUs.
 Edward has optional features that depend on external packages.
 
 \begin{itemize}
-  \item Neural networks are supported through three libraries:
+  \item Any examples using real data sets typically require
+  \href{https://github.com/edwardlib/observations/}{Observations} (>=0.1.2)
+\begin{lstlisting}[language=JSON]
+pip install observations
+\end{lstlisting}
+Observations lets you load an extensive collection of data sets with
+minimal effort under a one-line interface. Observations was originally
+developed for Edward and it has since become a standalone library for
+general machine learning.
+  \item Neural networks are supported through four libraries:
+  \texttt{tf.layers},
   \href{http://keras.io}{Keras} (>=1.0)
 \begin{lstlisting}[language=JSON]
 pip install keras==2.0.4

@@ -8,6 +8,7 @@ import os
 import sys
 
 import edward as ed
+import observations
 
 from tensorflow.python import debug as tf_debug
 from tensorflow.python.util import tf_inspect
@@ -29,6 +30,6 @@ if __name__ == '__main__':
 
   flags = doc_generator.parse_known_args()
 
-  doc_generator.set_py_modules([('ed', ed)])
+  doc_generator.set_py_modules([('ed', ed), ('observations', observations)])
 
   sys.exit(doc_generator.build(flags))

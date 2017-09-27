@@ -84,13 +84,12 @@ def ppc_stat_hist_plot(y_stats, yrep_stats, stat_name=None, **kwargs):
 
   # CRITICISM
   x_post = ed.copy(x, {p: qp})
-  ppc_stats = ed.ppc(
+  y_rep, y = ed.ppc(
       lambda xs, zs: tf.reduce_mean(tf.cast(xs[x_post], tf.float32)),
       data={x_post: x_data})
 
-  ed.ppc_stat_hist_plot(ppc_stats[1][1],
-                        ppc_stats[0],
-                        stat_name=r'$T \equiv$mean', bins=10)
+  ed.ppc_stat_hist_plot(
+      y[0], y_rep, stat_name=r'$T \equiv$mean', bins=10)
   plt.show()
   ```
   """

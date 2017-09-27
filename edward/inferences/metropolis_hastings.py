@@ -17,7 +17,7 @@ except Exception as e:
 
 
 class MetropolisHastings(MonteCarlo):
-  """Metropolis-Hastings (Metropolis et al., 1953; Hastings, 1970).
+  """Metropolis-Hastings [@metropolis1953equation; @hastings1970monte].
 
   #### Notes
 
@@ -33,6 +33,10 @@ class MetropolisHastings(MonteCarlo):
   leveraging a single Monte Carlo sample, where $\\beta^* \sim
   q(\\beta)$. This is unbiased (and therefore asymptotically exact as a
   pseudo-marginal method) if $q(\\beta) = p(\\beta \mid x)$.
+
+  `MetropolisHastings` assumes the proposal distribution has the same
+  support as the prior. The `auto_transform` attribute in
+  the method `initialize()` is not applicable.
 
   #### Examples
 
@@ -57,6 +61,10 @@ class MetropolisHastings(MonteCarlo):
     check_latent_vars(proposal_vars)
     self.proposal_vars = proposal_vars
     super(MetropolisHastings, self).__init__(latent_vars, data)
+
+  def initialize(self, *args, **kwargs):
+    kwargs['auto_transform'] = False
+    return super(MetropolisHastings, self).initialize(*args, **kwargs)
 
   def build_update(self):
     """Draw sample from proposal conditional on last sample. Then
@@ -131,7 +139,8 @@ class MetropolisHastings(MonteCarlo):
         ratio -= tf.reduce_sum(x_zold.log_prob(dict_swap[x]))
 
     # Accept or reject sample.
-    u = Uniform().sample()
+    u = Uniform(low=tf.constant(0.0, dtype=ratio.dtype),
+                high=tf.constant(1.0, dtype=ratio.dtype)).sample()
     accept = tf.log(u) < ratio
     sample_values = tf.cond(accept, lambda: list(six.itervalues(new_sample)),
                             lambda: list(six.itervalues(old_sample)))

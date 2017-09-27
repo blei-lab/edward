@@ -12,7 +12,7 @@ All stand-alone pages are under `docs/tex`. These compile to HTML pages. Our cus
 
 + Install the dependencies
 ```{bash}
-pip install argparse beautifulsoup4 ghp-import pandoc pandoc-attributes pandocfilters PyYAML
+pip install argparse beautifulsoup4 ghp-import observations pandoc pandoc-attributes pandocfilters PyYAML
 ```
 + You can build the website locally. Go to this `docs/` directory and run
 ```{bash}

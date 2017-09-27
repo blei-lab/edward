@@ -11,7 +11,7 @@ import os
 from datetime import datetime
 from edward.models import RandomVariable
 from edward.util import check_data, check_latent_vars, get_session, \
-    get_variables, Progbar
+    get_variables, Progbar, transform
 
 
 @six.add_metaclass(abc.ABCMeta)
@@ -152,8 +152,9 @@ class Inference(object):
       self.coord.join(self.threads)
 
   @abc.abstractmethod
-  def initialize(self, n_iter=1000, n_print=None, scale=None, logdir=None,
-                 log_timestamp=True, log_vars=None, debug=False):
+  def initialize(self, n_iter=1000, n_print=None, scale=None,
+                 auto_transform=True, logdir=None, log_timestamp=True,
+                 log_vars=None, debug=False):
     """Initialize inference algorithm. It initializes hyperparameters
     and builds ops for the algorithm's computation graph.
 
@@ -175,6 +176,12 @@ class Inference(object):
         element-wise to the random variable. For example, this is useful
         for mini-batch scaling when inferring global variables, or
         applying masks on a random variable.
+      auto_transform: bool, optional.
+        Whether to automatically transform continuous latent variables
+        of unequal support to be on the unconstrained space. It is
+        only applied if the argument is `True`, the latent variable
+        pair are `ed.RandomVariable`s with the `support` attribute,
+        the supports are both continuous and unequal.
       logdir: str, optional.
         Directory where event file will be written. For details,
         see `tf.summary.FileWriter`. Default is to log nothing.
@@ -209,6 +216,27 @@ class Inference(object):
       raise TypeError("scale must be a dict object.")
 
     self.scale = scale
+
+    # Set of all latent variables binded to their transformation on
+    # the unconstrained space (if any).
+    self.transformations = {}
+    if auto_transform:
+      latent_vars = self.latent_vars.copy()
+      self.latent_vars = {}
+      for z, qz in six.iteritems(latent_vars):
+        if hasattr(z, 'support') and hasattr(qz, 'support') and \
+                z.support != qz.support and qz.support != 'point':
+          z_transform = transform(z)
+          self.transformations[z] = z_transform
+          if qz.support == 'points':  # don't transform empirical approx's
+            self.latent_vars[z_transform] = qz
+          else:
+            qz_transform = transform(qz)
+            self.latent_vars[z_transform] = qz_transform
+            self.transformations[qz] = qz_transform
+        else:
+          self.latent_vars[z] = qz
+      del latent_vars
 
     if logdir is not None:
       self.logging = True

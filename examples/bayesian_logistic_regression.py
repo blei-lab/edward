@@ -48,6 +48,18 @@ qb = Empirical(params=tf.Variable(tf.random_normal([T])))
 inference = ed.HMC({w: qw, b: qb}, data={X: X_train, y: y_train})
 inference.initialize(n_print=10, step_size=0.6)
 
+# Alternatively, use variational inference.
+# qw_loc = tf.Variable(tf.random_normal([D]))
+# qw_scale = tf.nn.softplus(tf.Variable(tf.random_normal([D])))
+# qb_loc = tf.Variable(tf.random_normal([]) + 10)
+# qb_scale = tf.nn.softplus(tf.Variable(tf.random_normal([])))
+
+# qw = Normal(loc=qw_loc, scale=qw_scale)
+# qb = Normal(loc=qb_loc, scale=qb_scale)
+
+# inference = ed.KLqp({w: qw, b: qb}, data={X: X_train, y: y_train})
+# inference.initialize(n_print=10, n_iter=600)
+
 tf.global_variables_initializer().run()
 
 # Set up figure.

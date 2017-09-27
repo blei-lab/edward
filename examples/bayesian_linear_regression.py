@@ -1,5 +1,6 @@
 #!/usr/bin/env python
-"""Bayesian linear regression using variational inference.
+"""Bayesian linear regression using stochastic gradient Hamiltonian
+Monte Carlo.
 
 This version visualizes additional fits of the model.
 
@@ -13,10 +14,11 @@ from __future__ import print_function
 
 import edward as ed
 import matplotlib.pyplot as plt
+import seaborn as sns
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Normal
+from edward.models import Normal, Empirical
 
 
 def build_toy_dataset(N, noise_std=0.5):
@@ -43,15 +45,24 @@ b = Normal(loc=tf.zeros(1), scale=tf.ones(1))
 y = Normal(loc=ed.dot(X, w) + b, scale=tf.ones(N))
 
 # INFERENCE
-qw = Normal(loc=tf.Variable(tf.random_normal([D])),
-            scale=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
-qb = Normal(loc=tf.Variable(tf.random_normal([1])),
-            scale=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
+T = 5000                        # Number of samples.
+nburn = 100                     # Number of burn-in samples.
+stride = 10                    # Frequency with which to plot samples.
+qw = Empirical(params=tf.Variable(tf.random_normal([T, D])))
+qb = Empirical(params=tf.Variable(tf.random_normal([T, 1])))
 
-inference = ed.KLqp({w: qw, b: qb}, data={X: X_train, y: y_train})
-inference.run()
+inference = ed.SGHMC({w: qw, b: qb}, data={X: X_train, y: y_train})
+inference.run(step_size=1e-3)
+
 
 # CRITICISM
+
+# Plot posterior samples.
+sns.jointplot(qb.params.eval()[nburn:T:stride],
+              qw.params.eval()[nburn:T:stride])
+plt.show()
+
+# Posterior predictive checks.
 y_post = ed.copy(y, {w: qw, b: qb})
 # This is equivalent to
 # y_post = Normal(loc=ed.dot(X, qw) + qb, scale=tf.ones(N))

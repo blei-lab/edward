@@ -33,7 +33,9 @@ of the connection.
 
 First, we load the data.
 \begin{lstlisting}[language=Python]
-x_train = np.load('data/celegans_brain.npy')
+from observations import celegans
+
+x_train = celegans("~/data")
 \end{lstlisting}
 
 \subsubsection{Model}
