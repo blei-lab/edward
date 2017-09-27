@@ -100,9 +100,3 @@ docs/*.html
 # IDE related
 .idea/
 .vscode/
-
-# data:
-data/*
-
-# atom
-.remote-sync.json
