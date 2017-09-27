@@ -139,7 +139,7 @@ class Renyi_divergence(VariationalInference):
                 logF_max = tf.reduce_max(logF, 0)
                 logF = tf.log(
                     tf.maximum(1e-9,
-                               tf.reduce_mean(tf.exp(logF - logF_max), 0))
+                               tf.reduce_mean(tf.exp(logF - logF_max), 0)))
                 logF=(logF + logF_max) / (1 - self.alpha)
                 loss=tf.reduce_mean(logF)
             loss=-loss
