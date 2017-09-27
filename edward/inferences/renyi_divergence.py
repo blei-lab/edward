@@ -123,11 +123,11 @@ class Renyi_divergence(VariationalInference):
 
             logF = [p - q for p, q in zip(p_log_prob, q_log_prob)]
 
-            if backward_pass == 'max':
+            if self.backward_pass == 'max':
                 logF = tf.stack(logF)
                 logF = tf.reduce_max(logF, 0)
                 loss = tf.reduce_mean(logF)
-            elif backward_pass == 'min':
+            elif self.backward_pass == 'min':
                 logF = tf.stack(logF)
                 logF = tf.reduce_min(logF, 0)
                 loss = tf.reduce_mean(logF)
