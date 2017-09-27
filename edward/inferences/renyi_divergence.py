@@ -41,6 +41,7 @@ class Renyi_divergence(VariationalInference):
             anymore. This mode is not describe in the paper but implemented
             in the publicly available implementation of the paper's experiments.
     """
+
     def __init__(self, *args, **kwargs):
         super(Renyi_divergence, self).__init__(*args, **kwargs)
 
@@ -102,7 +103,8 @@ class Renyi_divergence(VariationalInference):
             for s in range(self.n_samples):
                 # Form dictionary in order to replace conditioning on prior or
                 # observed variable with conditioning on a specific value.
-                scope = base_scope + tf.get_default_graph().unique_name("sample")
+                scope = base_scope \
+                    + tf.get_default_graph().unique_name("sample")
                 dict_swap = {}
                 for x, qx in six.iteritems(self.data):
                     if isinstance(x, RandomVariable):
@@ -117,18 +119,21 @@ class Renyi_divergence(VariationalInference):
                     qz_copy = copy(qz, scope=scope)
                     dict_swap[z] = qz_copy.value()
                     q_log_prob[s] += tf.reduce_sum(
-                        self.scale.get(z, 1.0) * qz_copy.log_prob(dict_swap[z]))
+                        self.scale.get(z, 1.0)
+                        * qz_copy.log_prob(dict_swap[z]))
 
                 for z in six.iterkeys(self.latent_vars):
                     z_copy = copy(z, dict_swap, scope=scope)
                     p_log_prob[s] += tf.reduce_sum(
-                        self.scale.get(z, 1.0) * z_copy.log_prob(dict_swap[z]))
+                        self.scale.get(z, 1.0)
+                        * z_copy.log_prob(dict_swap[z]))
 
                 for x in six.iterkeys(self.data):
                     if isinstance(x, RandomVariable):
                         x_copy = copy(x, dict_swap, scope=scope)
                         p_log_prob[s] += tf.reduce_sum(
-                            self.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
+                            self.scale.get(x, 1.0)
+                            * x_copy.log_prob(dict_swap[x]))
 
             logF = [p - q for p, q in zip(p_log_prob, q_log_prob)]
 
@@ -149,28 +154,30 @@ class Renyi_divergence(VariationalInference):
                 logF = tf.log(
                     tf.maximum(1e-9,
                                tf.reduce_mean(tf.exp(logF - logF_max), 0)))
-                logF=(logF + logF_max) / (1 - self.alpha)
-                loss=tf.reduce_mean(logF)
-            loss=-loss
+                logF = (logF + logF_max) / (1 - self.alpha)
+                loss = tf.reduce_mean(logF)
+            loss = -loss
 
             if self.logging:
-                p_log_prob=tf.reduce_mean(p_log_prob)
-                q_log_prob=tf.reduce_mean(q_log_prob)
+                p_log_prob = tf.reduce_mean(p_log_prob)
+                q_log_prob = tf.reduce_mean(q_log_prob)
                 tf.summary.scalar("loss/p_log_prob", p_log_prob,
                                   collections=[self._summary_key])
                 tf.summary.scalar("loss/q_log_prob", q_log_prob,
                                   collections=[self._summary_key])
 
-            grads=tf.gradients(loss, var_list)
-            grads_and_vars=list(zip(grads, var_list))
+            grads = tf.gradients(loss, var_list)
+            grads_and_vars = list(zip(grads, var_list))
             return loss, grads_and_vars
         else:
-            raise NotImplementedError("Variational Renyi inference only works with reparameterizable models")
+            raise NotImplementedError(
+                "Variational Renyi inference only works with reparameterizable"
+                " models")
 
+#########
 
-#############
-### UTILS ###
-#############
+# UTILS #
+#########
 def isclose(a, b, rel_tol=0.0, abs_tol=1e-3):
     r"""
     Almost equal

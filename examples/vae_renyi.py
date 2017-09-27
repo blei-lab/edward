@@ -34,7 +34,7 @@ ed.set_seed(42)
 
 M = 100  # batch size during training
 d = 2  # latent dimension
-alpha = 0.5 # alpha values for reny divergence
+alpha = 0.5     # alpha values for reny divergence
 n_samples = 5   # number of samples used to estimate the Renyi ELBO
 backward_pass = 'max'   # Back propagation style ('min', 'max' or 'full')
 
