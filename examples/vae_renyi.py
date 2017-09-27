@@ -1,5 +1,10 @@
 #!/usr/bin/env python
-"""Variational auto-encoder for MNIST data.
+"""Variational auto-encoder for MNIST data using Renyi variational objective
+[@li2016renyi]
+
+#### Notes
+This example is almost exactly similar to example/vae.py. The only difference
+is the use of the Renyi objective.
 
 References
 ----------

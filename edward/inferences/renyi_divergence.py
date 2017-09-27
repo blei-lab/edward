@@ -18,18 +18,20 @@ except Exception as e:
 
 
 class RenyiDivergence(VariationalInference):
-  """Variational inference with the Renyi divergence
+  """Variational inference with the Renyi divergence [@li2016renyi].
+
+  It minimizes the Renyi divergence
 
   $ \text{D}_{R}^{(\alpha)}(q(z)||p(z \mid x))
-      = \frac{1}{\alpha-1} \log \int q(z)^{\alpha} p(z \mid x)^{1-\alpha} dz $
+      = \frac{1}{\alpha-1} \log \int q(z)^{\alpha} p(z \mid x)^{1-\alpha} dz.$
 
-  To perform the optimization, this class uses the techniques from
-  Renyi Divergence Variational Inference (Y. Li & al, 2016)
+  The optimization is performed using the gradient estimator as defined in
+  [@li2016renyi].
 
   ##### Notes
-      + Renyi divergence does not have any analytic version.
-      + Renyi divergence does not have any version for non reparametrizable
-      models.
+      + The gradient estimator used here does not have any analytic version.
+      + The gradient estimator used here does not have any version for non
+      reparametrizable models.
       + backward_pass = 'max': (extreme case $\alpha \rightarrow -\infty$)
       the algorithm chooses the sample that has the maximum unnormalised
       importance weight. This does not minimize the Renyi divergence
@@ -42,11 +44,17 @@ class RenyiDivergence(VariationalInference):
   """
 
   def __init__(self, *args, **kwargs):
+
+    self.is_reparameterizable = all([
+      rv.reparameterization_type ==
+      tf.contrib.distributions.FULLY_REPARAMETERIZED
+      for rv in six.itervalues(self.latent_vars)])
+
     super(RenyiDivergence, self).__init__(*args, **kwargs)
 
   def initialize(self,
                  n_samples=32,
-                 alpha=1.,
+                 alpha=1.0,
                  backward_pass='full',
                  *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters
@@ -57,12 +65,13 @@ class RenyiDivergence(VariationalInference):
             Number of samples from variational model for calculating
             stochastic gradients.
         alpha: float, optional.
-            Renyi divergence coefficient.
+            Renyi divergence coefficient. $\alpha \in \mathbb{R}$.
+            When $\alpha < 0$, the algorithm does not minimize the Renyi
+            divergence (see [@li2016renyi] - section 4.2)
         backward_pass: str, optional.
             Backward pass mode to be used.
             Options: 'min', 'max', 'full'
-            (see Renyi Divergence Variational Inference (Y. Li & al, 2016)
-             section 4.2)
+            (see [@li2016renyi] - section 4.2)
     """
     self.n_samples = n_samples
     self.alpha = alpha
@@ -77,25 +86,20 @@ class RenyiDivergence(VariationalInference):
 
     $ \mcalL_{R}^{\alpha}(q; x) =
             \frac{1}{1-\alpha} \log \dsE_{q} \left[
-                \left( \frac{p(x, z)}{q(z)}\right)^{1-\alpha} \right] $
+                \left( \frac{p(x, z)}{q(z)}\right)^{1-\alpha} \right].$
 
     It uses:
-        + Monte Carlo approximation of the ELBO (Y. Li & al, 2016)
-        + Reparameterization gradients (Kingma & al, 2014)
-        + Stochastic approximation of the joint distribution (Y. Li & al, 2016)
+        + Monte Carlo approximation of the ELBO [@li2016renyi].
+        + Reparameterization gradients [@kingma2014auto].
+        + Stochastic approximation of the joint distribution [@li2016renyi].
 
     ##### Notes
         + If the model is not reparameterizable, it returns a
         NotImplementedError.
-        + See Renyi Divergence Variational Inference (Y. Li & al, 2016) for
+        + See Renyi Divergence Variational Inference [@li2016renyi] for
         more details.
     """
-    is_reparameterizable = all([
-        rv.reparameterization_type ==
-        tf.contrib.distributions.FULLY_REPARAMETERIZED
-        for rv in six.itervalues(self.latent_vars)])
-
-    if is_reparameterizable:
+    if self.is_reparameterizable:
       p_log_prob = [0.0] * self.n_samples
       q_log_prob = [0.0] * self.n_samples
       base_scope = tf.get_default_graph().unique_name("inference") + '/'
@@ -131,26 +135,27 @@ class RenyiDivergence(VariationalInference):
             p_log_prob[s] += tf.reduce_sum(
                 self.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
 
-      logF = [p - q for p, q in zip(p_log_prob, q_log_prob)]
+      log_ratios = [p - q for p, q in zip(p_log_prob, q_log_prob)]
 
       if self.backward_pass == 'max':
-        logF = tf.stack(logF)
-        logF = tf.reduce_max(logF, 0)
-        loss = tf.reduce_mean(logF)
+        log_ratios = tf.stack(log_ratios)
+        log_ratios = tf.reduce_max(log_ratios, 0)
+        loss = tf.reduce_mean(log_ratios)
       elif self.backward_pass == 'min':
-        logF = tf.stack(logF)
-        logF = tf.reduce_min(logF, 0)
-        loss = tf.reduce_mean(logF)
-      elif isclose(self.alpha, 1.0, abs_tol=10e-3):
-        loss = tf.reduce_mean(logF)
+        log_ratios = tf.stack(log_ratios)
+        log_ratios = tf.reduce_min(log_ratios, 0)
+        loss = tf.reduce_mean(log_ratios)
+      elif np.abs(alpha - 1.0) < 10e-3:
+        loss = tf.reduce_mean(log_ratios)
       else:
-        logF = tf.stack(logF)
-        logF = logF * (1 - self.alpha)
-        logF_max = tf.reduce_max(logF, 0)
-        logF = tf.log(
-            tf.maximum(1e-9, tf.reduce_mean(tf.exp(logF - logF_max), 0)))
-        logF = (logF + logF_max) / (1 - self.alpha)
-        loss = tf.reduce_mean(logF)
+        log_ratios = tf.stack(log_ratios)
+        log_ratios = log_ratios * (1 - self.alpha)
+        log_ratios_max = tf.reduce_max(log_ratios, 0)
+        log_ratios = tf.log(
+            tf.maximum(1e-9,
+                       tf.reduce_mean(tf.exp(log_ratios - log_ratios_max), 0)))
+        log_ratios = (log_ratios + log_ratios_max) / (1 - self.alpha)
+        loss = tf.reduce_mean(log_ratios)
       loss = -loss
 
       if self.logging:
@@ -167,20 +172,4 @@ class RenyiDivergence(VariationalInference):
     else:
       raise NotImplementedError(
           "Variational Renyi inference only works with reparameterizable"
-          " models")
-
-
-#########
-# UTILS #
-#########
-def isclose(a, b, rel_tol=0.0, abs_tol=1e-3):
-  r"""
-  Almost equal
-
-  :param a:
-  :param b:
-  :param rel_tol:
-  :param abs_tol:
-  :return: Bool
-  """
-  return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+          " models.")
