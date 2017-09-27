@@ -184,11 +184,11 @@ sns.distplot(qx_constrained.sample(100000).eval(), hist=False, label='qx')
 
 \subsubsection{Acknowledgements \& Remarks}
 
-Automated transformations have largely been popularized by Stan,
-particularly for Hamiltonian Monte Carlo \citep{carpenter2016stan}.
-This design is inspired by Stan's. However, a key distinction is Edward
-provides users flexibility to wield transformations and manipulate
-results in either the original (constrained) or inferred
+Automated transformations have largely been popularized by Stan
+for Hamiltonian Monte Carlo \citep{carpenter2016stan}.
+This design is inspired by Stan's. However, a key distinction is that Edward
+provides users the ability to wield transformations and more flexibly
+manipulate results in both the original (constrained) and inferred
 (unconstrained) space.
 
 Automated transformations are also core to the algorithm automatic
