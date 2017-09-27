@@ -14,8 +14,7 @@ try:
   from edward.models import Normal
   from tensorflow.contrib.distributions import kl_divergence
 except Exception as e:
-  raise ImportError(
-      "{0}. Your TensorFlow version is not supported.".format(e))
+  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
 class RenyiDivergence(VariationalInference):
@@ -27,23 +26,23 @@ class RenyiDivergence(VariationalInference):
   To perform the optimization, this class uses the techniques from
   Renyi Divergence Variational Inference (Y. Li & al, 2016)
 
-  # Notes:
-      - Renyi divergence does not have any analytic version.
-      - Renyi divergence does not have any version for non reparametrizable
-          models.
-      - backward_pass = 'max': (extreme case $\alpha \rightarrow -\infty$)
-          the algorithm chooses the sample that has the maximum unnormalised
-          importance weight. This does not minimize the Renyi divergence
-          anymore.
-      - backward_pass = 'min': (extreme case $\alpha \rightarrow +\infty$)
-          the algorithm chooses the sample that has the minimum unnormalised
-          importance weight. This does not minimize the Renyi divergence
-          anymore. This mode is not describe in the paper but implemented
-          in the publicly available implementation of the paper's experiments.
+  ##### Notes
+      + Renyi divergence does not have any analytic version.
+      + Renyi divergence does not have any version for non reparametrizable
+      models.
+      + backward_pass = 'max': (extreme case $\alpha \rightarrow -\infty$)
+      the algorithm chooses the sample that has the maximum unnormalised
+      importance weight. This does not minimize the Renyi divergence
+      anymore.
+      + backward_pass = 'min': (extreme case $\alpha \rightarrow +\infty$)
+      the algorithm chooses the sample that has the minimum unnormalised
+      importance weight. This does not minimize the Renyi divergence
+      anymore. This mode is not describe in the paper but implemented
+      in the publicly available implementation of the paper's experiments.
   """
 
   def __init__(self, *args, **kwargs):
-    super(Renyi_divergence, self).__init__(*args, **kwargs)
+    super(RenyiDivergence, self).__init__(*args, **kwargs)
 
   def initialize(self,
                  n_samples=32,
@@ -69,7 +68,7 @@ class RenyiDivergence(VariationalInference):
     self.alpha = alpha
     self.backward_pass = backward_pass
 
-    return super(Renyi_divergence, self).initialize(*args, **kwargs)
+    return super(RenyiDivergence, self).initialize(*args, **kwargs)
 
   def build_loss_and_gradients(self, var_list):
     """Build the Renyi ELBO function.
@@ -81,15 +80,15 @@ class RenyiDivergence(VariationalInference):
                 \left( \frac{p(x, z)}{q(z)}\right)^{1-\alpha} \right] $
 
     It uses:
-    1. Monte Carlo approximation of the ELBO (Y. Li & al, 2016)
-    2. Reparameterization gradients (Kingma & al, 2014)
-    3. Stochastic approximation of the joint distribution (Y. Li & al, 2016)
+        + Monte Carlo approximation of the ELBO (Y. Li & al, 2016)
+        + Reparameterization gradients (Kingma & al, 2014)
+        + Stochastic approximation of the joint distribution (Y. Li & al, 2016)
 
-    # Notes
-        If the model is not reparameterizable, it returns a
+    ##### Notes
+        + If the model is not reparameterizable, it returns a
         NotImplementedError.
-        See Renyi Divergence Variational Inference (Y. Li & al, 2016)
-        for more details.
+        + See Renyi Divergence Variational Inference (Y. Li & al, 2016) for
+        more details.
     """
     is_reparameterizable = all([
         rv.reparameterization_type ==
@@ -119,21 +118,18 @@ class RenyiDivergence(VariationalInference):
           qz_copy = copy(qz, scope=scope)
           dict_swap[z] = qz_copy.value()
           q_log_prob[s] += tf.reduce_sum(
-              self.scale.get(z, 1.0)
-              * qz_copy.log_prob(dict_swap[z]))
+              self.scale.get(z, 1.0) * qz_copy.log_prob(dict_swap[z]))
 
         for z in six.iterkeys(self.latent_vars):
           z_copy = copy(z, dict_swap, scope=scope)
           p_log_prob[s] += tf.reduce_sum(
-              self.scale.get(z, 1.0)
-              * z_copy.log_prob(dict_swap[z]))
+              self.scale.get(z, 1.0) * z_copy.log_prob(dict_swap[z]))
 
         for x in six.iterkeys(self.data):
           if isinstance(x, RandomVariable):
             x_copy = copy(x, dict_swap, scope=scope)
             p_log_prob[s] += tf.reduce_sum(
-                self.scale.get(x, 1.0)
-                * x_copy.log_prob(dict_swap[x]))
+                self.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
 
       logF = [p - q for p, q in zip(p_log_prob, q_log_prob)]
 
@@ -152,8 +148,7 @@ class RenyiDivergence(VariationalInference):
         logF = logF * (1 - self.alpha)
         logF_max = tf.reduce_max(logF, 0)
         logF = tf.log(
-            tf.maximum(1e-9,
-                       tf.reduce_mean(tf.exp(logF - logF_max), 0)))
+            tf.maximum(1e-9, tf.reduce_mean(tf.exp(logF - logF_max), 0)))
         logF = (logF + logF_max) / (1 - self.alpha)
         loss = tf.reduce_mean(logF)
       loss = -loss
@@ -174,12 +169,10 @@ class RenyiDivergence(VariationalInference):
           "Variational Renyi inference only works with reparameterizable"
           " models")
 
-#########
 
+#########
 # UTILS #
 #########
-
-
 def isclose(a, b, rel_tol=0.0, abs_tol=1e-3):
   r"""
   Almost equal
