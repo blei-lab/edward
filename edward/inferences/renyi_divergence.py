@@ -27,10 +27,11 @@ class Renyi_divergence(VariationalInference):
     To perform the optimization, this class uses the techniques from
     Renyi Divergence Variational Inference (Y. Li & al, 2016)
 
-    ### Notes:
+    # Notes:
         - Renyi divergence does not have any analytic version.
         - Renyi divergence does not have any version for non reparametrizable models.
     """
+
     def __init__(self, *args, **kwargs):
         super(Renyi_divergence, self).__init__(*args, **kwargs)
 
@@ -77,7 +78,7 @@ class Renyi_divergence(VariationalInference):
         2. Reparameterization gradients (Kingma & al, 2014)
         3. Stochastic approximation of the joint distribution (Y. Li & al, 2016)
 
-        ### Notes
+        # Notes
             If the model is not reparameterizable, it returns a
             NotImplementedError.
             See Renyi Divergence Variational Inference (Y. Li & al, 2016)
@@ -126,99 +127,40 @@ class Renyi_divergence(VariationalInference):
             logF = [p - q for p, q in zip(p_log_prob, q_log_prob)]
 
             if backward_pass == 'max':
-                logF = tf.reshape(logF, [self.n_samples, 1])
+                logF = tf.stack(logF)
                 logF = tf.reduce_max(logF, 0)
                 loss = tf.reduce_mean(logF)
             elif backward_pass == 'min':
-                logF = tf.reshape(logF, [self.n_samples, 1])
+                logF = tf.stack(logF)
                 logF = tf.reduce_min(logF, 0)
                 loss = tf.reduce_mean(logF)
-            elif isclose(alpha, 1.0, abs_tol=10e-3):
+            elif isclose(self.alpha, 1.0, abs_tol=10e-3):
                 loss = tf.reduce_mean(logF)
             else:
-                logF = tf.reshape(logF, [self.n_samples, 1])
-                logF = logF * (1 - alpha)
+                logF = tf.stack(logF)
+                logF = logF * (1 - self.alpha)
                 logF_max = tf.reduce_max(logF, 0)
-                logF = tf.log(tf.clip_by_value(
-                    tf.reduce_mean(tf.exp(logF - logF_max), 0), 1e-9, np.inf))
-                logF = (logF + logF_max) / (1 - alpha)
-                loss = tf.reduce_mean(logF)
-            loss = -loss
+                logF = tf.log(
+                    tf.maximum(1e-9,
+                               tf.reduce_mean(tf.exp(logF - logF_max), 0))
+                logF=(logF + logF_max) / (1 - self.alpha)
+                loss=tf.reduce_mean(logF)
+            loss=-loss
 
             if self.logging:
-                p_log_prob = tf.reduce_mean(p_log_prob)
-                q_log_prob = tf.reduce_mean(q_log_prob)
+                p_log_prob=tf.reduce_mean(p_log_prob)
+                q_log_prob=tf.reduce_mean(q_log_prob)
                 tf.summary.scalar("loss/p_log_prob", p_log_prob,
                                   collections=[self._summary_key])
                 tf.summary.scalar("loss/q_log_prob", q_log_prob,
                                   collections=[self._summary_key])
 
-            grads = tf.gradients(loss, var_list)
-            grads_and_vars = list(zip(grads, var_list))
+            grads=tf.gradients(loss, var_list)
+            grads_and_vars=list(zip(grads, var_list))
             return loss, grads_and_vars
         else:
             raise NotImplementedError(
                 "Variational Renyi inference only works with reparameterizable models")
-
-
-#############
-### UTILS ###
-#############
-def isclose(a, b, rel_tol=0.0, abs_tol=1e-3):
-    r"""
-    Almost equal
-
-    :param a:
-    :param b:
-    :param rel_tol:
-    :param abs_tol:
-    :return: Bool
-    """
-    return abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
-y(x, dict_swap, scope=scope)
-                        p_log_prob[s] += tf.reduce_sum(
-                            self.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
-
-            logF = [p - q for p, q in zip(p_log_prob, q_log_prob)]
-
-            if backward_pass == 'max':
-                logF = tf.reshape(logF, [self.n_samples, 1])
-                logF = tf.reduce_max(logF, 0)
-                loss = tf.reduce_mean(logF)
-            elif backward_pass == 'min':
-                logF = tf.reshape(logF, [self.n_samples, 1])
-                logF = tf.reduce_min(logF, 0)
-                loss = tf.reduce_mean(logF)
-            elif isclose(alpha, 1.0, abs_tol=10e-3):
-                loss = tf.reduce_mean(logF)
-            else:
-                logF = tf.reshape(logF, [self.n_samples, 1])
-                logF = logF * (1 - alpha)
-                logF_max = tf.reduce_max(logF, 0)
-                logF = tf.log(tf.clip_by_value(
-                tf.reduce_mean(tf.exp(logF - logF_max), 0), 1e-9, np.inf))
-                logF = (logF + logF_max) / (1 - alpha)
-                loss = tf.reduce_mean(logF)
-            loss = -loss
-
-            if self.logging:
-                p_log_prob = tf.reduce_mean(p_log_prob)
-                q_log_prob = tf.reduce_mean(q_log_prob)
-                tf.summary.scalar("loss/p_log_prob", p_log_prob,
-                                  collections=[self._summary_key])
-                tf.summary.scalar("loss/q_log_prob", q_log_prob,
-                                  collections=[self._summary_key])
-
-            grads = tf.gradients(loss, var_list)
-            grads_and_vars = list(zip(grads, var_list))
-            return loss, grads_and_vars
-        else:
-            raise NotImplementedError("Variational Renyi inference only works with reparameterizable models")
-
-
-def build_reparam_R_loss_and_gradients(inference, var_list, alpha=1.0, backward_pass='full'):
-    """
-    """
 
 
 #############
