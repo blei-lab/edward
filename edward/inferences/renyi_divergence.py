@@ -28,7 +28,7 @@ class RenyiDivergence(VariationalInference):
   The optimization is performed using the gradient estimator as defined in
   [@li2016renyi].
 
-  ##### Notes
+  #### Notes
       + The gradient estimator used here does not have any analytic version.
       + The gradient estimator used here does not have any version for non
       reparametrizable models.
@@ -48,9 +48,9 @@ class RenyiDivergence(VariationalInference):
     super(RenyiDivergence, self).__init__(*args, **kwargs)
 
     self.is_reparameterizable = all([
-      rv.reparameterization_type ==
-      tf.contrib.distributions.FULLY_REPARAMETERIZED
-      for rv in six.itervalues(self.latent_vars)])
+        rv.reparameterization_type ==
+        tf.contrib.distributions.FULLY_REPARAMETERIZED
+        for rv in six.itervalues(self.latent_vars)])
 
   def initialize(self,
                  n_samples=32,
@@ -94,7 +94,7 @@ class RenyiDivergence(VariationalInference):
         + Reparameterization gradients [@kingma2014auto].
         + Stochastic approximation of the joint distribution [@li2016renyi].
 
-    ##### Notes
+    #### Notes
         + If the model is not reparameterizable, it returns a
         NotImplementedError.
         + See Renyi Divergence Variational Inference [@li2016renyi] for
@@ -146,7 +146,7 @@ class RenyiDivergence(VariationalInference):
         log_ratios = tf.stack(log_ratios)
         log_ratios = tf.reduce_min(log_ratios, 0)
         loss = tf.reduce_mean(log_ratios)
-      elif np.abs(alpha - 1.0) < 10e-3:
+      elif np.abs(self.alpha - 1.0) < 10e-3:
         loss = tf.reduce_mean(log_ratios)
       else:
         log_ratios = tf.stack(log_ratios)
