@@ -141,7 +141,7 @@
     \sum_{s=1}^{S}
     \frac{p(\mathbf{z}_s \mid \mathbf{x})}{q(\mathbf{z}_s\;;\;\lambda)}
   \end{aligned}\]</span></li>
-<li>compute the weighted mean.</li>
+<li>compute the weighted sum.</li>
 </ol>
 <p>The key insight is that we can use the joint <span class="math inline">\(p(\mathbf{x},\mathbf{z})\)</span> instead of the posterior when estimating the normalized importance weights <span class="math display">\[\begin{aligned}
   w_s
@@ -169,7 +169,6 @@
   )
   &amp;=
   -
-  \frac{1}{S}
   \sum_{s=1}^S
   w_s
   \nabla_\lambda\; \log q(\mathbf{z}_s\;;\;\lambda).\end{aligned}\]</span> The objective <span class="math inline">\(\text{KL}(p\|q)\)</span> can be calculated in a similar fashion. The only new ingredient for its gradient is the score function <span class="math inline">\(\nabla_\lambda \log q(\mathbf{z}\;;\;\lambda)\)</span>. Edward uses automatic differentiation, specifically with TensorFlow’s computational graphs, making this gradient computation both simple and efficient to distribute.</p>

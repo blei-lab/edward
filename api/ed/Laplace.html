@@ -123,6 +123,8 @@
 <p>We implement this by running <code>MAP</code> to find the posterior mode. This forms the mean of the normal approximation. We then compute the inverse Hessian at the mode of the posterior. This forms the covariance of the normal approximation.</p>
 <h4 id="notes">Notes</h4>
 <p>If <code>MultivariateNormalDiag</code> or <code>Normal</code> random variables are specified as approximations, then the Laplace approximation will only produce the diagonal. This does not capture correlation among the variables but it does not require a potentially expensive matrix inversion.</p>
+<p>Random variables with both scalar batch and event shape are not supported as <code>tf.hessians</code> is currently not applicable to scalars.</p>
+<p>Note that <code>Laplace</code> finds the location parameter of the normal approximation using <code>MAP</code>, which is performed on the latent variable's original (constrained) support. The scale parameter is calculated by evaluating the Hessian of <span class="math inline">\(-\log p(x, z)\)</span> in the constrained space and under the mode. This implies the Laplace approximation always has real support even if the target distribution has constrained support.</p>
 <h4 id="examples">Examples</h4>
 <pre class="python"><code>X = tf.placeholder(tf.float32, [N, D])
 w = Normal(loc=tf.zeros(D), scale=tf.ones(D))
@@ -144,7 +146,7 @@ inference = ed.Laplace({w: qw}, data={X: X_train, y: y_train})</code></pre>
 <p>Create an inference algorithm.</p>
 <h4 id="args">Args:</h4>
 <ul>
-<li><b><code>latent_vars</code></b>: list of RandomVariable or dict of RandomVariable to RandomVariable. Collection of random variables to perform inference on. If list, each random variable will be implictly optimized using a <code>MultivariateNormalTriL</code> random variable that is defined internally (with unconstrained support). If dictionary, each random variable must be a <code>MultivariateNormalDiag</code>, <code>MultivariateNormalTriL</code>, or <code>Normal</code> random variable.</li>
+<li><b><code>latent_vars</code></b>: list of RandomVariable or dict of RandomVariable to RandomVariable. Collection of random variables to perform inference on. If list, each random variable will be implictly optimized using a <code>MultivariateNormalTriL</code> random variable that is defined internally with unconstrained support and is initialized using standard normal draws. If dictionary, each random variable must be a <code>MultivariateNormalDiag</code>, <code>MultivariateNormalTriL</code>, or <code>Normal</code> random variable.</li>
 </ul>
 <h3 id="build_loss_and_gradients">
 <code>build_loss_and_gradients</code>

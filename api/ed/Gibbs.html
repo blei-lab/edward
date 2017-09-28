@@ -119,6 +119,7 @@
 </ul>
 <p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/inferences/gibbs.py"><code>edward/inferences/gibbs.py</code></a>.</p>
 <p>Gibbs sampling <span class="citation">(S. Geman &amp; Geman, 1984)</span>.</p>
+<p>Note <code>Gibbs</code> assumes the proposal distribution has the same support as the prior. The <code>auto_transform</code> attribute in the method <code>initialize()</code> is not applicable.</p>
 <h4 id="examples">Examples</h4>
 <pre class="python"><code>x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
 

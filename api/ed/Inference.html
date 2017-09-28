@@ -158,6 +158,7 @@ inference = ed.Inference({mu: qmu}, data={x: tf.zeros(50)})</code></pre>
     n_iter=1000,
     n_print=None,
     scale=None,
+    auto_transform=True,
     logdir=None,
     log_timestamp=True,
     log_vars=None,
@@ -170,6 +171,7 @@ inference = ed.Inference({mu: qmu}, data={x: tf.zeros(50)})</code></pre>
 <li><b><code>n_iter</code></b>: int, optional. Number of iterations for algorithm when calling <code>run()</code>. Alternatively if controlling inference manually, it is the expected number of calls to <code>update()</code>; this number determines tracking information during the print progress.</li>
 <li><b><code>n_print</code></b>: int, optional. Number of iterations for each print progress. To suppress print progress, then specify 0. Default is <code>int(n_iter / 100)</code>.</li>
 <li><b><code>scale</code></b>: dict of RandomVariable to tf.Tensor, optional. A tensor to scale computation for any random variable that it is binded to. Its shape must be broadcastable; it is multiplied element-wise to the random variable. For example, this is useful for mini-batch scaling when inferring global variables, or applying masks on a random variable.</li>
+<li><b><code>auto_transform</code></b>: bool, optional. Whether to automatically transform continuous latent variables of unequal support to be on the unconstrained space. It is only applied if the argument is <code>True</code>, the latent variable pair are <code>ed.RandomVariable</code>s with the <code>support</code> attribute, the supports are both continuous and unequal.</li>
 <li><b><code>logdir</code></b>: str, optional. Directory where event file will be written. For details, see <code>tf.summary.FileWriter</code>. Default is to log nothing.</li>
 <li><b><code>log_timestamp</code></b>: bool, optional. If True (and <code>logdir</code> is specified), create a subdirectory of <code>logdir</code> to save the specific run results. The subdirectory's name is the current UTC timestamp with format 'YYYYMMDD_HHMMSS'.</li>
 <li><b><code>log_vars</code></b>: list, optional. Specifies the list of variables to log after each <code>n_print</code> steps. If None, will log all variables. If <code>[]</code>, no variables will be logged. <code>logdir</code> must be specified for variables to be logged.</li>

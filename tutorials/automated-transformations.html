@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <meta http-equiv="Content-Style-Type" content="text/css" />
+  <meta name="generator" content="pandoc" />
+  <title>Edward – Automated Transformations</title>
+  <!-- Mobile Specific Metas -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- FONT -->
+  <link href="https://fonts.googleapis.com/css?family=Lora:400,400i,700" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="/css/normalize.css">
+  <link rel="stylesheet" href="/css/skeleton.css">
+  <!-- Dynamically resize logo for mobile -->
+  <style type="text/css">
+  .logo-width {
+    width: 100%;
+    box-sizing: border-box;
+    margin-bottom: 15%;
+  }
+  /* Roughly the point when website is single column */
+  @media (max-width: 850px) {
+    .logo-width {
+      width: 50%;
+      box-sizing: border-box;
+      margin-bottom: 5%;
+    }
+  }
+  </style>
+
+  <!-- KaTeX -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/katex.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.7.1/contrib/auto-render.min.js"></script>
+
+  <!-- highlight.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/highlight.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.4.0/styles/github.min.css">
+
+  <!-- Favicon -->
+  <link rel="apple-touch-icon" sizes="57x57" href="/icons/apple-touch-icon-57x57.png">
+  <link rel="apple-touch-icon" sizes="60x60" href="/icons/apple-touch-icon-60x60.png">
+  <link rel="apple-touch-icon" sizes="72x72" href="/icons/apple-touch-icon-72x72.png">
+  <link rel="apple-touch-icon" sizes="76x76" href="/icons/apple-touch-icon-76x76.png">
+  <link rel="apple-touch-icon" sizes="114x114" href="/icons/apple-touch-icon-114x114.png">
+  <link rel="apple-touch-icon" sizes="120x120" href="/icons/apple-touch-icon-120x120.png">
+  <link rel="apple-touch-icon" sizes="144x144" href="/icons/apple-touch-icon-144x144.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/icons/apple-touch-icon-152x152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" href="/icons/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="/icons/android-chrome-192x192.png" sizes="192x192">
+  <link rel="icon" type="image/png" href="/icons/favicon-96x96.png" sizes="96x96">
+  <link rel="icon" type="image/png" href="/icons/favicon-16x16.png" sizes="16x16">
+  <link rel="manifest" href="/icons/manifest.json">
+  <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#5bbad5">
+  <link rel="shortcut icon" href="/icons/favicon.ico">
+  <meta name="msapplication-TileColor" content="#da532c">
+  <meta name="msapplication-TileImage" content="/icons/mstile-144x144.png">
+  <meta name="msapplication-config" content="/icons/browserconfig.xml">
+  <meta name="theme-color" content="#ffffff">
+</head>
+<body>
+<div class="container">
+  <div class="row" style="margin-top: 5%">
+    <div class="three columns">
+    <h1><a href="/">Edward</a></h1>
+    <a href="/">
+    <center>
+      <img src="/images/edward.png" class="logo-width" alt="Edward" />
+    </center>
+    </a>
+    <a class="button u-full-width" href="/getting-started">Getting Started</a>
+    <a class="button u-full-width" href="/tutorials/">Tutorials</a>
+    <a class="button u-full-width" href="/api/">API</a>
+    <a class="button u-full-width" href="/community">Community</a>
+    <a class="button u-full-width" href="/contributing">Contributing</a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    <a class="button2 u-pull-right" style="padding-right:10%"
+      href="https://github.com/blei-lab/edward">
+      <span style="vertical-align:middle;">Github</span>&nbsp;
+      <img src="/images/github-mark.svg" style="vertical-align:middle;"
+      alt="Edward on Github" />
+    </a>
+    <div class="row" style="padding-bottom: 5%"> </div>
+    </div>
+    <div class="nine columns">
+
+<h2 id="automated-transformations">Automated Transformations</h2>
+<p>Automated transformations provide convenient handling of constrained continuous variables during inference by transforming them to an unconstrained space. Automated transformations are crucial for expanding the scope of algorithm classes such as gradient-based Monte Carlo and variational inference with reparameterization gradients.</p>
+<p>A Jupyter notebook version of this tutorial is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/automated_transformations.ipynb">here</a>.</p>
+<h3 id="the-transform-primitive">The Transform Primitive</h3>
+<p>Automated transformations in Edward are enabled through the key primitive <a href="/api/ed/transform"><code>ed.transform</code></a>. It takes as input a (possibly constrained) continuous random variable <span class="math inline">\(\mathbf{x}\)</span>, defaults to a choice of transformation <span class="math inline">\(T\)</span>, and returns a <a href="/api/ed/models/TransformedDistribution"><code>TransformedDistribution</code></a> <span class="math inline">\(\mathbf{y}=T(\mathbf{x})\)</span> with unconstrained support. An optional argument allows you to manually specify the transformation.</p>
+<p>The returned random variable <span class="math inline">\(\mathbf{y}\)</span>’s density is the original random variable <span class="math inline">\(\mathbf{x}\)</span>’s density adjusted by the determinant of the Jacobian of the inverse transformation <span class="citation">(Casella &amp; Berger, 2002)</span>,</p>
+<p><span class="math display">\[p(\mathbf{y}) = p(\mathbf{x})~|\mathrm{det}~J_{T^{-1}}(\mathbf{y}) |.\]</span></p>
+<p>Intuitively, the Jacobian describes how a transformation warps unit volumes across spaces. This matters for transformations of random variables, since probability density functions must always integrate to one.</p>
+<h3 id="automated-transformations-in-inference">Automated Transformations in Inference</h3>
+<p>To use automated transformations during inference, set the flag argument <code>auto_transform=True</code> in <code>inference.initialize</code> (or the all-encompassing method <code>inference.run</code>):</p>
+<pre class="python" language="Python"><code>inference.initialize(auto_transform=True)</code></pre>
+<p>By default, the flag is already set to <code>True</code>. With this flag, any key-value pair passed into inference’s <code>latent_vars</code> with unequal support is transformed to the unconstrained space; no transformation is applied if already unconstrained. The algorithm is then run under <code>inference.latent_vars</code>, which explicitly stores the transformed latent variables and forgets the constrained ones.</p>
+<p>We illustrate automated transformations in a few inference examples. Imagine that the target distribution is a Gamma distribution.</p>
+<pre class="python" language="Python"><code>from edward.models import Gamma
+
+x = Gamma(1.0, 2.0)</code></pre>
+<p>This example is only used for illustration, but note this context of inference with latent variables of non-negative support occur frequently: for example, this appears when applying topic models with a deep exponential family where we might use a normal variational approximation to implicitly approximate latent variables with Gamma priors (in <a href="https://github.com/blei-lab/edward/blob/master/examples/deep_exponential_family.py"><code>examples/deep_exponential_family.py</code></a>, we explicitly define a non-negative variational approximation).</p>
+<p><strong>Variational inference.</strong> Consider a Normal variational approximation and use the algorithm <a href="/api/ed/KLqp"><code>ed.KLqp</code></a>.</p>
+<pre class="python" language="Python"><code>from edward.models import Normal
+
+qx = Normal(loc=tf.Variable(tf.random_normal([])),
+            scale=tf.nn.softplus(tf.Variable(tf.random_normal([]))))
+
+inference = ed.KLqp({x: qx})
+inference.run()</code></pre>
+<p>The Gamma and Normal distribution have unequal support, so inference transforms both to the unconstrained space; normal is already unconstrained so only Gamma is transformed. <code>ed.KLqp</code> then optimizes with <a href="/api/klqp">reparameterization gradients</a>. This means the Normal distribution’s parameters are optimized to match the transformed (unconstrained) Gamma distribution.</p>
+<p>Oftentimes we’d like the approximation on the original (constrained) space. This was never needed for inference, so we must explicitly build it by first obtaining the target distribution’s transformation and then inverting the transformation:</p>
+<pre class="python" language="Python"><code>from tensorflow.contrib.distributions import bijectors
+
+x_unconstrained = inference.transformations[x]  # transformed prior
+x_transform = x_unconstrained.bijector  # transformed prior&#39;s transformation
+qx_constrained = ed.transform(qx, bijectors.Invert(x_transform))</code></pre>
+<p>The set of transformations is given by <code>inference.transformations</code>, which is a dictionary with keys given by any constrained latent variables and values given by their transformed distribution. We use the <a href="https://www.tensorflow.org/versions/master/api_docs/python/tf/distributions/bijectors"><code>bijectors</code></a> module in <code>tf.distributions</code> in order to handle invertible transformations.</p>
+<p><code>qx_unconstrained</code> is a random variable distributed according to a inverse-transformed (constrained) normal distribution. For example, if the automated transformation from non-negative to reals is <span class="math inline">\(\log\)</span>, then the constrained approximation is a LogNormal distribution; here, the default transformation is the inverse of <span class="math inline">\(\textrm{softplus}\)</span>.</p>
+<p>We can visualize the densities of the distributions. The figure below shows that the inverse-transformed normal distribution has lighter tails than the Gamma but is overall a good fit.</p>
+<pre class="python" language="Python"><code>sns.distplot(x.sample(50000).eval(), hist=False, label=&#39;x&#39;)
+sns.distplot(qx_constrained.sample(100000).eval(), hist=False, label=&#39;qx&#39;)</code></pre>
+<p><img src="/images/automated-transformations-0.png" alt="image" width="600" /></p>
+<p><strong>Gradient-based Monte Carlo.</strong> Consider an Empirical approximation with 1000 samples and use the algorithm <a href="/api/ed/HMC"><code>ed.HMC</code></a>.</p>
+<pre class="python" language="Python"><code>from edward.models import Empirical
+
+qx = Empirical(params=tf.Variable(tf.random_normal([1000])))
+
+inference = ed.HMC({x: qx})
+inference.run(step_size=0.8)</code></pre>
+<p>Gamma and Empirical have unequal support so Gamma is transformed to the unconstrained space; by implementation, discrete delta distributions such as Empirical and PointMass are not transformed. <code>ed.HMC</code> then simulates Hamiltonian dynamics and writes the unconstrained samples to the empirical distribution.</p>
+<p>In order to obtain the approximation on the original (constrained) support, we again take the inverse of the target distribution’s transformation.</p>
+<pre class="python" language="Python"><code>from tensorflow.contrib.distributions import bijectors
+
+x_unconstrained = inference.transformations[x]  # transformed prior
+x_transform = x_unconstrained.bijector  # transformed prior&#39;s transformation
+qx_constrained = Empirical(params=x_transform.inverse(qx.params))</code></pre>
+<p>Unlike variational inference, we don’t use <code>ed.transform</code> to obtain the constrained approximation, as it only applies to continuous distributions. Instead, we define a new Empirical distribution whose parameters (samples) are given by transforming all samples stored in the unconstrained approximation.</p>
+<p>We can visualize the densities of the distributions. The figure below indicates that the samples accurately fit the Gamma distribution up to simulation error.</p>
+<pre class="python" language="Python"><code>sns.distplot(x.sample(50000).eval(), hist=False, label=&#39;x&#39;)
+sns.distplot(qx_constrained.sample(100000).eval(), hist=False, label=&#39;qx&#39;)</code></pre>
+<p><img src="/images/automated-transformations-1.png" alt="image" width="600" /></p>
+<h3 id="acknowledgements-remarks">Acknowledgements &amp; Remarks</h3>
+<p>Automated transformations have largely been popularized by Stan for Hamiltonian Monte Carlo <span class="citation">(Carpenter et al., 2016)</span>. This design is inspired by Stan’s. However, a key distinction is that Edward provides users the ability to wield transformations and more flexibly manipulate results in both the original (constrained) and inferred (unconstrained) space.</p>
+<p>Automated transformations are also core to the algorithm automatic differentiation variational inference <span class="citation">(Kucukelbir, Tran, Ranganath, Gelman, &amp; Blei, 2017)</span>, which allows it to select a default variational family of normal distributions. However, note the automated transformation from non-negative to reals in Edward is not <span class="math inline">\(\log\)</span>, which is used in Stan; rather, Edward uses <span class="math inline">\(\textrm{softplus}\)</span> which is more numerically stable (see also <span class="citation">Kucukelbir et al. (2017 Fig. 9)</span>).</p>
+<p>Finally, note that not all inference algorithms use or even need automated transformations. <a href="/api/ed/Gibbs"><code>ed.Gibbs</code></a>, moment matching with EP using Edward’s conjugacy, and <a href="/api/ed/KLqp"><code>ed.KLqp</code></a> with score function gradients all perform inference on the original latent variable space. Point estimation such as <a href="/api/ed/MAP"><code>ed.MAP</code></a> also use the original latent variable space and only requires a constrained transformation on unconstrained free parameters. Model parameter estimation such as <a href="/api/ed/GANInference"><code>ed.GANInference</code></a> do not even perform inference over latent variables.</p>
+<h3 id="references" class="unnumbered">References</h3>
+<div id="refs" class="references">
+<div id="ref-carpenter2016stan">
+<p>Carpenter, B., Gelman, A., Hoffman, M. D., Lee, D., Goodrich, B., Betancourt, M., … Riddell, A. (2016). Stan: A probabilistic programming language. <em>Journal of Statistical Software</em>.</p>
+</div>
+<div id="ref-casella2002statistical">
+<p>Casella, G., &amp; Berger, R. L. (2002). <em>Statistical inference</em> (Vol. 2). Duxbury Pacific Grove, CA.</p>
+</div>
+<div id="ref-kucukelbir2017automatic">
+<p>Kucukelbir, A., Tran, D., Ranganath, R., Gelman, A., &amp; Blei, D. M. (2017). Automatic Differentiation Variational Inference. <em>Journal of Machine Learning Research</em>, <em>18</em>, 1–45.</p>
+</div>
+</div>
+    </div>
+  </div>
+  <div class="row" style="padding-bottom: 25%"> </div>
+</div>
+<script>
+  hljs.initHighlightingOnLoad();
+  renderMathInElement(document.body);
+</script>
+</body>
+</html>

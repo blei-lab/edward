@@ -146,12 +146,12 @@
 <p><span class="math inline">\(\text{KL}( p(z \mid x) \| q(z) )  = \mathbb{E}_{p(z \mid x)} [ \log p(z \mid x) - \log q(z; \lambda) ]\)</span></p>
 <p>and stochastic gradients based on importance sampling.</p>
 <p>The loss function can be estimated as</p>
-<p><span class="math inline">\(\frac{1}{S} \sum_{s=1}^S [  w_{\text{norm}}(z^s; \lambda) (\log p(x, z^s) - \log q(z^s; \lambda) ],\)</span></p>
+<p><span class="math inline">\(\sum_{s=1}^S [  w_{\text{norm}}(z^s; \lambda) (\log p(x, z^s) - \log q(z^s; \lambda) ],\)</span></p>
 <p>where for <span class="math inline">\(z^s \sim q(z; \lambda)\)</span>,</p>
 <p><span class="math inline">\(w_{\text{norm}}(z^s; \lambda) =  w(z^s; \lambda) / \sum_{s=1}^S w(z^s; \lambda)\)</span></p>
 <p>normalizes the importance weights, <span class="math inline">\(w(z^s; \lambda) = p(x, z^s) / q(z^s; \lambda)\)</span>.</p>
 <p>This provides a gradient,</p>
-<p><span class="math inline">\(- \frac{1}{S} \sum_{s=1}^S [  w_{\text{norm}}(z^s; \lambda) \nabla_{\lambda} \log q(z^s; \lambda) ].\)</span></p>
+<p><span class="math inline">\(- \sum_{s=1}^S [  w_{\text{norm}}(z^s; \lambda) \nabla_{\lambda} \log q(z^s; \lambda) ].\)</span></p>
 <h3 id="finalize">
 <code>finalize</code>
 </h3>

@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>Edward – observations.maybe_download_and_extract</title>
+  <title>Edward – ed.transform</title>
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -107,30 +107,40 @@
     <div class="nine columns">
 
 <div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
-<meta itemprop="name" content="observations.maybe_download_and_extract" />
+<meta itemprop="name" content="ed.transform" />
 </div>
-<h1 id="observations.maybe_download_and_extract">observations.maybe_download_and_extract</h1>
-<pre class="python"><code>maybe_download_and_extract(
-    path,
-    url,
-    extract=True,
-    hash_true=None,
-    resume=True,
-    save_file_name=None
+<h1 id="ed.transform">ed.transform</h1>
+<h3 id="aliases">Aliases:</h3>
+<ul>
+<li><code>ed.transform</code></li>
+<li><code>ed.util.transform</code></li>
+</ul>
+<pre class="python"><code>transform(
+    x,
+    *args,
+    **kwargs
 )</code></pre>
-<p>Download file from url unless it already exists in specified directory. Extract the file if <code>extract</code> is True.</p>
-<p>The file at <code>url</code> is downloaded to the directory <code>path</code> with its original filename. For example, with url <code>http://example.org/example.txt</code> and path <code>~/data</code>, the downloaded file is located at <code>~/data/example.txt</code>.</p>
+<p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/util/random_variables.py"><code>edward/util/random_variables.py</code></a>.</p>
+<p>Transform a continuous random variable to the unconstrained space.</p>
+<p><code>transform</code> selects among a number of default transformations which depend on the support of the provided random variable:</p>
+<ul>
+<li><span class="math inline">\([0, 1]\)</span> (e.g., Beta): Inverse of sigmoid.</li>
+<li><span class="math inline">\([0, \infty)\)</span> (e.g., Gamma): Inverse of softplus.</li>
+<li>Simplex (e.g., Dirichlet): Inverse of softmax-centered.</li>
+<li><span class="math inline">\((-\infty, \infty)\)</span> (e.g., Normal, MultivariateNormalTriL): None.</li>
+</ul>
 <h4 id="args">Args:</h4>
 <ul>
-<li><b><code>path</code></b>: str. Path to directory which either stores file or otherwise file will be downloaded and extracted there.</li>
-<li><b><code>url</code></b>: str. URL to download from if file doesn't exist.</li>
-<li><b><code>extract</code></b>: bool, optional. If True, tries to extract the file if it has format 'gz', 'tar' (including 'tar.gz' and 'tar.bz'), or 'zip'.</li>
-<li><b><code>hash_true</code></b>: str, optional. Hash (md5 or otherwise) string of the remote file to be downloaded.</li>
-<li><b><code>resume</code></b>: bool, optional. If True, tries to resume partial downloads (if supported by server).</li>
-<li><b><code>save_file_name</code></b>: str, optional. Save to specified file name, else derives from URL path.</li>
+<li><b><code>x</code></b>: RandomVariable. Continuous random variable to transform. *args, **kwargs: optional. Arguments to overwrite when forming the <code>TransformedDistribution</code>. For example, manually specify the transformation by passing in the <code>bijector</code> argument.</li>
 </ul>
 <h4 id="returns">Returns:</h4>
-<p>str. Path to downloaded or already existing file.</p>
+<p>RandomVariable. A <code>TransformedDistribution</code> random variable, or the provided random variable if no transformation was applied.</p>
+<h4 id="examples">Examples</h4>
+<pre class="python"><code>x = Gamma(1.0, 1.0)
+y = ed.transform(x)
+sess = tf.Session()
+sess.run(y)
+-2.2279539</code></pre>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>
