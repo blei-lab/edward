@@ -22,6 +22,7 @@ from edward.inferences.sghmc import *
 from edward.inferences.variational_inference import *
 from edward.inferences.wake_sleep import *
 from edward.inferences.wgan_inference import *
+from edward.inference.renyi_divergence import *
 
 from tensorflow.python.util.all_util import remove_undocumented
 

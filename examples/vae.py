@@ -19,7 +19,6 @@ from __future__ import division
 from __future__ import print_function
 
 import edward as ed
-from edward.inferences.renyi_divergence import RenyiDivergence
 import numpy as np
 import os
 import tensorflow as tf
@@ -64,7 +63,7 @@ qz = Normal(loc=Dense(d)(hidden),
             scale=Dense(d, activation='softplus')(hidden))
 
 # Bind p(x, z) and q(z | x) to the same TensorFlow placeholder for x.
-inference = RenyiDivergence({z: qz}, data={x: x_ph})
+inference = ed.RenyiDivergence({z: qz}, data={x: x_ph})
 optimizer = tf.train.RMSPropOptimizer(0.01, epsilon=1.0)
 inference.initialize(optimizer=optimizer,
                      n_samples=n_samples,

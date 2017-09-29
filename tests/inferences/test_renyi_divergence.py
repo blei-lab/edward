@@ -7,8 +7,6 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Bernoulli, Normal
-from edward.inferences.renyi_divergence import RenyiDivergence
-ed
 
 class test_renyi_divergence_class(tf.test.TestCase):
 
@@ -24,7 +22,7 @@ class test_renyi_divergence_class(tf.test.TestCase):
       qmu = Normal(loc=qmu_loc, scale=qmu_scale)
 
       # analytic solution: N(loc=0.0, scale=\sqrt{1/51}=0.140)
-      inference = RenyiDivergence({mu: qmu}, data={x: x_data})
+      inference = ed.RenyiDivergence({mu: qmu}, data={x: x_data})
       inference.run(*args, **kwargs)
 
       self.assertAllClose(qmu.mean().eval(), 0, rtol=1e-1, atol=1e-1)
@@ -47,7 +45,7 @@ class test_renyi_divergence_class(tf.test.TestCase):
       p = tf.sigmoid(tf.Variable(0.5))
       x = Bernoulli(probs=p, sample_shape=10)
 
-      inference = RenyiDivergence({}, data={x: x_data})
+      inference = ed.RenyiDivergence({}, data={x: x_data})
       inference.run(*args, **kwargs)
 
       self.assertAllClose(p.eval(), 0.2, rtol=5e-2, atol=5e-2)
