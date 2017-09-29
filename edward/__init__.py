@@ -15,7 +15,7 @@ from edward.inferences import Inference, MonteCarlo, VariationalInference, \
     KLpq, KLqp, ReparameterizationKLqp, ReparameterizationKLKLqp, \
     ReparameterizationEntropyKLqp, ScoreKLqp, ScoreKLKLqp, ScoreEntropyKLqp, \
     ScoreRBKLqp, WakeSleep, GANInference, BiGANInference, WGANInference, \
-    ImplicitKLqp, MAP, Laplace, complete_conditional, Gibbs, RenyiDivergence
+    ImplicitKLqp, MAP, Laplace, complete_conditional, Gibbs #, RenyiDivergence
 from edward.models import RandomVariable
 from edward.util import check_data, check_latent_vars, copy, dot, \
     get_ancestors, get_blanket, get_children, get_control_variate_coef, \
@@ -56,7 +56,7 @@ _allowed_symbols = [
     'BiGANInference',
     'WGANInference',
     'ImplicitKLqp',
-    'RenyiDivergence',
+    # 'RenyiDivergence',
     'MAP',
     'Laplace',
     'complete_conditional',
