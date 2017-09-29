@@ -24,6 +24,7 @@ from edward.inferences.wake_sleep import *
 from edward.inferences.wgan_inference import *
 from edward.inference.renyi_divergence import *
 
+
 from tensorflow.python.util.all_util import remove_undocumented
 
 _allowed_symbols = [
@@ -43,6 +44,7 @@ _allowed_symbols = [
     'ScoreKLKLqp',
     'ScoreEntropyKLqp',
     'ScoreRBKLqp',
+    'RenyiDivergence',
     'Laplace',
     'MAP',
     'MetropolisHastings',
