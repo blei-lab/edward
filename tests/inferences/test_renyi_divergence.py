@@ -8,6 +8,7 @@ import tensorflow as tf
 
 from edward.models import Bernoulli, Normal
 
+
 class test_renyi_divergence_class(tf.test.TestCase):
 
   def _test_normal_normal(self, *args, **kwargs):
