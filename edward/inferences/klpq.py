@@ -41,8 +41,38 @@ class KLpq(VariationalInference):
   where $z^{(s)} \sim q(z; \lambda)$ and$\\beta^{(s)}
   \sim q(\\beta)$.
   """
-  def __init__(self, *args, **kwargs):
-    super(KLpq, self).__init__(*args, **kwargs)
+  def __init__(self, latent_vars=None, data=None):
+    """Create an inference algorithm.
+
+    Args:
+      latent_vars: list of RandomVariable or
+                   dict of RandomVariable to RandomVariable.
+        Collection of random variables to perform inference on. If
+        list, each random variable will be implictly optimized using a
+        `Normal` random variable that is defined internally with a
+        free parameter per location and scale and is initialized using
+        standard normal draws. The random variables to approximate
+        must be continuous.
+    """
+    if isinstance(latent_vars, list):
+      with tf.variable_scope(None, default_name="posterior"):
+        latent_vars_dict = {}
+        continuous = \
+            ('01', 'nonnegative', 'simplex', 'real', 'multivariate_real')
+        for z in latent_vars:
+          if not hasattr(z, 'support') or z.support not in continuous:
+            raise AttributeError(
+                "Random variable {} is not continuous or a random "
+                "variable with supported continuous support.".format(z))
+          batch_event_shape = z.batch_shape.concatenate(z.event_shape)
+          loc = tf.Variable(tf.random_normal(batch_event_shape))
+          scale = tf.nn.softplus(
+              tf.Variable(tf.random_normal(batch_event_shape)))
+          latent_vars_dict[z] = Normal(loc=loc, scale=scale)
+        latent_vars = latent_vars_dict
+        del latent_vars_dict
+
+    super(KLpq, self).__init__(latent_vars, data)
 
   def initialize(self, n_samples=1, *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters
