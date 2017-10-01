@@ -46,13 +46,18 @@ class GANInference(VariationalInference):
       data: dict.
         Data dictionary which binds observed variables (of type
         `RandomVariable` or `tf.Tensor`) to their realizations (of
-        type `tf.Tensor`).  It can also bind placeholders (of type
+        type `tf.Tensor`). It can also bind placeholders (of type
         `tf.Tensor`) used in the model to their realizations.
       discriminator: function.
         Function (with parameters) to discriminate samples. It should
         output logit probabilities (real-valued) and not probabilities
         in $[0, 1]$.
     """
+    if len([key for key in six.iterkeys(data)
+            if not isinstance(key, tf.Tensor) or (isinstance(key,
+            tf.Tensor) and not "Placeholder" in key.op.type)]) != 1:
+      raise TypeError("data must have exactly one key that is not a "
+                      "`tf.placeholder`.")
     if not callable(discriminator):
       raise TypeError("discriminator must be a callable function.")
 
@@ -111,6 +116,7 @@ class GANInference(VariationalInference):
       self.summarize = tf.summary.merge_all(key=self._summary_key)
 
   def build_loss_and_gradients(self, var_list):
+    # TODO
     x_true = list(six.itervalues(self.data))[0]
     x_fake = list(six.iterkeys(self.data))[0]
     with tf.variable_scope("Disc"):

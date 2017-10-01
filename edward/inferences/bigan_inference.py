@@ -41,6 +41,13 @@ class BiGANInference(GANInference):
   ```
   """
   def __init__(self, latent_vars, data, discriminator):
+    if len(key) != 1:
+      raise TypeError("latent_vars must have exactly one key.")
+    if len([key for key in six.iterkeys(data)
+            if not isinstance(key, tf.Tensor) or (isinstance(key,
+            tf.Tensor) and not "Placeholder" in key.op.type)]) != 1:
+      raise TypeError("data must have exactly one key that is not a "
+                      "`tf.placeholder`.")
     if not callable(discriminator):
       raise TypeError("discriminator must be a callable function.")
 
@@ -49,6 +56,7 @@ class BiGANInference(GANInference):
     super(GANInference, self).__init__(latent_vars, data)
 
   def build_loss_and_gradients(self, var_list):
+    # TODO
     x_true = list(six.itervalues(self.data))[0]
     x_fake = list(six.iterkeys(self.data))[0]
 
