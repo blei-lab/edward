@@ -83,8 +83,8 @@ class test_evaluate_class(tf.test.TestCase):
   def test_metrics_with_binary_averaging(self):
     x = Multinomial(total_count=10.0, probs=tf.constant([0.2, 0.7, 0.1]))
     x_data = tf.constant([5, 4, 1], dtype=x.dtype.as_numpy_dtype)
-    self.assertAllClose(
-        np.array([9.0, 4.0, 1.0]),
+    self.assertAllEqual(
+        np.array([9.0, 4.0, 1.0], dtype=np.float32),
         ed.evaluate([('mean_squared_error', {'average': None})],
                     {x: x_data}, n_samples=1, seed=self.RANDOM_SEED))
     x = Multinomial(total_count=10.0, probs=tf.constant([0.2, 0.7, 0.1]))
@@ -105,8 +105,8 @@ class test_evaluate_class(tf.test.TestCase):
     x_data = tf.constant(
         [[2, 7, 1], [3, 6, 1], [3, 5, 2], [4, 4, 2], [2, 7, 1]],
         dtype=x.dtype.as_numpy_dtype)
-    self.assertAllClose(
-        np.array([1.2, 1.4, 0.6]),
+    self.assertAllEqual(
+        np.array([1.2, 1.4, 0.6], dtype=np.float32),
         ed.evaluate([('mean_squared_error', {'average': None})],
                     {x: x_data}, n_samples=1, seed=self.RANDOM_SEED))
     x = Multinomial(total_count=10.0, probs=tf.constant([0.2, 0.7, 0.1]),
