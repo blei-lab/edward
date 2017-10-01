@@ -1,4 +1,6 @@
-"""We describe how to perform inference in probabilistic models.
+"""Algorithms for inferring parameters or latent variables.
+
+We describe how to perform inference in probabilistic models.
 For background, see the
 [Inference tutorial](/tutorials/inference).
 

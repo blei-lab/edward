@@ -1,4 +1,6 @@
-"""A probabilistic model is a joint distribution $p(\mathbf{x},
+"""Probabilistic program primitives.
+
+A probabilistic model is a joint distribution $p(\mathbf{x},
 \mathbf{z})$ of data $\mathbf{x}$ and latent variables $\mathbf{z}$.
 For background, see the [Probabilistic Models tutorial](/tutorials/model).
 

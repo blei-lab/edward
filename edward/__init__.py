@@ -1,20 +1,4 @@
-"""There are four modules in Edward:
-
-+ [`ed.criticisms`](/api/ed/criticisms)
-  is comprised of functions. They operate on
-  random variables in a model or they operate on NumPy arrays
-  representing values drawn from the random variables.
-+ [`ed.inferences`](/api/ed/inferences)
-  is mostly comprised of classes. They are
-  organized in a class hierarchy, where methods are shared via parent
-  classes and `Inference` is the top-most base class.
-+ [`ed.models`](/api/ed/models)
-  is comprised of random variables.
-  The list of available random variables depends on the TensorFlow
-  version installed. The module's API docs describe those available for
-  TensorFlow {{tensorflow_version}}.
-+ [`ed.util`](/api/ed/util)
-  is comprised of functions for miscellaneous usage.
+"""
 """
 from __future__ import absolute_import
 from __future__ import division

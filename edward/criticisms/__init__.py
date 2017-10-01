@@ -1,4 +1,6 @@
-"""We can never validate whether a model is true. In practice, ``all
+"""Assessments for program and inference correctness.
+
+We can never validate whether a model is true. In practice, ``all
 models are wrong'' [@box1976science]. However, we can try to
 uncover where the model goes wrong. Model criticism helps justify the
 model as an approximation or point to good directions for revising the
