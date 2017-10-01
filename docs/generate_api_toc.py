@@ -23,9 +23,6 @@ with open(yaml_dir) as f:
 toc = ''
 for entry in data_map['toc']:
   title = entry['title']
-  if title == 'ed':
-    continue
-
   section = entry['section']
   assert section[0]['title'] == 'Overview'
   path = section[0]['path']
