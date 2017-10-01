@@ -67,7 +67,6 @@ PAGES = [
         'child_pages': [
             'inference-classes.tex',
             'inference-compositionality.tex',
-            'inference-data-subsampling.tex',
             'inference-development.tex',
         ],
     },
@@ -88,25 +87,11 @@ PAGES = [
         'child_pages': [],
     },
     {
-        'page': 'inference-data-subsampling.tex',
-        'title': 'Data Subsampling',
-        'parent_pages': [
-            'inference.tex'
-        ],
-        'child_pages': [],
-    },
-    {
         'page': 'inference-development.tex',
         'title': 'Development',
         'parent_pages': [
             'inference.tex'
         ],
-        'child_pages': [],
-    },
-    {
-        'page': 'criticism.tex',
-        'title': 'Criticism',
-        'parent_pages': [],
         'child_pages': [],
     },
     {
@@ -207,19 +192,6 @@ def generate_models():
   return '\n\item'.join(links)
 
 
-def generate_criticisms():
-  import edward.criticisms as module
-  objs = [getattr(module, name) for name in dir(module)]
-  objs = [obj for obj in objs
-          if (hasattr(obj, '__call__') or
-              isinstance(obj, type))
-          ]
-  objs = sorted(objs, key=lambda cls: cls.__name__)
-
-  links = [('@{{ed.criticisms.{}}}').format(cls.__name__) for cls in objs]
-  return '\n\item'.join(links)
-
-
 def generate_util():
   import edward.util as module
   objs = [getattr(module, name) for name in dir(module)]
@@ -259,9 +231,6 @@ for page_data in PAGES:
 
   if '{{models}}' in document:
     document = document.replace('{{models}}', generate_models())
-
-  if '{{criticisms}}' in document:
-    document = document.replace('{{criticisms}}', generate_criticisms())
 
   if '{{util}}' in document:
     document = document.replace('{{util}}', generate_util())
