@@ -20,13 +20,13 @@ except Exception as e:
 def evaluate(metrics, data, n_samples=500, output_key=None, seed=None):
   """Evaluate fitted model using a set of metrics.
 
-  A metric, or scoring rule [@winkler1994evaluating], is a function of
-  observed data under the posterior predictive distribution. For
-  example in supervised metrics such as classification accuracy, the
-  observed data (true output) is compared to the posterior
-  predictive's mean (predicted output). In unsupervised metrics such
-  as log-likelihood, the probability of observing the data is
-  calculated under the posterior predictive's log-density.
+  A metric, or scoring rule (Winkler, 1994), is a function of observed
+  data under the posterior predictive distribution. For example in
+  supervised metrics such as classification accuracy, the observed
+  data (true output) is compared to the posterior predictive's mean
+  (predicted output). In unsupervised metrics such as log-likelihood,
+  the probability of observing the data is calculated under the
+  posterior predictive's log-density.
 
   Args:
     metrics: list of str or str.
@@ -131,7 +131,7 @@ def evaluate(metrics, data, n_samples=500, output_key=None, seed=None):
           mode = compute_multinomial_mode(probs, total_count, seed)
           if len(output_key.sample_shape):
             y_pred = tf.reshape(tf.tile(mode, output_key.sample_shape),
-                               [-1, len(probs)])
+                                [-1, len(probs)])
           else:
             y_pred = mode
         else:
@@ -346,7 +346,8 @@ def kl_divergence(y_true, y_pred):
   y_true = tf.cast(y_true, tf.float32)
   y_pred = tf.cast(y_pred, tf.float32)
   zeros = tf.zeros(shape=(tf.shape(y_true)))
-  summand = tf.where(tf.equal(y_true, 0.0), zeros, y_true * (tf.log(y_true) - tf.log(y_pred)))
+  summand = tf.where(tf.equal(y_true, 0.0), zeros,
+                     y_true * (tf.log(y_true) - tf.log(y_pred)))
   return tf.reduce_sum(summand)
 
 
