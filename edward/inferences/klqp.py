@@ -27,7 +27,7 @@ class KLqp(VariationalInference):
   #### Notes
 
   `KLqp` also optimizes any model parameters $p(z \mid x;
-  \\theta)$. It does this by variational EM, minimizing
+  \\theta)$. It does this by variational EM, maximizing
 
   $\mathbb{E}_{q(z; \lambda)} [ \log p(x, z; \\theta) ]$
 
@@ -47,8 +47,38 @@ class KLqp(VariationalInference):
   where $z^{(s)} \sim q(z; \lambda)$ and $\\beta^{(s)}
   \sim q(\\beta)$.
   """
-  def __init__(self, *args, **kwargs):
-    super(KLqp, self).__init__(*args, **kwargs)
+  def __init__(self, latent_vars=None, data=None):
+    """Create an inference algorithm.
+
+    Args:
+      latent_vars: list of RandomVariable or
+                   dict of RandomVariable to RandomVariable.
+        Collection of random variables to perform inference on. If
+        list, each random variable will be implictly optimized using a
+        `Normal` random variable that is defined internally with a
+        free parameter per location and scale and is initialized using
+        standard normal draws. The random variables to approximate
+        must be continuous.
+    """
+    if isinstance(latent_vars, list):
+      with tf.variable_scope(None, default_name="posterior"):
+        latent_vars_dict = {}
+        continuous = \
+            ('01', 'nonnegative', 'simplex', 'real', 'multivariate_real')
+        for z in latent_vars:
+          if not hasattr(z, 'support') or z.support not in continuous:
+            raise AttributeError(
+                "Random variable {} is not continuous or a random "
+                "variable with supported continuous support.".format(z))
+          batch_event_shape = z.batch_shape.concatenate(z.event_shape)
+          loc = tf.Variable(tf.random_normal(batch_event_shape))
+          scale = tf.nn.softplus(
+              tf.Variable(tf.random_normal(batch_event_shape)))
+          latent_vars_dict[z] = Normal(loc=loc, scale=scale)
+        latent_vars = latent_vars_dict
+        del latent_vars_dict
+
+    super(KLqp, self).__init__(latent_vars, data)
 
   def initialize(self, n_samples=1, kl_scaling=None, *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters
@@ -84,8 +114,8 @@ class KLqp(VariationalInference):
 
     KLqp supports
 
-    1. score function gradients (Paisley et al., 2012)
-    2. reparameterization gradients (Kingma and Welling, 2014)
+    1. score function gradients [@paisley2012variational]
+    2. reparameterization gradients [@kingma2014auto]
 
     of the loss function.
 
@@ -95,9 +125,9 @@ class KLqp(VariationalInference):
     $-\mathbb{E}_{q(z; \lambda)}[\log p(x \mid z)] +
         \\text{KL}( q(z; \lambda) \| p(z) ),$
 
-    where the KL term is computed analytically (Kingma and Welling,
-    2014). We compute this automatically when $p(z)$ and
-    $q(z; \lambda)$ are Normal.
+    where the KL term is computed analytically [@kingma2014auto]. We
+    compute this automatically when $p(z)$ and $q(z; \lambda)$ are
+    Normal.
     """
     is_reparameterizable = all([
         rv.reparameterization_type ==
@@ -135,8 +165,38 @@ class ReparameterizationKLqp(VariationalInference):
   This class minimizes the objective using the reparameterization
   gradient.
   """
-  def __init__(self, *args, **kwargs):
-    super(ReparameterizationKLqp, self).__init__(*args, **kwargs)
+  def __init__(self, latent_vars=None, data=None):
+    """Create an inference algorithm.
+
+    Args:
+      latent_vars: list of RandomVariable or
+                   dict of RandomVariable to RandomVariable.
+        Collection of random variables to perform inference on. If
+        list, each random variable will be implictly optimized using a
+        `Normal` random variable that is defined internally with a
+        free parameter per location and scale and is initialized using
+        standard normal draws. The random variables to approximate
+        must be continuous.
+    """
+    if isinstance(latent_vars, list):
+      with tf.variable_scope(None, default_name="posterior"):
+        latent_vars_dict = {}
+        continuous = \
+            ('01', 'nonnegative', 'simplex', 'real', 'multivariate_real')
+        for z in latent_vars:
+          if not hasattr(z, 'support') or z.support not in continuous:
+            raise AttributeError(
+                "Random variable {} is not continuous or a random "
+                "variable with supported continuous support.".format(z))
+          batch_event_shape = z.batch_shape.concatenate(z.event_shape)
+          loc = tf.Variable(tf.random_normal(batch_event_shape))
+          scale = tf.nn.softplus(
+              tf.Variable(tf.random_normal(batch_event_shape)))
+          latent_vars_dict[z] = Normal(loc=loc, scale=scale)
+        latent_vars = latent_vars_dict
+        del latent_vars_dict
+
+    super(ReparameterizationKLqp, self).__init__(latent_vars, data)
 
   def initialize(self, n_samples=1, *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters
@@ -162,8 +222,38 @@ class ReparameterizationKLKLqp(VariationalInference):
   This class minimizes the objective using the reparameterization
   gradient and an analytic KL term.
   """
-  def __init__(self, *args, **kwargs):
-    super(ReparameterizationKLKLqp, self).__init__(*args, **kwargs)
+  def __init__(self, latent_vars=None, data=None):
+    """Create an inference algorithm.
+
+    Args:
+      latent_vars: list of RandomVariable or
+                   dict of RandomVariable to RandomVariable.
+        Collection of random variables to perform inference on. If
+        list, each random variable will be implictly optimized using a
+        `Normal` random variable that is defined internally with a
+        free parameter per location and scale and is initialized using
+        standard normal draws. The random variables to approximate
+        must be continuous.
+    """
+    if isinstance(latent_vars, list):
+      with tf.variable_scope(None, default_name="posterior"):
+        latent_vars_dict = {}
+        continuous = \
+            ('01', 'nonnegative', 'simplex', 'real', 'multivariate_real')
+        for z in latent_vars:
+          if not hasattr(z, 'support') or z.support not in continuous:
+            raise AttributeError(
+                "Random variable {} is not continuous or a random "
+                "variable with supported continuous support.".format(z))
+          batch_event_shape = z.batch_shape.concatenate(z.event_shape)
+          loc = tf.Variable(tf.random_normal(batch_event_shape))
+          scale = tf.nn.softplus(
+              tf.Variable(tf.random_normal(batch_event_shape)))
+          latent_vars_dict[z] = Normal(loc=loc, scale=scale)
+        latent_vars = latent_vars_dict
+        del latent_vars_dict
+
+    super(ReparameterizationKLKLqp, self).__init__(latent_vars, data)
 
   def initialize(self, n_samples=1, kl_scaling=None, *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters
@@ -203,8 +293,38 @@ class ReparameterizationEntropyKLqp(VariationalInference):
   This class minimizes the objective using the reparameterization
   gradient and an analytic entropy term.
   """
-  def __init__(self, *args, **kwargs):
-    super(ReparameterizationEntropyKLqp, self).__init__(*args, **kwargs)
+  def __init__(self, latent_vars=None, data=None):
+    """Create an inference algorithm.
+
+    Args:
+      latent_vars: list of RandomVariable or
+                   dict of RandomVariable to RandomVariable.
+        Collection of random variables to perform inference on. If
+        list, each random variable will be implictly optimized using a
+        `Normal` random variable that is defined internally with a
+        free parameter per location and scale and is initialized using
+        standard normal draws. The random variables to approximate
+        must be continuous.
+    """
+    if isinstance(latent_vars, list):
+      with tf.variable_scope(None, default_name="posterior"):
+        latent_vars_dict = {}
+        continuous = \
+            ('01', 'nonnegative', 'simplex', 'real', 'multivariate_real')
+        for z in latent_vars:
+          if not hasattr(z, 'support') or z.support not in continuous:
+            raise AttributeError(
+                "Random variable {} is not continuous or a random "
+                "variable with supported continuous support.".format(z))
+          batch_event_shape = z.batch_shape.concatenate(z.event_shape)
+          loc = tf.Variable(tf.random_normal(batch_event_shape))
+          scale = tf.nn.softplus(
+              tf.Variable(tf.random_normal(batch_event_shape)))
+          latent_vars_dict[z] = Normal(loc=loc, scale=scale)
+        latent_vars = latent_vars_dict
+        del latent_vars_dict
+
+    super(ReparameterizationEntropyKLqp, self).__init__(latent_vars, data)
 
   def initialize(self, n_samples=1, *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters
@@ -231,8 +351,38 @@ class ScoreKLqp(VariationalInference):
   This class minimizes the objective using the score function
   gradient.
   """
-  def __init__(self, *args, **kwargs):
-    super(ScoreKLqp, self).__init__(*args, **kwargs)
+  def __init__(self, latent_vars=None, data=None):
+    """Create an inference algorithm.
+
+    Args:
+      latent_vars: list of RandomVariable or
+                   dict of RandomVariable to RandomVariable.
+        Collection of random variables to perform inference on. If
+        list, each random variable will be implictly optimized using a
+        `Normal` random variable that is defined internally with a
+        free parameter per location and scale and is initialized using
+        standard normal draws. The random variables to approximate
+        must be continuous.
+    """
+    if isinstance(latent_vars, list):
+      with tf.variable_scope(None, default_name="posterior"):
+        latent_vars_dict = {}
+        continuous = \
+            ('01', 'nonnegative', 'simplex', 'real', 'multivariate_real')
+        for z in latent_vars:
+          if not hasattr(z, 'support') or z.support not in continuous:
+            raise AttributeError(
+                "Random variable {} is not continuous or a random "
+                "variable with supported continuous support.".format(z))
+          batch_event_shape = z.batch_shape.concatenate(z.event_shape)
+          loc = tf.Variable(tf.random_normal(batch_event_shape))
+          scale = tf.nn.softplus(
+              tf.Variable(tf.random_normal(batch_event_shape)))
+          latent_vars_dict[z] = Normal(loc=loc, scale=scale)
+        latent_vars = latent_vars_dict
+        del latent_vars_dict
+
+    super(ScoreKLqp, self).__init__(latent_vars, data)
 
   def initialize(self, n_samples=1, *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters
@@ -258,8 +408,38 @@ class ScoreKLKLqp(VariationalInference):
   This class minimizes the objective using the score function gradient
   and an analytic KL term.
   """
-  def __init__(self, *args, **kwargs):
-    super(ScoreKLKLqp, self).__init__(*args, **kwargs)
+  def __init__(self, latent_vars=None, data=None):
+    """Create an inference algorithm.
+
+    Args:
+      latent_vars: list of RandomVariable or
+                   dict of RandomVariable to RandomVariable.
+        Collection of random variables to perform inference on. If
+        list, each random variable will be implictly optimized using a
+        `Normal` random variable that is defined internally with a
+        free parameter per location and scale and is initialized using
+        standard normal draws. The random variables to approximate
+        must be continuous.
+    """
+    if isinstance(latent_vars, list):
+      with tf.variable_scope(None, default_name="posterior"):
+        latent_vars_dict = {}
+        continuous = \
+            ('01', 'nonnegative', 'simplex', 'real', 'multivariate_real')
+        for z in latent_vars:
+          if not hasattr(z, 'support') or z.support not in continuous:
+            raise AttributeError(
+                "Random variable {} is not continuous or a random "
+                "variable with supported continuous support.".format(z))
+          batch_event_shape = z.batch_shape.concatenate(z.event_shape)
+          loc = tf.Variable(tf.random_normal(batch_event_shape))
+          scale = tf.nn.softplus(
+              tf.Variable(tf.random_normal(batch_event_shape)))
+          latent_vars_dict[z] = Normal(loc=loc, scale=scale)
+        latent_vars = latent_vars_dict
+        del latent_vars_dict
+
+    super(ScoreKLKLqp, self).__init__(latent_vars, data)
 
   def initialize(self, n_samples=1, kl_scaling=None, *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters
@@ -299,8 +479,38 @@ class ScoreEntropyKLqp(VariationalInference):
   This class minimizes the objective using the score function gradient
   and an analytic entropy term.
   """
-  def __init__(self, *args, **kwargs):
-    super(ScoreEntropyKLqp, self).__init__(*args, **kwargs)
+  def __init__(self, latent_vars=None, data=None):
+    """Create an inference algorithm.
+
+    Args:
+      latent_vars: list of RandomVariable or
+                   dict of RandomVariable to RandomVariable.
+        Collection of random variables to perform inference on. If
+        list, each random variable will be implictly optimized using a
+        `Normal` random variable that is defined internally with a
+        free parameter per location and scale and is initialized using
+        standard normal draws. The random variables to approximate
+        must be continuous.
+    """
+    if isinstance(latent_vars, list):
+      with tf.variable_scope(None, default_name="posterior"):
+        latent_vars_dict = {}
+        continuous = \
+            ('01', 'nonnegative', 'simplex', 'real', 'multivariate_real')
+        for z in latent_vars:
+          if not hasattr(z, 'support') or z.support not in continuous:
+            raise AttributeError(
+                "Random variable {} is not continuous or a random "
+                "variable with supported continuous support.".format(z))
+          batch_event_shape = z.batch_shape.concatenate(z.event_shape)
+          loc = tf.Variable(tf.random_normal(batch_event_shape))
+          scale = tf.nn.softplus(
+              tf.Variable(tf.random_normal(batch_event_shape)))
+          latent_vars_dict[z] = Normal(loc=loc, scale=scale)
+        latent_vars = latent_vars_dict
+        del latent_vars_dict
+
+    super(ScoreEntropyKLqp, self).__init__(latent_vars, data)
 
   def initialize(self, n_samples=1, *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters
@@ -333,8 +543,38 @@ class ScoreRBKLqp(VariationalInference):
   Rao-Blackwellize within a node such as when a node represents
   multiple random variables via non-scalar batch shape.
   """
-  def __init__(self, *args, **kwargs):
-    super(ScoreRBKLqp, self).__init__(*args, **kwargs)
+  def __init__(self, latent_vars=None, data=None):
+    """Create an inference algorithm.
+
+    Args:
+      latent_vars: list of RandomVariable or
+                   dict of RandomVariable to RandomVariable.
+        Collection of random variables to perform inference on. If
+        list, each random variable will be implictly optimized using a
+        `Normal` random variable that is defined internally with a
+        free parameter per location and scale and is initialized using
+        standard normal draws. The random variables to approximate
+        must be continuous.
+    """
+    if isinstance(latent_vars, list):
+      with tf.variable_scope(None, default_name="posterior"):
+        latent_vars_dict = {}
+        continuous = \
+            ('01', 'nonnegative', 'simplex', 'real', 'multivariate_real')
+        for z in latent_vars:
+          if not hasattr(z, 'support') or z.support not in continuous:
+            raise AttributeError(
+                "Random variable {} is not continuous or a random "
+                "variable with supported continuous support.".format(z))
+          batch_event_shape = z.batch_shape.concatenate(z.event_shape)
+          loc = tf.Variable(tf.random_normal(batch_event_shape))
+          scale = tf.nn.softplus(
+              tf.Variable(tf.random_normal(batch_event_shape)))
+          latent_vars_dict[z] = Normal(loc=loc, scale=scale)
+        latent_vars = latent_vars_dict
+        del latent_vars_dict
+
+    super(ScoreRBKLqp, self).__init__(latent_vars, data)
 
   def initialize(self, n_samples=1, *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters
@@ -359,7 +599,7 @@ def build_reparam_loss_and_gradients(inference, var_list):
   $-\\text{ELBO} =
       -\mathbb{E}_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]$
 
-  based on the reparameterization trick (Kingma and Welling, 2014).
+  based on the reparameterization trick [@kingma2014auto].
 
   Computed by sampling from $q(z;\lambda)$ and evaluating the
   expectation using Monte Carlo sampling.
@@ -423,7 +663,7 @@ def build_reparam_kl_loss_and_gradients(inference, var_list):
     -\\text{ELBO} =  - ( \mathbb{E}_{q(z; \lambda)} [ \log p(x \mid z) ]
           + \\text{KL}(q(z; \lambda) \| p(z)) )
 
-  based on the reparameterization trick (Kingma and Welling, 2014).
+  based on the reparameterization trick [@kingma2014auto].
 
   It assumes the KL is analytic.
 
@@ -482,7 +722,7 @@ def build_reparam_entropy_loss_and_gradients(inference, var_list):
   $-\\text{ELBO} =  -( \mathbb{E}_{q(z; \lambda)} [ \log p(x , z) ]
           + \mathbb{H}(q(z; \lambda)) )$
 
-  based on the reparameterization trick (Kingma and Welling, 2014).
+  based on the reparameterization trick [@kingma2014auto].
 
   It assumes the entropy is analytic.
 
@@ -541,7 +781,7 @@ def build_reparam_entropy_loss_and_gradients(inference, var_list):
 
 def build_score_loss_and_gradients(inference, var_list):
   """Build loss function and gradients based on the score function
-  estimator (Paisley et al., 2012).
+  estimator [@paisley2012variational].
 
   Computed by sampling from $q(z;\lambda)$ and evaluating the
   expectation using Monte Carlo sampling.
@@ -607,7 +847,7 @@ def build_score_loss_and_gradients(inference, var_list):
 
 def build_score_kl_loss_and_gradients(inference, var_list):
   """Build loss function and gradients based on the score function
-  estimator (Paisley et al., 2012).
+  estimator [@paisley2012variational].
 
   It assumes the KL is analytic.
 
@@ -673,7 +913,7 @@ def build_score_kl_loss_and_gradients(inference, var_list):
 
 def build_score_entropy_loss_and_gradients(inference, var_list):
   """Build loss function and gradients based on the score function
-  estimator (Paisley et al., 2012).
+  estimator [@paisley2012variational].
 
   It assumes the entropy is analytic.
 
@@ -747,8 +987,8 @@ def build_score_entropy_loss_and_gradients(inference, var_list):
 
 def build_score_rb_loss_and_gradients(inference, var_list):
   """Build loss function and gradients based on the score function
-  estimator (Paisley et al., 2012) and Rao-Blackwellization (Ranganath
-  et al., 2014).
+  estimator [@paisley2012variational] and Rao-Blackwellization
+  [@ranganath2014black].
 
   Computed by sampling from :math:`q(z;\lambda)` and evaluating the
   expectation using Monte Carlo sampling and Rao-Blackwellization.

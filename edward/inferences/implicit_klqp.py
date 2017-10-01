@@ -12,7 +12,7 @@ from edward.util import check_latent_vars, copy, get_session
 
 class ImplicitKLqp(GANInference):
   """Variational inference with implicit probabilistic models
-  (Tran et al., 2017).
+  [@tran2017deep].
 
   It minimizes the KL divergence
 
@@ -123,8 +123,8 @@ class ImplicitKLqp(GANInference):
     solution to a ratio estimation problem, minimizing the specified
     `ratio_loss`.
 
-    Gradients are taken using the reparameterization trick (Kingma and
-    Welling, 2014).
+    Gradients are taken using the reparameterization trick
+    [@kingma2014auto].
 
     #### Notes
 

@@ -4,7 +4,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from edward.util.download import *
 from edward.util.graphs import *
 from edward.util.metrics import *
 from edward.util.progbar import *
@@ -28,12 +27,12 @@ _allowed_symbols = [
     'get_session',
     'get_siblings',
     'get_variables',
-    'maybe_download_and_extract',
     'Progbar',
     'random_variables',
     'rbf',
     'set_seed',
     'to_simplex',
+    'transform',
     'with_binary_averaging'
 ]
 

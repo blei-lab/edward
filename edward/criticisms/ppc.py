@@ -12,7 +12,7 @@ from edward.util import check_data, check_latent_vars, get_session
 
 def ppc(T, data, latent_vars=None, n_samples=100):
   """Posterior predictive check
-  (Rubin, 1984; Meng, 1994; Gelman, Meng, and Stern, 1996).
+  [@rubin1984bayesianly; @meng1994posterior; @gelman1996posterior].
 
   PPC's form an empirical distribution for the predictive discrepancy,
 
@@ -23,7 +23,7 @@ def ppc(T, data, latent_vars=None, n_samples=100):
   compares it to $T(x)$.
 
   If `data` is inputted with the prior predictive distribution, then
-  it is a prior predictive check (Box, 1980).
+  it is a prior predictive check [@box1980sampling].
 
   Args:
     T: function.

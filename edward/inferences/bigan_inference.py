@@ -10,8 +10,8 @@ from edward.util import get_session
 
 
 class BiGANInference(GANInference):
-  """Adversarially Learned Inference (Dumoulin et al., 2017) or
-  Bidirectional Generative Adversarial Networks (Donahue et al., 2017)
+  """Adversarially Learned Inference [@dumuolin2017adversarially] or
+  Bidirectional Generative Adversarial Networks [@donahue2017adversarial]
   for joint learning of generator and inference networks.
 
   Works for the class of implicit (and differentiable) probabilistic

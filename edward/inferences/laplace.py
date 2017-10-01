@@ -8,6 +8,7 @@ import tensorflow as tf
 from edward.inferences.map import MAP
 from edward.models import PointMass, RandomVariable
 from edward.util import get_session, get_variables
+from edward.util import copy, transform
 
 try:
   from edward.models import \
@@ -17,7 +18,7 @@ except Exception as e:
 
 
 class Laplace(MAP):
-  """Laplace approximation (Laplace, 1774).
+  """Laplace approximation [@laplace1986memoir].
 
   It approximates the posterior distribution using a multivariate
   normal distribution centered at the mode of the posterior.
@@ -34,6 +35,17 @@ class Laplace(MAP):
   only produce the diagonal. This does not capture correlation among
   the variables but it does not require a potentially expensive
   matrix inversion.
+
+  Random variables with both scalar batch and event shape are not
+  supported as `tf.hessians` is currently not applicable to scalars.
+
+  Note that `Laplace` finds the location parameter of the normal
+  approximation using `MAP`, which is performed on the latent
+  variable's original (constrained) support. The scale parameter
+  is calculated by evaluating the Hessian of $-\log p(x, z)$ in the
+  constrained space and under the mode. This implies the Laplace
+  approximation always has real support even if the target
+  distribution has constrained support.
 
   #### Examples
 
@@ -58,17 +70,29 @@ class Laplace(MAP):
         Collection of random variables to perform inference on. If list,
         each random variable will be implictly optimized using a
         `MultivariateNormalTriL` random variable that is defined
-        internally (with unconstrained support). If dictionary, each
-        random variable must be a `MultivariateNormalDiag`,
+        internally with unconstrained support and is initialized using
+        standard normal draws. If dictionary, each random
+        variable must be a `MultivariateNormalDiag`,
         `MultivariateNormalTriL`, or `Normal` random variable.
     """
     if isinstance(latent_vars, list):
       with tf.variable_scope(None, default_name="posterior"):
-        latent_vars = {rv: MultivariateNormalTriL(
-            loc=tf.Variable(tf.random_normal(rv.batch_shape)),
-            scale_tril=tf.Variable(tf.random_normal(
-                rv.batch_shape.concatenate(rv.batch_shape[-1]))))
-            for rv in latent_vars}
+        latent_vars_dict = {}
+        for z in latent_vars:
+          # Define location to have constrained support and
+          # unconstrained free parameters.
+          batch_event_shape = z.batch_shape.concatenate(z.event_shape)
+          loc = tf.Variable(tf.random_normal(batch_event_shape))
+          if hasattr(z, 'support'):
+            z_transform = transform(z)
+            if hasattr(z_transform, 'bijector'):
+              loc = z_transform.bijector.inverse(loc)
+          scale_tril = tf.Variable(tf.random_normal(
+              batch_event_shape.concatenate(batch_event_shape[-1])))
+          qz = MultivariateNormalTriL(loc=loc, scale_tril=scale_tril)
+          latent_vars_dict[z] = qz
+        latent_vars = latent_vars_dict
+        del latent_vars_dict
     elif isinstance(latent_vars, dict):
       for qz in six.itervalues(latent_vars):
         if not isinstance(
@@ -81,9 +105,9 @@ class Laplace(MAP):
     super(MAP, self).__init__(latent_vars, data)
 
   def initialize(self, *args, **kwargs):
-    # Store latent variables in a temporary attribute; MAP will
+    # Store latent variables in a temporary object; MAP will
     # optimize `PointMass` random variables, which subsequently
-    # optimizes mean parameters of the normal approximations.
+    # optimizes location parameters of the normal approximations.
     latent_vars_normal = self.latent_vars.copy()
     self.latent_vars = {z: PointMass(params=qz.loc)
                         for z, qz in six.iteritems(latent_vars_normal)}

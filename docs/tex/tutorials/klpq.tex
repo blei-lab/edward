@@ -85,7 +85,7 @@ The basic procedure follows these steps:
     \sum_{s=1}^{S}
     \frac{p(\mathbf{z}_s \mid \mathbf{x})}{q(\mathbf{z}_s\;;\;\lambda)}
   \end{align*}
-  \item compute the weighted mean.
+  \item compute the weighted sum.
 \end{enumerate}
 The key insight is that we can use the joint $p(\mathbf{x},\mathbf{z})$ instead of the posterior
 when estimating the normalized importance weights
@@ -122,7 +122,6 @@ estimate
   )
   &=
   -
-  \frac{1}{S}
   \sum_{s=1}^S
   w_s
   \nabla_\lambda\; \log q(\mathbf{z}_s\;;\;\lambda).

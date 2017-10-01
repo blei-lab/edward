@@ -9,6 +9,11 @@ from edward.inferences.variational_inference import VariationalInference
 from edward.models import RandomVariable
 from edward.util import copy, get_descendants
 
+try:
+  from edward.models import Normal
+except Exception as e:
+  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
+
 
 class KLpq(VariationalInference):
   """Variational inference with the KL divergence
@@ -16,12 +21,12 @@ class KLpq(VariationalInference):
   $\\text{KL}( p(z \mid x) \| q(z) ).$
 
   To perform the optimization, this class uses a technique from
-  adaptive importance sampling (Cappe et al., 2008).
+  adaptive importance sampling [@oh1992adaptive].
 
   #### Notes
 
   `KLpq` also optimizes any model parameters $p(z\mid x;
-  \\theta)$. It does this by variational EM, minimizing
+  \\theta)$. It does this by variational EM, maximizing
 
   $\mathbb{E}_{p(z \mid x; \lambda)} [ \log p(x, z; \\theta) ]$
 
@@ -41,8 +46,38 @@ class KLpq(VariationalInference):
   where $z^{(s)} \sim q(z; \lambda)$ and$\\beta^{(s)}
   \sim q(\\beta)$.
   """
-  def __init__(self, *args, **kwargs):
-    super(KLpq, self).__init__(*args, **kwargs)
+  def __init__(self, latent_vars=None, data=None):
+    """Create an inference algorithm.
+
+    Args:
+      latent_vars: list of RandomVariable or
+                   dict of RandomVariable to RandomVariable.
+        Collection of random variables to perform inference on. If
+        list, each random variable will be implictly optimized using a
+        `Normal` random variable that is defined internally with a
+        free parameter per location and scale and is initialized using
+        standard normal draws. The random variables to approximate
+        must be continuous.
+    """
+    if isinstance(latent_vars, list):
+      with tf.variable_scope(None, default_name="posterior"):
+        latent_vars_dict = {}
+        continuous = \
+            ('01', 'nonnegative', 'simplex', 'real', 'multivariate_real')
+        for z in latent_vars:
+          if not hasattr(z, 'support') or z.support not in continuous:
+            raise AttributeError(
+                "Random variable {} is not continuous or a random "
+                "variable with supported continuous support.".format(z))
+          batch_event_shape = z.batch_shape.concatenate(z.event_shape)
+          loc = tf.Variable(tf.random_normal(batch_event_shape))
+          scale = tf.nn.softplus(
+              tf.Variable(tf.random_normal(batch_event_shape)))
+          latent_vars_dict[z] = Normal(loc=loc, scale=scale)
+        latent_vars = latent_vars_dict
+        del latent_vars_dict
+
+    super(KLpq, self).__init__(latent_vars, data)
 
   def initialize(self, n_samples=1, *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters
@@ -66,7 +101,7 @@ class KLpq(VariationalInference):
 
     The loss function can be estimated as
 
-    $\\frac{1}{S} \sum_{s=1}^S [
+    $\sum_{s=1}^S [
       w_{\\text{norm}}(z^s; \lambda) (\log p(x, z^s) - \log q(z^s; \lambda) ],$
 
     where for $z^s \sim q(z; \lambda)$,
@@ -79,7 +114,7 @@ class KLpq(VariationalInference):
 
     This provides a gradient,
 
-    $- \\frac{1}{S} \sum_{s=1}^S [
+    $- \sum_{s=1}^S [
       w_{\\text{norm}}(z^s; \lambda) \\nabla_{\lambda} \log q(z^s; \lambda) ].$
     """
     p_log_prob = [0.0] * self.n_samples
@@ -126,13 +161,13 @@ class KLpq(VariationalInference):
     log_w = p_log_prob - q_log_prob
     log_w_norm = log_w - tf.reduce_logsumexp(log_w)
     w_norm = tf.exp(log_w_norm)
-    loss = tf.reduce_mean(w_norm * log_w)
+    loss = tf.reduce_sum(w_norm * log_w)
 
     q_rvs = list(six.itervalues(self.latent_vars))
     q_vars = [v for v in var_list
               if len(get_descendants(tf.convert_to_tensor(v), q_rvs)) != 0]
     q_grads = tf.gradients(
-        -tf.reduce_mean(q_log_prob * tf.stop_gradient(w_norm)),
+        -tf.reduce_sum(q_log_prob * tf.stop_gradient(w_norm)),
         q_vars)
     p_vars = [v for v in var_list if v not in q_vars]
     p_grads = tf.gradients(-loss, p_vars)

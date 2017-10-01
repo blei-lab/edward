@@ -18,7 +18,7 @@ except Exception as e:
 
 class HMC(MonteCarlo):
   """Hamiltonian Monte Carlo, also known as hybrid Monte Carlo
-  (Duane et al., 1987; Neal, 2011).
+  [@duane1987hybrid; @neal2011mcmc].
 
   #### Notes
 
@@ -81,7 +81,8 @@ class HMC(MonteCarlo):
     old_r_sample = OrderedDict()
     for z, qz in six.iteritems(self.latent_vars):
       event_shape = qz.event_shape
-      normal = Normal(loc=tf.zeros(event_shape), scale=tf.ones(event_shape))
+      normal = Normal(loc=tf.zeros(event_shape, dtype=qz.dtype),
+                      scale=tf.ones(event_shape, dtype=qz.dtype))
       old_r_sample[z] = normal.sample()
 
     # Simulate Hamiltonian dynamics.
@@ -98,7 +99,8 @@ class HMC(MonteCarlo):
     ratio -= self._log_joint(old_sample)
 
     # Accept or reject sample.
-    u = Uniform().sample()
+    u = Uniform(low=tf.constant(0.0, dtype=ratio.dtype),
+                high=tf.constant(1.0, dtype=ratio.dtype)).sample()
     accept = tf.log(u) < ratio
     sample_values = tf.cond(accept, lambda: list(six.itervalues(new_sample)),
                             lambda: list(six.itervalues(old_sample)))

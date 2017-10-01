@@ -7,7 +7,12 @@ import tensorflow as tf
 
 from edward.inferences.variational_inference import VariationalInference
 from edward.models import RandomVariable, PointMass
-from edward.util import copy
+from edward.util import copy, transform
+
+try:
+  from tensorflow.contrib.distributions import bijectors
+except Exception as e:
+  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
 class MAP(VariationalInference):
@@ -60,9 +65,12 @@ class MAP(VariationalInference):
   ed.MAP([pi, mu, sigma], data)
   ```
 
-  Currently, `MAP` can only instantiate `PointMass` random variables
-  with unconstrained support. To constrain their support, one must
-  manually pass in the `PointMass` family.
+  Note that for `MAP` to optimize over latent variables with
+  constrained continuous support, the point mass must be constrained
+  to have the same support while its free parameters are
+  unconstrained; see, e.g., `qsigma` above. This is different than
+  performing MAP on the unconstrained space: in general, the MAP of
+  the transform is not the transform of the MAP.
   """
   def __init__(self, latent_vars=None, data=None):
     """Create an inference algorithm.
@@ -71,16 +79,28 @@ class MAP(VariationalInference):
       latent_vars: list of RandomVariable or
                    dict of RandomVariable to RandomVariable.
         Collection of random variables to perform inference on. If
-        list, each random variable will be implictly optimized
-        using a `PointMass` random variable that is defined
-        internally (with unconstrained support). If dictionary, each
-        value in the dictionary must be a `PointMass` random variable.
+        list, each random variable will be implictly optimized using a
+        `PointMass` random variable that is defined internally with
+        constrained support, has unconstrained free parameters, and is
+        initialized using standard normal draws. If dictionary, each
+        value in the dictionary must be a `PointMass` random variable
+        with the same support as the key.
     """
     if isinstance(latent_vars, list):
       with tf.variable_scope(None, default_name="posterior"):
-        latent_vars = {rv: PointMass(
-            params=tf.Variable(tf.random_normal(rv.batch_shape)))
-            for rv in latent_vars}
+        latent_vars_dict = {}
+        for z in latent_vars:
+          # Define point masses to have constrained support and
+          # unconstrained free parameters.
+          batch_event_shape = z.batch_shape.concatenate(z.event_shape)
+          params = tf.Variable(tf.random_normal(batch_event_shape))
+          if hasattr(z, 'support'):
+            z_transform = transform(z)
+            if hasattr(z_transform, 'bijector'):
+              params = z_transform.bijector.inverse(params)
+          latent_vars_dict[z] = PointMass(params=params)
+        latent_vars = latent_vars_dict
+        del latent_vars_dict
     elif isinstance(latent_vars, dict):
       for qz in six.itervalues(latent_vars):
         if not isinstance(qz, PointMass):
