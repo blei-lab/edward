@@ -46,6 +46,9 @@ class HMC(MonteCarlo):
   """
   def __init__(self, *args, **kwargs):
     super(HMC, self).__init__(*args, **kwargs)
+    # TODO
+    check_latent_vars_densities(latent_vars)
+    check_data_densities(data)
 
   def initialize(self, step_size=0.25, n_steps=2, *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters

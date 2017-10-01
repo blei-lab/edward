@@ -79,6 +79,8 @@ class ImplicitKLqp(GANInference):
     self.global_vars = global_vars
     # call grandparent's method; avoid parent (GANInference)
     super(GANInference, self).__init__(latent_vars, data)
+    # TODO
+    check_latent_vars_densities(global_vars)
 
   def initialize(self, ratio_loss='log', *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters

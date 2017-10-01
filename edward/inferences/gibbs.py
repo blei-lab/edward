@@ -49,6 +49,7 @@ class Gibbs(MonteCarlo):
 
     self.proposal_vars = proposal_vars
     super(Gibbs, self).__init__(latent_vars, data)
+    # TODO what to need here?
 
   def initialize(self, scan_order='random', *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters

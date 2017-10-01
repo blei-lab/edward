@@ -108,6 +108,9 @@ class MAP(VariationalInference):
                           "PointMass random variables.")
 
     super(MAP, self).__init__(latent_vars, data)
+    # TODO
+    check_latent_vars_densities(latent_vars)
+    check_data_densities(data)
 
   def build_loss_and_gradients(self, var_list):
     """Build loss function. Its automatic differentiation

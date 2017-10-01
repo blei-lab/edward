@@ -43,6 +43,9 @@ class KLpq(VariationalInference):
   """
   def __init__(self, *args, **kwargs):
     super(KLpq, self).__init__(*args, **kwargs)
+    # TODO
+    check_latent_vars_densities(latent_vars)
+    check_data_densities(data)
 
   def initialize(self, n_samples=1, *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters

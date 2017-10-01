@@ -59,6 +59,24 @@ def check_data(data):
       raise TypeError("Data key has an invalid type: {}".format(type(key)))
 
 
+def check_data_densities(latent_vars):
+  """Check that dictionary is collection of ed.RandomVariable
+  key-value pairs with `_log_prob` implemented."""
+  for key, value in six.iteritems(dictionary):
+    valid_key = (isinstance(key, tf.Tensor) and "Placeholder" in key.op.type) or \
+        (isinstance(key, RandomVariable) and hasattr(key, '_log_prob'))
+    if not valid_key:
+      raise TypeError("Dictionary key must be a ed.RandomVariable with "
+                      "the `_log_prob` method implemented")
+    elif not isinstance(value, RandomVariable) or not hasattr(value, '_log_prob'):
+      raise TypeError("Dictionary value must be a ed.RandomVariable with "
+                      "the `_log_prob` method implemented")
+  for key in six.iterkeys(data):
+    if isinstance(key, tf.Tensor) and not "Placeholder" in key.op.type:
+      raise TypeError("Data key must be a ed.RandomVariable object or "
+                      "tf.placeholder object.")
+
+
 def check_latent_vars(latent_vars):
   """Check that the latent variable dictionary passed during inference and
   criticism is valid.
@@ -79,6 +97,18 @@ def check_latent_vars(latent_vars):
     elif key.dtype != value.dtype:
       raise TypeError("Key-value pair in latent_vars does not have same "
                       "dtype: {}, {}".format(key.dtype, value.dtype))
+
+
+def check_latent_vars_densities(latent_vars):
+  """Check that dictionary is collection of ed.RandomVariable
+  key-value pairs with `_log_prob` implemented."""
+  for key, value in six.iteritems(dictionary):
+    if not isinstance(key, RandomVariable) or not hasattr(key, '_log_prob'):
+      raise TypeError("Dictionary key must be a ed.RandomVariable with "
+                      "the `_log_prob` method implemented")
+    elif not isinstance(value, RandomVariable) or not hasattr(value, '_log_prob'):
+      raise TypeError("Dictionary value must be a ed.RandomVariable with "
+                      "the `_log_prob` method implemented")
 
 
 def _copy_default(x, *args, **kwargs):
