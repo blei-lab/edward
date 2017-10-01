@@ -1,6 +1,6 @@
 \title{Data Subsampling}
 
-\subsubsection{Data Subsampling}
+\subsection{Data Subsampling}
 
 Running algorithms which require the full data set for each update
 can be expensive when the data is large. In order to scale inferences,
@@ -91,7 +91,7 @@ the subset of $\mathbf{z}$ and a local inference over the subset of
 $\mathbf{z}$ given $\beta$.
 We also pass in a TensorFlow placeholder \texttt{x_ph} for the data,
 so we can change the data at each step. (Alternatively,
-\href{/api/data}{batch tensors} can be used.)
+\href{/tutorials/data}{batch tensors} can be used.)
 
 \begin{lstlisting}[language=Python]
 x_ph = tf.placeholder(tf.float32, [M])
