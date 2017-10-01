@@ -111,35 +111,6 @@ def generate_navbar(page_data):
   return navbar
 
 
-def generate_models():
-  import edward.models as module
-  from edward.models import RandomVariable
-  objs = [getattr(module, name) for name in dir(module)]
-  objs = [obj for obj in objs
-          if (isinstance(obj, type) and
-              issubclass(obj, RandomVariable) and
-              obj != RandomVariable
-              )
-          ]
-  objs = sorted(objs, key=lambda cls: cls.__name__)
-
-  links = [('@{{ed.models.{}}}').format(cls.__name__) for cls in objs]
-  return '\n\item'.join(links)
-
-
-def generate_util():
-  import edward.util as module
-  objs = [getattr(module, name) for name in dir(module)]
-  objs = [obj for obj in objs
-          if (hasattr(obj, '__call__') or
-              isinstance(obj, type))
-          ]
-  objs = sorted(objs, key=lambda cls: cls.__name__)
-
-  links = [('@{{ed.util.{}}}').format(cls.__name__) for cls in objs]
-  return '\n\item'.join(links)
-
-
 def get_tensorflow_version():
   import tensorflow
   return str(getattr(tensorflow, '__version__', '<unknown verison>'))
@@ -163,12 +134,6 @@ for page_data in PAGES:
   assert '{{navbar}}' in document, \
          ("File found for " + path + " but missing {{navbar}} tag.")
   document = document.replace('{{navbar}}', navbar)
-
-  if '{{models}}' in document:
-    document = document.replace('{{models}}', generate_models())
-
-  if '{{util}}' in document:
-    document = document.replace('{{util}}', generate_util())
 
   if '{{tensorflow_version}}' in document:
     document = document.replace('{{tensorflow_version}}',
