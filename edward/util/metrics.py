@@ -13,7 +13,13 @@ def with_binary_averaging(metric):
   Inspired by scikit-learn's _average_binary_score function:
   http://bit.ly/2yhcABp.
 
-  #TODO: Complete docstring (once we're happy with this function).
+  `None`: computes the specified metric along the second-to-last
+  dimension of `y_true` and `y_pred`. Returns a vector of "class-wise"
+  metrics.
+  `'macro'`: same as `None`, except compute the (unweighted) global
+  average of the resulting vector.
+  `'micro'`: flatten `y_true` and `y_pred` into vectors, then compute
+  `'macro'`
   """
   AVERAGE_OPTIONS = (None, 'micro', 'macro')
 
