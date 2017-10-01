@@ -748,4 +748,4 @@ def compute_multinomial_mode(probs, total_count=1, seed=None):
     mode[mask] += 1
     probs[mask] -= uniform_prob
     remaining_count -= np.sum(mask)
-  return list(mode)
+  return mode

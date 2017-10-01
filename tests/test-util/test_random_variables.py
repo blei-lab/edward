@@ -10,16 +10,20 @@ from edward.util.random_variables import compute_multinomial_mode
 
 class test_compute_multinomial_mode(tf.test.TestCase):
 
+  RANDOM_SEED = 12345
+
   def test_correct_mode_computed_with_uniform_probabilities(self):
     with self.test_session():
       probs = np.array(3 * [1 / 3.0])
       total_count = 5
-      self.assertIn(compute_multinomial_mode(probs, total_count),
-                    [[2, 2, 1], [2, 1, 2], [1, 2, 2]])
+      self.assertAllEqual(
+          compute_multinomial_mode(probs, total_count, seed=self.RANDOM_SEED),
+          np.array([1, 2, 2]))
       probs = np.array([0.6, 0.4, 0.0])
       total_count = 5
-      self.assertEqual(compute_multinomial_mode(probs, total_count),
-                       [3, 2, 0])
+      self.assertAllEqual(
+          compute_multinomial_mode(probs, total_count, seed=self.RANDOM_SEED),
+          np.array([2, 2, 1]))
 
 if __name__ == '__main__':
   tf.test.main()
