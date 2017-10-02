@@ -7,7 +7,6 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Normal, InverseGamma
-from tensorflow.contrib.distributions import bijectors
 
 
 class test_marginal_class(tf.test.TestCase):
@@ -63,6 +62,7 @@ class test_marginal_class(tf.test.TestCase):
 
   def test_sample_passthrough(self):
     with self.test_session():
+      tf.set_random_seed(1)
       loc = Normal(0.0, 100.0)
       y = Normal(loc, 0.0001)
       conditional_sample = y.sample(50)
