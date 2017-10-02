@@ -798,10 +798,13 @@ def marginal(x, n):
     The fully sampled values from x, of shape [n] + x.shape
 
   """
-  old_roots = [rv for rv in ed.get_ancestors(x) if ed.get_ancestors(rv) == []]
+  if get_ancestors(x) != []:
+    old_roots = [rv for rv in get_ancestors(x) if get_ancestors(rv) == []]
+  else:
+    old_roots = [x]
   new_roots = []
   for rv in old_roots:
-    new_rv = ed.copy(rv)
+    new_rv = copy(rv)
     if new_rv.shape == ():
       new_rv._sample_shape = tf.TensorShape([n, 1])
     else:
@@ -809,7 +812,7 @@ def marginal(x, n):
     new_rv._value = new_rv.sample(new_rv._sample_shape)
     new_roots.append(new_rv)
   dict_swap = dict(zip(old_roots, new_roots))
-  x_full = ed.copy(x, dict_swap)
+  x_full = copy(x, dict_swap)
   if x_full.shape[1:] != x.shape:
     raise ValueError('Could not transform graph for bulk sampling.')
   return x_full.sample()
