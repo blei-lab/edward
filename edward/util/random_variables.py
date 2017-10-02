@@ -791,7 +791,8 @@ def compute_multinomial_mode(probs, total_count=1, seed=None):
   Args:
     probs: 1-D Numpy array of Multinomial class probabilities
     total_count: integer number of trials in single Multinomial draw
-    seed: random seed to use in numpy random number generator
+    seed: a Python integer. Used to create a random seed for the
+      distribution
 
   #### Examples
 

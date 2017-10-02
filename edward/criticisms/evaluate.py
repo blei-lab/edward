@@ -56,6 +56,8 @@ def evaluate(metrics, data, n_samples=500, output_key=None, seed=None):
       posterior predictive distribution.
     output_key: RandomVariable or tf.Tensor, optional.
       It is the key in `data` which corresponds to the model's output.
+    seed: a Python integer. Used to create a random seed for the
+      distribution
 
   Returns:
     list of float or float.

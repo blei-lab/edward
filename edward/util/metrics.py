@@ -2,7 +2,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-
 from functools import wraps
 
 import tensorflow as tf
@@ -11,7 +10,7 @@ import tensorflow as tf
 def with_binary_averaging(metric):
   """
   Inspired by scikit-learn's _average_binary_score function:
-  http://bit.ly/2yhcABp.
+  https://github.com/scikit-learn/scikit-learn/blob/d9fdd8b0d1053cb47af8e3823b7a05279dd72054/sklearn/metrics/base.py#L23.
 
   `None`: computes the specified metric along the second-to-last
   dimension of `y_true` and `y_pred`. Returns a vector of "class-wise"
