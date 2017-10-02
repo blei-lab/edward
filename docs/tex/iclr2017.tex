@@ -198,7 +198,7 @@ for _ in range(10000):
   inference_m.update()
 \end{lstlisting}
 For more details, see the
-\href{/api/inference-compositionality}{inference compositionality} webpage.
+\href{/tutorials/inference-compositionality}{inference compositionality} webpage.
 See
 \href{https://github.com/blei-lab/edward/blob/master/examples/factor_analysis.py}{\texttt{examples/factor_analysis.py}} for
 a version performing Monte Carlo EM for logistic factor analysis
@@ -234,7 +234,7 @@ inference = ed.VariationalInference({beta: qbeta, z: qz}, data={x: x_batch})
 inference.initialize(scale={x: float(N) / M, z: float(N) / M})
 \end{lstlisting}
 For more details, see the
-\href{/api/inference-data-subsampling}{data subsampling} webpage.
+\href{/tutorials/data-subsampling}{data subsampling} webpage.
 
 \subsubsection{Section 5. Experiments}
 
@@ -346,7 +346,7 @@ in the Github repository. Its source implementation can be found at
 
 \textbf{Figure *}. Stochastic variational inference \citep{hoffman2013stochastic}.
 For more details, see the
-\href{/api/inference-data-subsampling}{data subsampling} webpage.
+\href{/tutorials/data-subsampling}{data subsampling} webpage.
 
 \subsubsection{Appendix C. Complete Examples}
 
