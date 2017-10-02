@@ -134,7 +134,12 @@ class KLqp(VariationalInference):
     is_analytic_kl = True
     for z, qz in six.iteritems(self.latent_vars):
       try:
-        RegisterKL(type(qz), type(z))(lambda: return None)
+        # This can produce false successes if inference is called
+        # multiple times, which can cause RegisterKL to succeed the
+        # next time because KL was in fact registered to this dummy
+        # function; here we force that KL to return an error.
+        RegisterKL(type(qz), type(z))(
+            lambda: raise NotImplementedError("kl_fn is not available"))
         is_analytic_kl = False
       except ValueError:  # check that kl is registered for each pair
         pass
