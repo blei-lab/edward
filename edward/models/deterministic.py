@@ -36,6 +36,7 @@ from tensorflow.python.ops.distributions import distribution
 __all__ = [
     "Deterministic",
     "VectorDeterministic",
+    "TensorDeterministic",
 ]
 
 
@@ -47,7 +48,7 @@ class _BaseDeterministic(distribution.Distribution):
                loc,
                atol=None,
                rtol=None,
-               is_vector=False,
+               event_rank=None,
                validate_args=False,
                allow_nan_stats=True,
                name="_BaseDeterministic"):
@@ -71,8 +72,7 @@ class _BaseDeterministic(distribution.Distribution):
       rtol:  Non-negative `Tensor` of same `dtype` as `loc` and broadcastable
         shape.  The relative tolerance for comparing closeness to `loc`.
         Default is `0`.
-      is_vector:  Python `bool`.  If `True`, this is for `VectorDeterministic`,
-        else `Deterministic`.
+      event_rank:  0D `Tensor`. Rank of the generated samples.
       validate_args: Python `bool`, default `False`. When `True` distribution
         parameters are checked for validity despite possibly degrading runtime
         performance. When `False` invalid inputs may silently render incorrect
@@ -89,14 +89,16 @@ class _BaseDeterministic(distribution.Distribution):
     parameters = locals()
     with ops.name_scope(name, values=[loc, atol, rtol]):
       loc = ops.convert_to_tensor(loc, name="loc")
-      if is_vector and validate_args:
-        msg = "Argument loc must be at least rank 1."
-        if loc.get_shape().ndims is not None:
-          if loc.get_shape().ndims < 1:
+      if event_rank is not None and validate_args:
+        msg = "Argument loc must be at least rank {}.".format(event_rank)
+        if loc.get_shape().ndims is not None and \
+                not tensor_util.is_tensor(event_rank):
+          if loc.get_shape().ndims < event_rank:
             raise ValueError(msg)
         else:
           loc = control_flow_ops.with_dependencies(
-              [check_ops.assert_rank_at_least(loc, 1, message=msg)], loc)
+              [check_ops.assert_rank_at_least(loc, event_rank, message=msg)],
+              loc)
       self._loc = loc
 
       super(_BaseDeterministic, self).__init__(
@@ -244,6 +246,7 @@ class Deterministic(_BaseDeterministic):
         loc,
         atol=atol,
         rtol=rtol,
+        event_rank=0,
         validate_args=validate_args,
         allow_nan_stats=allow_nan_stats,
         name=name)
@@ -350,7 +353,7 @@ class VectorDeterministic(_BaseDeterministic):
         loc,
         atol=atol,
         rtol=rtol,
-        is_vector=True,
+        event_rank=1,
         validate_args=validate_args,
         allow_nan_stats=allow_nan_stats,
         name=name)
@@ -380,4 +383,122 @@ class VectorDeterministic(_BaseDeterministic):
           x = array_ops.identity(x)
     return math_ops.cast(
         math_ops.reduce_all(math_ops.abs(x - self.loc) <= self._slack, axis=-1),
+        dtype=self.dtype)
+
+
+class TensorDeterministic(_BaseDeterministic):
+  """Tensor `Deterministic` distribution on `R^k`.
+
+  The `TensorDeterministic` distribution is parameterized by a [batch] point
+  `loc in R^k`.  The distribution is supported at this point only,
+  and corresponds to a random variable that is constant, equal to `loc`.
+
+  See [Degenerate rv](https://en.wikipedia.org/wiki/Degenerate_distribution).
+
+  #### Mathematical Details
+
+  The probability mass function (pmf) is
+
+  ```none
+  pmf(x; loc)
+    = 1, if All[Abs(x - loc) <= atol + rtol * Abs(loc)],
+    = 0, otherwise.
+  ```
+
+  #### Examples
+
+  ```python
+  # Initialize a single TensorDeterministic supported at [0., 2.] in R^2.
+  constant = tf.contrib.distributions.Deterministic([0., 2.])
+  constant.prob([0., 2.])
+  ==> 1.
+  constant.prob([0., 3.])
+  ==> 0.
+
+  # Initialize a single TensorDeterministic supported in R^{3,2}.
+  loc = [[0., 1.], [2., 3.], [4., 5.]]
+  constant = constant_lib.TensorDeterministic(loc)
+  constant.prob([[0., 1.], [2., 3.], [4., 5.]])
+  ==> 1.
+  constant.prob([[0., 1.], [1.9, 3.], [4., 5.]])
+  ==> 0.
+  ```
+
+  """
+
+  def __init__(self,
+               loc,
+               atol=None,
+               rtol=None,
+               validate_args=False,
+               allow_nan_stats=True,
+               name="TensorDeterministic"):
+    """Initialize a `TensorDeterministic` distribution on `R^k`, for `k >= 0`.
+
+    Note that there is only one point in `R^0`, the "point" `[]`.  So if `k = 0`
+    then `self.prob([]) == 1`.
+
+    The `atol` and `rtol` parameters allow for some slack in `pmf`
+    computations, e.g. due to floating-point error.
+
+    ```
+    pmf(x; loc)
+      = 1, if All[Abs(x - loc) <= atol + rtol * Abs(loc)],
+      = 0, otherwise
+    ```
+
+    Args:
+      loc: Numeric `Tensor` of shape `[B1, ..., Bb, k]`, with `b >= 0`, `k >= 0`
+        The point on which this distribution is supported.
+      atol:  Non-negative `Tensor` of same `dtype` as `loc` and broadcastable
+        shape.  The absolute tolerance for comparing closeness to `loc`.
+        Default is `0`.
+      rtol:  Non-negative `Tensor` of same `dtype` as `loc` and broadcastable
+        shape.  The relative tolerance for comparing closeness to `loc`.
+        Default is `0`.
+      validate_args: Python `bool`, default `False`. When `True` distribution
+        parameters are checked for validity despite possibly degrading runtime
+        performance. When `False` invalid inputs may silently render incorrect
+        outputs.
+      allow_nan_stats: Python `bool`, default `True`. When `True`, statistics
+        (e.g., mean, mode, variance) use the value "`NaN`" to indicate the
+        result is undefined. When `False`, an exception is raised if one or
+        more of the statistic's batch members are undefined.
+      name: Python `str` name prefixed to Ops created by this class.
+    """
+    super(TensorDeterministic, self).__init__(
+        loc,
+        atol=atol,
+        rtol=rtol,
+        event_rank=None,
+        validate_args=validate_args,
+        allow_nan_stats=allow_nan_stats,
+        name=name)
+
+  def _batch_shape_tensor(self):
+    return constant_op.constant([], dtype=dtypes.int32)
+
+  def _batch_shape(self):
+    return tensor_shape.scalar()
+
+  def _event_shape_tensor(self):
+    return array_ops.shape(self.loc)
+
+  def _event_shape(self):
+    return self.loc.get_shape()
+
+  def _prob(self, x):
+    if self.validate_args:
+      tensor_rank = self.event_shape.ndims
+      is_tensor_check = check_ops.assert_rank_at_least(x, tensor_rank)
+      right_tensor_space_check = check_ops.assert_equal(
+          self.event_shape_tensor(),
+          array_ops.gather(array_ops.shape(x), array_ops.rank(x) - tensor_rank),
+          message=
+          "Argument 'x' not defined in the same space R^k as this distribution")
+      with ops.control_dependencies([is_tensor_check]):
+        with ops.control_dependencies([right_tensor_space_check]):
+          x = array_ops.identity(x)
+    return math_ops.cast(
+        math_ops.reduce_all(math_ops.abs(x - self.loc) <= self._slack),
         dtype=self.dtype)
