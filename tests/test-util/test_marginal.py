@@ -6,7 +6,7 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Normal
+from edward.models import Normal, InverseGamma
 from tensorflow.contrib.distributions import bijectors
 
 
@@ -15,7 +15,7 @@ class test_marginal_class(tf.test.TestCase):
   def test_bad_graph(self):
     with self.test_session():
       loc = Normal(tf.zeros(5), 5.0)
-      y_loc = tf.expand_dims(loc, 1)
+      y_loc = tf.expand_dims(loc, 1)  # this displaces the sample dimension
       inv_scale = Normal(tf.zeros(3), 1.0)
       y_scale = tf.expand_dims(tf.nn.softplus(inv_scale), 0)
       y = Normal(y_loc, y_scale)
@@ -61,4 +61,26 @@ class test_marginal_class(tf.test.TestCase):
       sample = ed.marginal(y, 5)
       self.assertEqual(sample.shape, [5, 2, 3, 4])
 
+  def test_multiple_ancestors(self):
+    with self.test_session():
+      loc = Normal(0.0, 1.0)
+      scale = InverseGamma(1.0, 1.0)
+      y = Normal(loc, scale)
+      sample = ed.marginal(y, 4)
+      self.assertEqual(sample.shape, [4])
 
+  def test_multiple_ancestors_batch(self):
+    with self.test_session():
+      loc = Normal(tf.zeros(5), 1.0)
+      scale = InverseGamma(tf.ones(5), 1.0)
+      y = Normal(loc, scale)
+      sample = ed.marginal(y, 4)
+      self.assertEqual(sample.shape, [4, 5])
+
+  def test_multiple_ancestors_batch_broadcast(self):
+    with self.test_session():
+      loc = Normal(tf.zeros([5, 1]), 1.0)
+      scale = InverseGamma(tf.ones([1, 6]), 1.0)
+      y = Normal(loc, scale)
+      sample = ed.marginal(y, 4)
+      self.assertEqual(sample.shape, [4, 5, 6])

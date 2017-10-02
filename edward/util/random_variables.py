@@ -802,10 +802,6 @@ def marginal(x, n):
   The current implementation only works for graphs of RVs that don't use
   the `sample_shape` kwarg.
   """
-  # Get the ancestors
-  # If any has a sample_shape, break
-  # otherwise, grab the roots
-  # if there are no roots, just use the RV
   ancestors = get_ancestors(x)
   if any([rv.sample_shape != () for rv in ancestors]) or x.sample_shape != ():
     raise NotImplementedError("`marginal` doesn't support graphs of RVs "
