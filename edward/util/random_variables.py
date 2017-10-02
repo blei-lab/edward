@@ -780,11 +780,6 @@ def transform(x, *args, **kwargs):
   return new_x
 
 
-def softmax(vec):
-  numerator = np.exp(vec)
-  return numerator / numerator.sum(axis=0)
-
-
 def compute_multinomial_mode(probs, total_count=1, seed=None):
   """Compute the mode of a Multinomial random variable.
 
@@ -808,6 +803,10 @@ def compute_multinomial_mode(probs, total_count=1, seed=None):
   compute_multinomial_mode(probs, total_count)
   ```
   """
+  def softmax(vec):
+    numerator = np.exp(vec)
+    return numerator / numerator.sum(axis=0)
+
   random_state = np.random.RandomState(seed)
   mode = np.zeros_like(probs, dtype=np.int32)
   if total_count == 1:
