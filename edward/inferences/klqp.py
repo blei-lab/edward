@@ -11,7 +11,7 @@ from edward.util import copy, get_descendants
 
 try:
   from edward.models import Normal
-  from tensorflow.contrib.distributions import kl_divergence
+  from tensorflow.contrib.distributions import kl_divergence, RegisterKL
 except Exception as e:
   raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
@@ -131,10 +131,13 @@ class KLqp(VariationalInference):
         rv.reparameterization_type ==
         tf.contrib.distributions.FULLY_REPARAMETERIZED
         for rv in six.itervalues(self.latent_vars)])
-    # TODO(dt): determine if there is a kl registered for kl(qz, z)
-    # for each pair in self.latent_vars. how?
-    is_analytic_kl = all([_is_registered_kl(qz, z)
-                          for z, qz in six.iteritems(self.latent_vars)])
+    is_analytic_kl = True
+    for z, qz in six.iteritems(self.latent_vars):
+      try:
+        RegisterKL(type(qz), type(z))(lambda: return None)
+        is_analytic_kl = False
+      except ValueError:  # check that kl is registered for each pair
+        pass
     if not is_analytic_kl and self.kl_scaling:
       raise TypeError("kl_scaling must be None when using non-analytic KL term")
     if is_reparameterizable:
