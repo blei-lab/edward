@@ -778,3 +778,38 @@ def transform(x, *args, **kwargs):
   new_x = TransformedDistribution(x, bij, *args, **kwargs)
   new_x.support = new_support
   return new_x
+
+
+def marginal(x, n):
+  """Performs a full graph sample on the provided random variable.
+
+  Given a random variable and a sample size, adds an additional sample
+  dimension to the root random variables in x's graph, and samples from
+  a new graph in terms of that sample size.
+
+  Args:
+    x : RandomVariable.
+      Random variable to perform full graph sample on.
+    n : tf.Tensor or int
+      The size of the full graph sample to take.
+
+  Returns:
+    tf.Tensor.
+    The fully sampled values from x, of shape [n] + x.shape
+
+  """
+  old_roots = [rv for rv in ed.get_ancestors(x) if ed.get_ancestors(rv) == []]
+  new_roots = []
+  for rv in old_roots:
+    new_rv = ed.copy(rv)
+    if new_rv.shape == ():
+      new_rv._sample_shape = tf.TensorShape([n, 1])
+    else:
+      new_rv._sample_shape = tf.TensorShape(n).concatenate(new_rv._sample_shape)
+    new_rv._value = new_rv.sample(new_rv._sample_shape)
+    new_roots.append(new_rv)
+  dict_swap = dict(zip(old_roots, new_roots))
+  x_full = ed.copy(x, dict_swap)
+  if x_full.shape[1:] != x.shape:
+    raise ValueError('Could not transform graph for bulk sampling.')
+  return x_full.sample()
