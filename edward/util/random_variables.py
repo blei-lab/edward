@@ -787,6 +787,22 @@ def marginal(x, n):
     tf.Tensor.
     The fully sampled values from x, of shape [n] + x.shape
 
+  #### Examples
+
+  ```python
+  ed.get_session()
+  loc = Normal(0.0, 100.0)
+  y = Normal(loc, 0.0001)
+  conditional_sample = y.sample(50)
+  marginal_sample = ed.marginal(y, 50)
+
+  np.std(conditional_sample.eval())
+  0.000100221
+
+  np.std(marginal_sample.eval())
+  106.55982
+  ```
+
   #### Notes
 
   The current implementation only works for graphs of RVs that don't use
