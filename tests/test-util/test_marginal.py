@@ -61,6 +61,15 @@ class test_marginal_class(tf.test.TestCase):
       sample = ed.marginal(y, 5)
       self.assertEqual(sample.shape, [5, 2, 3, 4])
 
+  def test_sample_passthrough(self):
+    with self.test_session():
+      loc = Normal(0.0, 100.0)
+      y = Normal(loc, 0.0001)
+      conditional_sample = y.sample(50)
+      marginal_sample = ed.marginal(y, 50)
+      self.assertTrue(np.std(conditional_sample.eval()) < 1.0)
+      self.assertTrue(np.std(marginal_sample.eval()) > 1.0)
+
   def test_multiple_ancestors(self):
     with self.test_session():
       loc = Normal(0.0, 1.0)
@@ -84,3 +93,11 @@ class test_marginal_class(tf.test.TestCase):
       y = Normal(loc, scale)
       sample = ed.marginal(y, 4)
       self.assertEqual(sample.shape, [4, 5, 6])
+
+  def test_multiple_ancestors_failed_broadcast(self):
+    with self.test_session():
+      loc = Normal(tf.zeros([5, 1]), 1.0)
+      scale = InverseGamma(tf.ones([6]), 1.0)
+      y = Normal(loc, scale)
+      with self.assertRaises(ValueError):
+        sample = ed.marginal(y, 4)
