@@ -780,7 +780,6 @@ def transform(x, *args, **kwargs):
   return new_x
 
 
-
 def marginal(x, n):
   """Performs a full graph sample on the provided random variable.
 
