@@ -165,10 +165,10 @@ def write_docs(output_dir, parser_config, yaml_toc):
                   symbol_to_file[full_name] + '\n')
 
   # Write a global index containing all full names with links.
-  # with open(os.path.join(output_dir, 'index.md'), 'w') as f:
-  #   f.write(
-  #       parser.generate_global_index('Edward', parser_config.index,
-  #                                    parser_config.reference_resolver))
+  with open(os.path.join(output_dir, 'overview.md'), 'w') as f:
+    f.write(
+        parser.generate_global_index('Edward', parser_config.index,
+                                     parser_config.reference_resolver))
 
 
 def add_dict_to_dict(add_from, add_to):
