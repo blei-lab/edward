@@ -797,22 +797,35 @@ def marginal(x, n):
     tf.Tensor.
     The fully sampled values from x, of shape [n] + x.shape
 
+  #### Notes
+
+  The current implementation only works for graphs of RVs that don't use
+  the `sample_shape` kwarg.
   """
-  if get_ancestors(x) != []:
-    old_roots = [rv for rv in get_ancestors(x) if get_ancestors(rv) == []]
-  else:
+  # Get the ancestors
+  # If any has a sample_shape, break
+  # otherwise, grab the roots
+  # if there are no roots, just use the RV
+  ancestors = get_ancestors(x)
+  if any([rv.sample_shape != () for rv in ancestors]) or x.sample_shape != ():
+    raise NotImplementedError("`marginal` doesn't support graphs of RVs "
+                              "with non scalar sample_shape args.")
+  elif ancestors == []:
     old_roots = [x]
+  else:
+    old_roots = [rv for rv in ancestors if get_ancestors(rv) == []]
+
   new_roots = []
   for rv in old_roots:
     new_rv = copy(rv)
-    if new_rv.shape == ():
-      new_rv._sample_shape = tf.TensorShape([n, 1])
-    else:
-      new_rv._sample_shape = tf.TensorShape(n).concatenate(new_rv._sample_shape)
+    new_rv._sample_shape = tf.TensorShape(n).concatenate(new_rv._sample_shape)
     new_rv._value = new_rv.sample(new_rv._sample_shape)
     new_roots.append(new_rv)
   dict_swap = dict(zip(old_roots, new_roots))
-  x_full = copy(x, dict_swap)
+  x_full = copy(x, dict_swap, replace_itself=True)
   if x_full.shape[1:] != x.shape:
+    print(x_full.shape)
+    print(x.shape)
     raise ValueError('Could not transform graph for bulk sampling.')
-  return x_full.sample()
+
+  return x_full
