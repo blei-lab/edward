@@ -769,6 +769,7 @@ def transform(x, *args, **kwargs):
 
   return TransformedDistribution(x, bij, *args, **kwargs)
 
+
 def marginal(x, n):
   """Performs a full graph sample on the provided random variable.
 
