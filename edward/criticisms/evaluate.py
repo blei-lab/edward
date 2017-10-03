@@ -29,7 +29,8 @@ def evaluate(metrics, data, n_samples=500, output_key=None, seed=None):
   posterior predictive's log-density.
 
   Args:
-    metrics: list of str or str.
+    metrics: list of str and/or (str, params: dict) tuples, str,
+    or (str, params: dict) tuple.
       List of metrics or a single metric:
       `'binary_accuracy'`,
       `'categorical_accuracy'`,
@@ -46,6 +47,9 @@ def evaluate(metrics, data, n_samples=500, output_key=None, seed=None):
       `'poisson'`,
       `'cosine'` or `'cosine_proximity'`,
       `'log_lik'` or `'log_likelihood'`.
+      In lieu of a metric string, this method also accepts (str, params: dict)
+      tuples; the first element of this tuple is the metric string, and
+      the second is a dict of associated params. At present, this dict only expects one key, `'average'`, which stipulates the type of averaging to perform on those metrics that permit binary averaging. Permissible options include: `None`, `'macro'` and `'micro'`.
     data: dict.
       Data to evaluate model with. It binds observed variables (of type
       `RandomVariable` or `tf.Tensor`) to their realizations (of
@@ -85,6 +89,10 @@ def evaluate(metrics, data, n_samples=500, output_key=None, seed=None):
   # mean squared error
   ed.evaluate('mean_squared_error', data={y: y_data, x: x_data})
   ```
+
+  # mean squared logarithmic error with `'micro'` averaging
+  ed.evaluate(('mean_squared_logarithmic_error', {'average': 'micro'}),
+              data={y: y_data, x: x_data})
   """
   sess = get_session()
   if isinstance(metrics, str):
