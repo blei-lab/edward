@@ -362,8 +362,6 @@ def copy(org_instance, dict_swap=None, scope="copied",
                             "Ignoring colocation property.",
                             name, colocation_op.name, new_op.device,
                             colocation_op.device)
-          else:
-            new_op._set_device(colocation_op.device)
 
       all_colocation_groups = sorted(set(all_colocation_groups))
       new_op.node_def.attr["_class"].CopyFrom(attr_value_pb2.AttrValue(
