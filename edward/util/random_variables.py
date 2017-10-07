@@ -7,8 +7,8 @@ import six
 import tensorflow as tf
 
 from copy import deepcopy
+from edward import models as rvs
 from edward.models.random_variable import RandomVariable
-from edward.models.random_variables import TransformedDistribution
 from edward.util.graphs import random_variables
 from tensorflow.contrib.distributions import bijectors
 from tensorflow.core.framework import attr_value_pb2
@@ -749,32 +749,56 @@ def transform(x, *args, **kwargs):
   ```
   """
   if len(args) != 0 or kwargs.get('bijector', None) is not None:
-    return TransformedDistribution(x, *args, **kwargs)
+    return rvs.TransformedDistribution(x, *args, **kwargs)
 
-  try:
-    support = x.support
-  except AttributeError as e:
-    msg = """'{}' object has no 'support'
-             so cannot be transformed.""".format(type(x).__name__)
-    raise AttributeError(msg)
-
-  if support == '01':
-    bij = bijectors.Invert(bijectors.Sigmoid())
-    new_support = 'real'
-  elif support == 'nonnegative':
-    bij = bijectors.Invert(bijectors.Softplus())
-    new_support = 'real'
-  elif support == 'simplex':
-    bij = bijectors.Invert(bijectors.SoftmaxCentered(event_ndims=1))
-    new_support = 'multivariate_real'
-  elif support in ('real', 'multivariate_real'):
+  real = (rvs.Gumbel,
+          rvs.Laplace,
+          rvs.Logistic,
+          rvs.Normal,
+          rvs.StudentT,
+          rvs.MultivariateNormalDiag,
+          rvs.MultivariateNormalFullCovariance,
+          rvs.MultivariateNormalTriL,
+          rvs.MultivariateNormalDiagPlusLowRank)
+  if isinstance(x, real):
+    # Determine if distribution has real support at construction time
+    # via hard-coded distributions. This prevents adding unnecessary
+    # ops via a transformation with identity bijector.
     return x
-  else:
+
+  if x.support is None or len(x.support) > 1:
     msg = "'transform' does not handle supports of type '{}'".format(support)
     raise ValueError(msg)
 
-  new_x = TransformedDistribution(x, bij, *args, **kwargs)
-  new_x.support = new_support
+  interval, measure = x.support[0]
+  if measure == 'simplex':
+    # TODO
+    pass
+  elif measure != 'real':
+    raise
+
+  # TODO get event_shape
+  # TODO compatible dtypes
+  # TODO tf.fill_like
+  is_real = tf.logical_and(tf.is_equal(interval[0], tf.constant(-np.inf)),
+                           tf.is_equal(interval[1], tf.constant(np.inf)))
+  is_01 = tf.logical_and(tf.is_equal(interval[0], tf.constant(0)),
+                         tf.is_equal(interval[1], tf.constant(1)))
+  is_nonnegative = tf.logical_and(tf.is_equal(interval[0], tf.constant(0)),
+                                  tf.is_equal(interval[1], tf.constant(np.inf)))
+  # TODO
+  tf.where(is_real, x, tf.where()...)
+  elif interval == '01':
+    bij = bijectors.Invert(bijectors.Sigmoid())
+  elif interval == 'nonnegative':
+    bij = bijectors.Invert(bijectors.Softplus())
+  elif interval == 'simplex':
+    bij = bijectors.Invert(bijectors.SoftmaxCentered(event_ndims=1))
+  # TODO identity
+
+  new_x = rvs.TransformedDistribution(x, bij, *args, **kwargs)
+  # TODO
+  new_x.support = [([], 'real')]
   return new_x
 
 
