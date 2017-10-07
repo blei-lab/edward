@@ -48,7 +48,9 @@ sns.regplot(X_train, y_train, fit_reg=False)
 
 \includegraphics[width=650px]{/images/mixture-density-network-fig0.png}
 
-We define TensorFlow placeholders, which will be used to manually feed batches of data during inference. This is \href{http://edwardlib.org/api/data}{one of many ways} to train models with data in Edward.
+We define TensorFlow placeholders, which will be used to manually feed
+batches of data during inference. This is
+\href{http://edwardlib.org/tutorials/data}{one of many ways} to train models with data in Edward.
 
 \begin{lstlisting}[language=Python]
 X_ph = tf.placeholder(tf.float32, [None, D])

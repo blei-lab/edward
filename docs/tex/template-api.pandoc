@@ -114,7 +114,7 @@ $endfor$
     </a>
     <a class="button u-full-width" href="/api/">API</a>
     <hr style="margin-top: 1rem; margin-bottom: 1.5rem;"/>
-    <a class="button u-full-width" href="/api/reference">Reference</a>
+    <a class="button u-full-width" href="/api/overview">Overview</a>
     {{toc}}
     <div class="row" style="padding-bottom: 5%"> </div>
     <a class="button2 u-pull-right" style="padding-right:10%"
