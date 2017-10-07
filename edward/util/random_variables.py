@@ -7,8 +7,8 @@ import six
 import tensorflow as tf
 
 from copy import deepcopy
+from edward import models as rvs
 from edward.models.random_variable import RandomVariable
-from edward.models.random_variables import TransformedDistribution
 from edward.util.graphs import random_variables
 from tensorflow.contrib.distributions import bijectors
 from tensorflow.core.framework import attr_value_pb2
@@ -751,17 +751,17 @@ def transform(x, *args, **kwargs):
   ```
   """
   if len(args) != 0 or kwargs.get('bijector', None) is not None:
-    return TransformedDistribution(x, *args, **kwargs)
+    return rvs.TransformedDistribution(x, *args, **kwargs)
 
-  real = (Gumbel,
-          Laplace,
-          Logistic,
-          Normal,
-          StudentT,
-          MultivariateNormalDiag,
-          MultivariateNormalFullCovariance,
-          MultivariateNormalTriL,
-          MultivariateNormalDiagPlusLowRank)
+  real = (rvs.Gumbel,
+          rvs.Laplace,
+          rvs.Logistic,
+          rvs.Normal,
+          rvs.StudentT,
+          rvs.MultivariateNormalDiag,
+          rvs.MultivariateNormalFullCovariance,
+          rvs.MultivariateNormalTriL,
+          rvs.MultivariateNormalDiagPlusLowRank)
   if isinstance(x, real):
     # Determine if distribution has real support at construction time
     # via hard-coded distributions. This prevents adding unnecessary
@@ -798,7 +798,7 @@ def transform(x, *args, **kwargs):
     bij = bijectors.Invert(bijectors.SoftmaxCentered(event_ndims=1))
   # TODO identity
 
-  new_x = TransformedDistribution(x, bij, *args, **kwargs)
+  new_x = rvs.TransformedDistribution(x, bij, *args, **kwargs)
   # TODO
   new_x.support = [([], 'real')]
   return new_x
