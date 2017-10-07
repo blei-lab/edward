@@ -27,6 +27,7 @@ def normal_from_natural_params(p1, p2):
   return {'loc': loc, 'scale': tf.sqrt(sigmasq)}
 
 
+# TODO
 _suff_stat_to_dist = defaultdict(dict)
 _suff_stat_to_dist['binary'][(('#x',),)] = (
     Bernoulli, lambda p1: {'logits': p1})
