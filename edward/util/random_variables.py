@@ -714,6 +714,69 @@ def get_variables(x, collection=None):
   return list(output)
 
 
+def marginal(x, n):
+  """Performs a full graph sample on the provided random variable.
+
+  Given a random variable and a sample size, adds an additional sample
+  dimension to the root random variables in x's graph, and samples from
+  a new graph in terms of that sample size.
+
+  Args:
+    x : RandomVariable.
+      Random variable to perform full graph sample on.
+    n : tf.Tensor or int
+      The size of the full graph sample to take.
+
+  Returns:
+    tf.Tensor.
+    Full graph sample of shape [n] + x.batch_shape + x.event_shape.
+
+  #### Examples
+
+  ```python
+  ed.get_session()
+  loc = Normal(0.0, 100.0)
+  y = Normal(loc, 0.0001)
+  conditional_sample = y.sample(50)
+  marginal_sample = ed.marginal(y, 50)
+
+  np.std(conditional_sample.eval())
+  0.000100221
+
+  np.std(marginal_sample.eval())
+  106.55982
+  ```
+
+  #### Notes
+
+  The current implementation only works for graphs of RVs that don't use
+  the `sample_shape` kwarg.
+  """
+  ancestors = get_ancestors(x)
+  if any([rv.sample_shape != () for rv in ancestors]) or x.sample_shape != ():
+    raise NotImplementedError("`marginal` doesn't support graphs of RVs "
+                              "with non scalar sample_shape args.")
+  elif ancestors == []:
+    old_roots = [x]
+  else:
+    old_roots = [rv for rv in ancestors if get_ancestors(rv) == []]
+
+  new_roots = []
+  for rv in old_roots:
+    new_rv = copy(rv)
+    new_rv._sample_shape = tf.TensorShape(n).concatenate(new_rv._sample_shape)
+    new_rv._value = new_rv.sample(new_rv._sample_shape)
+    new_roots.append(new_rv)
+  dict_swap = dict(zip(old_roots, new_roots))
+  x_full = copy(x, dict_swap, replace_itself=True)
+  if x_full.shape[1:] != x.shape:
+    print(x_full.shape)
+    print(x.shape)
+    raise ValueError('Could not transform graph for bulk sampling.')
+
+  return x_full
+
+
 def transform(x, *args, **kwargs):
   """Transform a continuous random variable to the unconstrained space.
 

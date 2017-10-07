@@ -27,6 +27,7 @@ _allowed_symbols = [
     'get_session',
     'get_siblings',
     'get_variables',
+    'marginal',
     'Progbar',
     'random_variables',
     'rbf',
