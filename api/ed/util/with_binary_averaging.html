@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>Edward – ed.util</title>
+  <title>Edward – ed.util.with_binary_averaging</title>
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -107,33 +107,13 @@
     <div class="nine columns">
 
 <div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
-<meta itemprop="name" content="ed.util" />
+<meta itemprop="name" content="ed.util.with_binary_averaging" />
 </div>
-<h1 id="module-ed.util">Module: ed.util</h1>
-<p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/util/__init__.py"><code>edward/util/__init__.py</code></a>.</p>
-<h2 id="classes">Classes</h2>
-<p><a href="../ed/Progbar"><code>class Progbar</code></a></p>
-<h2 id="functions">Functions</h2>
-<p><a href="../ed/check_data"><code>check_data(...)</code></a>: Check that the data dictionary passed during inference and</p>
-<p><a href="../ed/check_latent_vars"><code>check_latent_vars(...)</code></a>: Check that the latent variable dictionary passed during inference and</p>
-<p><a href="../ed/util/compute_multinomial_mode"><code>compute_multinomial_mode(...)</code></a>: Compute the mode of a Multinomial random variable.</p>
-<p><a href="../ed/copy"><code>copy(...)</code></a>: Build a new node in the TensorFlow graph from <code>org_instance</code>,</p>
-<p><a href="../ed/dot"><code>dot(...)</code></a>: Compute dot product between a 2-D tensor and a 1-D tensor.</p>
-<p><a href="../ed/get_ancestors"><code>get_ancestors(...)</code></a>: Get ancestor random variables of input.</p>
-<p><a href="../ed/get_blanket"><code>get_blanket(...)</code></a>: Get Markov blanket of input, which consists of its parents, its</p>
-<p><a href="../ed/get_children"><code>get_children(...)</code></a>: Get child random variables of input.</p>
-<p><a href="../ed/get_control_variate_coef"><code>get_control_variate_coef(...)</code></a>: Returns scalar used by control variates method for variance reduction in</p>
-<p><a href="../ed/get_descendants"><code>get_descendants(...)</code></a>: Get descendant random variables of input.</p>
-<p><a href="../ed/get_parents"><code>get_parents(...)</code></a>: Get parent random variables of input.</p>
-<p><a href="../ed/get_session"><code>get_session(...)</code></a>: Get the globally defined TensorFlow session.</p>
-<p><a href="../ed/get_siblings"><code>get_siblings(...)</code></a>: Get sibling random variables of input.</p>
-<p><a href="../ed/get_variables"><code>get_variables(...)</code></a>: Get parent TensorFlow variables of input.</p>
-<p><a href="../ed/random_variables"><code>random_variables(...)</code></a>: Return all random variables in the TensorFlow graph.</p>
-<p><a href="../ed/rbf"><code>rbf(...)</code></a>: Radial basis function kernel, also known as the squared</p>
-<p><a href="../ed/set_seed"><code>set_seed(...)</code></a>: Set seed for both NumPy and TensorFlow.</p>
-<p><a href="../ed/to_simplex"><code>to_simplex(...)</code></a>: Transform real vector of length <code>(K-1)</code> to a simplex of dimension <code>K</code></p>
-<p><a href="../ed/transform"><code>transform(...)</code></a>: Transform a continuous random variable to the unconstrained space.</p>
-<p><a href="../ed/util/with_binary_averaging"><code>with_binary_averaging(...)</code></a>: Inspired by scikit-learn's _average_binary_score function:</p>
+<h1 id="ed.util.with_binary_averaging">ed.util.with_binary_averaging</h1>
+<pre class="python"><code>with_binary_averaging(metric)</code></pre>
+<p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/util/metrics.py"><code>edward/util/metrics.py</code></a>.</p>
+<p>Inspired by scikit-learn's _average_binary_score function: https://github.com/scikit-learn/scikit-learn/blob/d9fdd8b0d1053cb47af8e3823b7a05279dd72054/sklearn/metrics/base.py#L23.</p>
+<p><code>None</code>: computes the specified metric along the second-to-last dimension of <code>y_true</code> and <code>y_pred</code>. Returns a vector of &quot;class-wise&quot; metrics. <code>'macro'</code>: same as <code>None</code>, except compute the (unweighted) global average of the resulting vector. <code>'micro'</code>: flatten <code>y_true</code> and <code>y_pred</code> into vectors, then compute <code>'macro'</code></p>
     </div>
   </div>
   <div class="row" style="padding-bottom: 25%"> </div>

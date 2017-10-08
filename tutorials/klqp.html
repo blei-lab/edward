@@ -215,9 +215,9 @@
   \big[
   \nabla_\lambda
   \big(
-  \log p(\mathbf{x}, \mathbf{z}(\epsilon \;;\; \lambda))
+  \log p(\mathbf{x}, \mathbf{z}(\epsilon_s \;;\; \lambda))
   -
-  \log q(\mathbf{z}(\epsilon \;;\; \lambda) \;;\;\lambda)
+  \log q(\mathbf{z}(\epsilon_s \;;\; \lambda) \;;\;\lambda)
   \big)
   \big].\end{aligned}\]</span> This is an unbiased estimate of the actual gradient of the ELBO. Empirically, it exhibits lower variance than the score function gradient, leading to faster convergence in a large set of problems.</p>
 <p>For more details, see the <a href="/api/">API</a> as well as its implementation in Edward’s code base.</p>
