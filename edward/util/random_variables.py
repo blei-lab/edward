@@ -9,6 +9,7 @@ import tensorflow as tf
 from copy import deepcopy
 from edward.models.random_variable import RandomVariable
 from edward.models.random_variables import TransformedDistribution
+from edward.models import PointMass
 from edward.util.graphs import random_variables
 from tensorflow.contrib.distributions import bijectors
 from tensorflow.core.framework import attr_value_pb2
@@ -712,6 +713,109 @@ def get_variables(x, collection=None):
     nodes.update(node.op.inputs)
 
   return list(output)
+
+
+def get_irrelevant(J, K):
+  """Find the set of random variables irrelevant to J given K.
+
+  Implemented using the Bayes-ball algorithm[1].
+
+  Parameters
+  ----------
+  J : RandomVariable or list of RandomVariable
+    Query node(s)
+
+  K : RandomVariable or list of RandomVariable
+    Random variable(s) to condition on.
+
+  Returns
+  -------
+  list of RandomVariable
+    Set of random variables that are irrelevant to J given K.
+
+  References
+  ----------
+  [1] Ross D. Schachter, "Bayes-Ball: The Rational Pastime
+    (for Determining Irrelevance and Requisite Information
+    in Belief Networks and Influence Diagrams)",
+    accessed via: http://mlg.eng.cam.ac.uk/zoubin/course03/BayesBall.pdf
+  """
+  if not isinstance(J, list):
+    assert isinstance(J, RandomVariable), \
+        "J must be an instance of ed.RandomVariable or a list of instances of ed.RandomVariable"
+    J = [J]
+  if not isinstance(K, list):
+    assert isinstance(K, RandomVariable), \
+        "K must be an instance of ed.RandomVariable or a list of instances of ed.RandomVariable"
+    K = [K]
+  J = set(J)
+  K = set(K)
+  top_marked = dict()
+  bottom_marked = dict()
+  checked = dict()
+
+  schedule = [(j, "child") for j in J]
+  while schedule:
+    node, came_from = schedule.pop()
+    if not node in K and came_from == "child":
+      if not top_marked.get(node, False):
+        top_marked.update({node: True})
+        for parent in get_parents(node):
+          schedule.append((parent, "child"))
+      if not isinstance(node, PointMass) and not bottom_marked.get(node, False):
+        bottom_marked.update({node: True})
+        for child in get_children(node):
+          schedule.append((child, "parent"))
+    elif came_from == "parent":
+      if node in K and not top_marked.get(node, False):
+        top_marked.update({node: True})
+        for parent in get_parents(node):
+          schedule.append((parent, "child"))
+      elif node not in K and not bottom_marked.get(node, False):
+        bottom_marked.update({node: True})
+        for child in get_children(node):
+          schedule.append((child, "parent"))
+  irrelevant_nodes = []
+  pgm_of_J = set([rv for j in J for anc in get_ancestors(j)
+              for rv in get_descendants(anc)])
+  for rv in pgm_of_J:
+    if not (rv in bottom_marked or rv in K or rv in irrelevant_nodes):
+      irrelevant_nodes.append(rv)
+  return irrelevant_nodes
+
+
+def is_independent(x, y, z=None):
+  """Assess whether x is independent of y given z[1].
+
+  Implemented using the Bayes Ball algorithm.
+
+  Parameters
+  ----------
+  x : RandomVariable or list of RandomVariable
+    Query node(s).
+
+  y : RandomVariable or list of RandomVariable
+    Query node(s).
+
+  z : RandomVariable or list of RandomVariable, optional
+    Random variable(s) to condition on.
+
+  Returns
+  -------
+  bool
+  True if x is conditionally independent of y given z.
+
+  References
+  ----------
+  [1] https://github.com/blei-lab/edward/issues/290
+  """
+  if z is None:
+    z = []
+  irrelevant_nodes = get_irrelevant(y, z)
+  if isinstance(x, list):
+    return all(_x in irrelevant_nodes for _x in x)
+  else:
+    return x in irrelevant_nodes
 
 
 def transform(x, *args, **kwargs):
