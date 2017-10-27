@@ -715,30 +715,41 @@ def get_variables(x, collection=None):
   return list(output)
 
 
-def get_irrelevant(J, K):
+def get_irrelevant(J, K, collection=None):
   """Find the set of random variables irrelevant to J given K.
 
   Implemented using the Bayes-ball algorithm[1].
 
-  Parameters
-  ----------
-  J : RandomVariable or list of RandomVariable
-    Query node(s)
+  Args
+    J: RandomVariable or list of RandomVariable
+      Query node(s)
 
-  K : RandomVariable or list of RandomVariable
-    Random variable(s) to condition on.
+    K: RandomVariable or list of RandomVariable
+      Random variable(s) to condition on.
+
+    collection: list of RandomVariable, optional.
+      The collection of random variables to check with respect to;
+      defaults to all random variables in the graph.
 
   Returns
-  -------
-  list of RandomVariable
-    Set of random variables that are irrelevant to J given K.
+    list of RandomVariable
+      Set of random variables that are irrelevant to J given K.
 
   References
-  ----------
-  [1] Ross D. Schachter, "Bayes-Ball: The Rational Pastime
-    (for Determining Irrelevance and Requisite Information
-    in Belief Networks and Influence Diagrams)",
-    accessed via: http://mlg.eng.cam.ac.uk/zoubin/course03/BayesBall.pdf
+    [1] Ross D. Schachter, "Bayes-Ball: The Rational Pastime
+      (for Determining Irrelevance and Requisite Information
+      in Belief Networks and Influence Diagrams)",
+      accessed via: http://mlg.eng.cam.ac.uk/zoubin/course03/BayesBall.pdf
+
+  #### Examples
+
+  ```python
+  a = Normal(0.0, 1.0)
+  b = Normal(a, 1.0)
+  c = Normal(a, 1.0)
+  d = Normal(c, 1.0)
+  assert set(ed.get_irrelevant(d, [b, c])) == set([a, b])
+  ```
   """
   if not isinstance(J, list):
     assert isinstance(J, RandomVariable), \
@@ -775,13 +786,13 @@ def get_irrelevant(J, K):
         bottom_marked.update({node: True})
         for child in get_children(node):
           schedule.append((child, "parent"))
-  irrelevant_nodes = []
-  pgm_of_J = set([rv for j in J for anc in get_ancestors(j)
-              for rv in get_descendants(anc)])
-  for rv in pgm_of_J:
-    if not (rv in bottom_marked or rv in K or rv in irrelevant_nodes):
-      irrelevant_nodes.append(rv)
-  return irrelevant_nodes
+  irrelevant_nodes = set()
+  if collection is None:
+    collection = random_variables()
+  for rv in collection:
+    if rv not in J and rv not in K and rv not in bottom_marked:
+      irrelevant_nodes.add(rv)
+  return list(irrelevant_nodes)
 
 
 def is_independent(x, y, z=None):
@@ -789,33 +800,40 @@ def is_independent(x, y, z=None):
 
   Implemented using the Bayes Ball algorithm.
 
-  Parameters
-  ----------
-  x : RandomVariable or list of RandomVariable
-    Query node(s).
+  Args
+    x: RandomVariable or list of RandomVariable
+       Query node(s).
 
-  y : RandomVariable or list of RandomVariable
-    Query node(s).
+    y: RandomVariable or list of RandomVariable
+       Query node(s).
 
-  z : RandomVariable or list of RandomVariable, optional
-    Random variable(s) to condition on.
+    z: RandomVariable or list of RandomVariable, optional
+       Random variable(s) to condition on.
 
   Returns
-  -------
-  bool
-  True if x is conditionally independent of y given z.
+    bool
+    True if x is conditionally independent of y given z.
 
   References
-  ----------
-  [1] https://github.com/blei-lab/edward/issues/290
+    [1] https://github.com/blei-lab/edward/issues/290
+
+  #### Examples
+
+  ```python
+  a = Normal(0.0, 1.0)
+  b = Normal(a, 1.0)
+  c = Normal(a, 1.0)
+  assert ed.is_independent(b, c, a)
+  ```
   """
   if z is None:
     z = []
-  irrelevant_nodes = get_irrelevant(y, z)
-  if isinstance(x, list):
-    return all(_x in irrelevant_nodes for _x in x)
-  else:
-    return x in irrelevant_nodes
+  if not isinstance(x, list):
+    assert isinstance(x, RandomVariable), \
+      "x must be ed.RandomVariable or list of ed.RandomVariable"
+    x = [x]
+  irrelevant_nodes = get_irrelevant(y, z, collection=x)
+  return all(_x in irrelevant_nodes for _x in x)
 
 
 def transform(x, *args, **kwargs):
