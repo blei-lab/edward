@@ -748,7 +748,7 @@ def get_irrelevant(J, K, collection=None):
   b = Normal(a, 1.0)
   c = Normal(a, 1.0)
   d = Normal(c, 1.0)
-  assert set(ed.get_irrelevant(d, [b, c])) == set([a, b])
+  assert set(ed.get_irrelevant(d, c)) == set([a, b])
   ```
   """
   if not isinstance(J, list):
