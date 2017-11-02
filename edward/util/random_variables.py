@@ -715,25 +715,24 @@ def get_variables(x, collection=None):
   return list(output)
 
 
-def get_irrelevant(J, K, collection=None):
-  """Find the set of random variables irrelevant to J given K.
+def is_independent(a, b, condition=None):
+  """Assess whether a is independent of b given the random variables in condition.
 
-  Implemented using the Bayes-ball algorithm[1].
+  Implemented using the Bayes-Ball algorithm[1].
 
   Args
-    J: RandomVariable or list of RandomVariable
-      Query node(s)
+    a : RandomVariable or list of RandomVariable
+       Query node(s).
 
-    K: RandomVariable or list of RandomVariable
-      Random variable(s) to condition on.
+    b : RandomVariable or list of RandomVariable
+       Query node(s).
 
-    collection: list of RandomVariable, optional.
-      The collection of random variables to check with respect to;
-      defaults to all random variables in the graph.
+    condition : RandomVariable or list of RandomVariable, optional
+       Random variable(s) to condition on.
 
   Returns
-    list of RandomVariable
-      Set of random variables that are irrelevant to J given K.
+    bool
+    True if a is independent of b given the random variables in condition.
 
   References
     [1] Ross D. Schachter, "Bayes-Ball: The Rational Pastime
@@ -747,93 +746,55 @@ def get_irrelevant(J, K, collection=None):
   a = Normal(0.0, 1.0)
   b = Normal(a, 1.0)
   c = Normal(a, 1.0)
-  d = Normal(c, 1.0)
-  assert set(ed.get_irrelevant(d, c)) == set([a, b])
+  assert ed.is_independent(b, c, condition=a)
   ```
   """
-  if not isinstance(J, list):
-    assert isinstance(J, RandomVariable), \
-        "J must be an instance of ed.RandomVariable or a list of instances of ed.RandomVariable"
-    J = [J]
-  if not isinstance(K, list):
-    assert isinstance(K, RandomVariable), \
-        "K must be an instance of ed.RandomVariable or a list of instances of ed.RandomVariable"
-    K = [K]
-  J = set(J)
-  K = set(K)
-  top_marked = dict()
-  bottom_marked = dict()
-  checked = dict()
+  if condition is None:
+    condition = []
+  if not isinstance(a, list):
+    a = [a]
+  if not isinstance(b, list):
+    b = [b]
+  if not isinstance(condition, list):
+    condition = [condition]
+  A = set(a)
+  B = set(b)
+  condition = set(condition)
 
-  schedule = [(j, "child") for j in J]
+  top_marked = set()
+  bottom_marked = set() # Nodes not in bottom_marked are irrelevant to b given the condition
+
+  schedule = [(node, "child") for node in B]
   while schedule:
     node, came_from = schedule.pop()
-    if not node in K and came_from == "child":
-      if not top_marked.get(node, False):
-        top_marked.update({node: True})
+
+    if node not in condition and came_from == "child":
+      if node not in top_marked:
+        top_marked.add(node)
         for parent in get_parents(node):
           schedule.append((parent, "child"))
-      if not isinstance(node, PointMass) and not bottom_marked.get(node, False):
-        bottom_marked.update({node: True})
+
+      if not isinstance(node, PointMass) and node not in bottom_marked:
+        bottom_marked.add(node)
+        if node in A: # bottom_marked node in A -> at least one node in A is relevant to B
+          return False
         for child in get_children(node):
           schedule.append((child, "parent"))
+
     elif came_from == "parent":
-      if node in K and not top_marked.get(node, False):
-        top_marked.update({node: True})
+      if node in condition and node not in top_marked:
+        top_marked.add(node)
         for parent in get_parents(node):
           schedule.append((parent, "child"))
-      elif node not in K and not bottom_marked.get(node, False):
-        bottom_marked.update({node: True})
+
+      elif node not in condition and node not in bottom_marked:
+        bottom_marked.add(node)
+        if node in A: # bottom_marked node in A -> at least one node in A is relevant to B
+          return False
         for child in get_children(node):
           schedule.append((child, "parent"))
-  irrelevant_nodes = set()
-  if collection is None:
-    collection = random_variables()
-  for rv in collection:
-    if rv not in J and rv not in K and rv not in bottom_marked:
-      irrelevant_nodes.add(rv)
-  return list(irrelevant_nodes)
 
-
-def is_independent(x, y, z=None):
-  """Assess whether x is independent of y given z[1].
-
-  Implemented using the Bayes Ball algorithm.
-
-  Args
-    x: RandomVariable or list of RandomVariable
-       Query node(s).
-
-    y: RandomVariable or list of RandomVariable
-       Query node(s).
-
-    z: RandomVariable or list of RandomVariable, optional
-       Random variable(s) to condition on.
-
-  Returns
-    bool
-    True if x is conditionally independent of y given z.
-
-  References
-    [1] https://github.com/blei-lab/edward/issues/290
-
-  #### Examples
-
-  ```python
-  a = Normal(0.0, 1.0)
-  b = Normal(a, 1.0)
-  c = Normal(a, 1.0)
-  assert ed.is_independent(b, c, a)
-  ```
-  """
-  if z is None:
-    z = []
-  if not isinstance(x, list):
-    assert isinstance(x, RandomVariable), \
-      "x must be ed.RandomVariable or list of ed.RandomVariable"
-    x = [x]
-  irrelevant_nodes = get_irrelevant(y, z, collection=x)
-  return all(_x in irrelevant_nodes for _x in x)
+  return True
 
 
 def transform(x, *args, **kwargs):

@@ -27,7 +27,6 @@ _allowed_symbols = [
     'get_session',
     'get_siblings',
     'get_variables',
-    'get_irrelevant',
     'is_independent',
     'Progbar',
     'random_variables',
