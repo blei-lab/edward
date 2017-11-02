@@ -716,7 +716,8 @@ def get_variables(x, collection=None):
 
 
 def is_independent(a, b, condition=None):
-  """Assess whether a is independent of b given the random variables in condition.
+  """Assess whether a is independent of b given the random variables in
+  condition.
 
   Implemented using the Bayes-Ball algorithm[1].
 
@@ -762,7 +763,7 @@ def is_independent(a, b, condition=None):
   condition = set(condition)
 
   top_marked = set()
-  bottom_marked = set() # Nodes not in bottom_marked are irrelevant to b given the condition
+  bottom_marked = set() # set of nodes relevant to b given condition
 
   schedule = [(node, "child") for node in B]
   while schedule:
@@ -776,7 +777,8 @@ def is_independent(a, b, condition=None):
 
       if not isinstance(node, PointMass) and node not in bottom_marked:
         bottom_marked.add(node)
-        if node in A: # bottom_marked node in A -> at least one node in A is relevant to B
+        if node in A:
+          # node is not irrelevant to b
           return False
         for child in get_children(node):
           schedule.append((child, "parent"))
@@ -789,7 +791,8 @@ def is_independent(a, b, condition=None):
 
       elif node not in condition and node not in bottom_marked:
         bottom_marked.add(node)
-        if node in A: # bottom_marked node in A -> at least one node in A is relevant to B
+        if node in A:
+          # node is not irrelevant to b
           return False
         for child in get_children(node):
           schedule.append((child, "parent"))
