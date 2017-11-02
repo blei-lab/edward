@@ -763,7 +763,11 @@ def is_independent(a, b, condition=None):
   condition = set(condition)
 
   top_marked = set()
-  bottom_marked = set() # set of nodes relevant to b given condition
+  # The Bayes-Ball algorithm will traverse the belief network
+  # and add each node that is relevant to B given condition
+  # to the set bottom_marked. A and B are conditionally
+  # independent if no node in A is in bottom_marked.
+  bottom_marked = set()
 
   schedule = [(node, "child") for node in B]
   while schedule:
@@ -778,8 +782,7 @@ def is_independent(a, b, condition=None):
       if not isinstance(node, PointMass) and node not in bottom_marked:
         bottom_marked.add(node)
         if node in A:
-          # node is not irrelevant to b
-          return False
+          return False  # node in A is relevant to B
         for child in get_children(node):
           schedule.append((child, "parent"))
 
@@ -792,8 +795,7 @@ def is_independent(a, b, condition=None):
       elif node not in condition and node not in bottom_marked:
         bottom_marked.add(node)
         if node in A:
-          # node is not irrelevant to b
-          return False
+          return False  # node in A is relevant to B
         for child in get_children(node):
           schedule.append((child, "parent"))
 
