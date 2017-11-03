@@ -9,6 +9,7 @@ import tensorflow as tf
 from copy import deepcopy
 from edward.models.random_variable import RandomVariable
 from edward.models.random_variables import TransformedDistribution
+from edward.models import PointMass
 from edward.util.graphs import random_variables
 from tensorflow.contrib.distributions import bijectors
 from tensorflow.core.framework import attr_value_pb2
@@ -712,6 +713,85 @@ def get_variables(x, collection=None):
     nodes.update(node.op.inputs)
 
   return list(output)
+
+
+def is_independent(a, b, condition=None):
+  """Assess whether a is independent of b given the random variables in
+  condition.
+
+  Implemented using the Bayes-Ball algorithm [@schachter1998bayes].
+
+  Args:
+    a: RandomVariable or list of RandomVariable.
+       Query node(s).
+    b: RandomVariable or list of RandomVariable.
+       Query node(s).
+    condition: RandomVariable or list of RandomVariable, optional.
+       Random variable(s) to condition on.
+
+  Returns:
+    bool.
+    True if a is independent of b given the random variables in condition.
+
+  #### Examples
+
+  ```python
+  a = Normal(0.0, 1.0)
+  b = Normal(a, 1.0)
+  c = Normal(a, 1.0)
+  assert ed.is_independent(b, c, condition=a)
+  ```
+  """
+  if condition is None:
+    condition = []
+  if not isinstance(a, list):
+    a = [a]
+  if not isinstance(b, list):
+    b = [b]
+  if not isinstance(condition, list):
+    condition = [condition]
+  A = set(a)
+  B = set(b)
+  condition = set(condition)
+
+  top_marked = set()
+  # The Bayes-Ball algorithm will traverse the belief network
+  # and add each node that is relevant to B given condition
+  # to the set bottom_marked. A and B are conditionally
+  # independent if no node in A is in bottom_marked.
+  bottom_marked = set()
+
+  schedule = [(node, "child") for node in B]
+  while schedule:
+    node, came_from = schedule.pop()
+
+    if node not in condition and came_from == "child":
+      if node not in top_marked:
+        top_marked.add(node)
+        for parent in get_parents(node):
+          schedule.append((parent, "child"))
+
+      if not isinstance(node, PointMass) and node not in bottom_marked:
+        bottom_marked.add(node)
+        if node in A:
+          return False  # node in A is relevant to B
+        for child in get_children(node):
+          schedule.append((child, "parent"))
+
+    elif came_from == "parent":
+      if node in condition and node not in top_marked:
+        top_marked.add(node)
+        for parent in get_parents(node):
+          schedule.append((parent, "child"))
+
+      elif node not in condition and node not in bottom_marked:
+        bottom_marked.add(node)
+        if node in A:
+          return False  # node in A is relevant to B
+        for child in get_children(node):
+          schedule.append((child, "parent"))
+
+  return True
 
 
 def transform(x, *args, **kwargs):
