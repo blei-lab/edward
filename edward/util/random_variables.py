@@ -719,27 +719,19 @@ def is_independent(a, b, condition=None):
   """Assess whether a is independent of b given the random variables in
   condition.
 
-  Implemented using the Bayes-Ball algorithm[1].
+  Implemented using the Bayes-Ball algorithm [@schachter1998bayes].
 
-  Args
-    a : RandomVariable or list of RandomVariable
+  Args:
+    a: RandomVariable or list of RandomVariable.
        Query node(s).
-
-    b : RandomVariable or list of RandomVariable
+    b: RandomVariable or list of RandomVariable.
        Query node(s).
-
-    condition : RandomVariable or list of RandomVariable, optional
+    condition: RandomVariable or list of RandomVariable, optional.
        Random variable(s) to condition on.
 
-  Returns
-    bool
+  Returns:
+    bool.
     True if a is independent of b given the random variables in condition.
-
-  References
-    [1] Ross D. Schachter, "Bayes-Ball: The Rational Pastime
-      (for Determining Irrelevance and Requisite Information
-      in Belief Networks and Influence Diagrams)",
-      accessed via: http://mlg.eng.cam.ac.uk/zoubin/course03/BayesBall.pdf
 
   #### Examples
 
