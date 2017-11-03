@@ -32,7 +32,7 @@ points $\mathbf{x}\in\{0,1\}^{50}$.
 from edward.models import Bernoulli, Beta
 
 theta = Beta(1.0, 1.0)
-x = Bernoulli(tf.ones(50) * theta)
+x = Bernoulli(probs=tf.ones(50) * theta)
 \end{lstlisting}
 
 \includegraphics[width=450px]{/images/beta_bernoulli.png} \\
@@ -55,7 +55,7 @@ about. In TensorFlow, this is given by a \texttt{tf.Variable}.
 from edward.models import Bernoulli
 
 theta = tf.Variable(0.0)
-x = Bernoulli(tf.ones(50) * tf.sigmoid(theta))
+x = Bernoulli(probs=tf.ones(50) * tf.sigmoid(theta))
 \end{lstlisting}
 
 Another use case of mutable states is for building discriminative
