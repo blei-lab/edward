@@ -40,8 +40,8 @@ class test_inference_auto_transform_class(tf.test.TestCase):
       qx_mean, qx_var = tf.nn.moments(qx_constrained.sample(n_samples), 0)
       stats = sess.run([x_mean, qx_mean, x_var, qx_var])
       self.assertAllClose(info_dict['loss'], 0.0, rtol=0.2, atol=0.2)
-      self.assertAllClose(stats[0], stats[1], rtol=1e-2, atol=1e-2)
-      self.assertAllClose(stats[2], stats[3], rtol=1e-2, atol=1e-2)
+      self.assertAllClose(stats[0], stats[1], rtol=1e-1, atol=1e-1)
+      self.assertAllClose(stats[2], stats[3], rtol=1e-1, atol=1e-1)
 
   def test_auto_transform_false(self):
     with self.test_session():
