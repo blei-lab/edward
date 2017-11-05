@@ -30,9 +30,9 @@ class test_klqp_class(tf.test.TestCase):
         qmu = inference.latent_vars[mu]
       inference.run(*args, **kwargs)
 
-      self.assertAllClose(qmu.mean().eval(), 0, rtol=0.15, atol=0.15)
+      self.assertAllClose(qmu.mean().eval(), 0, rtol=0.15, atol=0.5)
       self.assertAllClose(qmu.stddev().eval(), np.sqrt(1 / 51),
-                          rtol=0.15, atol=0.15)
+                          rtol=0.15, atol=0.5)
 
       variables = tf.get_collection(
           tf.GraphKeys.GLOBAL_VARIABLES, scope='optimizer')
