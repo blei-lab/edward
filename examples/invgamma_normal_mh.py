@@ -19,7 +19,7 @@ N = 1000
 loc = 7.0
 scale = 0.7
 xn_data = np.random.normal(loc, scale, N)
-print('sigma={}'.format(sigma))
+print('sigma={}'.format(scale))
 
 # Prior definition
 alpha = tf.Variable(0.5, trainable=False)
