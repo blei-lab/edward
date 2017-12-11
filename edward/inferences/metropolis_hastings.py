@@ -71,8 +71,8 @@ class MetropolisHastings(MonteCarlo):
     accept or reject the sample based on the ratio,
 
     $\\text{ratio} =
-          \log p(x, z^{\\text{new}}) - \log p(x, z^{\\text{old}}) +
-          \log g(z^{\\text{new}} \mid z^{\\text{old}}) -
+          \log p(x, z^{\\text{new}}) - \log p(x, z^{\\text{old}}) -
+          \log g(z^{\\text{new}} \mid z^{\\text{old}}) +
           \log g(z^{\\text{old}} \mid z^{\\text{new}})$
 
     #### Notes
@@ -110,7 +110,7 @@ class MetropolisHastings(MonteCarlo):
       # Sample znew ~ g(znew | zold).
       new_sample[z] = proposal_znew.value()
       # Increment ratio.
-      ratio += tf.reduce_sum(proposal_znew.log_prob(new_sample[z]))
+      ratio -= tf.reduce_sum(proposal_znew.log_prob(new_sample[z]))
 
     dict_swap_new = dict_swap.copy()
     dict_swap_new.update(new_sample)
@@ -119,7 +119,7 @@ class MetropolisHastings(MonteCarlo):
       # Build proposal g(zold | znew).
       proposal_zold = copy(proposal_z, dict_swap_new, scope=scope_new)
       # Increment ratio.
-      ratio -= tf.reduce_sum(proposal_zold.log_prob(dict_swap_old[z]))
+      ratio += tf.reduce_sum(proposal_zold.log_prob(dict_swap_old[z]))
 
     for z in six.iterkeys(self.latent_vars):
       # Build priors p(znew) and p(zold).
