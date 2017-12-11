@@ -38,7 +38,7 @@ q_logtau = Normal(tf.Variable(tf.random_normal([1])), tf.nn.softplus(tf.Variable
 q_mu = Normal(tf.Variable(tf.random_normal([1])), tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
 q_theta_tilde = Normal(tf.Variable(tf.random_normal([J])), tf.nn.softplus(tf.Variable(tf.random_normal([J]))))
 inference = ed.KLqp({logtau: q_logtau, mu: q_mu, theta_tilde: q_theta_tilde}, data=thedata)
-inference.run(n_samples=15, n_iter=20000)
+inference.run(n_samples=1, n_iter=20000)
 # end ed.KLqp inference
 print("====    ed.KLqp inference ====")
 print("E[mu] = %f" % (q_mu.mean().eval()))
@@ -50,7 +50,8 @@ print("")
 print("")
 
 # HMC inference
-S = 100000
+S = 400000
+burn = S//2
 hq_logtau = Empirical(tf.Variable(tf.zeros([S, 1])))
 hq_mu = Empirical(tf.Variable(tf.zeros([S, 1])))
 hq_theta_tilde = Empirical(tf.Variable(tf.zeros([S, J])))
@@ -60,16 +61,13 @@ inference.run()
 # end HMC inference
 
 print("====    ed.HMC inference ====")
-print("E[mu] = %f" % (hq_mu.mean().eval()))
-print("E[logtau] = %f" % (hq_logtau.mean().eval()))
+print("E[mu] = %f" % (hq_mu.params.eval()[burn:].mean()))
+print("E[logtau] = %f" % (hq_logtau.params.eval()[burn:].mean()))
 print("E[theta_tilde]=")
-print((hq_theta_tilde.mean().eval()))
+print(hq_theta_tilde.params.eval()[burn:,].mean(0))
 print("====  end ed.HMC inference ====")
 print("")
 print("")
-
-print("In order to see the result using Stan/NUTS run:")
-print("Rscript eight_schools.R")
 
 
 try:
