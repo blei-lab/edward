@@ -40,14 +40,14 @@ q_theta_tilde = Normal(tf.Variable(tf.random_normal([J])), tf.nn.softplus(tf.Var
 inference = ed.KLqp({logtau: q_logtau, mu: q_mu, theta_tilde: q_theta_tilde}, data=thedata)
 inference.run(n_samples=15, n_iter=20000)
 # end ed.KLqp inference
-print "====    ed.KLqp inference ===="
-print "E[mu] = %f" % (q_mu.mean().eval())
-print "E[logtau] = %f" % (q_logtau.mean().eval())
-print "E[theta_tilde]="
-print (q_theta_tilde.mean().eval())
-print "====  end ed.KLqp inference ===="
-print ""
-print ""
+print("====    ed.KLqp inference ====")
+print("E[mu] = %f" % (q_mu.mean().eval()))
+print("E[logtau] = %f" % (q_logtau.mean().eval()))
+print("E[theta_tilde]=")
+print((q_theta_tilde.mean().eval()))
+print("====  end ed.KLqp inference ====")
+print("")
+print("")
 
 # HMC inference
 S = 100000
@@ -59,17 +59,17 @@ inference = ed.HMC({logtau: hq_logtau, mu: hq_mu, theta_tilde: hq_theta_tilde}, 
 inference.run()
 # end HMC inference
 
-print "====    ed.HMC inference ===="
-print "E[mu] = %f" % (hq_mu.mean().eval())
-print "E[logtau] = %f" % (hq_logtau.mean().eval())
-print "E[theta_tilde]="
-print (hq_theta_tilde.mean().eval())
-print "====  end ed.HMC inference ===="
-print ""
-print ""
+print("====    ed.HMC inference ====")
+print("E[mu] = %f" % (hq_mu.mean().eval()))
+print("E[logtau] = %f" % (hq_logtau.mean().eval()))
+print("E[theta_tilde]=")
+print((hq_theta_tilde.mean().eval()))
+print("====  end ed.HMC inference ====")
+print("")
+print("")
 
-print "In order to see the result using Stan/NUTS run:"
-print "Rscript eight_schools.R"
+print("In order to see the result using Stan/NUTS run:")
+print("Rscript eight_schools.R")
 
 
 try:
@@ -78,5 +78,5 @@ try:
     fit = pystan.stan('eight_schools.stan', data=standata, iter=100000)
     print(fit)
 except ImportError:
-    print "pystan not detected"
-    print "if you have Rstan try: Rscript eight_schools.R"
+    print("pystan not detected")
+    print("if you have Rstan try: Rscript eight_schools.R")
