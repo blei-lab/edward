@@ -24,20 +24,24 @@ data_sigma = np.array([15, 10, 16, 11, 9, 11, 10, 18])
 # end data
 
 # model definition
-mu = Normal(0.*tf.ones([1]), 10.*tf.ones([1]))
-logtau = Normal(0.*tf.ones([1]), 1.*tf.ones([1]))
+mu = Normal(0. * tf.ones([1]), 10. * tf.ones([1]))
+logtau = Normal(0. * tf.ones([1]), 1. * tf.ones([1]))
 theta_tilde = Normal(tf.zeros([J]), tf.ones([J]))
 sigma = tf.placeholder(tf.float32, J)
-y = Normal(mu + tf.exp(logtau) * theta_tilde, sigma*tf.ones(J))
+y = Normal(mu + tf.exp(logtau) * theta_tilde, sigma * tf.ones(J))
 # end model definition
 
 thedata = {y: data_y, sigma: data_sigma}
 
 # ed.KLqp inference
-q_logtau = Normal(tf.Variable(tf.random_normal([1])), tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
-q_mu = Normal(tf.Variable(tf.random_normal([1])), tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
-q_theta_tilde = Normal(tf.Variable(tf.random_normal([J])), tf.nn.softplus(tf.Variable(tf.random_normal([J]))))
-inference = ed.KLqp({logtau: q_logtau, mu: q_mu, theta_tilde: q_theta_tilde}, data=thedata)
+q_logtau = Normal(tf.Variable(tf.random_normal([1])),
+                  tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
+q_mu = Normal(tf.Variable(tf.random_normal([1])),
+              tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
+q_theta_tilde = Normal(tf.Variable(tf.random_normal([J])),
+                       tf.nn.softplus(tf.Variable(tf.random_normal([J]))))
+par2q = {logtau: q_logtau, mu: q_mu, theta_tilde: q_theta_tilde}
+inference = ed.KLqp(par2q, data=thedata)
 inference.run(n_samples=1, n_iter=20000)
 # end ed.KLqp inference
 print("====    ed.KLqp inference ====")
@@ -51,12 +55,13 @@ print("")
 
 # HMC inference
 S = 400000
-burn = S//2
+burn = S // 2
 hq_logtau = Empirical(tf.Variable(tf.zeros([S, 1])))
 hq_mu = Empirical(tf.Variable(tf.zeros([S, 1])))
 hq_theta_tilde = Empirical(tf.Variable(tf.zeros([S, J])))
 
-inference = ed.HMC({logtau: hq_logtau, mu: hq_mu, theta_tilde: hq_theta_tilde}, data=thedata)
+par2hq = {logtau: hq_logtau, mu: hq_mu, theta_tilde: hq_theta_tilde}
+inference = ed.HMC(par2hq, data=thedata)
 inference.run()
 # end HMC inference
 
@@ -64,7 +69,7 @@ print("====    ed.HMC inference ====")
 print("E[mu] = %f" % (hq_mu.params.eval()[burn:].mean()))
 print("E[logtau] = %f" % (hq_logtau.params.eval()[burn:].mean()))
 print("E[theta_tilde]=")
-print(hq_theta_tilde.params.eval()[burn:,].mean(0))
+print(hq_theta_tilde.params.eval()[burn:, ].mean(0))
 print("====  end ed.HMC inference ====")
 print("")
 print("")
