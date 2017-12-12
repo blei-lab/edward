@@ -42,7 +42,7 @@ q_theta_tilde = Normal(tf.Variable(tf.random_normal([J])),
                        tf.nn.softplus(tf.Variable(tf.random_normal([J]))))
 par2q = {logtau: q_logtau, mu: q_mu, theta_tilde: q_theta_tilde}
 inference = ed.KLqp(par2q, data=thedata)
-inference.run(n_samples=1, n_iter=20000)
+inference.run(n_samples=15, n_iter=60000)
 # end ed.KLqp inference
 print("====    ed.KLqp inference ====")
 print("E[mu] = %f" % (q_mu.mean().eval()))
