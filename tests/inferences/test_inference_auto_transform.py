@@ -107,7 +107,7 @@ class test_inference_auto_transform_class(tf.test.TestCase):
 
       # Check approximation on constrained space has same mode as
       # target distribution.
-      qx = inference.latent_vars[x]      
+      qx = inference.latent_vars[x]
       stats = sess.run([x.mode(), qx.mean()])
       self.assertAllClose(stats[0], stats[1], rtol=1e-5, atol=1e-5)
 
@@ -127,7 +127,7 @@ class test_inference_auto_transform_class(tf.test.TestCase):
 
       # Check approximation on constrained space has same moments as
       # target distribution.
-      n_samples = 10000      
+      n_samples = 10000
       x_unconstrained = inference.transformations[x]
       qx_constrained_params = x_unconstrained.bijector.inverse(qx.params)
       x_mean, x_var = tf.nn.moments(x.sample(n_samples), 0)
@@ -144,8 +144,7 @@ class test_inference_auto_transform_class(tf.test.TestCase):
       x.support = 'nonnegative'
 
       inference = ed.HMC([x])
-      inference.initialize(auto_transform=True, 
-                           step_size=0.8)
+      inference.initialize(auto_transform=True, step_size=0.8)
       tf.global_variables_initializer().run()
       for _ in range(inference.n_iter):
         info_dict = inference.update()
