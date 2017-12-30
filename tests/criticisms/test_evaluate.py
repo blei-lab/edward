@@ -171,5 +171,18 @@ class test_evaluate_class(tf.test.TestCase):
                         {x: x_data, y: y_data, x_ph: x_ph_data}, n_samples=1,
                         output_key='x')
 
+  def test_custom_metric(self):
+    def logcosh(y_true, y_pred):
+      diff = y_pred - y_true
+      return tf.reduce_mean(diff + tf.nn.softplus(-2.0 * diff) - tf.log(2.0),
+                            axis=-1)
+    with self.test_session():
+      x = Normal(loc=0.0, scale=1.0)
+      x_data = tf.constant(0.0)
+      ed.evaluate(logcosh, {x: x_data}, n_samples=1)
+      ed.evaluate(['mean_squared_error', logcosh], {x: x_data}, n_samples=1)
+      self.assertRaises(NotImplementedError, ed.evaluate, 'logcosh',
+                        {x: x_data}, n_samples=1)
+
 if __name__ == '__main__':
   tf.test.main()

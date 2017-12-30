@@ -100,8 +100,10 @@ def evaluate(metrics, data, n_samples=500, output_key=None, seed=None):
   sess = get_session()
   if isinstance(metrics, str):
     metrics = [metrics]
+  elif callable(metrics):
+    metrics = [metrics]
   elif not isinstance(metrics, list):
-    raise TypeError("metrics must have type str or list.")
+    raise TypeError("metrics must have type str or list, or be callable.")
 
   check_data(data)
   if not isinstance(n_samples, int):
@@ -218,6 +220,8 @@ def evaluate(metrics, data, n_samples=500, output_key=None, seed=None):
       log_pred = [sess.run(tensor, feed_dict) for _ in range(n_samples)]
       log_pred = tf.add_n(log_pred) / tf.cast(n_samples, tensor.dtype)
       evaluations += [log_pred]
+    elif callable(metric):
+      evaluations += [metric(y_true, y_pred, **params)]
     else:
       raise NotImplementedError("Metric is not implemented: {}".format(metric))
 
