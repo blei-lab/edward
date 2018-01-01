@@ -1086,7 +1086,7 @@ def build_score_rb_loss_and_gradients(inference, var_list):
     grad = tf.gradients(
         -tf.reduce_mean(qi_log_prob *
                         tf.stop_gradient(pi_log_prob - qi_log_prob)) +
-            tf.reduce_sum(tf.losses.get_regularization_losses()),
+        tf.reduce_sum(tf.losses.get_regularization_losses()),
         var)
     grads.extend(grad)
     grads_vars.append(var)
