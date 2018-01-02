@@ -46,6 +46,9 @@ class KLqp(VariationalInference):
 
   where $z^{(s)} \sim q(z; \lambda)$ and $\\beta^{(s)}
   \sim q(\\beta)$.
+
+  The objective function also adds to itself a summation over all
+  tensors in the `REGULARIZATION_LOSSES` collection.
   """
   def __init__(self, latent_vars=None, data=None):
     """Create an inference algorithm.
@@ -164,6 +167,9 @@ class ReparameterizationKLqp(VariationalInference):
 
   This class minimizes the objective using the reparameterization
   gradient.
+
+  The objective function also adds to itself a summation over all
+  tensors in the `REGULARIZATION_LOSSES` collection.
   """
   def __init__(self, latent_vars=None, data=None):
     """Create an inference algorithm.
@@ -221,6 +227,9 @@ class ReparameterizationKLKLqp(VariationalInference):
 
   This class minimizes the objective using the reparameterization
   gradient and an analytic KL term.
+
+  The objective function also adds to itself a summation over all
+  tensors in the `REGULARIZATION_LOSSES` collection.
   """
   def __init__(self, latent_vars=None, data=None):
     """Create an inference algorithm.
@@ -292,6 +301,9 @@ class ReparameterizationEntropyKLqp(VariationalInference):
 
   This class minimizes the objective using the reparameterization
   gradient and an analytic entropy term.
+
+  The objective function also adds to itself a summation over all
+  tensors in the `REGULARIZATION_LOSSES` collection.
   """
   def __init__(self, latent_vars=None, data=None):
     """Create an inference algorithm.
@@ -350,6 +362,9 @@ class ScoreKLqp(VariationalInference):
 
   This class minimizes the objective using the score function
   gradient.
+
+  The objective function also adds to itself a summation over all
+  tensors in the `REGULARIZATION_LOSSES` collection.
   """
   def __init__(self, latent_vars=None, data=None):
     """Create an inference algorithm.
@@ -407,6 +422,9 @@ class ScoreKLKLqp(VariationalInference):
 
   This class minimizes the objective using the score function gradient
   and an analytic KL term.
+
+  The objective function also adds to itself a summation over all
+  tensors in the `REGULARIZATION_LOSSES` collection.
   """
   def __init__(self, latent_vars=None, data=None):
     """Create an inference algorithm.
@@ -478,6 +496,9 @@ class ScoreEntropyKLqp(VariationalInference):
 
   This class minimizes the objective using the score function gradient
   and an analytic entropy term.
+
+  The objective function also adds to itself a summation over all
+  tensors in the `REGULARIZATION_LOSSES` collection.
   """
   def __init__(self, latent_vars=None, data=None):
     """Create an inference algorithm.
@@ -542,6 +563,9 @@ class ScoreRBKLqp(VariationalInference):
   stochastic nodes in the computation graph. It does not
   Rao-Blackwellize within a node such as when a node represents
   multiple random variables via non-scalar batch shape.
+
+  The objective function also adds to itself a summation over all
+  tensors in the `REGULARIZATION_LOSSES` collection.
   """
   def __init__(self, latent_vars=None, data=None):
     """Create an inference algorithm.
