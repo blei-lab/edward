@@ -4,13 +4,15 @@ from __future__ import print_function
 
 import tensorflow as tf
 
+from collections import defaultdict
+
 try:
   from tensorflow.python.client.session import \
       register_session_run_conversion_functions
 except Exception as e:
   raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
-RANDOM_VARIABLE_COLLECTION = "random_variables"
+_RANDOM_VARIABLE_COLLECTION = defaultdict(list)
 
 
 class RandomVariable(object):
@@ -26,79 +28,88 @@ class RandomVariable(object):
 
   The random variable's shape is given by
 
-  ``sample_shape + batch_shape + event_shape``,
+  `sample_shape + batch_shape + event_shape`,
 
-  where ``sample_shape`` is an optional argument representing the
+  where `sample_shape` is an optional argument representing the
   dimensions of samples drawn from the distribution (default is
-  a scalar); ``batch_shape`` is the number of independent random variables
-  (determined by the shape of its parameters); and ``event_shape`` is
-  the shape of one draw from the distribution (e.g., ``Normal`` has a
-  scalar ``event_shape``; ``Dirichlet`` has a vector ``event_shape``).
+  a scalar); `batch_shape` is the number of independent random variables
+  (determined by the shape of its parameters); and `event_shape` is
+  the shape of one draw from the distribution (e.g., `Normal` has a
+  scalar `event_shape`; `Dirichlet` has a vector `event_shape`).
 
-  Notes
-  -----
-  ``RandomVariable`` assumes use in a multiple inheritance setting. The
-  child class must first inherit ``RandomVariable``, then second inherit a
-  class in ``tf.contrib.distributions``. With Python's method resolution
+  #### Notes
+
+  `RandomVariable` assumes use in a multiple inheritance setting. The
+  child class must first inherit `RandomVariable`, then second inherit a
+  class in `tf.contrib.distributions`. With Python's method resolution
   order, this implies the following during initialization (using
-  ``distributions.Bernoulli`` as an example):
+  `distributions.Bernoulli` as an example):
 
-  1. Start the ``__init__()`` of the child class, which passes all
-     ``*args, **kwargs`` to ``RandomVariable``.
-  2. This in turn passes all ``*args, **kwargs`` to
-     ``distributions.Bernoulli``, completing the ``__init__()`` of
-     ``distributions.Bernoulli``.
-  3. Complete the ``__init__()`` of ``RandomVariable``, which calls
-     ``self.sample()``, relying on the method from
-     ``distributions.Bernoulli``.
-  4. Complete the ``__init__()`` of the child class.
+  1. Start the `__init__()` of the child class, which passes all
+     `*args, **kwargs` to `RandomVariable`.
+  2. This in turn passes all `*args, **kwargs` to
+     `distributions.Bernoulli`, completing the `__init__()` of
+     `distributions.Bernoulli`.
+  3. Complete the `__init__()` of `RandomVariable`, which calls
+     `self.sample()`, relying on the method from
+     `distributions.Bernoulli`.
+  4. Complete the `__init__()` of the child class.
 
-  Methods from both ``RandomVariable`` and ``distributions.Bernoulli``
+  Methods from both `RandomVariable` and `distributions.Bernoulli`
   populate the namespace of the child class. Methods from
-  ``RandomVariable`` will take higher priority if there are conflicts.
+  `RandomVariable` will take higher priority if there are conflicts.
 
-  Examples
-  --------
-  >>> p = tf.constant(0.5)
-  >>> x = Bernoulli(p)
-  >>>
-  >>> z1 = tf.constant([[1.0, -0.8], [0.3, -1.0]])
-  >>> z2 = tf.constant([[0.9, 0.2], [2.0, -0.1]])
-  >>> x = Bernoulli(logits=tf.matmul(z1, z2))
-  >>>
-  >>> mu = Normal(tf.constant(0.0), tf.constant(1.0))
-  >>> x = Normal(mu, tf.constant(1.0))
+  #### Examples
+
+  ```python
+  p = tf.constant(0.5)
+  x = Bernoulli(p)
+
+  z1 = tf.constant([[1.0, -0.8], [0.3, -1.0]])
+  z2 = tf.constant([[0.9, 0.2], [2.0, -0.1]])
+  x = Bernoulli(logits=tf.matmul(z1, z2))
+
+  mu = Normal(tf.constant(0.0), tf.constant(1.0))
+  x = Normal(mu, tf.constant(1.0))
+  ```
   """
   def __init__(self, *args, **kwargs):
-    """
-    Parameters
-    ----------
-    sample_shape : tf.TensorShape, optional
-      Shape of samples to draw from the random variable.
-    value : tf.Tensor, optional
-      Fixed tensor to associate with random variable. Must have shape
-      ``sample_shape + batch_shape + event_shape``.
-    collections : list, optional
-      Optional list of graph collections keys. The random variable is
-      added to these collections. Defaults to ["random_variables"].
-    *args, **kwargs
-      Passed into parent ``__init__``.
-    """
-    # storing args, kwargs for easy graph copying
-    self._args = args
-    self._kwargs = kwargs
+    """Create a new random variable.
 
-    # temporarily pop (then reinsert) before calling parent __init__
+    Args:
+      sample_shape: tf.TensorShape, optional.
+        Shape of samples to draw from the random variable.
+      value: tf.Tensor, optional.
+        Fixed tensor to associate with random variable. Must have shape
+        `sample_shape + batch_shape + event_shape`.
+      collections: list, optional.
+        Optional list of graph collections (lists). The random variable is
+        added to these collections. Defaults to `[ed.random_variables()]`.
+    """
+    # Force the Distribution class to always use the same name scope
+    # when scoping its parameter names and also when calling any
+    # methods such as sample.
+    name = kwargs.get('name', type(self).__name__)
+    with tf.name_scope(name) as ns:
+      kwargs['name'] = ns
+
+    # pop and store RandomVariable-specific parameters in _kwargs
     sample_shape = kwargs.pop('sample_shape', ())
     value = kwargs.pop('value', None)
-    collections = kwargs.pop('collections', [RANDOM_VARIABLE_COLLECTION])
-    super(RandomVariable, self).__init__(*args, **kwargs)
+    collections = kwargs.pop('collections', ["random_variables"])
+
+    # store args, kwargs for easy graph copying
+    self._args = args
+    self._kwargs = kwargs.copy()
+
     if sample_shape != ():
       self._kwargs['sample_shape'] = sample_shape
     if value is not None:
       self._kwargs['value'] = value
-    if collections != [RANDOM_VARIABLE_COLLECTION]:
+    if collections != ["random_variables"]:
       self._kwargs['collections'] = collections
+
+    super(RandomVariable, self).__init__(*args, **kwargs)
 
     self._sample_shape = tf.TensorShape(sample_shape)
     if value is not None:
@@ -121,11 +132,10 @@ class RandomVariable(object):
             "value argument or implement sample for {0}."
             .format(self.__class__.__name__))
 
-    with tf.name_scope(self.name) as ns:
-      self._unique_name = ns
-
     for collection in collections:
-      tf.add_to_collection(collection, self)
+      if collection == "random_variables":
+        collection = _RANDOM_VARIABLE_COLLECTION
+      collection[tf.get_default_graph()].append(self)
 
   @property
   def sample_shape(self):
@@ -137,15 +147,9 @@ class RandomVariable(object):
     """Shape of random variable."""
     return self._value.shape
 
-  @property
-  def unique_name(self):
-    """Name of random variable with its unique scoping name. Use
-    ``name`` to just get the name of the random variable."""
-    return self._unique_name
-
   def __str__(self):
     return "RandomVariable(\"%s\"%s%s%s)" % (
-        self.unique_name,
+        self.name,
         (", shape=%s" % self.shape)
         if self.shape.ndims is not None else "",
         (", dtype=%s" % self.dtype.name) if self.dtype else "",
@@ -153,97 +157,7 @@ class RandomVariable(object):
 
   def __repr__(self):
     return "<ed.RandomVariable '%s' shape=%s dtype=%s>" % (
-        self.unique_name, self.shape, self.dtype.name)
-
-  def __add__(self, other):
-    return tf.add(self, other)
-
-  def __radd__(self, other):
-    return tf.add(other, self)
-
-  def __sub__(self, other):
-    return tf.subtract(self, other)
-
-  def __rsub__(self, other):
-    return tf.subtract(other, self)
-
-  def __mul__(self, other):
-    return tf.multiply(self, other)
-
-  def __rmul__(self, other):
-    return tf.multiply(other, self)
-
-  def __div__(self, other):
-    return tf.div(self, other)
-
-  __truediv__ = __div__
-
-  def __rdiv__(self, other):
-    return tf.div(other, self)
-
-  __rtruediv__ = __rdiv__
-
-  def __floordiv__(self, other):
-    return tf.floor(tf.div(self, other))
-
-  def __rfloordiv__(self, other):
-    return tf.floor(tf.div(other, self))
-
-  def __mod__(self, other):
-    return tf.mod(self, other)
-
-  def __rmod__(self, other):
-    return tf.mod(other, self)
-
-  def __lt__(self, other):
-    return tf.less(self, other)
-
-  def __le__(self, other):
-    return tf.less_equal(self, other)
-
-  def __gt__(self, other):
-    return tf.greater(self, other)
-
-  def __ge__(self, other):
-    return tf.greater_equal(self, other)
-
-  def __and__(self, other):
-    return tf.logical_and(self, other)
-
-  def __rand__(self, other):
-    return tf.logical_and(other, self)
-
-  def __or__(self, other):
-    return tf.logical_or(self, other)
-
-  def __ror__(self, other):
-    return tf.logical_or(other, self)
-
-  def __xor__(self, other):
-    return tf.logical_xor(self, other)
-
-  def __rxor__(self, other):
-    return tf.logical_xor(other, self)
-
-  def __getitem__(self, key):
-    """Subset the tensor associated to the random variable, not the
-    random variable itself."""
-    return self.value()[key]
-
-  def __pow__(self, other):
-    return tf.pow(self, other)
-
-  def __rpow__(self, other):
-    return tf.pow(other, self)
-
-  def __invert__(self):
-    return tf.logical_not(self)
-
-  def __neg__(self):
-    return tf.negative(self)
-
-  def __abs__(self):
-    return tf.abs(self)
+        self.name, self.shape, self.dtype.name)
 
   def __hash__(self):
     return id(self)
@@ -279,24 +193,25 @@ class RandomVariable(object):
     containing this variable has been launched. If no session is
     passed, the default session is used.
 
-    Parameters
-    ----------
-    session : tf.BaseSession, optional
-      The ``tf.Session`` to use to evaluate this random variable. If
-      none, the default session is used.
-    feed_dict : dict, optional
-      A dictionary that maps ``tf.Tensor`` objects to feed values. See
-      ``tf.Session.run()`` for a description of the valid feed values.
+    Args:
+      session: tf.BaseSession, optional.
+        The `tf.Session` to use to evaluate this random variable. If
+        none, the default session is used.
+      feed_dict: dict, optional.
+        A dictionary that maps `tf.Tensor` objects to feed values. See
+        `tf.Session.run()` for a description of the valid feed values.
 
-    Examples
-    --------
-    >>> x = Normal(0.0, 1.0)
-    >>> with tf.Session() as sess:
-    >>>   # Usage passing the session explicitly.
-    >>>   print(x.eval(sess))
-    >>>   # Usage with the default session.  The 'with' block
-    >>>   # above makes 'sess' the default session.
-    >>>   print(x.eval())
+    #### Examples
+
+    ```python
+    x = Normal(0.0, 1.0)
+    with tf.Session() as sess:
+      # Usage passing the session explicitly.
+      print(x.eval(sess))
+      # Usage with the default session.  The 'with' block
+      # above makes 'sess' the default session.
+      print(x.eval())
+    ```
     """
     return self.value().eval(session=session, feed_dict=feed_dict)
 
@@ -344,6 +259,37 @@ class RandomVariable(object):
     return self.shape
 
   @staticmethod
+  def _overload_all_operators():
+    """Register overloads for all operators."""
+    for operator in tf.Tensor.OVERLOADABLE_OPERATORS:
+      RandomVariable._overload_operator(operator)
+
+  @staticmethod
+  def _overload_operator(operator):
+    """Defer an operator overload to `tf.Tensor`.
+
+    We pull the operator out of tf.Tensor dynamically to avoid ordering issues.
+
+    Args:
+      operator: string. The operator name.
+    """
+    def _run_op(a, *args):
+      return getattr(tf.Tensor, operator)(a.value(), *args)
+    # Propagate __doc__ to wrapper
+    try:
+      _run_op.__doc__ = getattr(tf.Tensor, operator).__doc__
+    except AttributeError:
+      pass
+
+    setattr(RandomVariable, operator, _run_op)
+
+  # "This enables the Variable's overloaded "right" binary operators to
+  # run when the left operand is an ndarray, because it accords the
+  # Variable class higher priority than an ndarray, or a numpy matrix."
+  # Taken from implementation of tf.Tensor.
+  __array_priority__ = 100
+
+  @staticmethod
   def _session_run_conversion_fetch_function(tensor):
     return ([tensor.value()], lambda val: val[0])
 
@@ -364,6 +310,8 @@ class RandomVariable(object):
           "of type '%s'" % (dtype.name, v.dtype.name))
     return v.value()
 
+
+RandomVariable._overload_all_operators()
 
 register_session_run_conversion_functions(
     RandomVariable,

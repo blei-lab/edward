@@ -9,16 +9,14 @@ Edward depends on
 \begin{itemize}
   \item NumPy (>=1.7)
   \item Six (>=1.1.0)
-  \item TensorFlow (>=1.1.0rc0)
+  \item TensorFlow (>=1.2.0rc0)
 \end{itemize}
 
 Installing \texttt{edward} by default also installs \texttt{numpy} and
-\texttt{six} if they are not available (or are out-of-date in your
-system).
+\texttt{six} if they are unavailable (or out-of-date).
 
-Installing \texttt{edward} does not automatically install TensorFlow
-(or update an existing TensorFlow version). We recommend installing
-it via
+Installing \texttt{edward} does not automatically install or update
+TensorFlow. We recommend installing it via
 
 \begin{lstlisting}[language=JSON]
 pip install tensorflow
@@ -33,23 +31,48 @@ pip install tensorflow-gpu
 
 See TensorFlow's
 \href{https://www.tensorflow.org/install/}{installation instructions}
-for details, including how to setup up NVIDIA software for TensorFlow with GPUs.
+for details, including how to set up NVIDIA software for TensorFlow with GPUs.
 
 \subsubsection{Full Installation}
 
 Edward has optional features that depend on external packages.
 
 \begin{itemize}
-  \item Neural networks are supported through three
-  libraries:
+  \item Any examples using real data sets typically require
+  \href{https://github.com/edwardlib/observations/}{Observations} (>=0.1.2)
+\begin{lstlisting}[language=JSON]
+pip install observations
+\end{lstlisting}
+Observations lets you load an extensive collection of data sets with
+minimal effort under a one-line interface. Observations was originally
+developed for Edward and it has since become a standalone library for
+general machine learning.
+  \item Neural networks are supported through four libraries:
+  \texttt{tf.layers},
   \href{http://keras.io}{Keras} (>=1.0)
 \begin{lstlisting}[language=JSON]
-pip install keras
+pip install keras==2.0.4
 \end{lstlisting}
-\href{https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim}{TensorFlow
-Slim} (native in TensorFlow), and
-\href{https://github.com/google/prettytensor}{PrettyTensor} (>=0.7.4)
+  \href{https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim}{TensorFlow Slim}
+  (native in TensorFlow), and
+  \href{https://github.com/google/prettytensor}{PrettyTensor} (>=0.7.4)
 \begin{lstlisting}[language=JSON]
 pip install prettytensor
+\end{lstlisting}
+Note that for Keras 2.0.5 and beyond, all neural net layer transformations cannot be directly applied on random variables anymore. For example, if \texttt{x} is a \texttt{ed.RandomVariable} object, one must call \texttt{tf.convert_to_tensor} before applying it to a layer transformation, \texttt{Dense(256)(tf.convert_to_tensor(x))}.
+See \href{https://github.com/fchollet/keras/issues/6979}{here} for more details.
+  \item Notebooks require
+  \href{http://jupyter.org}{Jupyter} (>=1.0.0)
+\begin{lstlisting}[language=JSON]
+pip install jupyter
+\end{lstlisting}
+  \item Visualization requires
+  \href{http://matplotlib.org}{Matplotlib} (>=1.3),
+  \href{https://pillow.readthedocs.io}{Pillow} (>=3.4.2), and
+  \href{https://seaborn.pydata.org}{Seaborn} (>=0.3.1)
+\begin{lstlisting}[language=JSON]
+pip install matplotlib
+pip install pillow
+pip install seaborn
 \end{lstlisting}
 \end{itemize}

@@ -10,25 +10,22 @@ from tensorflow.python.ops import control_flow_ops
 def dot(x, y):
   """Compute dot product between a 2-D tensor and a 1-D tensor.
 
-  If x is a ``[M x N]`` matrix, then y is a ``M``-vector.
+  If x is a `[M x N]` matrix, then y is a `M`-vector.
 
-  If x is a ``M``-vector, then y is a ``[M x N]`` matrix.
+  If x is a `M`-vector, then y is a `[M x N]` matrix.
 
-  Parameters
-  ----------
-  x : tf.Tensor
-    A 1-D or 2-D tensor (see above).
-  y : tf.Tensor
-    A 1-D or 2-D tensor (see above).
+  Args:
+    x: tf.Tensor.
+      A 1-D or 2-D tensor (see above).
+    y: tf.Tensor.
+      A 1-D or 2-D tensor (see above).
 
-  Returns
-  -------
-  tf.Tensor
-    A 1-D tensor of length ``N``.
+  Returns:
+    tf.Tensor.
+    A 1-D tensor of length `N`.
 
-  Raises
-  ------
-  InvalidArgumentError
+  Raises:
+    InvalidArgumentError.
     If the inputs have Inf or NaN values.
   """
   x = tf.convert_to_tensor(x)
@@ -48,64 +45,37 @@ def dot(x, y):
     return tf.reshape(tf.matmul(mat, tf.expand_dims(vec, 1)), [-1])
 
 
-def logit(x):
-  """Evaluate :math:`\log(x / (1 - x))` elementwise.
-
-  Parameters
-  ----------
-  x : tf.Tensor
-    A n-D tensor.
-
-  Returns
-  -------
-  tf.Tensor
-    A tensor of same shape as input.
-
-  Raises
-  ------
-  InvalidArgumentError
-    If the input is not between :math:`(0,1)` elementwise.
-  """
-  x = tf.convert_to_tensor(x)
-  dependencies = [tf.assert_positive(x),
-                  tf.assert_less(x, 1.0)]
-  x = control_flow_ops.with_dependencies(dependencies, x)
-
-  return tf.log(x) - tf.log(1.0 - x)
-
-
 def rbf(X, X2=None, lengthscale=1.0, variance=1.0):
   """Radial basis function kernel, also known as the squared
   exponential or exponentiated quadratic. It is defined as
 
-  .. math::
+  $k(x, x') = \sigma^2 \exp\Big(
+      -\\frac{1}{2} \sum_{d=1}^D \\frac{1}{\ell_d^2} (x_d - x'_d)^2 \Big)$
 
-    k(x, x') = \\sigma^2 \exp\Big(
-        -\frac{1}{2} \sum_{d=1}^D \frac{1}{\\ell_d^2} (x_d - x'_d)^2 \Big)
+  for output variance $\sigma^2$ and lengthscale $\ell^2$.
 
-  for output variance :math:`\\sigma^2` and lengthscale :math:`\\ell^2`.
-
-  The kernel is evaluated over all pairs of rows, ``k(X[i, ], X2[j, ])``.
-  If ``X2`` is not specified, then it evaluates over all pairs
-  of rows in ``X``, ``k(X[i, ], X[j, ])``. The output is a matrix
+  The kernel is evaluated over all pairs of rows, `k(X[i, ], X2[j, ])`.
+  If `X2` is not specified, then it evaluates over all pairs
+  of rows in `X`, `k(X[i, ], X[j, ])`. The output is a matrix
   where each entry (i, j) is the kernel over the ith and jth rows.
 
-  Parameters
-  ----------
-  X : tf.Tensor
-    N x D matrix of N data points each with D features.
-  X2 : tf.Tensor, optional
-    N x D matrix of N data points each with D features.
-  lengthscale : tf.Tensor, optional
-    Lengthscale parameter, a positive scalar or D-dimensional vector.
-  variance : tf.Tensor, optional
-    Output variance parameter, a positive scalar.
+  Args:
+    X: tf.Tensor.
+      N x D matrix of N data points each with D features.
+    X2: tf.Tensor, optional.
+      N x D matrix of N data points each with D features.
+    lengthscale: tf.Tensor, optional.
+      Lengthscale parameter, a positive scalar or D-dimensional vector.
+    variance: tf.Tensor, optional.
+      Output variance parameter, a positive scalar.
 
-  Examples
-  --------
-  >>> X = tf.random_normal([100, 5])
-  >>> K = ed.rbf(X)
-  >>> assert K.shape == (100, 100)
+  #### Examples
+
+  ```python
+  X = tf.random_normal([100, 5])
+  K = ed.rbf(X)
+  assert K.shape == (100, 100)
+  ```
   """
   lengthscale = tf.convert_to_tensor(lengthscale)
   variance = tf.convert_to_tensor(variance)
@@ -131,57 +101,25 @@ def rbf(X, X2=None, lengthscale=1.0, variance=1.0):
   return output
 
 
-def reduce_logmeanexp(input_tensor, axis=None, keep_dims=False):
-  """Computes log(mean(exp(elements across dimensions of a tensor))).
-
-  Parameters
-  ----------
-  input_tensor : tf.Tensor
-    The tensor to reduce. Should have numeric type.
-  axis : int or list of int, optional
-    The dimensions to reduce. If `None` (the default), reduces all
-    dimensions.
-  keep_dims : bool, optional
-    If true, retains reduced dimensions with length 1.
-
-  Returns
-  -------
-  tf.Tensor
-    The reduced tensor.
-  """
-  logsumexp = tf.reduce_logsumexp(input_tensor, axis, keep_dims)
-  input_tensor = tf.convert_to_tensor(input_tensor)
-  n = input_tensor.shape.as_list()
-  if axis is None:
-    n = tf.cast(tf.reduce_prod(n), logsumexp.dtype)
-  else:
-    n = tf.cast(tf.reduce_prod(n[axis]), logsumexp.dtype)
-
-  return -tf.log(n) + logsumexp
-
-
 def to_simplex(x):
-  """Transform real vector of length ``(K-1)`` to a simplex of dimension ``K``
+  """Transform real vector of length `(K-1)` to a simplex of dimension `K`
   using a backward stick breaking construction.
 
-  Parameters
-  ----------
-  x : tf.Tensor
-    A 1-D or 2-D tensor.
+  Args:
+    x: tf.Tensor.
+      A 1-D or 2-D tensor.
 
-  Returns
-  -------
-  tf.Tensor
+  Returns:
+    tf.Tensor.
     A tensor of same shape as input but with last dimension of
-    size ``K``.
+    size `K`.
 
-  Raises
-  ------
-  InvalidArgumentError
+  Raises:
+    InvalidArgumentError.
     If the input has Inf or NaN values.
 
-  Notes
-  -----
+  #### Notes
+
   x as a 3-D or higher tensor is not guaranteed to be supported.
   """
   x = tf.cast(x, dtype=tf.float32)
@@ -214,30 +152,27 @@ def to_simplex(x):
 
 def get_control_variate_coef(f, h):
   """Returns scalar used by control variates method for variance reduction in
-  MCMC methods.
+  Monte Carlo methods.
 
-  If we have a statistic :math:`m` unbiased estimator of :math:`\mu` and
-  and another statistic :math:`t` which is an unbiased estimator of
-  :math:`\tau` then :math:`m^* = m + c(t - \tau)` is also an unbiased
-  estimator of :math:`\mu' for any coefficient :math:`c`.
+  If we have a statistic $m$ as an unbiased estimator of $\mu$ and
+  and another statistic $t$ which is an unbiased estimator of
+  $\\tau$ then $m^* = m + c(t - \\tau)$ is also an unbiased
+  estimator of $\mu$ for any coefficient $c$.
 
   This function calculates the optimal coefficient
-  .. math::
 
-    \c^* = \frac{Cov(m,t)}{Var(t)}
+  $c^* = \\frac{\\text{Cov}(m,t)}{\\text{Var}(t)}$
 
-  for minimizing the variance of :math:`m^*`.
+  for minimizing the variance of $m^*$.
 
-  Parameters
-  ----------
-  f : tf.Tensor
-    A 1-D tensor.
-  h : tf.Tensor
-    A 1-D tensor.
+  Args:
+    f: tf.Tensor.
+      A 1-D tensor.
+    h: tf.Tensor.
+      A 1-D tensor.
 
-  Returns
-  -------
-  tf.Tensor
+  Returns:
+    tf.Tensor.
     A 0 rank tensor
   """
   f_mu = tf.reduce_mean(f)

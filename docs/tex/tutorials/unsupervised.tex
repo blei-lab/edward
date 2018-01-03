@@ -89,13 +89,13 @@ mixture assignments $c_n\in\{0,\ldots,K-1\}$ as latent variables,
 and another with them summed out.
 
 The joint version includes an explicit latent variable for the mixture
-assignments. We implement this with the `ParamMixture` random
+assignments. We implement this with the \texttt{ParamMixture} random
 variable; it takes as input the mixing probabilities, the components'
 parameters, and the distribution of the components. It is the
 distribution of the mixture conditional on mixture assignments. (Note
 we can also write this separately by first building a `Categorical`
-random variable for `z` and then building `x`; `ParamMixture` avoids
-requiring `tf.gather` which is slightly more efficient.)
+random variable for \texttt{z} and then building \texttt{x}; \texttt{ParamMixture} avoids
+requiring \texttt{tf.gather} which is slightly more efficient.)
 
 \begin{lstlisting}[language=Python]
 from edward.models import Dirichlet, InverseGamma, MultivariateNormalDiag, \
@@ -106,7 +106,8 @@ K = 2  # number of components
 pi = Dirichlet(tf.ones(K))
 mu = Normal(tf.zeros(D), tf.ones(D), sample_shape=K)
 sigmasq = InverseGamma(tf.ones(D), tf.ones(D), sample_shape=K)
-x = ParamMixture(pi, {'loc': mu, 'scale_diag': tf.sqrt(sigmasq)}, MultivariateNormalDiag,
+x = ParamMixture(pi, {'loc': mu, 'scale_diag': tf.sqrt(sigmasq)},
+                 MultivariateNormalDiag,
                  sample_shape=N)
 z = x.cat
 \end{lstlisting}
@@ -155,7 +156,8 @@ qz = Empirical(tf.Variable(tf.zeros([T, N], dtype=tf.int32)))
 Run Gibbs sampling. We write the training loop explicitly, so that we can track
 the cluster means as the sampler progresses.
 \begin{lstlisting}[language=Python]
-inference = ed.Gibbs({pi: qpi, mu: qmu, sigmasq: qsigmasq, z: qz}, data={x: x_train})
+inference = ed.Gibbs({pi: qpi, mu: qmu, sigmasq: qsigmasq, z: qz},
+                     data={x: x_train})
 inference.initialize()
 
 sess = ed.get_session()

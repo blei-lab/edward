@@ -78,9 +78,7 @@ inference_z.initialize(scale={x: float(N) / M, z: float(N) / M},
                        n_samples=5)
 
 sess = ed.get_session()
-init = tf.global_variables_initializer()
-init.run()
-
+tf.global_variables_initializer().run()
 for _ in range(inference_w.n_iter):
   x_batch, idx_batch = next_batch(M)
   for _ in range(5):
@@ -90,6 +88,6 @@ for _ in range(inference_w.n_iter):
   inference_w.print_progress(info_dict)
 
   t = info_dict['t']
-  if t == 1 or t % inference_w.n_print == 0:
+  if t % 100 == 0:
     print("\nInferred principal axes:")
     print(sess.run(qw.mean()))

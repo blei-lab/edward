@@ -10,46 +10,48 @@ from edward.util import get_session
 
 
 class GANInference(VariationalInference):
-  """Parameter estimation with GAN-style training (Goodfellow et al.,
-  2014).
+  """Parameter estimation with GAN-style training
+  [@goodfellow2014generative].
 
   Works for the class of implicit (and differentiable) probabilistic
   models. These models do not require a tractable density and assume
   only a program that generates samples.
+
+  #### Notes
+
+  `GANInference` does not support latent variable inference. Note
+  that GAN-style training also samples from the prior: this does not
+  work well for latent variables that are shared across many data
+  points (global variables).
+
+  In building the computation graph for inference, the
+  discriminator's parameters can be accessed with the variable scope
+  "Disc".
+
+  GANs also only work for one observed random variable in `data`.
+
+  #### Examples
+
+  ```python
+  z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
+  x = generative_network(z)
+
+  inference = ed.GANInference({x: x_data}, discriminator)
+  ```
   """
   def __init__(self, data, discriminator):
-    """
-    Parameters
-    ----------
-    data : dict
-      Data dictionary which binds observed variables (of type
-      ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
-      type ``tf.Tensor``).  It can also bind placeholders (of type
-      ``tf.Tensor``) used in the model to their realizations.
-    discriminator : function
-      Function (with parameters) to discriminate samples. It should
-      output logit probabilities (real-valued) and not probabilities
-      in [0, 1].
+    """Create an inference algorithm.
 
-    Notes
-    -----
-    ``GANInference`` does not support latent variable inference. Note
-    that GAN-style training also samples from the prior: this does not
-    work well for latent variables that are shared across many data
-    points (global variables).
-
-    In building the computation graph for inference, the
-    discriminator's parameters can be accessed with the variable scope
-    "Disc".
-
-    GANs also only work for one observed random variable in ``data``.
-
-    Examples
-    --------
-    >>> z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
-    >>> x = generative_network(z)
-    >>>
-    >>> inference = ed.GANInference({x: x_data}, discriminator)
+    Args:
+      data: dict.
+        Data dictionary which binds observed variables (of type
+        `RandomVariable` or `tf.Tensor`) to their realizations (of
+        type `tf.Tensor`).  It can also bind placeholders (of type
+        `tf.Tensor`) used in the model to their realizations.
+      discriminator: function.
+        Function (with parameters) to discriminate samples. It should
+        output logit probabilities (real-valued) and not probabilities
+        in $[0, 1]$.
     """
     if not callable(discriminator):
       raise TypeError("discriminator must be a callable function.")
@@ -60,32 +62,32 @@ class GANInference(VariationalInference):
   def initialize(self, optimizer=None, optimizer_d=None,
                  global_step=None, global_step_d=None, var_list=None,
                  *args, **kwargs):
-    """Initialize variational inference.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computation graph.
 
-    Parameters
-    ----------
-    optimizer : str or tf.train.Optimizer, optional
-      A TensorFlow optimizer, to use for optimizing the generator
-      objective. Alternatively, one can pass in the name of a
-      TensorFlow optimizer, and default parameters for the optimizer
-      will be used.
-    optimizer_d : str or tf.train.Optimizer, optional
-      A TensorFlow optimizer, to use for optimizing the discriminator
-      objective. Alternatively, one can pass in the name of a
-      TensorFlow optimizer, and default parameters for the optimizer
-      will be used.
-    global_step : tf.Variable, optional
-      Optional ``Variable`` to increment by one after the variables
-      for the generator have been updated. See
-      ``tf.train.Optimizer.apply_gradients``.
-    global_step_d : tf.Variable, optional
-      Optional ``Variable`` to increment by one after the variables
-      for the discriminator have been updated. See
-      ``tf.train.Optimizer.apply_gradients``.
-    var_list : list of tf.Variable, optional
-      List of TensorFlow variables to optimize over (in the generative
-      model). Default is all trainable variables that ``latent_vars``
-      and ``data`` depend on.
+    Args:
+      optimizer: str or tf.train.Optimizer, optional.
+        A TensorFlow optimizer, to use for optimizing the generator
+        objective. Alternatively, one can pass in the name of a
+        TensorFlow optimizer, and default parameters for the optimizer
+        will be used.
+      optimizer_d: str or tf.train.Optimizer, optional.
+        A TensorFlow optimizer, to use for optimizing the discriminator
+        objective. Alternatively, one can pass in the name of a
+        TensorFlow optimizer, and default parameters for the optimizer
+        will be used.
+      global_step: tf.Variable, optional.
+        Optional `Variable` to increment by one after the variables
+        for the generator have been updated. See
+        `tf.train.Optimizer.apply_gradients`.
+      global_step_d: tf.Variable, optional.
+        Optional `Variable` to increment by one after the variables
+        for the discriminator have been updated. See
+        `tf.train.Optimizer.apply_gradients`.
+      var_list: list of tf.Variable, optional.
+        List of TensorFlow variables to optimize over (in the generative
+        model). Default is all trainable variables that `latent_vars`
+        and `data` depend on.
     """
     # call grandparent's method; avoid parent (VariationalInference)
     super(VariationalInference, self).initialize(*args, **kwargs)
@@ -101,6 +103,13 @@ class GANInference(VariationalInference):
     self.train_d = optimizer_d.apply_gradients(grads_and_vars_d,
                                                global_step=global_step_d)
 
+    if self.logging:
+      tf.summary.scalar("loss", self.loss,
+                        collections=[self._summary_key])
+      tf.summary.scalar("loss/discriminative", self.loss_d,
+                        collections=[self._summary_key])
+      self.summarize = tf.summary.merge_all(key=self._summary_key)
+
   def build_loss_and_gradients(self, var_list):
     x_true = list(six.itervalues(self.data))[0]
     x_fake = list(six.iterkeys(self.data))[0]
@@ -109,6 +118,11 @@ class GANInference(VariationalInference):
 
     with tf.variable_scope("Disc", reuse=True):
       d_fake = self.discriminator(x_fake)
+
+    if self.logging:
+      tf.summary.histogram("discriminator_outputs",
+                           tf.concat([d_true, d_fake], axis=0),
+                           collections=[self._summary_key])
 
     loss_d = tf.nn.sigmoid_cross_entropy_with_logits(
         labels=tf.ones_like(d_true), logits=d_true) + \
@@ -133,25 +147,23 @@ class GANInference(VariationalInference):
   def update(self, feed_dict=None, variables=None):
     """Run one iteration of optimization.
 
-    Parameters
-    ----------
-    feed_dict : dict, optional
-      Feed dictionary for a TensorFlow session run. It is used to feed
-      placeholders that are not fed during initialization.
-    variables : str, optional
-      Which set of variables to update. Either "Disc" or "Gen".
-      Default is both.
+    Args:
+      feed_dict: dict, optional.
+        Feed dictionary for a TensorFlow session run. It is used to feed
+        placeholders that are not fed during initialization.
+      variables: str, optional.
+        Which set of variables to update. Either "Disc" or "Gen".
+        Default is both.
 
-    Returns
-    -------
-    dict
+    Returns:
+      dict.
       Dictionary of algorithm-specific information. In this case, the
       iteration number and generative and discriminative losses.
 
-    Notes
-    -----
+    #### Notes
+
     The outputted iteration number is the total number of calls to
-    ``update``. Each update may include updating only a subset of
+    `update`. Each update may include updating only a subset of
     parameters.
     """
     if feed_dict is None:
@@ -178,13 +190,12 @@ class GANInference(VariationalInference):
       raise NotImplementedError("variables must be None, 'Gen', or 'Disc'.")
 
     if self.debug:
-      sess.run(self.op_check)
+      sess.run(self.op_check, feed_dict)
 
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:
-        if self.summarize is not None:
-          summary = sess.run(self.summarize, feed_dict)
-          self.train_writer.add_summary(summary, t)
+        summary = sess.run(self.summarize, feed_dict)
+        self.train_writer.add_summary(summary, t)
 
     return {'t': t, 'loss': loss, 'loss_d': loss_d}
 
@@ -199,32 +210,39 @@ class GANInference(VariationalInference):
 
 
 def _build_optimizer(optimizer, global_step):
-  if optimizer is None:
-    # Use ADAM with a decaying scale factor.
+  if optimizer is None and global_step is None:
+    # Default optimizer always uses a global step variable.
     global_step = tf.Variable(0, trainable=False, name="global_step")
+
+  if isinstance(global_step, tf.Variable):
     starter_learning_rate = 0.1
     learning_rate = tf.train.exponential_decay(starter_learning_rate,
                                                global_step,
                                                100, 0.9, staircase=True)
+  else:
+    learning_rate = 0.01
+
+  # Build optimizer.
+  if optimizer is None:
     optimizer = tf.train.AdamOptimizer(learning_rate)
   elif isinstance(optimizer, str):
     if optimizer == 'gradientdescent':
-      optimizer = tf.train.GradientDescentOptimizer(0.01)
+      optimizer = tf.train.GradientDescentOptimizer(learning_rate)
     elif optimizer == 'adadelta':
-      optimizer = tf.train.AdadeltaOptimizer()
+      optimizer = tf.train.AdadeltaOptimizer(learning_rate)
     elif optimizer == 'adagrad':
-      optimizer = tf.train.AdagradOptimizer(0.01)
+      optimizer = tf.train.AdagradOptimizer(learning_rate)
     elif optimizer == 'momentum':
-      optimizer = tf.train.MomentumOptimizer(0.01, 0.9)
+      optimizer = tf.train.MomentumOptimizer(learning_rate, 0.9)
     elif optimizer == 'adam':
-      optimizer = tf.train.AdamOptimizer()
+      optimizer = tf.train.AdamOptimizer(learning_rate)
     elif optimizer == 'ftrl':
-      optimizer = tf.train.FtrlOptimizer(0.01)
+      optimizer = tf.train.FtrlOptimizer(learning_rate)
     elif optimizer == 'rmsprop':
-      optimizer = tf.train.RMSPropOptimizer(0.01)
+      optimizer = tf.train.RMSPropOptimizer(learning_rate)
     else:
       raise ValueError('Optimizer class not found:', optimizer)
   elif not isinstance(optimizer, tf.train.Optimizer):
-    raise TypeError("Optimizer must be a tf.train.Optimizer object.")
+    raise TypeError("Optimizer must be str, tf.train.Optimizer, or None.")
 
   return optimizer, global_step

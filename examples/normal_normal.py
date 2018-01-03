@@ -1,14 +1,15 @@
 #!/usr/bin/env python
-"""Normal-normal model using variational inference."""
+"""Normal-normal model using Hamiltonian Monte Carlo."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
 import edward as ed
+import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Normal
+from edward.models import Empirical, Normal
 
 ed.set_seed(42)
 
@@ -20,10 +21,27 @@ mu = Normal(loc=0.0, scale=1.0)
 x = Normal(loc=tf.ones(50) * mu, scale=1.0)
 
 # INFERENCE
-qmu_loc = tf.Variable(tf.random_normal([]))
-qmu_scale = tf.nn.softplus(tf.Variable(tf.random_normal([])))
-qmu = Normal(loc=qmu_loc, scale=qmu_scale)
+qmu = Empirical(params=tf.Variable(tf.zeros(1000)))
 
 # analytic solution: N(loc=0.0, scale=\sqrt{1/51}=0.140)
-inference = ed.KLqp({mu: qmu}, data={x: x_data})
+inference = ed.HMC({mu: qmu}, data={x: x_data})
 inference.run()
+
+# CRITICISM
+sess = ed.get_session()
+mean, stddev = sess.run([qmu.mean(), qmu.stddev()])
+print("Inferred posterior mean:")
+print(mean)
+print("Inferred posterior stddev:")
+print(stddev)
+
+# Check convergence with visual diagnostics.
+samples = sess.run(qmu.params)
+
+# Plot histogram.
+plt.hist(samples, bins='auto')
+plt.show()
+
+# Trace plot.
+plt.plot(samples)
+plt.show()

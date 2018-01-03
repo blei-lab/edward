@@ -165,7 +165,7 @@ x = generative_network(eps)
 
 # INFERENCE
 inference = ed.GANInference(data={x: x_train},
-    discriminator=discriminative_network)
+                            discriminator=discriminative_network)
 \end{lstlisting}
 For an example of it in use, see the
 \href{/tutorials/gan}{generative adversarial networks} tutorial.

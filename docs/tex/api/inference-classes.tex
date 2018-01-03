@@ -86,9 +86,6 @@ qz = Empirical(params=tf.Variable(tf.zeros([T, N]))
 
 inference = ed.MonteCarlo({beta: qbeta, z: qz}, data={x: x_train})
 \end{lstlisting}
-Monte Carlo
-algorithms proceed by updating one sample $\beta^{(t)},\mathbf{z}^{(t)}$ at a time in the empirical
-approximation.
 Monte Carlo algorithms proceed by updating one sample
 $\beta^{(t)},\mathbf{(z)}^{(t)}$ at a time in the empirical approximation.
 %
@@ -122,81 +119,27 @@ our efforts.
 
 \subsubsection{Exact Inference}
 
-This approach also extends to algorithms that usually require tedious
-algebraic manipulation.  With symbolic algebra on the nodes of the
-computational graph, we can uncover conjugacy relationships between
-random variables.  Users can then integrate out variables to
-automatically derive classical Gibbs \citep{gelfand1990sampling},
+In order to uncover conjugacy relationships between random variables
+(if they exist), we use symbolic algebra on nodes in the computational
+graph.  Users can then integrate out variables to automatically derive
+classical Gibbs \citep{gelfand1990sampling},
 mean-field updates \citep{bishop2006pattern}, and exact inference.
 
-\begin{center}\rule{3in}{0.4pt}\end{center}
+For example,  can calculate a conjugate posterior analytically by
+using the \texttt{ed.complete_conditional} function:
 
-The classes below inherit methods from base inference classes;
-see the \href{/api/inference-development}{development page} for more
-details.
+\begin{lstlisting}[language=Python]
+from edward.models import Bernoulli, Beta
 
-{%sphinx
+# Beta-Bernoulli model
+pi = Beta(1.0, 1.0)
+x = Bernoulli(probs=pi, sample_shape=10)
 
-.. autoclass:: edward.inferences.VariationalInference
-   :members:
+# Beta posterior; it conditions on the sample tensor associated to x
+pi_cond = ed.complete_conditional(pi)
 
-.. autoclass:: edward.inferences.KLqp
-   :members:
-
-.. autoclass:: edward.inferences.ReparameterizationKLqp
-
-.. autoclass:: edward.inferences.ReparameterizationKLKLqp
-
-.. autoclass:: edward.inferences.ReparameterizationEntropyKLqp
-
-.. autoclass:: edward.inferences.ScoreKLqp
-
-.. autoclass:: edward.inferences.ScoreKLKLqp
-
-.. autoclass:: edward.inferences.ScoreEntropyKLqp
-
-.. autoclass:: edward.inferences.GANInference
-   :members:
-
-.. autoclass:: edward.inferences.BiGANInference
-   :members:
-
-.. autoclass:: edward.inferences.WGANInference
-   :members:
-
-.. autoclass:: edward.inferences.ImplicitKLqp
-   :members:
-
-.. autoclass:: edward.inferences.KLpq
-   :members:
-
-.. autoclass:: edward.inferences.MAP
-   :members:
-
-.. autoclass:: edward.inferences.Laplace
-   :members:
-
-.. autoclass:: edward.inferences.MonteCarlo
-   :members:
-
-.. autoclass:: edward.inferences.MetropolisHastings
-   :members:
-
-.. autoclass:: edward.inferences.Gibbs
-   :members:
-
-.. autoclass:: edward.inferences.HMC
-   :members:
-
-.. autoclass:: edward.inferences.SGLD
-   :members:
-
-.. autoclass:: edward.inferences.SGHMC
-   :members:
-
-.. automodule:: edward.inferences.conjugacy
-   :members: complete_conditional
-
-%}
+# Generate samples from p(pi | x = NumPy array)
+sess.run(pi_cond, {x: np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])})
+\end{lstlisting}
 
 \subsubsection{References}\label{references}

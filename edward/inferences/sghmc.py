@@ -16,49 +16,47 @@ except Exception as e:
 
 
 class SGHMC(MonteCarlo):
-  """Stochastic gradient Hamiltonian Monte Carlo (Chen et al., 2014).
+  """Stochastic gradient Hamiltonian Monte Carlo [@chen2014stochastic].
 
-  Notes
-  -----
-  In conditional inference, we infer :math:`z` in :math:`p(z, \\beta
-  \mid x)` while fixing inference over :math:`\\beta` using another
-  distribution :math:`q(\\beta)`.
-  ``SGHMC`` substitutes the model's log marginal density
+  #### Notes
 
-  .. math::
+  In conditional inference, we infer $z$ in $p(z, \\beta
+  \mid x)$ while fixing inference over $\\beta$ using another
+  distribution $q(\\beta)$.
+  `SGHMC` substitutes the model's log marginal density
 
-    \log p(x, z) = \log \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
-                \\approx \log p(x, z, \\beta^*)
+  $\log p(x, z) = \log \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
+                \\approx \log p(x, z, \\beta^*)$
 
-  leveraging a single Monte Carlo sample, where :math:`\\beta^* \sim
-  q(\\beta)`. This is unbiased (and therefore asymptotically exact as a
-  pseudo-marginal method) if :math:`q(\\beta) = p(\\beta \mid x)`.
+  leveraging a single Monte Carlo sample, where $\\beta^* \sim
+  q(\\beta)$. This is unbiased (and therefore asymptotically exact as a
+  pseudo-marginal method) if $q(\\beta) = p(\\beta \mid x)$.
+
+  #### Examples
+
+  ```python
+  mu = Normal(loc=0.0, scale=1.0)
+  x = Normal(loc=mu, scale=1.0, sample_shape=10)
+
+  qmu = Empirical(tf.Variable(tf.zeros(500)))
+  inference = ed.SGHMC({mu: qmu}, {x: np.zeros(10, dtype=np.float32)})
+  ```
   """
   def __init__(self, *args, **kwargs):
-    """
-    Examples
-    --------
-    >>> z = Normal(loc=0.0, scale=1.0)
-    >>> x = Normal(loc=tf.ones(10) * z, scale=1.0)
-    >>>
-    >>> qz = Empirical(tf.Variable(tf.zeros(500)))
-    >>> data = {x: np.array([0.0] * 10, dtype=np.float32)}
-    >>> inference = ed.SGHMC({z: qz}, data)
-    """
     super(SGHMC, self).__init__(*args, **kwargs)
 
   def initialize(self, step_size=0.25, friction=0.1, *args, **kwargs):
-    """
-    Parameters
-    ----------
-    step_size : float, optional
-      Constant scale factor of learning rate.
-    friction : float, optional
-      Constant scale on the friction term in the Hamiltonian system.
+    """Initialize inference algorithm.
+
+    Args:
+      step_size: float, optional.
+        Constant scale factor of learning rate.
+      friction: float, optional.
+        Constant scale on the friction term in the Hamiltonian system.
     """
     self.step_size = step_size
     self.friction = friction
-    self.v = {z: tf.Variable(tf.zeros(qz.params.shape[1:]))
+    self.v = {z: tf.Variable(tf.zeros(qz.params.shape[1:], dtype=qz.dtype))
               for z, qz in six.iteritems(self.latent_vars)}
     return super(SGHMC, self).initialize(*args, **kwargs)
 
@@ -67,15 +65,14 @@ class SGHMC(MonteCarlo):
     integrator. Its discretization error goes to zero as the learning
     rate decreases.
 
-    Implements the update equations from (15) of Chen et al. (2014).
+    Implements the update equations from (15) of @chen2014stochastic.
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(self.latent_vars)}
     old_v_sample = {z: v for z, v in six.iteritems(self.v)}
 
     # Simulate Hamiltonian dynamics with friction.
-    friction = tf.constant(self.friction, dtype=tf.float32)
-    learning_rate = tf.constant(self.step_size * 0.01, dtype=tf.float32)
+    learning_rate = self.step_size * 0.01
     grad_log_joint = tf.gradients(self._log_joint(old_sample),
                                   list(six.itervalues(old_sample)))
 
@@ -85,12 +82,14 @@ class SGHMC(MonteCarlo):
     for z, grad_log_p in zip(six.iterkeys(old_sample), grad_log_joint):
       qz = self.latent_vars[z]
       event_shape = qz.event_shape
-      normal = Normal(loc=tf.zeros(event_shape),
-                      scale=(tf.sqrt(learning_rate * friction) *
-                             tf.ones(event_shape)))
+      normal = Normal(
+          loc=tf.zeros(event_shape, dtype=qz.dtype),
+          scale=(tf.sqrt(tf.cast(learning_rate * self.friction, qz.dtype)) *
+                 tf.ones(event_shape, dtype=qz.dtype)))
       sample[z] = old_sample[z] + old_v_sample[z]
-      v_sample[z] = ((1. - 0.5 * friction) * old_v_sample[z] +
-                     learning_rate * grad_log_p + normal.sample())
+      v_sample[z] = ((1.0 - 0.5 * self.friction) * old_v_sample[z] +
+                     learning_rate * tf.convert_to_tensor(grad_log_p) +
+                     normal.sample())
 
     # Update Empirical random variables.
     assign_ops = []
@@ -107,12 +106,11 @@ class SGHMC(MonteCarlo):
     """Utility function to calculate model's log joint density,
     log p(x, z), for inputs z (and fixed data x).
 
-    Parameters
-    ----------
-    z_sample : dict
-      Latent variable keys to samples.
+    Args:
+      z_sample: dict.
+        Latent variable keys to samples.
     """
-    scope = 'inference_' + str(id(self))
+    scope = tf.get_default_graph().unique_name("inference")
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
     dict_swap = z_sample.copy()

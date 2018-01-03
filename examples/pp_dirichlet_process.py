@@ -88,6 +88,6 @@ print(sess.run([dp, theta]))
 
 # DirichletProcess can also take in non-scalar concentrations and bases.
 alpha = tf.constant([0.1, 0.6, 0.4])
-base = Exponential(lam=tf.ones([5, 2]))
+base = Exponential(rate=tf.ones([5, 2]))
 dp = DirichletProcess(alpha, base)
 print(dp)

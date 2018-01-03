@@ -15,43 +15,45 @@ except Exception as e:
 
 
 class WGANInference(GANInference):
-  """Parameter estimation with GAN-style training (Goodfellow et al.,
-  2014), using the Wasserstein distance (Arjovsky et al., 2017).
+  """Parameter estimation with GAN-style training
+  [@goodfellow2014generative], using the Wasserstein distance
+  [@arjovsky2017wasserstein].
 
   Works for the class of implicit (and differentiable) probabilistic
   models. These models do not require a tractable density and assume
   only a program that generates samples.
+
+  #### Notes
+
+  Argument-wise, the only difference from `GANInference` is
+  conceptual: the `discriminator` is better described as a test
+  function or critic. `WGANInference` continues to use
+  `discriminator` only to share methods and attributes with
+  `GANInference`.
+
+  #### Examples
+
+  ```python
+  z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
+  x = generative_network(z)
+
+  inference = ed.WGANInference({x: x_data}, discriminator)
+  ```
   """
   def __init__(self, *args, **kwargs):
-    """
-    Examples
-    --------
-    >>> z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
-    >>> x = generative_network(z)
-    >>>
-    >>> inference = ed.WGANInference({x: x_data}, discriminator)
-
-    Notes
-    -----
-    Argument-wise, the only difference from ``GANInference`` is
-    conceptual: the ``discriminator`` is better described as a test
-    function or critic. ``WGANInference`` continues to use
-    ``discriminator`` only to share methods and attributes with
-    ``GANInference``.
-    """
     super(WGANInference, self).__init__(*args, **kwargs)
 
   def initialize(self, penalty=10.0, clip=None, *args, **kwargs):
-    """Initialize Wasserstein GAN inference.
+    """Initialize inference algorithm. It initializes hyperparameters
+    and builds ops for the algorithm's computation graph.
 
-    Parameters
-    ----------
-    penalty : float, optional
-      Scalar value to enforce gradient penalty that ensures the
-      gradients have norm equal to 1 (Gulrajani et al., 2017). Set to
-      None (or 0.0) if using no penalty.
-    clip : float, optional
-      Value to clip weights by. Default is no clipping.
+    Args:
+      penalty: float, optional.
+        Scalar value to enforce gradient penalty that ensures the
+        gradients have norm equal to 1 [@gulrajani2017improved]. Set to
+        None (or 0.0) if using no penalty.
+      clip: float, optional.
+        Value to clip weights by. Default is no clipping.
     """
     self.penalty = penalty
 

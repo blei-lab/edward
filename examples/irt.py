@@ -28,7 +28,7 @@ def build_toy_dataset(n_students, n_questions, n_obs,
   student_ids = np.random.choice(range(n_students), n_obs)
   question_ids = np.random.choice(range(n_questions), n_obs)
 
-  logits = student_etas[student_ids] + question_etas[question_ids] + mu
+  logits = student_etas[student_ids] + question_etas[question_ids] + loc
   outcomes = np.random.binomial(1, expit(logits), n_obs)
 
   data = pd.DataFrame({'question_id': question_ids,
@@ -102,8 +102,7 @@ inference.initialize(n_print=2, n_iter=50)
 qstudents_mean = qstudents.mean()
 qquestions_mean = qquestions.mean()
 
-init = tf.global_variables_initializer()
-init.run()
+tf.global_variables_initializer().run()
 
 f, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
 ax1.set_ylim([-3.0, 3.0])

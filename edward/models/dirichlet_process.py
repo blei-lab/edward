@@ -14,36 +14,41 @@ except Exception as e:
   raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
-class DirichletProcess(RandomVariable, Distribution):
-  """Dirichlet process :math:`\mathcal{DP}(\\alpha, H)`.
+class distributions_DirichletProcess(Distribution):
+  """Dirichlet process $\mathcal{DP}(\\alpha, H)$.
 
-  It has two parameters: a positive real value :math:`\\alpha`, known
-  as the concentration parameter (``concentration``), and a base
-  distribution :math:`H` (``base``).
+  It has two parameters: a positive real value $\\alpha$, known
+  as the concentration parameter (`concentration`), and a base
+  distribution $H$ (`base`).
+
+  #### Examples
+
+  ```python
+  # scalar concentration parameter, scalar base distribution
+  dp = DirichletProcess(0.1, Normal(loc=0.0, scale=1.0))
+  assert dp.shape == ()
+
+  # vector of concentration parameters, matrix of Exponentials
+  dp = DirichletProcess(tf.constant([0.1, 0.4]),
+                        Exponential(lam=tf.ones([5, 3])))
+  assert dp.shape == (2, 5, 3)
+  ```
   """
-  def __init__(self, concentration, base, validate_args=False,
-               allow_nan_stats=True, name="DirichletProcess", *args, **kwargs):
+  def __init__(self,
+               concentration,
+               base,
+               validate_args=False,
+               allow_nan_stats=True,
+               name="DirichletProcess"):
     """Initialize a batch of Dirichlet processes.
 
-    Parameters
-    ----------
-    concentration : tf.Tensor
-      Concentration parameter. Must be positive real-valued. Its shape
-      determines the number of independent DPs (batch shape).
-    base : RandomVariable
-      Base distribution. Its shape determines the shape of an
-      individual DP (event shape).
-
-    Examples
-    --------
-    >>> # scalar concentration parameter, scalar base distribution
-    >>> dp = DirichletProcess(0.1, Normal(loc=0.0, scale=1.0))
-    >>> assert dp.shape == ()
-    >>>
-    >>> # vector of concentration parameters, matrix of Exponentials
-    >>> dp = DirichletProcess(tf.constant([0.1, 0.4]),
-    ...                       Exponential(lam=tf.ones([5, 3])))
-    >>> assert dp.shape == (2, 5, 3)
+    Args:
+      concentration: tf.Tensor.
+        Concentration parameter. Must be positive real-valued. Its shape
+        determines the number of independent DPs (batch shape).
+      base: RandomVariable.
+        Base distribution. Its shape determines the shape of an
+        individual DP (event shape).
     """
     parameters = locals()
     with tf.name_scope(name, values=[concentration]):
@@ -70,15 +75,14 @@ class DirichletProcess(RandomVariable, Distribution):
             [0] + self.batch_shape.as_list(),
             dtype=self._probs_dist.dtype)
 
-    super(DirichletProcess, self).__init__(
+    super(distributions_DirichletProcess, self).__init__(
         dtype=tf.int32,
         reparameterization_type=NOT_REPARAMETERIZED,
         validate_args=validate_args,
         allow_nan_stats=allow_nan_stats,
         parameters=parameters,
         graph_parents=[self._concentration, self._locs, self._probs],
-        name=name,
-        *args, **kwargs)
+        name=name)
 
   @property
   def base(self):
@@ -117,24 +121,23 @@ class DirichletProcess(RandomVariable, Distribution):
     return self.base.shape
 
   def _sample_n(self, n, seed=None):
-    """Sample ``n`` draws from the DP. Draws from the base
-    distribution are memoized across ``n`` and across calls to
-    ``sample()``.
+    """Sample `n` draws from the DP. Draws from the base
+    distribution are memoized across `n` and across calls to
+    `sample()`.
 
     Draws from the base distribution are not memoized across the batch
     shape, i.e., each independent DP in the batch shape has its own
     memoized samples.
 
-    Returns
-    -------
-    tf.Tensor
-      A ``tf.Tensor`` of shape ``[n] + batch_shape + event_shape``,
-      where ``n`` is the number of samples for each DP,
-      ``batch_shape`` is the number of independent DPs, and
-      ``event_shape`` is the shape of the base distribution.
+    Returns:
+      tf.Tensor.
+      A `tf.Tensor` of shape `[n] + batch_shape + event_shape`,
+      where `n` is the number of samples for each DP,
+      `batch_shape` is the number of independent DPs, and
+      `event_shape` is the shape of the base distribution.
 
-    Notes
-    -----
+    #### Notes
+
     The implementation has one inefficiency, which is that it draws
     (batch_shape,) samples from the base distribution when adding a
     new persistent state. Ideally, we would only draw new samples for
@@ -202,9 +205,9 @@ class DirichletProcess(RandomVariable, Distribution):
     if len(bools.shape) <= 1:
       bools_tile = bools
     else:
-      # ``tf.where`` only index subsets when ``bools`` is at most a
-      # vector. In general, ``bools`` has shape (n, batch_shape).
-      # Therefore we tile ``bools`` to be of shape
+      # `tf.where` only index subsets when `bools` is at most a
+      # vector. In general, `bools` has shape (n, batch_shape).
+      # Therefore we tile `bools` to be of shape
       # (n, batch_shape, event_shape) in order to index per-element.
       bools_tile = tf.tile(tf.reshape(
           bools, [n] + batch_shape + [1] * len(event_shape)),
@@ -214,8 +217,22 @@ class DirichletProcess(RandomVariable, Distribution):
     draws = tf.where(bools_tile, locs_k_tile, draws)
 
     # Flip coins according to stick probabilities.
-    flips = Bernoulli(probs_k).sample(n)
+    flips = Bernoulli(probs=probs_k).sample(n)
     # If coin lands heads, assign sample's corresponding bool to False
     # (this ends its "while loop").
     bools = tf.where(tf.cast(flips, tf.bool), tf.zeros_like(bools), bools)
     return k + 1, bools, locs, probs, draws
+
+
+# Generate random variable class similar to autogenerated ones from TensorFlow.
+def __init__(self, *args, **kwargs):
+  RandomVariable.__init__(self, *args, **kwargs)
+
+
+_name = 'DirichletProcess'
+_candidate = distributions_DirichletProcess
+__init__.__doc__ = _candidate.__init__.__doc__
+_globals = globals()
+_params = {'__doc__': _candidate.__doc__,
+           '__init__': __init__}
+_globals[_name] = type(_name, (RandomVariable, _candidate), _params)

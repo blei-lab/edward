@@ -11,7 +11,7 @@ import time
 from collections import defaultdict
 from edward.inferences.conjugacy.simplify \
     import symbolic_suff_stat, full_simplify, expr_contains, reconstruct_expr
-from edward.models import random_variables as rvs
+from edward.models.random_variables import *
 from edward.util import copy, get_blanket
 
 
@@ -29,62 +29,65 @@ def normal_from_natural_params(p1, p2):
 
 _suff_stat_to_dist = defaultdict(dict)
 _suff_stat_to_dist['binary'][(('#x',),)] = (
-    rvs.Bernoulli, lambda p1: {'logits': p1})
+    Bernoulli, lambda p1: {'logits': p1})
 _suff_stat_to_dist['01'][(('#Log', ('#One_minus', ('#x',))),
                           ('#Log', ('#x',)))] = (
-    rvs.Beta, lambda p1, p2: {'concentration1': p2 + 1,
-                              'concentration0': p1 + 1})
+    Beta, lambda p1, p2: {'concentration1': p2 + 1,
+                          'concentration0': p1 + 1})
 _suff_stat_to_dist['categorical'][(('#OneHot', ('#x',),),)] = (
-    rvs.Categorical, lambda p1: {'logits': p1})
+    Categorical, lambda p1: {'logits': p1})
 _suff_stat_to_dist['nonnegative'][(('#Log', ('#x',)),)] = (
-    rvs.Chi2, lambda p1: {'df': 2.0 * (p1 + 1)})
+    Chi2, lambda p1: {'df': 2.0 * (p1 + 1)})
 _suff_stat_to_dist['simplex'][(('#Log', ('#x',)),)] = (
-    rvs.Dirichlet, lambda p1: {'concentration': p1 + 1})
+    Dirichlet, lambda p1: {'concentration': p1 + 1})
 _suff_stat_to_dist['nonnegative'][(('#x',),)] = (
-    rvs.Exponential, lambda p1: {'rate': -p1})
+    Exponential, lambda p1: {'rate': -p1})
 _suff_stat_to_dist['nonnegative'][(('#Log', ('#x',)),
                                    ('#x',))] = (
-    rvs.Gamma, lambda p1, p2: {'concentration': p1 + 1, 'rate': -p2})
+    Gamma, lambda p1, p2: {'concentration': p1 + 1, 'rate': -p2})
 _suff_stat_to_dist['nonnegative'][(('#CPow-1.0000e+00', ('#x',)),
                                    ('#Log', ('#x',)))] = (
-    rvs.InverseGamma, lambda p1, p2: {'concentration': -p2 - 1, 'rate': -p1})
+    InverseGamma, lambda p1, p2: {'concentration': -p2 - 1, 'rate': -p1})
 _suff_stat_to_dist['multivariate_real'][(('#CPow2.0000e+00', ('#x',)),
                                         ('#x',))] = (
-    rvs.MultivariateNormalDiag, mvn_diag_from_natural_params)
+    MultivariateNormalDiag, mvn_diag_from_natural_params)
 _suff_stat_to_dist['real'][(('#CPow2.0000e+00', ('#x',)),
                             ('#x',))] = (
-    rvs.Normal, normal_from_natural_params)
+    Normal, normal_from_natural_params)
 _suff_stat_to_dist['countable'][(('#x',),)] = (
-    rvs.Poisson, lambda p1: {'rate': tf.exp(p1)})
+    Poisson, lambda p1: {'rate': tf.exp(p1)})
 
 
 def complete_conditional(rv, cond_set=None):
-  """Returns the conditional distribution `RandomVariable` p(`rv` | .).
+  """Returns the conditional distribution `RandomVariable`
+  $p(\\text{rv}\mid \cdot)$.
 
   This function tries to infer the conditional distribution of `rv`
   given `cond_set`, a set of other `RandomVariable`s in the graph. It
   will only be able to do this if
-  a) p(`rv` | `cond_set`) is in a tractable exponential family AND
-  b) the truth of assumption (a) is not obscured in the TensorFlow graph.
+
+  1. $p(\\text{rv}\mid \\text{cond\_set})$ is in a tractable
+     exponential family; and
+  2. the truth of assumption 1 is not obscured in the TensorFlow graph.
+
   In other words, this function will do its best to recognize conjugate
-  relationships when they exist, but it may not always be able to do the
+  relationships when they exist. But it may not always be able to do the
   necessary algebra.
 
-  Parameters
-  ----------
-  rv : RandomVariable
-    The `RandomVariable` whose conditional distribution we are interested in.
-  cond_set : iterable of RandomVariables, optional
-    The set of `RandomVariable`s we want to condition on. Defaults to all
-    `RandomVariable`s in the graph. (It makes no difference if `cond_set` does
-    or does not include `rv`.)
+  Args:
+    rv: RandomVariable.
+      The random variable whose conditional distribution we are interested in.
+    cond_set: iterable of RandomVariable, optional.
+      The set of random variables we want to condition on. Default is all
+      random variables in the graph. (It makes no difference if `cond_set`
+      does or does not include `rv`.)
 
-  Notes
-  -----
+  #### Notes
+
   When calling `complete_conditional()` multiple times, one should
   usually pass an explicit `cond_set`. Otherwise
   `complete_conditional()` will try to condition on the
-  `RandomVariable`s returned by previous calls to itself, which may
+  `RandomVariable`s returned by previous calls to itself. This may
   result in unpredictable behavior.
   """
   if cond_set is None:
@@ -92,11 +95,10 @@ def complete_conditional(rv, cond_set=None):
     # calling complete_conditional many times without passing in cond_set.
     cond_set = get_blanket(rv)
     cond_set = [i for i in cond_set if not
-                ('complete_conditional' in i.unique_name and
-                 'cond_dist' in i.unique_name)]
+                ('complete_conditional' in i.name and 'cond_dist' in i.name)]
 
   cond_set = set([rv] + list(cond_set))
-  with tf.name_scope('complete_conditional_%s' % rv.unique_name) as scope:
+  with tf.name_scope('complete_conditional_%s' % rv.name) as scope:
     # log_joint holds all the information we need to get a conditional.
     log_joint = get_log_joint(cond_set)
 
@@ -166,7 +168,7 @@ def complete_conditional(rv, cond_set=None):
 
 def get_log_joint(cond_set):
   g = tf.get_default_graph()
-  cond_set_names = [i.unique_name[:-1] for i in cond_set]
+  cond_set_names = [i.name[:-1] for i in cond_set]
   cond_set_names.sort()
   cond_set_name = 'log_joint_of_' + '_'.join(cond_set_names)
   with tf.name_scope("conjugate_log_joint/") as scope:
@@ -178,7 +180,7 @@ def get_log_joint(cond_set):
 
     terms = []
     for b in cond_set:
-      name = b.unique_name.replace(':', '_') + '_conjugate_log_prob'
+      name = b.name.replace(':', '_') + '_conjugate_log_prob'
       try:
         # Use log prob tensor if already built in graph.
         conjugate_log_prob = g.get_tensor_by_name(scope + name + ':0')

@@ -10,36 +10,37 @@ from edward.util import get_session
 
 
 class BiGANInference(GANInference):
-  """Adversarially Learned Inference (Dumoulin et al., 2017) or
-  Bidirectional Generative Adversarial Networks (Donahue et al., 2017)
+  """Adversarially Learned Inference [@dumuolin2017adversarially] or
+  Bidirectional Generative Adversarial Networks [@donahue2017adversarial]
   for joint learning of generator and inference networks.
 
   Works for the class of implicit (and differentiable) probabilistic
   models. These models do not require a tractable density and assume
   only a program that generates samples.
+
+  #### Notes
+
+  `BiGANInference` matches a mapping from data to latent variables and a
+  mapping from latent variables to data through a joint
+  discriminator.
+
+  In building the computation graph for inference, the
+  discriminator's parameters can be accessed with the variable scope
+  "Disc".
+  In building the computation graph for inference, the
+  encoder and decoder parameters can be accessed with the variable scope
+  "Gen".
+
+  #### Examples
+
+  ```python
+  with tf.variable_scope("Gen"):
+    xf = gen_data(z_ph)
+    zf = gen_latent(x_ph)
+  inference = ed.BiGANInference({z_ph: zf}, {xf: x_ph}, discriminator)
+  ```
   """
   def __init__(self, latent_vars, data, discriminator):
-    """
-    Notes
-    -----
-    ``BiGANInference`` matches a mapping from data to latent variables and a
-    mapping from latent variables to data through a joint
-    discriminator.
-
-    In building the computation graph for inference, the
-    discriminator's parameters can be accessed with the variable scope
-    "Disc".
-    In building the computation graph for inference, the
-    encoder and decoder parameters can be accessed with the variable scope
-    "Gen".
-
-    Examples
-    --------
-    >>> with tf.variable_scope("Gen"):
-    >>>   xf = gen_data(z_ph)
-    >>>   zf = gen_latent(x_ph)
-    >>> inference = ed.BiGANInference({z_ph: zf}, {xf: x_ph}, discriminator)
-    """
     if not callable(discriminator):
       raise TypeError("discriminator must be a callable function.")
 
@@ -48,7 +49,6 @@ class BiGANInference(GANInference):
     super(GANInference, self).__init__(latent_vars, data)
 
   def build_loss_and_gradients(self, var_list):
-
     x_true = list(six.itervalues(self.data))[0]
     x_fake = list(six.iterkeys(self.data))[0]
 

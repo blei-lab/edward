@@ -113,16 +113,16 @@ In conditional inference, only a subset of the posterior is inferred
 while the rest are fixed using other inferences. The inference
 problem is
 \begin{equation*}
-q(\beta)q(\mathbf{z})\approx
+q(\mathbf{z}\mid\beta)q(\beta)\approx
 p(\mathbf{z}, \beta\mid\mathbf{x}_{\text{train}})
 \end{equation*}
-where parameters in $q(\beta)$ are estimated and $q(\mathbf{z})$ is
-fixed.
+where parameters in $q(\mathbf{z}\mid\beta)$ are estimated and
+$q(\beta)$ is fixed.
 %
 In Edward, we enable conditioning by binding random variables to other
 random variables in \texttt{data}.
 \begin{lstlisting}[language=Python]
-inference = ed.Inference({beta: qbeta}, {x: x_train, z: qz})
+inference = ed.Inference({z: qz}, {x: x_train, beta: qbeta})
 \end{lstlisting}
 
 In the \href{/api/inference-compositionality}{compositionality page},
@@ -149,9 +149,38 @@ the latent variables; it uses samples from the prior.
 
 \begin{center}\rule{3in}{0.4pt}\end{center}
 
-{%sphinx
-
-.. autoclass:: edward.inferences.Inference
-   :members:
-
-%}
+\begin{itemize}
+  \item @{ed.inferences.Inference}
+  \item @{ed.inferences.VariationalInference}
+    \begin{itemize}
+    \item @{ed.inferences.KLqp}
+      \begin{itemize}
+      \item @{ed.inferences.ReparameterizationKLqp}
+      \item @{ed.inferences.ReparameterizationKLKLqp}
+      \item @{ed.inferences.ReparameterizationEntropyKLqp}
+      \item @{ed.inferences.ScoreKLqp}
+      \item @{ed.inferences.ScoreKLKLqp}
+      \item @{ed.inferences.ScoreEntropyKLqp}
+      \end{itemize}
+    \item @{ed.inferences.KLpq}
+    \item @{ed.inferences.GANInference}
+      \begin{itemize}
+      \item @{ed.inferences.BiGANInference}
+      \item @{ed.inferences.ImplicitKLqp}
+      \item @{ed.inferences.WGANInference}
+      \end{itemize}
+    \item @{ed.inferences.MAP}
+      \begin{itemize}
+      \item @{ed.inferences.Laplace}
+      \end{itemize}
+    \end{itemize}
+  \item @{ed.inferences.MonteCarlo}
+    \begin{itemize}
+    \item @{ed.inferences.Gibbs}
+    \item @{ed.inferences.MetropolisHastings}
+    \item @{ed.inferences.HMC}
+    \item @{ed.inferences.SGLD}
+    \item @{ed.inferences.SGHMC}
+    \end{itemize}
+  \item @{ed.inferences.complete_conditional}
+\end{itemize}

@@ -19,7 +19,7 @@ N = 1000
 loc = 7.0
 scale = 0.7
 xn_data = np.random.normal(loc, scale, N)
-print('sigma={}'.format(sigma))
+print('scale={}'.format(scale))
 
 # Prior definition
 alpha = tf.Variable(0.5, trainable=False)
@@ -38,4 +38,4 @@ inference = ed.MetropolisHastings({ig: qig},
 inference.run()
 
 sess = ed.get_session()
-print('Inferred sigma={}'.format(sess.run(tf.sqrt(qig.mean()))))
+print('Inferred scale={}'.format(sess.run(tf.sqrt(qig.mean()))))

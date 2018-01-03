@@ -132,7 +132,7 @@ dimension).
 
 \begin{lstlisting}[language=Python]
 def visualise(X_data, y_data, w, b, n_samples=10):
-  w_samples = w.sample(n_samples)[0].eval()
+  w_samples = w.sample(n_samples)[:, 0].eval()
   b_samples = b.sample(n_samples).eval()
   plt.scatter(X_data[:, 0], y_data)
   inputs = np.linspace(-8, 8, num=400)

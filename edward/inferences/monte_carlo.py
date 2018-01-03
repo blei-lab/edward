@@ -15,68 +15,71 @@ from edward.util import get_session
 @six.add_metaclass(abc.ABCMeta)
 class MonteCarlo(Inference):
   """Abstract base class for Monte Carlo. Specific Monte Carlo methods
-  inherit from ``MonteCarlo``, sharing methods in this class.
+  inherit from `MonteCarlo`, sharing methods in this class.
 
-  To build an algorithm inheriting from ``MonteCarlo``, one must at the
-  minimum implement ``build_update``: it determines how to assign
-  the samples in the ``Empirical`` approximations.
+  To build an algorithm inheriting from `MonteCarlo`, one must at the
+  minimum implement `build_update`: it determines how to assign
+  the samples in the `Empirical` approximations.
+
+  #### Notes
+
+  The number of Monte Carlo iterations is set according to the
+  minimum of all `Empirical` sizes.
+
+  Initialization is assumed from `params[0, :]`. This generalizes
+  initializing randomly and initializing from user input. Updates
+  are along this outer dimension, where iteration t updates
+  `params[t, :]` in each `Empirical` random variable.
+
+  No warm-up is implemented. Users must run MCMC for a long period
+  of time, then manually burn in the Empirical random variable.
+
+  #### Examples
+
+  Most explicitly, `MonteCarlo` is specified via a dictionary:
+
+  ```python
+  qpi = Empirical(params=tf.Variable(tf.zeros([T, K-1])))
+  qmu = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
+  qsigma = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
+  ed.MonteCarlo({pi: qpi, mu: qmu, sigma: qsigma}, data)
+  ```
+
+  The inferred posterior is comprised of `Empirical` random
+  variables with `T` samples. We also automate the specification
+  of `Empirical` random variables. One can pass in a list of
+  latent variables instead:
+
+  ```python
+  ed.MonteCarlo([beta], data)
+  ed.MonteCarlo([pi, mu, sigma], data)
+  ```
+
+  It defaults to `Empirical` random variables with 10,000 samples for
+  each dimension.
   """
   def __init__(self, latent_vars=None, data=None):
-    """Initialization.
+    """Create an inference algorithm.
 
-    Parameters
-    ----------
-    latent_vars : list or dict, optional
-      Collection of random variables (of type ``RandomVariable`` or
-      ``tf.Tensor``) to perform inference on. If list, each random
-      variable will be approximated using a ``Empirical`` random
-      variable that is defined internally (with unconstrained
-      support). If dictionary, each value in the dictionary must be a
-      ``Empirical`` random variable.
-    data : dict, optional
-      Data dictionary which binds observed variables (of type
-      ``RandomVariable`` or ``tf.Tensor``) to their realizations (of
-      type ``tf.Tensor``). It can also bind placeholders (of type
-      ``tf.Tensor``) used in the model to their realizations.
-
-    Examples
-    --------
-    Most explicitly, ``MonteCarlo`` is specified via a dictionary:
-
-    >>> qpi = Empirical(params=tf.Variable(tf.zeros([T, K-1])))
-    >>> qmu = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
-    >>> qsigma = Empirical(params=tf.Variable(tf.zeros([T, K*D])))
-    >>> ed.MonteCarlo({pi: qpi, mu: qmu, sigma: qsigma}, data)
-
-    The inferred posterior is comprised of ``Empirical`` random
-    variables with ``T`` samples. We also automate the specification
-    of ``Empirical`` random variables. One can pass in a list of
-    latent variables instead:
-
-    >>> ed.MonteCarlo([beta], data)
-    >>> ed.MonteCarlo([pi, mu, sigma], data)
-
-    It defaults to ``Empirical`` random variables with 10,000 samples for
-    each dimension.
-
-    Notes
-    -----
-    The number of Monte Carlo iterations is set according to the
-    minimum of all ``Empirical`` sizes.
-
-    Initialization is assumed from ``params[0, :]``. This generalizes
-    initializing randomly and initializing from user input. Updates
-    are along this outer dimension, where iteration t updates
-    ``params[t, :]`` in each ``Empirical`` random variable.
-
-    No warm-up is implemented. Users must run MCMC for a long period
-    of time, then manually burn in the Empirical random variable.
+    Args:
+      latent_vars: list or dict, optional.
+        Collection of random variables (of type `RandomVariable` or
+        `tf.Tensor`) to perform inference on. If list, each random
+        variable will be approximated using a `Empirical` random
+        variable that is defined internally (with unconstrained
+        support). If dictionary, each value in the dictionary must be a
+        `Empirical` random variable.
+      data: dict, optional.
+        Data dictionary which binds observed variables (of type
+        `RandomVariable` or `tf.Tensor`) to their realizations (of
+        type `tf.Tensor`). It can also bind placeholders (of type
+        `tf.Tensor`) used in the model to their realizations.
     """
     if isinstance(latent_vars, list):
-      with tf.variable_scope("posterior"):
-        latent_vars = {rv: Empirical(params=tf.Variable(
-            tf.zeros([1e4] + rv.batch_shape.as_list())))
-            for rv in latent_vars}
+      with tf.variable_scope(None, default_name="posterior"):
+        latent_vars = {z: Empirical(params=tf.Variable(tf.zeros(
+            [1e4] + z.batch_shape.concatenate(z.event_shape).as_list())))
+            for z in latent_vars}
     elif isinstance(latent_vars, dict):
       for qz in six.itervalues(latent_vars):
         if not isinstance(qz, Empirical):
@@ -97,25 +100,30 @@ class MonteCarlo(Inference):
     self.n_accept_over_t = self.n_accept / self.t
     self.train = self.build_update()
 
+    self.reset.append(tf.variables_initializer([self.n_accept]))
+
+    if self.logging:
+      tf.summary.scalar("n_accept", self.n_accept,
+                        collections=[self._summary_key])
+      self.summarize = tf.summary.merge_all(key=self._summary_key)
+
   def update(self, feed_dict=None):
-    """Run one iteration of sampling for Monte Carlo.
+    """Run one iteration of sampling.
 
-    Parameters
-    ----------
-    feed_dict : dict, optional
-      Feed dictionary for a TensorFlow session run. It is used to feed
-      placeholders that are not fed during initialization.
+    Args:
+      feed_dict: dict, optional.
+        Feed dictionary for a TensorFlow session run. It is used to feed
+        placeholders that are not fed during initialization.
 
-    Returns
-    -------
-    dict
+    Returns:
+      dict.
       Dictionary of algorithm-specific information. In this case, the
       acceptance rate of samples since (and including) this iteration.
 
-    Notes
-    -----
-    We run the increment of ``t`` separately from other ops. Whether the
-    others op run with the ``t`` before incrementing or after incrementing
+    #### Notes
+
+    We run the increment of `t` separately from other ops. Whether the
+    others op run with the `t` before incrementing or after incrementing
     depends on which is run faster in the TensorFlow graph. Running it
     separately forces a consistent behavior.
     """
@@ -131,7 +139,7 @@ class MonteCarlo(Inference):
     t = sess.run(self.increment_t)
 
     if self.debug:
-      sess.run(self.op_check)
+      sess.run(self.op_check, feed_dict)
 
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:
@@ -151,12 +159,11 @@ class MonteCarlo(Inference):
   @abc.abstractmethod
   def build_update(self):
     """Build update rules, returning an assign op for parameters in
-    the ``Empirical`` random variables.
+    the `Empirical` random variables.
 
-    Any derived class of ``MonteCarlo`` **must** implement this method.
+    Any derived class of `MonteCarlo` **must** implement this method.
 
-    Raises
-    ------
-    NotImplementedError
+    Raises:
+      NotImplementedError.
     """
     raise NotImplementedError()

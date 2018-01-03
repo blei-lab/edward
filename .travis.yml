@@ -30,21 +30,24 @@ install:
   # Useful for debugging any issues with conda
   - conda info -a
 
-  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy scipy pytest
+  - conda create -q -n test-environment python=$TRAVIS_PYTHON_VERSION numpy pytest
   - source activate test-environment
   - pip install pep8 pytest-pep8 pytest-xdist
   - pip install python-coveralls pytest-cov
-  - pip install numpydoc
-  - pip install keras
-  - pip install matplotlib seaborn
-  - if [[ "$TRAVIS_PYTHON_VERSION" == "2.7" ]]; then
-      pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-1.1.0rc0-cp27-none-linux_x86_64.whl;
-    elif [[ "$TRAVIS_PYTHON_VERSION" == "3.4" ]]; then
-      pip install https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-1.1.0rc0-cp34-cp34m-linux_x86_64.whl;
-    fi
+  - pip install keras==2.0.4
+  - pip install matplotlib seaborn scipy
+  - pip install networkx==1.9.1 observations sklearn
+  - pip install tensorflow==1.4.0
+  - pip install nbformat nbconvert jupyter_client jupyter
   - python setup.py install
 script:
-  - PYTHONPATH=$PWD:$PYTHONPATH pytest --cov=./ --pep8;
+  # Convert and preprocess Jupyter notebooks to Python files for PEP8.
+  - for file in notebooks/*.ipynb; do
+      if [ "$file" != "notebooks/iclr2017.ipynb" ]; then
+        jupyter nbconvert --template=tests/data/strip_markdown.tpl --to python --stdout $file | grep -v '^get_ipython' | sed '$d' > ${file%.*}.py;
+      fi
+    done;
+  - PYTHONPATH=$PWD:$PYTHONPATH pytest --cov=edward --pep8;
 
 after_success:
   - coveralls
