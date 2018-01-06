@@ -31,6 +31,9 @@ class BiGANInference(GANInference):
   encoder and decoder parameters can be accessed with the variable scope
   "Gen".
 
+  The objective function also adds to itself a summation over all tensors
+  in the `REGULARIZATION_LOSSES` collection.
+
   #### Examples
 
   ```python
@@ -71,8 +74,11 @@ class BiGANInference(GANInference):
         tf.nn.sigmoid_cross_entropy_with_logits(
             labels=tf.ones_like(d_xtzf), logits=d_xtzf)
 
-    loss_d = tf.reduce_mean(loss_d)
-    loss = tf.reduce_mean(loss)
+    reg_terms_d = tf.losses.get_regularization_losses(scope="Disc")
+    reg_terms = tf.losses.get_regularization_losses(scope="Gen")
+
+    loss_d = tf.reduce_mean(loss_d) + tf.reduce_sum(reg_terms_d)
+    loss = tf.reduce_mean(loss) + tf.reduce_sum(reg_terms)
 
     var_list_d = tf.get_collection(
         tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
