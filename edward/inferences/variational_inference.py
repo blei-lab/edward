@@ -18,7 +18,7 @@ class VariationalInference(Inference):
   variational inference methods inherit from `VariationalInference`,
   sharing methods such as a default optimizer.
 
-  To build an algorithm inheriting from `VariaitonalInference`, one
+  To build an algorithm inheriting from `VariationalInference`, one
   must at the minimum implement `build_loss_and_gradients`: it
   determines the loss function and gradients to apply for a given
   optimizer.
