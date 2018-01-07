@@ -102,7 +102,7 @@ class SGLD(MonteCarlo):
       if isinstance(x, RandomVariable):
         if isinstance(qx, RandomVariable):
           qx_copy = copy(qx, scope=scope)
-          dict_swap[x] = qx_copy.value()
+          dict_swap[x] = qx_copy.value
         else:
           dict_swap[x] = qx
 

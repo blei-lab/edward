@@ -15,7 +15,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = x + y
-      z_value = x.value() + y
+      z_value = x.value + y
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -24,7 +24,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = y + x
-      z_value = y + x.value()
+      z_value = y + x.value
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -33,7 +33,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = x - y
-      z_value = x.value() - y
+      z_value = x.value - y
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -42,7 +42,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = y - x
-      z_value = y - x.value()
+      z_value = y - x.value
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -51,7 +51,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = x * y
-      z_value = x.value() * y
+      z_value = x.value * y
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -60,7 +60,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = y * x
-      z_value = y * x.value()
+      z_value = y * x.value
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -69,7 +69,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = x / y
-      z_value = x.value() / y
+      z_value = x.value / y
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -78,7 +78,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = y / x
-      z_value = y / x.value()
+      z_value = y / x.value
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -87,7 +87,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = x // y
-      z_value = x.value() // y
+      z_value = x.value // y
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -96,7 +96,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = y // x
-      z_value = y // x.value()
+      z_value = y // x.value
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -105,7 +105,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = x % y
-      z_value = x.value() % y
+      z_value = x.value % y
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -114,7 +114,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = y % x
-      z_value = y % x.value()
+      z_value = y % x.value
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -123,7 +123,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = x < y
-      z_value = x.value() < y
+      z_value = x.value < y
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -132,7 +132,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = x <= y
-      z_value = x.value() <= y
+      z_value = x.value <= y
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -141,7 +141,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = x > y
-      z_value = x.value() > y
+      z_value = x.value > y
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -150,7 +150,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = x >= y
-      z_value = x.value() >= y
+      z_value = x.value >= y
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -160,7 +160,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       # x = tf.cast(Bernoulli(0.5), tf.bool)
       # y = True
       # z = x & y
-      # z_value = x.value() & y
+      # z_value = x.value & y
       # z_eval, z_value_eval = sess.run([z, z_value])
       # self.assertAllEqual(z_eval, z_value_eval)
 
@@ -174,7 +174,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
     with self.test_session() as sess:
       x = Normal(tf.zeros([3, 4]), tf.ones([3, 4]))
       z = x[0:2, 2:3]
-      z_value = x.value()[0:2, 2:3]
+      z_value = x.value[0:2, 2:3]
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -183,7 +183,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = x ** y
-      z_value = x.value() ** y
+      z_value = x.value ** y
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -192,7 +192,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
       x = Normal(0.0, 1.0)
       y = 5.0
       z = y ** x
-      z_value = y ** x.value()
+      z_value = y ** x.value
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -202,7 +202,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
     with self.test_session() as sess:
       x = Normal(0.0, 1.0)
       z = -x
-      z_value = -x.value()
+      z_value = -x.value
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 
@@ -210,7 +210,7 @@ class test_random_variable_operators_class(tf.test.TestCase):
     with self.test_session() as sess:
       x = Normal(0.0, 1.0)
       z = abs(x)
-      z_value = abs(x.value())
+      z_value = abs(x.value)
       z_eval, z_value_eval = sess.run([z, z_value])
       self.assertAllEqual(z_eval, z_value_eval)
 

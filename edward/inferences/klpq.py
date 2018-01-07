@@ -135,14 +135,14 @@ class KLpq(VariationalInference):
         if isinstance(x, RandomVariable):
           if isinstance(qx, RandomVariable):
             qx_copy = copy(qx, scope=scope)
-            dict_swap[x] = qx_copy.value()
+            dict_swap[x] = qx_copy.value
           else:
             dict_swap[x] = qx
 
       for z, qz in six.iteritems(self.latent_vars):
         # Copy q(z) to obtain new set of posterior samples.
         qz_copy = copy(qz, scope=scope)
-        dict_swap[z] = qz_copy.value()
+        dict_swap[z] = qz_copy.value
         q_log_prob[s] += tf.reduce_sum(
             qz_copy.log_prob(tf.stop_gradient(dict_swap[z])))
 

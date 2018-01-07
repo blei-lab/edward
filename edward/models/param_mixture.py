@@ -143,7 +143,7 @@ class distributions_ParamMixture(Distribution):
         validate_args=validate_args,
         allow_nan_stats=allow_nan_stats,
         parameters=parameters,
-        graph_parents=[self._cat.value(), self._components.value()],
+        graph_parents=[self._cat.value, self._components.value],
         name=name)
 
   @property

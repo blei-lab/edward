@@ -103,15 +103,15 @@ def complete_conditional(rv, cond_set=None):
     log_joint = get_log_joint(cond_set)
 
     # Pull out the nodes that are nonlinear functions of rv into s_stats.
-    stop_nodes = set([i.value() for i in cond_set])
+    stop_nodes = set([i.value for i in cond_set])
     subgraph = extract_subgraph(log_joint, stop_nodes)
-    s_stats = suff_stat_nodes(subgraph, rv.value(), cond_set)
+    s_stats = suff_stat_nodes(subgraph, rv.value, cond_set)
     s_stats = list(set(s_stats))
 
     # Simplify those nodes, and put any new linear terms into multipliers_i.
     s_stat_exprs = defaultdict(list)
     for s_stat in s_stats:
-      expr = symbolic_suff_stat(s_stat, rv.value(), stop_nodes)
+      expr = symbolic_suff_stat(s_stat, rv.value, stop_nodes)
       expr = full_simplify(expr)
       multipliers_i, s_stats_i = extract_s_stat_multipliers(expr)
       s_stat_exprs[s_stats_i].append(
@@ -139,7 +139,7 @@ def complete_conditional(rv, cond_set=None):
     for s_stat_expr in six.itervalues(s_stat_exprs):
       s_stat_placeholder = tf.placeholder(tf.float32,
                                           s_stat_expr[0][0].get_shape())
-      swap_back[s_stat_placeholder] = tf.cast(rv.value(), tf.float32)
+      swap_back[s_stat_placeholder] = tf.cast(rv.value, tf.float32)
       s_stat_placeholders.append(s_stat_placeholder)
       for s_stat_node, multiplier in s_stat_expr:
         fake_node = s_stat_placeholder * multiplier
@@ -148,7 +148,7 @@ def complete_conditional(rv, cond_set=None):
 
     for i in cond_set:
       if i != rv:
-        val = i.value()
+        val = i.value
         val_placeholder = tf.placeholder(val.dtype)
         swap_dict[val] = val_placeholder
         swap_back[val_placeholder] = val

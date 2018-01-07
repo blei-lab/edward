@@ -145,7 +145,12 @@ class RandomVariable(object):
   @property
   def shape(self):
     """Shape of random variable."""
-    return self._value.shape
+    return self.value.shape
+
+  @property
+  def value(self):
+    """Get tensor that the random variable corresponds to."""
+    return self._value
 
   def __str__(self):
     return "RandomVariable(\"%s\"%s%s%s)" % (
@@ -153,7 +158,7 @@ class RandomVariable(object):
         (", shape=%s" % self.shape)
         if self.shape.ndims is not None else "",
         (", dtype=%s" % self.dtype.name) if self.dtype else "",
-        (", device=%s" % self.value().device) if self.value().device else "")
+        (", device=%s" % self.value.device) if self.value.device else "")
 
   def __repr__(self):
     return "<ed.RandomVariable '%s' shape=%s dtype=%s>" % (
@@ -213,11 +218,7 @@ class RandomVariable(object):
       print(x.eval())
     ```
     """
-    return self.value().eval(session=session, feed_dict=feed_dict)
-
-  def value(self):
-    """Get tensor that the random variable corresponds to."""
-    return self._value
+    return self.value.eval(session=session, feed_dict=feed_dict)
 
   def get_ancestors(self, collection=None):
     """Get ancestor random variables."""
@@ -274,7 +275,7 @@ class RandomVariable(object):
       operator: string. The operator name.
     """
     def _run_op(a, *args):
-      return getattr(tf.Tensor, operator)(a.value(), *args)
+      return getattr(tf.Tensor, operator)(a.value, *args)
     # Propagate __doc__ to wrapper
     try:
       _run_op.__doc__ = getattr(tf.Tensor, operator).__doc__
@@ -291,15 +292,15 @@ class RandomVariable(object):
 
   @staticmethod
   def _session_run_conversion_fetch_function(tensor):
-    return ([tensor.value()], lambda val: val[0])
+    return ([tensor.value], lambda val: val[0])
 
   @staticmethod
   def _session_run_conversion_feed_function(feed, feed_val):
-    return [(feed.value(), feed_val)]
+    return [(feed.value, feed_val)]
 
   @staticmethod
   def _session_run_conversion_feed_function_for_partial_run(feed):
-    return [feed.value()]
+    return [feed.value]
 
   @staticmethod
   def _tensor_conversion_function(v, dtype=None, name=None, as_ref=False):
@@ -308,7 +309,7 @@ class RandomVariable(object):
       raise ValueError(
           "Incompatible type conversion requested to type '%s' for variable "
           "of type '%s'" % (dtype.name, v.dtype.name))
-    return v.value()
+    return v.value
 
 
 RandomVariable._overload_all_operators()

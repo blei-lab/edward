@@ -88,8 +88,8 @@ class test_copy_class(tf.test.TestCase):
       components = [Normal(x, tf.constant(0.1))
                     for _ in range(5)]
       z = Mixture(cat=cat, components=components)
-      z_new = ed.copy(z, {x: y.value()})
-      self.assertGreater(z_new.value().eval(), 5.0)
+      z_new = ed.copy(z, {x: y.value})
+      self.assertGreater(z_new.value.eval(), 5.0)
 
   def test_random(self):
     with self.test_session() as sess:
@@ -206,7 +206,7 @@ class test_copy_class(tf.test.TestCase):
       y = tf.constant(1.0)
       z = x * y
       qx = Normal(10.0, 0.1)
-      z_new = ed.copy(z, {x: qx.value()})
+      z_new = ed.copy(z, {x: qx.value})
       self.assertGreater(z_new.eval(), 5.0)
 
   def test_swap_tensor_rv(self):
@@ -216,7 +216,7 @@ class test_copy_class(tf.test.TestCase):
       y = tf.constant(1.0)
       z = x * y
       qx = Normal(10.0, 0.1)
-      z_new = ed.copy(z, {x.value(): qx})
+      z_new = ed.copy(z, {x.value: qx})
       self.assertGreater(z_new.eval(), 5.0)
 
   def test_ordering_rv_tensor(self):

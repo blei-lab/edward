@@ -154,7 +154,7 @@ class ImplicitKLqp(GANInference):
     for beta, qbeta in six.iteritems(self.global_vars):
       # Draw a sample beta' ~ q(beta) and calculate
       # log p(beta') and log q(beta').
-      qbeta_sample[beta] = qbeta.value()
+      qbeta_sample[beta] = qbeta.value
       pbeta_log_prob += tf.reduce_sum(beta.log_prob(qbeta_sample[beta]))
       qbeta_log_prob += tf.reduce_sum(qbeta.log_prob(qbeta_sample[beta]))
 
@@ -165,8 +165,8 @@ class ImplicitKLqp(GANInference):
         # Copy local variables p(z), q(z) to draw samples
         # z' ~ p(z | beta'), z' ~ q(z | beta').
         pz_copy = copy(z, dict_swap=qbeta_sample, scope=scope)
-        pz_sample[z] = pz_copy.value()
-        qz_sample[z] = qz.value()
+        pz_sample[z] = pz_copy.value
+        qz_sample[z] = qz.value
 
     # Collect x' ~ p(x | z', beta') and x' ~ q(x).
     dict_swap = qbeta_sample.copy()
@@ -183,7 +183,7 @@ class ImplicitKLqp(GANInference):
       elif isinstance(x, RandomVariable):
         # Copy p(x | z, beta) to get draw p(x | z', beta').
         x_copy = copy(x, dict_swap=dict_swap, scope=scope)
-        x_psample[x] = x_copy.value()
+        x_psample[x] = x_copy.value
         x_qsample[x] = x_data
 
     with tf.variable_scope("Disc"):

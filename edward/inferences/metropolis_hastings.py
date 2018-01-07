@@ -86,7 +86,7 @@ class MetropolisHastings(MonteCarlo):
       if isinstance(x, RandomVariable):
         if isinstance(qx, RandomVariable):
           qx_copy = copy(qx, scope='conditional')
-          dict_swap[x] = qx_copy.value()
+          dict_swap[x] = qx_copy.value
         else:
           dict_swap[x] = qx
 
@@ -103,7 +103,7 @@ class MetropolisHastings(MonteCarlo):
       # Build proposal g(znew | zold).
       proposal_znew = copy(proposal_z, dict_swap_old, scope=scope_old)
       # Sample znew ~ g(znew | zold).
-      new_sample[z] = proposal_znew.value()
+      new_sample[z] = proposal_znew.value
       # Increment ratio.
       ratio -= tf.reduce_sum(proposal_znew.log_prob(new_sample[z]))
 

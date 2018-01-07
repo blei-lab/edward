@@ -95,7 +95,7 @@ def ppc(T, data, latent_vars=None, n_samples=100):
           for key, value in six.iteritems(latent_vars)}
 
   # Build replicated data.
-  xrep = {x: (x.value() if isinstance(x, RandomVariable) else obs)
+  xrep = {x: (x.value if isinstance(x, RandomVariable) else obs)
           for x, obs in six.iteritems(data)}
 
   # Create feed_dict for data placeholders that the model conditions

@@ -89,7 +89,7 @@ class WakeSleep(VariationalInference):
         if isinstance(x, RandomVariable):
           if isinstance(qx, RandomVariable):
             qx_copy = copy(qx, scope=scope)
-            dict_swap[x] = qx_copy.value()
+            dict_swap[x] = qx_copy.value
           else:
             dict_swap[x] = qx
 
@@ -98,7 +98,7 @@ class WakeSleep(VariationalInference):
       for z, qz in six.iteritems(self.latent_vars):
         # Copy q(z) to obtain new set of posterior samples.
         qz_copy = copy(qz, scope=scope)
-        q_dict_swap[z] = qz_copy.value()
+        q_dict_swap[z] = qz_copy.value
         if self.phase_q != 'sleep':
           # If not sleep phase, compute log q(z).
           q_log_prob[s] += tf.reduce_sum(
@@ -123,7 +123,7 @@ class WakeSleep(VariationalInference):
         for z, qz in six.iteritems(self.latent_vars):
           # Copy p(z) to obtain new set of prior samples.
           z_copy = copy(z, scope=scope)
-          p_dict_swap[qz] = z_copy.value()
+          p_dict_swap[qz] = z_copy.value
         for qz in six.itervalues(self.latent_vars):
           qz_copy = copy(qz, p_dict_swap, scope=scope)
           q_log_prob[s] += tf.reduce_sum(
