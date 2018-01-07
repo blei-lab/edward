@@ -6,7 +6,6 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import Bernoulli, Normal, Poisson, RandomVariable
-from edward.util import copy
 
 
 class test_random_variable_value_class(tf.test.TestCase):
@@ -18,13 +17,6 @@ class test_random_variable_value_class(tf.test.TestCase):
         rv.batch_shape).concatenate(rv.event_shape)
     self.assertEqual(value_shape, expected_shape)
     self.assertEqual(rv.dtype, rv.value.dtype)
-
-  def _test_copy(self, RV, value, *args, **kwargs):
-    rv1 = RV(*args, value=value, **kwargs)
-    rv2 = copy(rv1)
-    value_shape1 = rv1.value.shape
-    value_shape2 = rv2.value.shape
-    self.assertEqual(value_shape1, value_shape2)
 
   def test_shape_and_dtype(self):
     with self.test_session():
@@ -44,12 +36,6 @@ class test_random_variable_value_class(tf.test.TestCase):
                         loc=[0.5], scale=[1.0])
       self.assertRaises(ValueError, self._test_sample, Normal,
                         np.zeros([10, 3]), loc=[0.5, 0.5], scale=[1.0, 1.0])
-
-  def test_copy(self):
-    with self.test_session():
-      self._test_copy(Normal, 2, loc=0.5, scale=1.0)
-      self._test_copy(Normal, [2], loc=[0.5], scale=[1.0])
-      self._test_copy(Poisson, 2, rate=0.5)
 
 if __name__ == '__main__':
   tf.test.main()

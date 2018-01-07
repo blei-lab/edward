@@ -6,8 +6,8 @@ import six
 import tensorflow as tf
 
 from copy import deepcopy
+from edward.models.core import TransformedDistribution
 from edward.models.random_variable import RandomVariable
-from edward.models.random_variables import TransformedDistribution
 from edward.util.graphs import random_variables
 from tensorflow.core.framework import attr_value_pb2
 from tensorflow.python.framework.ops import set_shapes_for_outputs

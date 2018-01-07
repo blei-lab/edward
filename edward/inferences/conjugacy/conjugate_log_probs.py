@@ -5,7 +5,7 @@ from __future__ import print_function
 import numpy as np
 import tensorflow as tf
 
-from edward.models.random_variables import *
+from edward.models.core import *
 
 
 def _val_wrapper(f):

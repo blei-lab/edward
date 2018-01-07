@@ -4,14 +4,15 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from edward.models.random_variable import RandomVariable
-from edward.models.random_variables import *
+from edward.models.core import *
+from edward.models.random_variable import *
 
 from tensorflow.python.util.all_util import remove_undocumented
-from edward.models import random_variables as _module
+from edward.models import core as _module
 
 _allowed_symbols = [
     'RandomVariable',
+    'Trace',
 ]
 for name in dir(_module):
   obj = getattr(_module, name)

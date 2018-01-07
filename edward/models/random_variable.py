@@ -86,28 +86,10 @@ class RandomVariable(object):
         Optional list of graph collections (lists). The random variable is
         added to these collections. Defaults to `[ed.random_variables()]`.
     """
-    # Force the Distribution class to always use the same name scope
-    # when scoping its parameter names and also when calling any
-    # methods such as sample.
-    name = kwargs.get('name', type(self).__name__)
-    with tf.name_scope(name) as ns:
-      kwargs['name'] = ns
-
-    # pop and store RandomVariable-specific parameters in _kwargs
+    # pop and store RandomVariable-specific parameters
     sample_shape = kwargs.pop('sample_shape', ())
     value = kwargs.pop('value', None)
     collections = kwargs.pop('collections', ["random_variables"])
-
-    # store args, kwargs for easy graph copying
-    self._args = args
-    self._kwargs = kwargs.copy()
-
-    if sample_shape != ():
-      self._kwargs['sample_shape'] = sample_shape
-    if value is not None:
-      self._kwargs['value'] = value
-    if collections != ["random_variables"]:
-      self._kwargs['collections'] = collections
 
     super(RandomVariable, self).__init__(*args, **kwargs)
 
@@ -153,16 +135,24 @@ class RandomVariable(object):
     return self._value
 
   def __str__(self):
+    if not hasattr(self.value, "numpy"):
+      name = self.name
+    else:
+      name = numpy_text(self.value)
     return "RandomVariable(\"%s\"%s%s%s)" % (
-        self.name,
+        name,
         (", shape=%s" % self.shape)
         if self.shape.ndims is not None else "",
         (", dtype=%s" % self.dtype.name) if self.dtype else "",
         (", device=%s" % self.value.device) if self.value.device else "")
 
   def __repr__(self):
-    return "<ed.RandomVariable '%s' shape=%s dtype=%s>" % (
+    string = "<ed.RandomVariable '%s' shape=%s dtype=%s>" % (
         self.name, self.shape, self.dtype.name)
+    if hasattr(self.value, "numpy"):
+      string = string[:-1] + " numpy=%s>" % (
+          numpy_text(self.value, is_repr=True))
+    return string
 
   def __hash__(self):
     return id(self)
@@ -219,6 +209,10 @@ class RandomVariable(object):
     ```
     """
     return self.value.eval(session=session, feed_dict=feed_dict)
+
+  def numpy(self):
+    """Value as NumPy array, only available for TF Eager."""
+    return self.value.numpy()
 
   def get_ancestors(self, collection=None):
     """Get ancestor random variables."""
@@ -310,6 +304,17 @@ class RandomVariable(object):
           "Incompatible type conversion requested to type '%s' for variable "
           "of type '%s'" % (dtype.name, v.dtype.name))
     return v.value
+
+
+def numpy_text(tensor, is_repr=False):  # utility fn from TF Eager codebase
+  """Human readable representation of a tensor's numpy value."""
+  if tensor.dtype.is_numpy_compatible:
+    text = repr(tensor.numpy()) if is_repr else str(tensor.numpy())
+  else:
+    text = "<unprintable>"
+  if "\n" in text:
+    text = "\n" + text
+  return text
 
 
 RandomVariable._overload_all_operators()
