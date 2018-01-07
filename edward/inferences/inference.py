@@ -13,6 +13,7 @@ from edward.models import RandomVariable
 from edward.util import check_data, check_latent_vars, get_session, \
     get_variables, Progbar, transform
 
+from tensorflow.contrib.distributions import bijectors
 
 @six.add_metaclass(abc.ABCMeta)
 class Inference(object):
@@ -217,25 +218,46 @@ class Inference(object):
 
     self.scale = scale
 
-    # Set of all latent variables binded to their transformation on
-    # the unconstrained space (if any).
+    # map from original latent vars to unconstrained versions
     self.transformations = {}
     if auto_transform:
       latent_vars = self.latent_vars.copy()
-      self.latent_vars = {}
+      self.latent_vars = {} # maps original latent vars to constrained Q's
+      self.latent_vars_unconstrained = {} # maps unconstrained vars to unconstrained Q's
       for z, qz in six.iteritems(latent_vars):
         if hasattr(z, 'support') and hasattr(qz, 'support') and \
-                z.support != qz.support and qz.support != 'point':
-          z_transform = transform(z)
-          self.transformations[z] = z_transform
-          if qz.support == 'points':  # don't transform empirical approx's
-            self.latent_vars[z_transform] = qz
+              z.support != qz.support and qz.support != 'point':
+
+          # transform z to an unconstrained space
+          z_unconstrained = transform(z)
+          self.transformations[z] = z_unconstrained
+
+          # make sure we also have a qz that covers the unconstrained space
+          if qz.support == "points":
+            qz_unconstrained = qz
           else:
-            qz_transform = transform(qz)
-            self.latent_vars[z_transform] = qz_transform
-            self.transformations[qz] = qz_transform
+            qz_unconstrained = transform(qz)
+          self.latent_vars_unconstrained[z_unconstrained] = qz_unconstrained
+
+          # additionally construct the transformation of qz
+          # back into the original constrained space
+          if z_unconstrained != z:
+            qz_constrained = transform(
+              qz_unconstrained, bijectors.Invert(z_unconstrained.bijector))
+
+            try: # attempt to pushforward the params of Empirical distributions
+              qz_constrained.params = z_unconstrained.bijector.inverse(
+                qz_unconstrained.params)
+            except: # qz_unconstrained is not an Empirical distribution
+              pass
+
+          else:
+            qz_constrained = qz_unconstrained
+
+          self.latent_vars[z] = qz_constrained
         else:
           self.latent_vars[z] = qz
+          self.latent_vars_unconstrained[z] = qz
       del latent_vars
 
     if logdir is not None:
