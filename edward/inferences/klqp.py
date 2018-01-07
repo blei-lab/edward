@@ -592,6 +592,15 @@ class ScoreRBKLqp(VariationalInference):
     return build_score_rb_loss_and_gradients(self, var_list)
 
 
+class RejectionSamplingKLqp(VariationalInference):
+
+    """
+    """
+
+    def build_loss_and_gradients(self, var_list):
+        return
+
+
 def build_reparam_loss_and_gradients(inference, var_list):
   """Build loss function. Its automatic differentiation
   is a stochastic gradient of

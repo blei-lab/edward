@@ -42,6 +42,7 @@ _allowed_symbols = [
     'ScoreKLKLqp',
     'ScoreEntropyKLqp',
     'ScoreRBKLqp',
+    'RejectionSamplingKLqp',
     'Laplace',
     'MAP',
     'MetropolisHastings',

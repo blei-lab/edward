@@ -6,7 +6,7 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Bernoulli, Normal
+from edward.models import Bernoulli, Normal, Dirichlet, Multinomial
 
 
 class test_klqp_class(tf.test.TestCase):
@@ -42,6 +42,20 @@ class test_klqp_class(tf.test.TestCase):
       new_t, new_variables = sess.run([inference.t, variables])
       self.assertEqual(new_t, 0)
       self.assertNotEqual(old_variables, new_variables)
+
+  def _test_multinomial_dirichlet(self, Inference, *args, **kwargs):
+      x_data = tf.constant([2, 7, 1], dtype=np.float32)
+
+      probs = Dirichlet([1., 1., 1.])
+      x = Multinomial(total_count=10.0, probs=probs, sample_shape=1)
+
+      qalpha = tf.Variable(tf.random_normal([3]))
+      qprobs = Dirichlet(qalpha)
+
+      # analytic solution: Dirichlet(alpha=[1+2, 1+7, 1+1])
+      inference = Inference({probs: qprobs}, data={x: x_data})
+
+      inference.run(*args, **kwargs)
 
   def _test_model_parameter(self, Inference, *args, **kwargs):
     with self.test_session() as sess:
@@ -108,6 +122,11 @@ class test_klqp_class(tf.test.TestCase):
     self._test_normal_normal(
         ed.ScoreRBKLqp, default=True, n_samples=5, n_iter=5000)
     self._test_model_parameter(ed.ScoreRBKLqp, n_iter=50)
+
+  def test_rejection_sampling_klqp(self):
+    self._test_multinomial_dirichlet(
+      ed.RejectionSamplingKLqp, n_samples=5, n_iter=5000)
+
 
 if __name__ == '__main__':
   ed.set_seed(42)
