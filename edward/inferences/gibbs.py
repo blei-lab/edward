@@ -10,7 +10,7 @@ from collections import OrderedDict
 from edward.inferences.conjugacy import complete_conditional
 from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import RandomVariable
-from edward.util import check_latent_vars, get_session
+from edward.util import check_and_maybe_build_latent_vars, get_session
 
 
 class Gibbs(MonteCarlo):
@@ -45,7 +45,7 @@ class Gibbs(MonteCarlo):
       proposal_vars = {z: complete_conditional(z)
                        for z in six.iterkeys(latent_vars)}
     else:
-      check_latent_vars(proposal_vars)
+      proposal_vars = check_and_maybe_build_latent_vars(proposal_vars)
 
     self.proposal_vars = proposal_vars
     super(Gibbs, self).__init__(latent_vars, data)

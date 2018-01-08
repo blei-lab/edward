@@ -6,8 +6,9 @@ import numpy as np
 import six
 import tensorflow as tf
 
+from edward.inferences.inference import check_and_maybe_build_data
 from edward.models import RandomVariable
-from edward.util import check_data, get_session, compute_multinomial_mode, \
+from edward.util import get_session, compute_multinomial_mode, \
     with_binary_averaging
 
 try:
@@ -105,7 +106,7 @@ def evaluate(metrics, data, n_samples=500, output_key=None, seed=None):
   elif not isinstance(metrics, list):
     raise TypeError("metrics must have type str or list, or be callable.")
 
-  check_data(data)
+  data = check_and_maybe_build_data(data)
   if not isinstance(n_samples, int):
     raise TypeError("n_samples must have type int.")
 

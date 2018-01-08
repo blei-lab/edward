@@ -6,8 +6,10 @@ import numpy as np
 import six
 import tensorflow as tf
 
+from edward.inferences.inference import (check_and_maybe_build_data,
+    check_and_maybe_build_latent_vars)
 from edward.models import RandomVariable
-from edward.util import check_data, check_latent_vars, get_session
+from edward.util import get_session
 
 
 def ppc(T, data, latent_vars=None, n_samples=100):
@@ -82,11 +84,8 @@ def ppc(T, data, latent_vars=None, n_samples=100):
   if not callable(T):
     raise TypeError("T must be a callable function.")
 
-  check_data(data)
-  if latent_vars is None:
-    latent_vars = {}
-
-  check_latent_vars(latent_vars)
+  data = check_and_maybe_build_data(data)
+  latent_vars = check_and_maybe_build_latent_vars(latent_vars)
   if not isinstance(n_samples, int):
     raise TypeError("n_samples must have type int.")
 
