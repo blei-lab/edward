@@ -181,7 +181,7 @@ class test_inference_auto_transform_class(tf.test.TestCase):
       qz_constrained = z_unconstrained.bijector.inverse(qz_samples)
       qz_mean, qz_var = sess.run(tf.nn.moments(qz_constrained, 0))
 
-      true_posterior = Beta(1. + np.sum(x_obs), 1. + np.sum(1-x_obs))      
+      true_posterior = Beta(1. + np.sum(x_obs), 1. + np.sum(1 - x_obs))
       pz_mean, pz_var = sess.run((true_posterior.mean(),
                                   true_posterior.variance()))
       self.assertAllClose(qz_mean, pz_mean, rtol=5e-2, atol=5e-2)
@@ -199,16 +199,19 @@ class test_inference_auto_transform_class(tf.test.TestCase):
                                 initializer=tf.random_normal(()))
       qz_std = tf.nn.softplus(tf.get_variable(name="qz_prestd",
                                               initializer=tf.random_normal(())))
-      qz_unconstrained = ed.models.Normal(loc=qz_mean, scale=qz_std, name="z_posterior")
+      qz_unconstrained = ed.models.Normal(
+          loc=qz_mean, scale=qz_std, name="z_posterior")
 
-      inference_klqp = ed.inferences.KLqp({z: qz_unconstrained}, data={xs: x_obs})
+      inference_klqp = ed.inferences.KLqp(
+          {z: qz_unconstrained}, data={xs: x_obs})
       inference_klqp.run(n_iter=500, auto_transform=True)
 
       z_unconstrained = inference_klqp.transformations[z]
-      qz_constrained = z_unconstrained.bijector.inverse(qz_unconstrained.sample(1000))
+      qz_constrained = z_unconstrained.bijector.inverse(
+          qz_unconstrained.sample(1000))
       qz_mean, qz_var = sess.run(tf.nn.moments(qz_constrained, 0))
 
-      true_posterior = Beta(np.sum(x_obs) + 1., np.sum(1-x_obs) + 1.)
+      true_posterior = Beta(np.sum(x_obs) + 1., np.sum(1 - x_obs) + 1.)
       pz_mean, pz_var = sess.run((true_posterior.mean(),
                                   true_posterior.variance()))
       self.assertAllClose(qz_mean, pz_mean, rtol=5e-2, atol=5e-2)
