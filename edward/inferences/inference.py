@@ -15,6 +15,7 @@ from edward.util import check_data, check_latent_vars, get_session, \
 
 from tensorflow.contrib.distributions import bijectors
 
+
 @six.add_metaclass(abc.ABCMeta)
 class Inference(object):
   """Abstract base class for inference. All inference algorithms in
@@ -222,11 +223,13 @@ class Inference(object):
     self.transformations = {}
     if auto_transform:
       latent_vars = self.latent_vars.copy()
-      self.latent_vars = {} # maps original latent vars to constrained Q's
-      self.latent_vars_unconstrained = {} # maps unconstrained vars to unconstrained Q's
+      # latent_vars maps original latent vars to constrained Q's.
+      # latent_vars_unconstrained maps unconstrained vars to unconstrained Q's.
+      self.latent_vars = {}
+      self.latent_vars_unconstrained = {}
       for z, qz in six.iteritems(latent_vars):
         if hasattr(z, 'support') and hasattr(qz, 'support') and \
-              z.support != qz.support and qz.support != 'point':
+                z.support != qz.support and qz.support != 'point':
 
           # transform z to an unconstrained space
           z_unconstrained = transform(z)
@@ -243,12 +246,12 @@ class Inference(object):
           # back into the original constrained space
           if z_unconstrained != z:
             qz_constrained = transform(
-              qz_unconstrained, bijectors.Invert(z_unconstrained.bijector))
+                qz_unconstrained, bijectors.Invert(z_unconstrained.bijector))
 
-            try: # attempt to pushforward the params of Empirical distributions
+            try:  # attempt to pushforward the params of Empirical distributions
               qz_constrained.params = z_unconstrained.bijector.inverse(
-                qz_unconstrained.params)
-            except: # qz_unconstrained is not an Empirical distribution
+                  qz_unconstrained.params)
+            except:  # qz_unconstrained is not an Empirical distribution
               pass
 
           else:

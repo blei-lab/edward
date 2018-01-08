@@ -128,7 +128,7 @@ class HMC(MonteCarlo):
     # Update Empirical random variables.
     assign_ops = []
     for z_unconstrained, qz_unconstrained in six.iteritems(
-        self.latent_vars_unconstrained):
+            self.latent_vars_unconstrained):
       variable = qz_unconstrained.get_variables()[0]
       assign_ops.append(tf.scatter_update(
           variable, self.t, sample[z_unconstrained]))
@@ -139,7 +139,7 @@ class HMC(MonteCarlo):
 
   def _log_joint_unconstrained(self, z_sample):
     """
-    Given a sample in unconstrained latent space, transform it back into 
+    Given a sample in unconstrained latent space, transform it back into
     the original space, and compute the log joint density with appropriate
     Jacobian correction.
     """
@@ -151,17 +151,17 @@ class HMC(MonteCarlo):
     z_sample_transformed = {}
     log_det_jacobian = 0.0
     for z_unconstrained, qz_unconstrained in z_sample.items():
-      z = (unconstrained_to_z[z_unconstrained] 
-           if z_unconstrained in unconstrained_to_z 
+      z = (unconstrained_to_z[z_unconstrained]
+           if z_unconstrained in unconstrained_to_z
            else z_unconstrained)
 
       try:
         bij = self.transformations[z].bijector
         z_sample_transformed[z] = bij.inverse(qz_unconstrained)
         log_det_jacobian += tf.reduce_sum(
-          bij.inverse_log_det_jacobian(qz_unconstrained))
-      except: # if z not in self.transformations, 
-              # or is not a TransformedDist w/ bijector
+            bij.inverse_log_det_jacobian(qz_unconstrained))
+      except:  # if z not in self.transformations,
+               # or is not a TransformedDist w/ bijector
         z_sample_transformed[z] = qz_unconstrained
 
     return self._log_joint(z_sample_transformed) + log_det_jacobian
