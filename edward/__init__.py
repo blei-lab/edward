@@ -11,7 +11,7 @@ from edward import util
 from edward.criticisms import evaluate, ppc, ppc_density_plot, \
     ppc_stat_hist_plot
 from edward.inferences import Inference, MonteCarlo, VariationalInference, \
-    HMC, MetropolisHastings, SGLD, SGHMC, \
+    HMC, MetropolisHastings, SGLD, SGHMC, mSGNHT, \
     KLpq, KLqp, ReparameterizationKLqp, ReparameterizationKLKLqp, \
     ReparameterizationEntropyKLqp, ScoreKLqp, ScoreKLKLqp, ScoreEntropyKLqp, \
     ScoreRBKLqp, WakeSleep, GANInference, BiGANInference, WGANInference, \
