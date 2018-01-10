@@ -48,6 +48,9 @@ class ImplicitKLqp(GANInference):
   + If `scale` has more than one item, then in order to scale
   its corresponding output, `discriminator` must output a
   dictionary of same size and keys as `scale`.
+
+  The objective function also adds to itself a summation over all
+  tensors in the `REGULARIZATION_LOSSES` collection.
   """
   def __init__(self, latent_vars, data=None, discriminator=None,
                global_vars=None):
@@ -203,8 +206,14 @@ class ImplicitKLqp(GANInference):
                       for key in six.iterkeys(self.scale)]
       scaled_ratio = tf.reduce_sum(scaled_ratio)
 
+    reg_terms_d = tf.losses.get_regularization_losses(scope="Disc")
+    reg_terms_all = tf.losses.get_regularization_losses()
+    reg_terms = [r for r in reg_terms_all if r not in reg_terms_d]
+
     # Form variational objective.
-    loss = -(pbeta_log_prob - qbeta_log_prob + scaled_ratio)
+    loss = -(pbeta_log_prob - qbeta_log_prob + scaled_ratio -
+             tf.reduce_sum(reg_terms))
+    loss_d = loss_d + tf.reduce_sum(reg_terms_d)
 
     var_list_d = tf.get_collection(
         tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")

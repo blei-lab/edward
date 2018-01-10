@@ -71,6 +71,9 @@ class MAP(VariationalInference):
   unconstrained; see, e.g., `qsigma` above. This is different than
   performing MAP on the unconstrained space: in general, the MAP of
   the transform is not the transform of the MAP.
+
+  The objective function also adds to itself a summation over all
+  tensors in the `REGULARIZATION_LOSSES` collection.
   """
   def __init__(self, latent_vars=None, data=None):
     """Create an inference algorithm.
@@ -142,7 +145,8 @@ class MAP(VariationalInference):
         p_log_prob += tf.reduce_sum(
             self.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
 
-    loss = -p_log_prob
+    reg_penalty = tf.reduce_sum(tf.losses.get_regularization_losses())
+    loss = -p_log_prob + reg_penalty
 
     grads = tf.gradients(loss, var_list)
     grads_and_vars = list(zip(grads, var_list))

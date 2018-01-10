@@ -51,6 +51,9 @@ class WakeSleep(VariationalInference):
 
   where $z^{(s)} \sim q(z; \lambda)$ and $\\beta^{(s)}
   \sim q(\\beta)$.
+
+  The objective function also adds to itself a summation over all
+  tensors in the `REGULARIZATION_LOSSES` collection.
   """
   def __init__(self, *args, **kwargs):
     super(WakeSleep, self).__init__(*args, **kwargs)
@@ -129,15 +132,18 @@ class WakeSleep(VariationalInference):
 
     p_log_prob = tf.reduce_mean(p_log_prob)
     q_log_prob = tf.reduce_mean(q_log_prob)
+    reg_penalty = tf.reduce_sum(tf.losses.get_regularization_losses())
 
     if self.logging:
       tf.summary.scalar("loss/p_log_prob", p_log_prob,
                         collections=[self._summary_key])
       tf.summary.scalar("loss/q_log_prob", q_log_prob,
                         collections=[self._summary_key])
+      tf.summary.scalar("loss/reg_penalty", reg_penalty,
+                        collections=[self._summary_key])
 
-    loss_p = -p_log_prob
-    loss_q = -q_log_prob
+    loss_p = -p_log_prob + reg_penalty
+    loss_q = -q_log_prob + reg_penalty
 
     q_rvs = list(six.itervalues(self.latent_vars))
     q_vars = [v for v in var_list
