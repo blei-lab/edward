@@ -81,6 +81,7 @@ def check_latent_vars(latent_vars):
       raise TypeError("Key-value pair in latent_vars does not have same "
                       "dtype: {}, {}".format(key.dtype, value.dtype))
 
+
 def _get_context_copy(ctx, scope):
     # contexts are stored in graph collections
     # is there a more efficient way to do this?
@@ -117,11 +118,12 @@ def _copy_context(ctx, context_matches, dict_swap, scope, copy_q):
     return ctx_copy
 
   ctx_copy = ctx.from_proto(ctx.to_proto(), scope[:-1])
-  outer_copy = _copy_context(ctx.outer_context, context_matches, dict_swap, scope, copy_q)
+  outer_copy = _copy_context(ctx.outer_context, context_matches, dict_swap,
+                             scope, copy_q)
   ctx_copy._outer_context = outer_copy
 
   for name, collection in six.iteritems(graph._collections):
-      if ctx in collection :
+      if ctx in collection:
         graph.add_to_collection(name, ctx_copy)
   return ctx_copy
 
@@ -338,8 +340,8 @@ def copy(org_instance, dict_swap=None, scope="copied",
     # we need to make sure frame definitions are copied
     if 'frame_name' in node_def.attr and node_def.attr['frame_name'].s != b'':
       node_def.attr['frame_name'].s = (scope.encode('utf-8') +
-       node_def.attr['frame_name'].s)
-       
+                                       node_def.attr['frame_name'].s)
+
     if 'seed2' in node_def.attr and tf.get_seed(None)[1] is not None:
       node_def.attr['seed2'].i = tf.get_seed(None)[1]
 
@@ -388,7 +390,8 @@ def copy(org_instance, dict_swap=None, scope="copied",
       new_op._add_input(elem)
 
     # Copy the control flow context.
-    control_flow_context = _copy_context(op._get_control_flow_context(), {}, dict_swap, scope, copy_q)
+    control_flow_context = _copy_context(op._get_control_flow_context(), {},
+                                         dict_swap, scope, copy_q)
     new_op._set_control_flow_context(control_flow_context)
 
     # Use Graph's private methods to add the op, following

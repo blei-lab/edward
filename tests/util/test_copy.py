@@ -128,9 +128,11 @@ class test_copy_class(tf.test.TestCase):
       a = tf.Variable([1.0, 2.0, 3.0])
       i = tf.constant(0.0)
       tot = tf.constant([0.0, 0.0, 0.0])
-      cond = lambda i, tot: i < 5
-      body = lambda i, tot: (i + 1, tot + tf.scan(lambda x0, x: x0 + i * x, a, 0.0))
-      op = tf.while_loop(cond, body, [i, tot])[1]
+      op = tf.while_loop(lambda i, tot: i < 5,
+                         lambda i, tot: (i + 1,
+                                         tot + tf.scan(lambda x0, x:
+                                                       x0 + i * x, a, 0.0)),
+                         [i, tot])[1]
       copy_op = ed.copy(op)
       gradient = tf.gradients(op, [a])[0]
       copy_gradient = tf.gradients(copy_op, [a])[0]
