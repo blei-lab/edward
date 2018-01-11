@@ -31,6 +31,9 @@ class WGANInference(GANInference):
   `discriminator` only to share methods and attributes with
   `GANInference`.
 
+  The objective function also adds to itself a summation over all
+  tensors in the `REGULARIZATION_LOSSES` collection.
+
   #### Examples
 
   ```python
@@ -90,10 +93,14 @@ class WGANInference(GANInference):
                                      list(range(1, gradients.shape.ndims))))
       penalty = self.penalty * tf.reduce_mean(tf.square(slopes - 1.0))
 
+    reg_terms_d = tf.losses.get_regularization_losses(scope="Disc")
+    reg_terms_all = tf.losses.get_regularization_losses()
+    reg_terms = [r for r in reg_terms_all if r not in reg_terms_d]
+
     mean_true = tf.reduce_mean(d_true)
     mean_fake = tf.reduce_mean(d_fake)
-    loss_d = mean_fake - mean_true + penalty
-    loss = -mean_fake
+    loss_d = mean_fake - mean_true + penalty + tf.reduce_sum(reg_terms_d)
+    loss = -mean_fake + tf.reduce_sum(reg_terms)
 
     var_list_d = tf.get_collection(
         tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
