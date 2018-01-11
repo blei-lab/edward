@@ -123,9 +123,22 @@ class test_copy_class(tf.test.TestCase):
       self.assertAllClose(result, [3.0, 2.0, 1.0])
       self.assertAllClose(result_copy, [3.0, 2.0, 1.0])
 
-      # TODO the values in value_def don't seem to change
-      # op.op.inputs[2].op._get_control_flow_context().to_proto()
-      # copy_op.op.inputs[2].op._get_control_flow_context().to_proto()
+  def test_nested_scan_gradients(self):
+    with self.test_session() as sess:
+      a = tf.Variable([1.0, 2.0, 3.0])
+      i = tf.constant(0.0)
+      tot = tf.constant([0.0, 0.0, 0.0])
+      cond = lambda i, tot: i < 5
+      body = lambda i, tot: (i + 1, tot + tf.scan(lambda x0, x: x0 + i * x, a, 0.0))
+      op = tf.while_loop(cond, body, [i, tot])[1]
+      copy_op = ed.copy(op)
+      gradient = tf.gradients(op, [a])[0]
+      copy_gradient = tf.gradients(copy_op, [a])[0]
+
+      tf.variables_initializer([a]).run()
+      result_copy, result = sess.run([copy_gradient, gradient])
+      self.assertAllClose(result, [30.0, 20.0, 10.0])
+      self.assertAllClose(result_copy, [30.0, 20.0, 10.0])
 
   def test_swap_tensor_tensor(self):
     with self.test_session():

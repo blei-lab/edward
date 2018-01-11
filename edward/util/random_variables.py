@@ -81,38 +81,49 @@ def check_latent_vars(latent_vars):
       raise TypeError("Key-value pair in latent_vars does not have same "
                       "dtype: {}, {}".format(key.dtype, value.dtype))
 
+def _get_context_copy(ctx, scope):
+    # contexts are stored in graph collections
+    # is there a more efficient way to do this?
+
+    graph = tf.get_default_graph()
+
+    for name, collection in six.iteritems(graph._collections):
+      if ctx in collection:
+        for item in collection:
+          if item.name == scope + ctx.name:
+            return item
+
+    return None
+
 
 def _copy_context(ctx, context_matches, dict_swap, scope, copy_q):
   if ctx is None:
     return None
-  elif ctx in context_matches:
-    return context_matches[ctx]
 
-  loop_exits = []
-  for tensor in ctx.loop_exits:
-    loop_exits.append(copy(tensor, dict_swap, scope, True, copy_q))
+  # We'd normally check about returning early, but the context won't
+  # be copied until after all children are, so we check that first.
 
-  values = set()
-  # TODO is this neecssary?
-  # also, how are gradient values in the value def being updated?
-  for string in ctx._values:
-    values.add(scope + '/' + string)
+  graph = tf.get_default_graph()
 
-  _copy_context(ctx.outer_context, context_matches, dict_swap, scope, copy_q)
+  # copy all nodes within context
+  for tensorname in ctx._values:
+    tensor = graph.as_graph_element(tensorname)
+    copy(tensor, dict_swap, scope, True, copy_q)
 
-  # TODO is control_flow_context necessary? if so, also check out ctx.Enter()/Exit()
-  # prev = graph._get_control_flow_context()
-  try:
-    # graph._set_control_flow_context(ctx)
-    ctx_copy = ctx.from_proto(ctx.to_proto(), scope)
-    # graph._set_control_flow_context(prev)
-    ctx_copy._loop_exits = loop_exits
-    ctx_copy._values = values
-    context_matches[ctx] = ctx_copy
+  # now make sure we haven't already copied the context we're currently
+  # trying to copy (in the course of copying another child)
+  ctx_copy = _get_context_copy(ctx, scope)
+  if ctx_copy:
     return ctx_copy
-  except:
-    # graph._set_control_flow_context(prev)
-    return None
+
+  ctx_copy = ctx.from_proto(ctx.to_proto(), scope[:-1])
+  outer_copy = _copy_context(ctx.outer_context, context_matches, dict_swap, scope, copy_q)
+  ctx_copy._outer_context = outer_copy
+
+  for name, collection in six.iteritems(graph._collections):
+      if ctx in collection :
+        graph.add_to_collection(name, ctx_copy)
+  return ctx_copy
 
 
 def _copy_default(x, *args, **kwargs):
@@ -322,6 +333,13 @@ def copy(org_instance, dict_swap=None, scope="copied",
     # its operation-level seed if it has one.
     node_def = deepcopy(op.node_def)
     node_def.name = new_name
+
+    # when copying control flow contexts,
+    # we need to make sure frame definitions are copied
+    if 'frame_name' in node_def.attr and node_def.attr['frame_name'].s != b'':
+      node_def.attr['frame_name'].s = (scope.encode('utf-8') +
+       node_def.attr['frame_name'].s)
+       
     if 'seed2' in node_def.attr and tf.get_seed(None)[1] is not None:
       node_def.attr['seed2'].i = tf.get_seed(None)[1]
 
