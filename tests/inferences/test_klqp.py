@@ -47,7 +47,7 @@ class test_klqp_class(tf.test.TestCase):
       x_data = tf.constant([2, 7, 1], dtype=np.float32)
 
       probs = Dirichlet([1., 1., 1.])
-      x = Multinomial(total_count=10.0, probs=probs, sample_shape=1)
+      x = Multinomial(total_count=10.0, probs=probs)
 
       qalpha = tf.Variable(tf.random_normal([3]))
       qprobs = Dirichlet(qalpha)
