@@ -7,7 +7,7 @@ import numpy as np
 import tensorflow as tf
 
 from edward.models import (Empirical, Gamma, Normal, PointMass,
-                           TransformedDistribution)
+                           TransformedDistribution, Beta, Bernoulli)
 from edward.util import transform
 from tensorflow.contrib.distributions import bijectors
 
@@ -129,9 +129,9 @@ class test_inference_auto_transform_class(tf.test.TestCase):
       # target distribution.
       n_samples = 10000
       x_unconstrained = inference.transformations[x]
-      qx_constrained = Empirical(x_unconstrained.bijector.inverse(qx.params))
+      qx_constrained_params = x_unconstrained.bijector.inverse(qx.params)
       x_mean, x_var = tf.nn.moments(x.sample(n_samples), 0)
-      qx_mean, qx_var = tf.nn.moments(qx_constrained.params[500:], 0)
+      qx_mean, qx_var = tf.nn.moments(qx_constrained_params[500:], 0)
       stats = sess.run([x_mean, qx_mean, x_var, qx_var])
       self.assertAllClose(stats[0], stats[1], rtol=1e-1, atol=1e-1)
       self.assertAllClose(stats[2], stats[3], rtol=1e-1, atol=1e-1)
@@ -152,15 +152,70 @@ class test_inference_auto_transform_class(tf.test.TestCase):
 
       # Check approximation on constrained space has same moments as
       # target distribution.
-      n_samples = 10000
-      x_unconstrained = inference.transformations[x]
-      qx = inference.latent_vars[x_unconstrained]
-      qx_constrained = Empirical(x_unconstrained.bijector.inverse(qx.params))
+      n_samples = 1000
+      qx_constrained = inference.latent_vars[x]
       x_mean, x_var = tf.nn.moments(x.sample(n_samples), 0)
       qx_mean, qx_var = tf.nn.moments(qx_constrained.params[500:], 0)
       stats = sess.run([x_mean, qx_mean, x_var, qx_var])
       self.assertAllClose(stats[0], stats[1], rtol=1e-1, atol=1e-1)
       self.assertAllClose(stats[2], stats[3], rtol=1e-1, atol=1e-1)
+
+  def test_hmc_betabernoulli(self):
+    """Do we correctly handle dependencies of transformed variables?"""
+
+    with self.test_session() as sess:
+      # model
+      z = Beta(1., 1., name="z")
+      xs = Bernoulli(probs=z, sample_shape=10)
+      x_obs = np.asarray([0, 0, 1, 1, 0, 0, 0, 0, 0, 1], dtype=np.int32)
+
+      # inference
+      qz_samples = tf.Variable(tf.random_uniform(shape=(1000,)))
+      qz = ed.models.Empirical(params=qz_samples, name="z_posterior")
+      inference_hmc = ed.inferences.HMC({z: qz}, data={xs: x_obs})
+      inference_hmc.run(step_size=1.0, n_steps=5, auto_transform=True)
+
+      # check that inferred posterior mean/variance is close to
+      # that of the exact Beta posterior
+      z_unconstrained = inference_hmc.transformations[z]
+      qz_constrained = z_unconstrained.bijector.inverse(qz_samples)
+      qz_mean, qz_var = sess.run(tf.nn.moments(qz_constrained, 0))
+
+      true_posterior = Beta(1. + np.sum(x_obs), 1. + np.sum(1 - x_obs))
+      pz_mean, pz_var = sess.run((true_posterior.mean(),
+                                  true_posterior.variance()))
+      self.assertAllClose(qz_mean, pz_mean, rtol=5e-2, atol=5e-2)
+      self.assertAllClose(qz_var, pz_var, rtol=1e-2, atol=1e-2)
+
+  def test_klqp_betabernoulli(self):
+    with self.test_session() as sess:
+      # model
+      z = Beta(1., 1., name="z")
+      xs = Bernoulli(probs=z, sample_shape=10)
+      x_obs = np.asarray([0, 0, 1, 1, 0, 0, 0, 0, 0, 1], dtype=np.int32)
+
+      # inference
+      qz_mean = tf.get_variable("qz_mean",
+                                initializer=tf.random_normal(()))
+      qz_std = tf.nn.softplus(tf.get_variable(name="qz_prestd",
+                                              initializer=tf.random_normal(())))
+      qz_unconstrained = ed.models.Normal(
+          loc=qz_mean, scale=qz_std, name="z_posterior")
+
+      inference_klqp = ed.inferences.KLqp(
+          {z: qz_unconstrained}, data={xs: x_obs})
+      inference_klqp.run(n_iter=500, auto_transform=True)
+
+      z_unconstrained = inference_klqp.transformations[z]
+      qz_constrained = z_unconstrained.bijector.inverse(
+          qz_unconstrained.sample(1000))
+      qz_mean, qz_var = sess.run(tf.nn.moments(qz_constrained, 0))
+
+      true_posterior = Beta(np.sum(x_obs) + 1., np.sum(1 - x_obs) + 1.)
+      pz_mean, pz_var = sess.run((true_posterior.mean(),
+                                  true_posterior.variance()))
+      self.assertAllClose(qz_mean, pz_mean, rtol=5e-2, atol=5e-2)
+      self.assertAllClose(qz_var, pz_var, rtol=1e-2, atol=1e-2)
 
 if __name__ == '__main__':
   ed.set_seed(124125)

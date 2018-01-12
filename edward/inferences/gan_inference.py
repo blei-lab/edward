@@ -30,6 +30,9 @@ class GANInference(VariationalInference):
 
   GANs also only work for one observed random variable in `data`.
 
+  The objective function also adds to itself a summation over all
+  tensors in the `REGULARIZATION_LOSSES` collection.
+
   #### Examples
 
   ```python
@@ -124,14 +127,18 @@ class GANInference(VariationalInference):
                            tf.concat([d_true, d_fake], axis=0),
                            collections=[self._summary_key])
 
+    reg_terms_d = tf.losses.get_regularization_losses(scope="Disc")
+    reg_terms_all = tf.losses.get_regularization_losses()
+    reg_terms = [r for r in reg_terms_all if r not in reg_terms_d]
+
     loss_d = tf.nn.sigmoid_cross_entropy_with_logits(
         labels=tf.ones_like(d_true), logits=d_true) + \
         tf.nn.sigmoid_cross_entropy_with_logits(
             labels=tf.zeros_like(d_fake), logits=d_fake)
     loss = tf.nn.sigmoid_cross_entropy_with_logits(
         labels=tf.ones_like(d_fake), logits=d_fake)
-    loss_d = tf.reduce_mean(loss_d)
-    loss = tf.reduce_mean(loss)
+    loss_d = tf.reduce_mean(loss_d) + tf.reduce_sum(reg_terms_d)
+    loss = tf.reduce_mean(loss) + tf.reduce_sum(reg_terms)
 
     var_list_d = tf.get_collection(
         tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")

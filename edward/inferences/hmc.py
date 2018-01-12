@@ -73,13 +73,25 @@ class HMC(MonteCarlo):
     The updates assume each Empirical random variable is directly
     parameterized by `tf.Variable`s.
     """
-    old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
-                  for z, qz in six.iteritems(self.latent_vars)}
+
+    # Gather the initial state, transformed to unconstrained space.
+    try:
+      self.latent_vars_unconstrained
+    except:
+      raise ValueError("This implementation of HMC requires that all "
+                       "variables have unconstrained support. Please "
+                       "initialize with auto_transform=True to ensure "
+                       "this. (if your variables already have unconstrained "
+                       "support then doing this is a no-op).")
+    old_sample = {z_unconstrained:
+                  tf.gather(qz_unconstrained.params, tf.maximum(self.t - 1, 0))
+                  for z_unconstrained, qz_unconstrained in
+                  six.iteritems(self.latent_vars_unconstrained)}
     old_sample = OrderedDict(old_sample)
 
     # Sample momentum.
     old_r_sample = OrderedDict()
-    for z, qz in six.iteritems(self.latent_vars):
+    for z, qz in six.iteritems(self.latent_vars_unconstrained):
       event_shape = qz.event_shape
       normal = Normal(loc=tf.zeros(event_shape, dtype=qz.dtype),
                       scale=tf.ones(event_shape, dtype=qz.dtype))
@@ -87,7 +99,8 @@ class HMC(MonteCarlo):
 
     # Simulate Hamiltonian dynamics.
     new_sample, new_r_sample = leapfrog(old_sample, old_r_sample,
-                                        self.step_size, self._log_joint,
+                                        self.step_size,
+                                        self._log_joint_unconstrained,
                                         self.n_steps)
 
     # Calculate acceptance ratio.
@@ -95,8 +108,8 @@ class HMC(MonteCarlo):
                            for r in six.itervalues(old_r_sample)])
     ratio -= tf.reduce_sum([0.5 * tf.reduce_sum(tf.square(r))
                             for r in six.itervalues(new_r_sample)])
-    ratio += self._log_joint(new_sample)
-    ratio -= self._log_joint(old_sample)
+    ratio += self._log_joint_unconstrained(new_sample)
+    ratio -= self._log_joint_unconstrained(old_sample)
 
     # Accept or reject sample.
     u = Uniform(low=tf.constant(0.0, dtype=ratio.dtype),
@@ -108,18 +121,50 @@ class HMC(MonteCarlo):
       # `tf.cond` returns tf.Tensor if output is a list of size 1.
       sample_values = [sample_values]
 
-    sample = {z: sample_value for z, sample_value in
+    sample = {z_unconstrained: sample_value for
+              z_unconstrained, sample_value in
               zip(six.iterkeys(new_sample), sample_values)}
 
     # Update Empirical random variables.
     assign_ops = []
-    for z, qz in six.iteritems(self.latent_vars):
-      variable = qz.get_variables()[0]
-      assign_ops.append(tf.scatter_update(variable, self.t, sample[z]))
+    for z_unconstrained, qz_unconstrained in six.iteritems(
+            self.latent_vars_unconstrained):
+      variable = qz_unconstrained.get_variables()[0]
+      assign_ops.append(tf.scatter_update(
+          variable, self.t, sample[z_unconstrained]))
 
     # Increment n_accept (if accepted).
     assign_ops.append(self.n_accept.assign_add(tf.where(accept, 1, 0)))
     return tf.group(*assign_ops)
+
+  def _log_joint_unconstrained(self, z_sample):
+    """
+    Given a sample in unconstrained latent space, transform it back into
+    the original space, and compute the log joint density with appropriate
+    Jacobian correction.
+    """
+
+    unconstrained_to_z = {v: k for (k, v) in self.transformations.items()}
+
+    # transform all samples back into the original (potentially
+    # constrained) space.
+    z_sample_transformed = {}
+    log_det_jacobian = 0.0
+    for z_unconstrained, qz_unconstrained in z_sample.items():
+      z = (unconstrained_to_z[z_unconstrained]
+           if z_unconstrained in unconstrained_to_z
+           else z_unconstrained)
+
+      try:
+        bij = self.transformations[z].bijector
+        z_sample_transformed[z] = bij.inverse(qz_unconstrained)
+        log_det_jacobian += tf.reduce_sum(
+            bij.inverse_log_det_jacobian(qz_unconstrained))
+      except:  # if z not in self.transformations,
+               # or is not a TransformedDist w/ bijector
+        z_sample_transformed[z] = qz_unconstrained
+
+    return self._log_joint(z_sample_transformed) + log_det_jacobian
 
   def _log_joint(self, z_sample):
     """Utility function to calculate model's log joint density,
@@ -133,6 +178,7 @@ class HMC(MonteCarlo):
     # Form dictionary in order to replace conditioning on prior or
     # observed variable with conditioning on a specific value.
     dict_swap = z_sample.copy()
+
     for x, qx in six.iteritems(self.data):
       if isinstance(x, RandomVariable):
         if isinstance(qx, RandomVariable):

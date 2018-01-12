@@ -98,7 +98,7 @@ class Gibbs(MonteCarlo):
     if feed_dict is None:
       feed_dict = {}
 
-    feed_dict.update(self.feed_dict)
+    self.feed_dict.update(feed_dict)
 
     # Determine scan order.
     if self.scan_order == 'random':
@@ -110,25 +110,24 @@ class Gibbs(MonteCarlo):
     # Fetch samples by iterating over complete conditional draws.
     for z in scan_order:
       if isinstance(z, RandomVariable):
-        draw = sess.run(self.proposal_vars[z], feed_dict)
-        feed_dict[z] = draw
+        draw = sess.run(self.proposal_vars[z], self.feed_dict)
         self.feed_dict[z] = draw
       else:  # list
-        draws = sess.run([self.proposal_vars[zz] for zz in z], feed_dict)
+        draws = sess.run([self.proposal_vars[zz] for zz in z], self.feed_dict)
         for zz, draw in zip(z, draws):
-          feed_dict[zz] = draw
           self.feed_dict[zz] = draw
 
     # Assign the samples to the Empirical random variables.
-    _, accept_rate = sess.run([self.train, self.n_accept_over_t], feed_dict)
+    _, accept_rate = sess.run(
+        [self.train, self.n_accept_over_t], self.feed_dict)
     t = sess.run(self.increment_t)
 
     if self.debug:
-      sess.run(self.op_check, feed_dict)
+      sess.run(self.op_check, self.feed_dict)
 
     if self.logging and self.n_print != 0:
       if t == 1 or t % self.n_print == 0:
-        summary = sess.run(self.summarize, feed_dict)
+        summary = sess.run(self.summarize, self.feed_dict)
         self.train_writer.add_summary(summary, t)
 
     return {'t': t, 'accept_rate': accept_rate}
