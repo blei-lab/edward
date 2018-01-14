@@ -8,7 +8,7 @@ import tensorflow as tf
 from collections import OrderedDict
 from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import RandomVariable
-from edward.util import check_and_maybe_build_latent_vars, copy
+from edward.util import check_and_maybe_build_latent_vars
 
 
 class MetropolisHastings(MonteCarlo):

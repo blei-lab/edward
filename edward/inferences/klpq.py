@@ -5,10 +5,9 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
-from edward.inferences.inference import (check_and_maybe_build_data,
-    check_and_maybe_build_latent_vars, transform, check_and_maybe_build_dict, check_and_maybe_build_var_list)
-from edward.models import RandomVariable
-from edward.util import copy, get_descendants
+from edward.inferences.inference import (
+    call_function_up_to_args, make_intercept)
+from edward.models.core import Trace
 
 try:
   from edward.models import Normal
@@ -16,8 +15,9 @@ except Exception as e:
   raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
-def klpq(latent_vars=None, data=None, n_samples=1,
-         auto_transform=True, scale=None, var_list=None, collections=None):
+def klpq(model, variational, align_latent, align_data,
+         scale=lambda name: 1.0, n_samples=1, auto_transform=True,
+         collections=None, *args, **kwargs):
   """Variational inference with the KL divergence
 
   $\\text{KL}( p(z \mid x) \| q(z) ).$
@@ -91,65 +91,30 @@ def klpq(latent_vars=None, data=None, n_samples=1,
   $- \sum_{s=1}^S [
     w_{\\text{norm}}(z^s; \lambda) \\nabla_{\lambda} \log q(z^s; \lambda) ].$
   """
-  if isinstance(latent_vars, list):
-    with tf.variable_scope(None, default_name="posterior"):
-      latent_vars_dict = {}
-      continuous = \
-          ('01', 'nonnegative', 'simplex', 'real', 'multivariate_real')
-      for z in latent_vars:
-        if not hasattr(z, 'support') or z.support not in continuous:
-          raise AttributeError(
-              "Random variable {} is not continuous or a random "
-              "variable with supported continuous support.".format(z))
-        batch_event_shape = z.batch_shape.concatenate(z.event_shape)
-        loc = tf.Variable(tf.random_normal(batch_event_shape))
-        scale = tf.nn.softplus(
-            tf.Variable(tf.random_normal(batch_event_shape)))
-        latent_vars_dict[z] = Normal(loc=loc, scale=scale)
-      latent_vars = latent_vars_dict
-      del latent_vars_dict
-  latent_vars = check_and_maybe_build_latent_vars(latent_vars)
-  data = check_and_maybe_build_data(data)
-  latent_vars, _ = transform(latent_vars, auto_transform)
-  scale = check_and_maybe_build_dict(scale)
-  var_list = check_and_maybe_build_var_list(var_list, latent_vars, data)
-
   p_log_prob = [0.0] * n_samples
   q_log_prob = [0.0] * n_samples
-  base_scope = tf.get_default_graph().unique_name("inference") + '/'
   for s in range(n_samples):
-    # Form dictionary in order to replace conditioning on prior or
-    # observed variable with conditioning on a specific value.
-    scope = base_scope + tf.get_default_graph().unique_name("sample")
-    dict_swap = {}
-    for x, qx in six.iteritems(data):
-      if isinstance(x, RandomVariable):
-        if isinstance(qx, RandomVariable):
-          qx_copy = copy(qx, scope=scope)
-          dict_swap[x] = qx_copy.value
-        else:
-          dict_swap[x] = qx
+    with Trace() as posterior_trace:
+      call_function_up_to_args(variational, *args, **kwargs)
+    intercept = make_intercept(
+        posterior_trace, align_data, align_latent, args, kwargs)
+    with Trace(intercept=intercept) as model_trace:
+      call_function_up_to_args(model, *args, **kwargs)
 
-    for z, qz in six.iteritems(latent_vars):
-      # Copy q(z) to obtain new set of posterior samples.
-      qz_copy = copy(qz, scope=scope)
-      dict_swap[z] = qz_copy.value
-      q_log_prob[s] += tf.reduce_sum(
-          qz_copy.log_prob(tf.stop_gradient(dict_swap[z])))
-
-    for z in six.iterkeys(latent_vars):
-      z_copy = copy(z, dict_swap, scope=scope)
-      p_log_prob[s] += tf.reduce_sum(z_copy.log_prob(dict_swap[z]))
-
-    for x in six.iterkeys(data):
-      if isinstance(x, RandomVariable):
-        x_copy = copy(x, dict_swap, scope=scope)
-        p_log_prob[s] += tf.reduce_sum(x_copy.log_prob(dict_swap[x]))
+    for name, node in six.iteritems(model_trace):
+      rv = node.value
+      scale_factor = scale(name)
+      if align_latent(name) is not None or align_data(name) is not None:
+        p_log_prob[s] += tf.reduce_sum(
+            scale_factor * rv.log_prob(tf.stop_gradient(rv.value)))
+      if align_latent(name) is not None:
+        qz = posterior_trace[align_latent(name)].value
+        q_log_prob[s] += tf.reduce_sum(
+            scale_factor * qz.log_prob(tf.stop_gradient(qz.value)))
 
   p_log_prob = tf.stack(p_log_prob)
   q_log_prob = tf.stack(q_log_prob)
   reg_penalty = tf.reduce_sum(tf.losses.get_regularization_losses())
-
   if collections is not None:
     tf.summary.scalar("loss/p_log_prob", tf.reduce_mean(p_log_prob),
                       collections=collections)
@@ -158,18 +123,11 @@ def klpq(latent_vars=None, data=None, n_samples=1,
     tf.summary.scalar("loss/reg_penalty", reg_penalty,
                       collections=collections)
 
-  log_w = p_log_prob - q_log_prob
+  log_w = p_log_prob - tf.stop_gradient(q_log_prob)
   log_w_norm = log_w - tf.reduce_logsumexp(log_w)
   w_norm = tf.exp(log_w_norm)
-  loss = tf.reduce_sum(w_norm * log_w) - reg_penalty
-
-  q_rvs = list(six.itervalues(latent_vars))
-  q_vars = [v for v in var_list
-            if len(get_descendants(tf.convert_to_tensor(v), q_rvs)) != 0]
-  q_grads = tf.gradients(
-      -(tf.reduce_sum(q_log_prob * tf.stop_gradient(w_norm)) - reg_penalty),
-      q_vars)
-  p_vars = [v for v in var_list if v not in q_vars]
-  p_grads = tf.gradients(-loss, p_vars)
-  grads_and_vars = list(zip(q_grads, q_vars)) + list(zip(p_grads, p_vars))
-  return loss, grads_and_vars
+  loss = -tf.reduce_sum(w_norm * log_w) + reg_penalty
+  # Model parameter gradients will backprop into loss. Variational
+  # parameter gradients will backprop into reg_penalty and last term.
+  surrogate_loss = loss + tf.reduce_sum(q_log_prob * tf.stop_gradient(w_norm))
+  return loss, surrogate_loss

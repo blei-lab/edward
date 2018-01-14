@@ -5,13 +5,11 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
-from edward.inferences.inference import (check_and_maybe_build_data,
-    transform, check_and_maybe_build_dict, check_and_maybe_build_var_list)
+from edward.inferences.inference import call_function_up_to_args
 
 
-def wgan_inference(data=None, discriminator=None,
-                   penalty=10.0,
-                   scale=None, var_list=None, collections=None):
+def wgan_inference(model, discriminator, align_data,
+                   penalty=10.0, collections=None, *args, **kwargs):
   """Parameter estimation with GAN-style training
   [@goodfellow2014generative], using the Wasserstein distance
   [@arjovsky2017wasserstein].
@@ -62,13 +60,15 @@ def wgan_inference(data=None, discriminator=None,
       None (or 0.0) if using no penalty.
     clip: float, optional.
       Value to clip weights by. Default is no clipping.
-  """
-  data = check_and_maybe_build_data(data)
-  scale = check_and_maybe_build_dict(scale)
-  var_list = check_and_maybe_build_var_list(var_list, {}, data)
 
-  x_true = list(six.itervalues(data))[0]
-  x_fake = list(six.iterkeys(data))[0]
+  `model` must return the generated data.
+  """
+  x_fake = call_function_up_to_args(model, *args, **kwargs)
+  key = align_data(x_fake.name.split(':')[0])
+  if isinstance(key, int):
+    x_true = args[key]
+  elif kwargs.get(key, None) is not None:
+    x_true = kwargs.get(key)
   with tf.variable_scope("Disc"):
     d_true = discriminator(x_true)
 
@@ -96,14 +96,4 @@ def wgan_inference(data=None, discriminator=None,
   mean_fake = tf.reduce_mean(d_fake)
   loss_d = mean_fake - mean_true + penalty + tf.reduce_sum(reg_terms_d)
   loss = -mean_fake + tf.reduce_sum(reg_terms)
-
-  var_list_d = tf.get_collection(
-      tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
-  if var_list is None:
-    var_list = [v for v in tf.trainable_variables() if v not in var_list_d]
-
-  grads_d = tf.gradients(loss_d, var_list_d)
-  grads = tf.gradients(loss, var_list)
-  grads_and_vars_d = list(zip(grads_d, var_list_d))
-  grads_and_vars = list(zip(grads, var_list))
-  return loss, grads_and_vars, loss_d, grads_and_vars_d
+  return loss, loss_d

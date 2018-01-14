@@ -5,13 +5,12 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
-from edward.inferences.inference import (check_and_maybe_build_data,
-    check_and_maybe_build_latent_vars, transform, check_and_maybe_build_dict, check_and_maybe_build_var_list)
+from edward.inferences.inference import call_function_up_to_args
+from edward.models.core import Trace
 
 
-def bigan_inference(latent_vars=None, data=None, discriminator=None,
-                    auto_transform=True, scale=None, var_list=None,
-                    collections=None):
+def bigan_inference(model, variational, discriminator, align_data,
+                    align_latent, collections=None, *args, **kwargs):
   """Adversarially Learned Inference [@dumuolin2017adversarially] or
   Bidirectional Generative Adversarial Networks [@donahue2017adversarial]
   for joint learning of generator and inference networks.
@@ -44,20 +43,27 @@ def bigan_inference(latent_vars=None, data=None, discriminator=None,
     zf = gen_latent(x_ph)
   inference = ed.BiGANInference({z_ph: zf}, {xf: x_ph}, discriminator)
   ```
+
+  `align_latent` must only align one random variable in `model` and
+  `variational`. `model` must return the generated data.
   """
-  if not callable(discriminator):
-    raise TypeError("discriminator must be a callable function.")
-  latent_vars = check_and_maybe_build_latent_vars(latent_vars)
-  data = check_and_maybe_build_data(data)
-  latent_vars, _ = transform(latent_vars, auto_transform)
-  scale = check_and_maybe_build_dict(scale)
-  var_list = check_and_maybe_build_var_list(var_list, latent_vars, data)
+  with Trace() as posterior_trace:
+    call_function_up_to_args(variational, *args, **kwargs)
+  with Trace() as model_trace:
+    x_fake = call_function_up_to_args(model, *args, **kwargs)
 
-  x_true = list(six.itervalues(self.data))[0]
-  x_fake = list(six.iterkeys(self.data))[0]
+  key = align_data(x_fake.name.split(':')[0])
+  if isinstance(key, int):
+    x_true = args[key]
+  elif kwargs.get(key, None) is not None:
+    x_true = kwargs.get(key)
 
-  z_true = list(six.iterkeys(self.latent_vars))[0]
-  z_fake = list(six.itervalues(self.latent_vars))[0]
+  for name, node in six.iteritems(model_trace):
+    aligned = align_latent(name)
+    if aligned is not None:
+      z_true = node.value
+      z_fake = posterior_trace[aligned].value
+      break
 
   with tf.variable_scope("Disc"):
       # xtzf := x_true, z_fake
@@ -76,18 +82,9 @@ def bigan_inference(latent_vars=None, data=None, discriminator=None,
           labels=tf.ones_like(d_xtzf), logits=d_xtzf)
 
   reg_terms_d = tf.losses.get_regularization_losses(scope="Disc")
-  reg_terms = tf.losses.get_regularization_losses(scope="Gen")
+  reg_terms_all = tf.losses.get_regularization_losses()
+  reg_terms = [r for r in reg_terms_all if r not in reg_terms_d]
 
   loss_d = tf.reduce_mean(loss_d) + tf.reduce_sum(reg_terms_d)
   loss = tf.reduce_mean(loss) + tf.reduce_sum(reg_terms)
-
-  var_list_d = tf.get_collection(
-      tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
-  var_list = tf.get_collection(
-      tf.GraphKeys.TRAINABLE_VARIABLES, scope="Gen")
-
-  grads_d = tf.gradients(loss_d, var_list_d)
-  grads = tf.gradients(loss, var_list)
-  grads_and_vars_d = list(zip(grads_d, var_list_d))
-  grads_and_vars = list(zip(grads, var_list))
-  return loss, grads_and_vars, loss_d, grads_and_vars_d
+  return loss, loss_d

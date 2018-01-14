@@ -5,15 +5,15 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
-from edward.inferences.inference import (check_and_maybe_build_data,
-    check_and_maybe_build_latent_vars, transform, check_and_maybe_build_dict, check_and_maybe_build_var_list)
-from edward.models import RandomVariable
-from edward.util import copy
+from edward.inferences.inference import (
+    call_function_up_to_args, make_intercept)
+from edward.models.core import Trace
 
 
-def implicit_klqp(latent_vars=None, data=None, discriminator=None,
-                  global_vars=None, ratio_loss='log',
-                  auto_transform=True, scale=None, var_list=None, collections=None):
+def klqp_implicit(model, variational, discriminator, align_latent,
+                  align_data, align_latent_global=lambda name: name,
+                  ratio_loss='log', scale=lambda name: 1.0,
+                  auto_transform=True, collections=None, *args, **kwargs):
   """Variational inference with implicit probabilistic models
   [@tran2017deep].
 
@@ -43,14 +43,6 @@ def implicit_klqp(latent_vars=None, data=None, discriminator=None,
 
   Note the type for `discriminator`'s output changes when one
   passes in the `scale` argument to `initialize()`.
-
-  + If `scale` has at most one item, then `discriminator`
-  outputs a tensor whose multiplication with that element is
-  broadcastable. (For example, the output is a tensor and the single
-  scale factor is a scalar.)
-  + If `scale` has more than one item, then in order to scale
-  its corresponding output, `discriminator` must output a
-  dictionary of same size and keys as `scale`.
 
   The objective function also adds to itself a summation over all
   tensors in the `REGULARIZATION_LOSSES` collection.
@@ -121,106 +113,96 @@ def implicit_klqp(latent_vars=None, data=None, discriminator=None,
     function for q's as well, and an additional loop. we opt not to
     because it complicates the code;
   + analytic KL/swapping out the penalty term for the globals.
+
+  align_latent aligns all global and local latents;
+  align_global_latent only aligns global latents.
   """
-  if not callable(discriminator):
-    raise TypeError("discriminator must be a callable function.")
   if callable(ratio_loss):
     ratio_loss = ratio_loss
   elif ratio_loss == 'log':
-    ratio_loss = log_loss
+    ratio_loss = _log_loss
   elif ratio_loss == 'hinge':
-    ratio_loss = hinge_loss
+    ratio_loss = _hinge_loss
   else:
     raise ValueError('Ratio loss not found:', ratio_loss)
-  latent_vars = check_and_maybe_build_latent_vars(latent_vars)
-  data = check_and_maybe_build_data(data)
-  global_vars = check_and_maybe_build_latent_vars(global_vars)
-  latent_vars, _ = transform(latent_vars, auto_transform)
-  scale = check_and_maybe_build_dict(scale)
-  var_list = check_and_maybe_build_var_list(var_list, latent_vars, data)
+
+  with Trace() as posterior_trace:
+    call_function_up_to_args(variational, *args, **kwargs)
+  global_intercept = make_intercept(
+      posterior_trace, align_data, align_latent_global, args, kwargs)
+  with Trace(intercept=global_intercept) as model_trace:
+    # Intercept model's global latent variables and set to posterior
+    # samples (but not its locals).
+    call_function_up_to_args(model, *args, **kwargs)
 
   # Collect tensors used in calculation of losses.
-  scope = tf.get_default_graph().unique_name("inference")
-  qbeta_sample = {}
   pbeta_log_prob = 0.0
   qbeta_log_prob = 0.0
-  for beta, qbeta in six.iteritems(global_vars):
-    # Draw a sample beta' ~ q(beta) and calculate
-    # log p(beta') and log q(beta').
-    qbeta_sample[beta] = qbeta.value
-    pbeta_log_prob += tf.reduce_sum(beta.log_prob(qbeta_sample[beta]))
-    qbeta_log_prob += tf.reduce_sum(qbeta.log_prob(qbeta_sample[beta]))
-
+  qbeta_sample = {}
   pz_sample = {}
   qz_sample = {}
-  for z, qz in six.iteritems(latent_vars):
-    if z not in global_vars:
-      # Copy local variables p(z), q(z) to draw samples
-      # z' ~ p(z | beta'), z' ~ q(z | beta').
-      pz_copy = copy(z, dict_swap=qbeta_sample, scope=scope)
-      pz_sample[z] = pz_copy.value
-      qz_sample[z] = qz.value
-
-  # Collect x' ~ p(x | z', beta') and x' ~ q(x).
-  dict_swap = qbeta_sample.copy()
-  dict_swap.update(qz_sample)
   x_psample = {}
   x_qsample = {}
-  for x, x_data in six.iteritems(data):
-    if isinstance(x, tf.Tensor):
-      if "Placeholder" not in x.op.type:
-        # Copy p(x | z, beta) to get draw p(x | z', beta').
-        x_copy = copy(x, dict_swap=dict_swap, scope=scope)
-        x_psample[x] = x_copy
-        x_qsample[x] = x_data
-    elif isinstance(x, RandomVariable):
-      # Copy p(x | z, beta) to get draw p(x | z', beta').
-      x_copy = copy(x, dict_swap=dict_swap, scope=scope)
-      x_psample[x] = x_copy.value
-      x_qsample[x] = x_data
+  for name, node in six.iteritems(model_trace):
+    # Calculate log p(beta') and log q(beta').
+    if align_latent_global(name) is not None:
+      pbeta = node.value
+      qbeta = posterior_trace[align_latent_global(name)].value
+      scale_factor = scale(name)
+      pbeta_log_prob += tf.reduce_sum(
+          scale_factor * pbeta.log_prob(pbeta.value))
+      qbeta_log_prob += tf.reduce_sum(
+          scale_factor * qbeta.log_prob(qbeta.value))
+      qbeta_sample[name] = qbeta.value
+    else:
+      # TODO This assumes implicit variables are tf.Tensors existing
+      # on the Trace stack.
+      if align_latent(name) is not None:
+        pz = node.value
+        qz = posterior_trace[align_latent(Name)].value
+        pz_sample[name] = pz
+        qz_sample[name] = qz
+      else:
+        key = align_data(name)
+        if isinstance(key, int):
+          data_node = args[key]
+        elif kwargs.get(key, None) is not None:
+          data_node = kwargs.get(key)
+        px = node.value
+        qx = data_node.value
+        x_psample[name] = px
+        x_qsample[name] = qx
 
+  # Collect x' ~ p(x | z', beta') and x' ~ q(x).
   with tf.variable_scope("Disc"):
+    # TODO For now, this assumes the discriminator automagically knows
+    # how to index the dictionaries and computes some forward pass on
+    # them (which can vary across executions). Dictionaries should be
+    # improved to be more idiomatic.
     r_psample = discriminator(x_psample, pz_sample, qbeta_sample)
 
   with tf.variable_scope("Disc", reuse=True):
     r_qsample = discriminator(x_qsample, qz_sample, qbeta_sample)
 
   # Form ratio loss and ratio estimator.
-  if len(scale) <= 1:
-    loss_d = tf.reduce_mean(ratio_loss(r_psample, r_qsample))
-    scale = list(six.itervalues(scale))
-    scale = scale[0] if scale else 1.0
-    scaled_ratio = tf.reduce_sum(scale * r_qsample)
-  else:
-    loss_d = [tf.reduce_mean(ratio_loss(r_psample[key], r_qsample[key]))
-              for key in six.iterkeys(scale)]
-    loss_d = tf.reduce_sum(loss_d)
-    scaled_ratio = [tf.reduce_sum(scale[key] * r_qsample[key])
-                    for key in six.iterkeys(scale)]
-    scaled_ratio = tf.reduce_sum(scaled_ratio)
+  loss_d = 0.0
+  scaled_ratio = 0.0
+  for key, value in six.iteritems(r_qsample):
+    loss_d += tf.reduce_mean(ratio_loss(r_psample[key], value))
+    scaled_ratio += tf.reduce_sum(scale(key) * value)
 
   reg_terms_d = tf.losses.get_regularization_losses(scope="Disc")
   reg_terms_all = tf.losses.get_regularization_losses()
   reg_terms = [r for r in reg_terms_all if r not in reg_terms_d]
 
   # Form variational objective.
-  loss = -(pbeta_log_prob - qbeta_log_prob + scaled_ratio -
-           tf.reduce_sum(reg_terms))
+  loss = (qbeta_log_prob - pbeta_log_prob - scaled_ratio +
+          tf.reduce_sum(reg_terms))
   loss_d = loss_d + tf.reduce_sum(reg_terms_d)
-
-  var_list_d = tf.get_collection(
-      tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
-  if var_list is None:
-    var_list = [v for v in tf.trainable_variables() if v not in var_list_d]
-
-  grads = tf.gradients(loss, var_list)
-  grads_d = tf.gradients(loss_d, var_list_d)
-  grads_and_vars = list(zip(grads, var_list))
-  grads_and_vars_d = list(zip(grads_d, var_list_d))
-  return loss, grads_and_vars, loss_d, grads_and_vars_d
+  return loss, loss_d
 
 
-def log_loss(psample, qsample):
+def _log_loss(psample, qsample):
   """Point-wise log loss."""
   loss = tf.nn.sigmoid_cross_entropy_with_logits(
       labels=tf.ones_like(psample), logits=psample) + \
@@ -229,7 +211,7 @@ def log_loss(psample, qsample):
   return loss
 
 
-def hinge_loss(psample, qsample):
+def _hinge_loss(psample, qsample):
   """Point-wise hinge loss."""
   loss = tf.nn.relu(1.0 - psample) + tf.nn.relu(1.0 + qsample)
   return loss

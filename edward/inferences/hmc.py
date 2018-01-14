@@ -8,7 +8,6 @@ import tensorflow as tf
 from collections import OrderedDict
 from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import RandomVariable
-from edward.util import copy
 
 
 class HMC(MonteCarlo):

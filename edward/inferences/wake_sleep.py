@@ -5,14 +5,14 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
-from edward.inferences.inference import (check_and_maybe_build_data,
-    check_and_maybe_build_latent_vars, transform, check_and_maybe_build_dict, check_and_maybe_build_var_list)
-from edward.models import RandomVariable
-from edward.util import copy, get_descendants
+from edward.inferences.inference import (
+    call_function_up_to_args, make_intercept)
+from edward.models.core import Trace
 
 
-def wake_sleep(latent_vars=None, data=None, n_samples=1, phase_q='sleep',
-               auto_transform=True, scale=None, var_list=None, collections=None):
+def wake_sleep(model, variational, align_latent, align_data,
+               scale=lambda name: 1.0, n_samples=1, phase_q='sleep',
+               auto_transform=True, collections=None, *args, **kwargs):
   """Wake-Sleep algorithm [@hinton1995wake].
 
   Given a probability model $p(x, z; \\theta)$ and variational
@@ -68,69 +68,54 @@ def wake_sleep(latent_vars=None, data=None, n_samples=1, phase_q='sleep',
       (Unlike reparameterization gradients, the sample is held
       fixed.)
   """
-  latent_vars = check_and_maybe_build_latent_vars(latent_vars)
-  data = check_and_maybe_build_data(data)
-  latent_vars, _ = transform(latent_vars, auto_transform)
-  scale = check_and_maybe_build_dict(scale)
-  var_list = check_and_maybe_build_var_list(var_list, latent_vars, data)
-
   p_log_prob = [0.0] * n_samples
   q_log_prob = [0.0] * n_samples
-  base_scope = tf.get_default_graph().unique_name("inference") + '/'
   for s in range(n_samples):
-    # Form dictionary in order to replace conditioning on prior or
-    # observed variable with conditioning on a specific value.
-    scope = base_scope + tf.get_default_graph().unique_name("q_sample")
-    dict_swap = {}
-    for x, qx in six.iteritems(data):
-      if isinstance(x, RandomVariable):
-        if isinstance(qx, RandomVariable):
-          qx_copy = copy(qx, scope=scope)
-          dict_swap[x] = qx_copy.value
-        else:
-          dict_swap[x] = qx
+    with Trace() as posterior_trace:
+      call_function_up_to_args(variational, *args, **kwargs)
+    intercept = make_intercept(
+        posterior_trace, align_data, align_latent, args, kwargs)
+    with Trace(intercept=intercept) as model_trace:
+      call_function_up_to_args(model, *args, **kwargs)
 
-    # Sample z ~ q(z), then compute log p(x, z).
-    q_dict_swap = dict_swap.copy()
-    for z, qz in six.iteritems(latent_vars):
-      # Copy q(z) to obtain new set of posterior samples.
-      qz_copy = copy(qz, scope=scope)
-      q_dict_swap[z] = qz_copy.value
-      if phase_q != 'sleep':
+    for name, node in six.iteritems(model_trace):
+      rv = node.value
+      scale_factor = scale(name)
+      if align_data(name) is not None or align_latent(name) is not None:
+        p_log_prob[s] += tf.reduce_sum(scale_factor * rv.log_prob(rv.value))
+      if phase_q != 'sleep' and align_latent(name) is not None:
         # If not sleep phase, compute log q(z).
+        qz = posterior_trace[align_latent(name)].value
         q_log_prob[s] += tf.reduce_sum(
-            scale.get(z, 1.0) *
-            qz_copy.log_prob(tf.stop_gradient(q_dict_swap[z])))
-
-    for z in six.iterkeys(latent_vars):
-      z_copy = copy(z, q_dict_swap, scope=scope)
-      p_log_prob[s] += tf.reduce_sum(
-          scale.get(z, 1.0) * z_copy.log_prob(q_dict_swap[z]))
-
-    for x in six.iterkeys(data):
-      if isinstance(x, RandomVariable):
-        x_copy = copy(x, q_dict_swap, scope=scope)
-        p_log_prob[s] += tf.reduce_sum(
-            scale.get(x, 1.0) * x_copy.log_prob(q_dict_swap[x]))
+            scale_factor * qz.log_prob(tf.stop_gradient(qz.value)))
 
     if phase_q == 'sleep':
-      # Sample z ~ p(z), then compute log q(z).
-      scope = base_scope + tf.get_default_graph().unique_name("p_sample")
-      p_dict_swap = dict_swap.copy()
-      for z, qz in six.iteritems(latent_vars):
-        # Copy p(z) to obtain new set of prior samples.
-        z_copy = copy(z, scope=scope)
-        p_dict_swap[qz] = z_copy.value
-      for qz in six.itervalues(latent_vars):
-        qz_copy = copy(qz, p_dict_swap, scope=scope)
+      with Trace() as model_trace:
+        call_function_up_to_args(model, *args, **kwargs)
+      intercept = _make_sleep_intercept(
+          model_trace, align_data, align_latent, args, kwargs)
+      with Trace(intercept=intercept) as posterior_trace:
+        call_function_up_to_args(variational, *args, **kwargs)
+
+      # Build dictionary to return scale factor for a posterior
+      # variable via its corresponding prior. The implementation is
+      # naive.
+      scale_posterior = {}
+      for name, node in six.iteritems(model_trace):
+        rv = node.value
+        if align_latent(name) is not None:
+          qz = posterior_trace[align_latent(name)].value
+          scale_posterior[qz] = rv
+
+      for name, node in six.iteritems(posterior_trace):
+        rv = node.value
+        scale_factor = scale_posterior[rv]
         q_log_prob[s] += tf.reduce_sum(
-            scale.get(z, 1.0) *
-            qz_copy.log_prob(tf.stop_gradient(p_dict_swap[qz])))
+            scale_factor * rv.log_prob(tf.stop_gradient(rv.value)))
 
   p_log_prob = tf.reduce_mean(p_log_prob)
   q_log_prob = tf.reduce_mean(q_log_prob)
   reg_penalty = tf.reduce_sum(tf.losses.get_regularization_losses())
-
   if collections is not None:
     tf.summary.scalar("loss/p_log_prob", p_log_prob,
                       collections=collections)
@@ -141,12 +126,14 @@ def wake_sleep(latent_vars=None, data=None, n_samples=1, phase_q='sleep',
 
   loss_p = -p_log_prob + reg_penalty
   loss_q = -q_log_prob + reg_penalty
+  return loss_p, loss_q
 
-  q_rvs = list(six.itervalues(latent_vars))
-  q_vars = [v for v in var_list
-            if len(get_descendants(tf.convert_to_tensor(v), q_rvs)) != 0]
-  q_grads = tf.gradients(loss_q, q_vars)
-  p_vars = [v for v in var_list if v not in q_vars]
-  p_grads = tf.gradients(loss_p, p_vars)
-  grads_and_vars = list(zip(q_grads, q_vars)) + list(zip(p_grads, p_vars))
-  return loss_p, grads_and_vars
+
+def _make_sleep_intercept(trace, align_data, align_latent, args, kwargs):
+  def _intercept(f, *fargs, **fkwargs):
+    """Set variational distribution's sample value to prior's."""
+    name = fkwargs.get('name', None)
+    z = trace[align_latent(name)].value
+    fkwargs['value'] = z.value
+    return f(*fargs, **fkwargs)
+  return _intercept

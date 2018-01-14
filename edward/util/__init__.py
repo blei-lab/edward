@@ -10,7 +10,6 @@ from edward.util.tensorflow import *
 from tensorflow.python.util.all_util import remove_undocumented
 
 _allowed_symbols = [
-    'copy',
     'get_control_variate_coef',
     'transform',
 ]

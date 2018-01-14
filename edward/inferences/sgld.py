@@ -7,7 +7,6 @@ import tensorflow as tf
 
 from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import RandomVariable
-from edward.util import copy
 
 
 class SGLD(MonteCarlo):

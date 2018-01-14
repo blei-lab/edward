@@ -5,10 +5,9 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
-from edward.inferences.inference import (check_and_maybe_build_data,
-    check_and_maybe_build_latent_vars, transform, check_and_maybe_build_dict, check_and_maybe_build_var_list)
-from edward.models import RandomVariable, PointMass
-from edward.util import copy, transform
+from edward.inferences.inference import (
+    call_function_up_to_args, make_intercept)
+from edward.models.core import Trace
 
 try:
   from tensorflow.contrib.distributions import bijectors
@@ -16,8 +15,9 @@ except Exception as e:
   raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
-def map(latent_vars=None, data=None,
-        auto_transform=True, scale=None, var_list=None, collections=None):
+def map(model, variational, align_latent, align_data,
+        scale=lambda name: 1.0, auto_transform=True, collections=None,
+        *args, **kwargs):
   """Maximum a posteriori.
 
   This class implements gradient-based optimization to solve the
@@ -95,62 +95,26 @@ def map(latent_vars=None, data=None,
 
   $- \log p(x,z).$
   """
-  if isinstance(latent_vars, list):
-    with tf.variable_scope(None, default_name="posterior"):
-      latent_vars_dict = {}
-      for z in latent_vars:
-        # Define point masses to have constrained support and
-        # unconstrained free parameters.
-        batch_event_shape = z.batch_shape.concatenate(z.event_shape)
-        params = tf.Variable(tf.random_normal(batch_event_shape))
-        if hasattr(z, 'support'):
-          z_transform = transform(z)
-          if hasattr(z_transform, 'bijector'):
-            params = z_transform.bijector.inverse(params)
-        latent_vars_dict[z] = PointMass(params=params)
-      latent_vars = latent_vars_dict
-      del latent_vars_dict
-  elif isinstance(latent_vars, dict):
-    for qz in six.itervalues(latent_vars):
-      if not isinstance(qz, PointMass):
-        raise TypeError("Posterior approximation must consist of only "
-                        "PointMass random variables.")
-  latent_vars = check_and_maybe_build_latent_vars(latent_vars)
-  data = check_and_maybe_build_data(data)
-  latent_vars, _ = transform(latent_vars, auto_transform)
-  scale = check_and_maybe_build_dict(scale)
-  var_list = check_and_maybe_build_var_list(var_list, latent_vars, data)
-
-  # Form dictionary in order to replace conditioning on prior or
-  # observed variable with conditioning on a specific value.
-  scope = tf.get_default_graph().unique_name("inference")
-  dict_swap = {z: qz.value
-               for z, qz in six.iteritems(latent_vars)}
-  for x, qx in six.iteritems(data):
-    if isinstance(x, RandomVariable):
-      if isinstance(qx, RandomVariable):
-        dict_swap[x] = qx.value
-      else:
-        dict_swap[x] = qx
+  with Trace() as posterior_trace:
+    call_function_up_to_args(variational, *args, **kwargs)
+  intercept = make_intercept(
+      posterior_trace, align_data, align_latent, args, kwargs)
+  with Trace(intercept=intercept) as model_trace:
+    call_function_up_to_args(model, *args, **kwargs)
 
   p_log_prob = 0.0
-  for z in six.iterkeys(latent_vars):
-    z_copy = copy(z, dict_swap, scope=scope)
-    p_log_prob += tf.reduce_sum(
-        scale.get(z, 1.0) * z_copy.log_prob(dict_swap[z]))
-
-  for x in six.iterkeys(data):
-    if isinstance(x, RandomVariable):
-      if dict_swap:
-        x_copy = copy(x, dict_swap, scope=scope)
-      else:
-        x_copy = x
-      p_log_prob += tf.reduce_sum(
-          scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
+  for name, node in six.iteritems(model_trace):
+    if align_latent(name) is not None or align_data(name) is not None:
+      rv = node.value
+      scale_factor = scale(name)
+      p_log_prob += tf.reduce_sum(scale_factor * rv.log_prob(rv.value))
 
   reg_penalty = tf.reduce_sum(tf.losses.get_regularization_losses())
-  loss = -p_log_prob + reg_penalty
+  if collections is not None:
+    tf.summary.scalar("loss/p_log_prob", p_log_prob,
+                      collections=collections)
+    tf.summary.scalar("loss/reg_penalty", reg_penalty,
+                      collections=collections)
 
-  grads = tf.gradients(loss, var_list)
-  grads_and_vars = list(zip(grads, var_list))
-  return loss, grads_and_vars
+  loss = -p_log_prob + reg_penalty
+  return loss
