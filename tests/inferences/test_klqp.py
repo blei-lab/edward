@@ -6,7 +6,8 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Bernoulli, Normal, Dirichlet, Multinomial
+from edward.models import Bernoulli, Normal, Dirichlet, Multinomial, \
+  Gamma, Poisson
 
 
 class test_klqp_class(tf.test.TestCase):
@@ -42,6 +43,23 @@ class test_klqp_class(tf.test.TestCase):
       new_t, new_variables = sess.run([inference.t, variables])
       self.assertEqual(new_t, 0)
       self.assertNotEqual(old_variables, new_variables)
+
+  def _test_poisson_gamma(self, Inference, *args, **kwargs):
+      x_data = np.array([2, 8, 3, 6, 1], dtype=np.int32)
+
+      rate = Gamma(5.0, 1.0)
+      x = Poisson(rate=rate, sample_shape=5)
+
+      qalpha = tf.Variable(tf.random_normal([]))
+      qbeta = tf.Variable(tf.random_normal([]))
+      qgamma = Gamma(qalpha, qbeta)
+
+      # sum(x_data) = 20
+      # len(x_data) = 5
+      # analytic solution: Gamma(alpha=5+20, beta=1+5)
+      inference = Inference({rate: qgamma}, data={x: x_data})
+
+      inference.run(*args, **kwargs)
 
   def _test_multinomial_dirichlet(self, Inference, *args, **kwargs):
       x_data = tf.constant([2, 7, 1], dtype=np.float32)
@@ -124,8 +142,10 @@ class test_klqp_class(tf.test.TestCase):
     self._test_model_parameter(ed.ScoreRBKLqp, n_iter=50)
 
   def test_rejection_sampling_klqp(self):
-    self._test_multinomial_dirichlet(
-      ed.RejectionSamplingKLqp, n_samples=5, n_iter=5000)
+    self._test_poisson_gamma(
+      ed.ReparameterizationKLqp, n_samples=5, n_iter=5000)
+    # self._test_multinomial_dirichlet(
+    #   ed.ReparameterizationKLqp, n_samples=5, n_iter=5000)
 
 
 if __name__ == '__main__':
