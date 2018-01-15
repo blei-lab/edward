@@ -616,7 +616,7 @@ class ScoreRBKLqp(VariationalInference):
     return build_score_rb_loss_and_gradients(self, var_list)
 
 
-# TODO: you can probably make another base class?
+# TODO: you can probably make another base class that implements a `sample` method?
 class RejectionSamplingKLqp(VariationalInference):
 
     """
@@ -654,19 +654,6 @@ class RejectionSamplingKLqp(VariationalInference):
 
     def build_loss_and_gradients(self, var_list):
       return build_rejection_sampling_loss_and_gradients(self, var_list)
-
-    # TODO: pass in the real `qalpha` and `qbeta`
-    # TODO: pass in the real `qz`
-    def sample(self, qz, alpha=5, beta=5):
-      qz_class = qz.__class__
-      while True:
-        epsilon = self.rejection_sampler_vars[qz_class]['epsilon_likelihood'].value()
-        z = self.rejection_sampler_vars[qz_class]['reparam_func'](epsilon)
-        eps_prob = self.rejection_sampler_vars[qz_class]['epsilon_likelihood'].prob(epsilon)
-        qz_prob = qz.prob(z)
-        random_uniform = tf.random_uniform([])
-        if random_uniform * self.rejection_sampler_vars[qz_class]['m'] * eps_prob <= qz_prob:
-          return epsilon
 
 
 def build_reparam_loss_and_gradients(inference, var_list):
@@ -1204,19 +1191,38 @@ def build_rejection_sampling_loss_and_gradients(inference, var_list):
 
       for z, qz in six.iteritems(inference.latent_vars):
         # Copy q(z) to obtain new set of posterior samples.
-        # You need to check if the things need to be RSVI'd in the first place
-        qz_class = qz.__class__
-        epsilon_likelihood = self.rejection_sampler_vars[qz_class]['epsilon_likelihood']
         qz_copy = copy(qz, scope=scope)
 
+        # Of course, this will evaluate to `True`. We just do this as a simple first pass.
         if 'rsvi':
           # --- RSVI
-          epsilon = self.sample(qz_copy)
-          z = self.rejection_sampler_vars[qz_class]['reparam_func'](epsilon)
+
+          # Get variable shortnames
+          qz_class = qz.__class__
+          epsilon_likelihood = inference.rejection_sampler_vars[qz_class]['epsilon_likelihood']
+          reparam_func = inference.rejection_sampler_vars[qz_class]['reparam_func']
+          m = inference.rejection_sampler_vars[qz_class]['m']
+          alpha = qz.parameters['concentration']
+          beta = qz.parameters['rate']
+
+          # Sample
+
+          # TODO: pass in the real `qalpha` and `qbeta`
+          # TODO: pass in the real `qz`
+          epsilon = epsilon_likelihood.value()
+          sample = reparam_func(epsilon, alpha, beta)
+          eps_prob = epsilon_likelihood.prob(epsilon)
+          qz_prob = qz.prob(sample)
+          random_uniform = tf.random_uniform([])
+
+          # We need this line. However, let's just accept for now.
+          # if random_uniform * m * eps_prob <= qz_prob:
+
           # RSVI ---
         else:
           z = qz_copy.value()
-        dict_swap[z] = z
+
+        dict_swap[z] = sample
 
         q_log_prob[s] += tf.reduce_sum(
             inference.scale.get(z, 1.0) * qz_copy.log_prob(dict_swap[z]))
@@ -1254,7 +1260,13 @@ def build_rejection_sampling_loss_and_gradients(inference, var_list):
 
     loss = -(p_log_prob + q_entropy - reg_penalty)
 
-    # Here you have to carefully return the gradients; check what we do elsewhere
-    grads = tf.gradients(loss, var_list)
+    # RSVI gradient components
+    model_grad = tf.gradients(p_log_prob, sample)[0]
+    q_entropy_grad = tf.gradients(q_entropy, var_list)
+    g_rep = [model_grad * grad for grad in tf.gradients(sample, var_list)]
+    g_cor = [p_log_prob * grad for grad in tf.gradients(q_log_prob - r_log_prob, var_list)]
+    grad_summands = zip(*[g_rep, g_cor, q_entropy_grad])
+
+    grads = [tf.reduce_sum(summand) for summand in grad_summands]
     grads_and_vars = list(zip(grads, var_list))
     return loss, grads_and_vars
