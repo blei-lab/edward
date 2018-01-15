@@ -50,14 +50,41 @@ class test_klqp_class(tf.test.TestCase):
       rate = Gamma(5.0, 1.0)
       x = Poisson(rate=rate, sample_shape=5)
 
-      qalpha = tf.Variable(tf.random_normal([]))
-      qbeta = tf.Variable(tf.random_normal([]))
+      qalpha = tf.nn.softplus(tf.Variable(tf.random_normal([])))
+      qbeta = tf.nn.softplus(tf.Variable(tf.random_normal([])))
       qgamma = Gamma(qalpha, qbeta)
+
+      # Gamma rejection sampler variables
+      def gamma_reparam_func(epsilon, alpha, beta):
+        def _gamma_reparam_func(alpha, beta, epsilon=epsilon)
+          a = alpha - (1. / 3)
+          b = np.sqrt(9 * alpha - 3)
+          c = 1 + (epsilon / b)
+          z = a * c**3
+          return z
+
+        if alpha < 1:
+          z_tilde = _gamma_reparam_func(alpha=alpha + 1, beta=beta)
+          u = np.random.uniform()
+          z = u ** (1 / alpha) * z_tilde
+        else:
+          z = _gamma_reparam_func(alpha=alpha, beta=beta)
+        if beta != 1:
+          z /= beta
+
+        return z
+
+      gamma_rejection_sampler_vars = {
+        'reparam_func': gamma_reparam_func,
+        'epsilon_likelihood': Normal(loc=0.0, scale=1.0),
+        'm': 10.
+      }
 
       # sum(x_data) = 20
       # len(x_data) = 5
       # analytic solution: Gamma(alpha=5+20, beta=1+5)
-      inference = Inference({rate: qgamma}, data={x: x_data})
+      inference = Inference({rate: qgamma}, data={x: x_data},
+          rejection_sampler_vars={Gamma: gamma_rejection_sampler_vars})
 
       inference.run(*args, **kwargs)
 
@@ -143,7 +170,7 @@ class test_klqp_class(tf.test.TestCase):
 
   def test_rejection_sampling_klqp(self):
     self._test_poisson_gamma(
-      ed.ReparameterizationKLqp, n_samples=5, n_iter=5000)
+      ed.RejectionSamplingKLqp, n_samples=1, n_iter=5000)
     # self._test_multinomial_dirichlet(
     #   ed.ReparameterizationKLqp, n_samples=5, n_iter=5000)
 
