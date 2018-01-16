@@ -20,7 +20,6 @@ _allowed_symbols = [
     'get_control_variate_coef',
     'get_descendants',
     'get_parents',
-    'get_session',
     'get_siblings',
     'get_variables',
     'is_independent',

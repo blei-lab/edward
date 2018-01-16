@@ -7,7 +7,6 @@ import tensorflow as tf
 
 from edward.inferences.inference import (check_and_maybe_build_data,
     check_and_maybe_build_latent_vars, transform, check_and_maybe_build_dict, check_and_maybe_build_var_list)
-from edward.util import get_session
 
 
 def bigan_inference(latent_vars=None, data=None, discriminator=None,

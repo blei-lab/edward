@@ -2,41 +2,9 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import sys
 import tensorflow as tf
 
 from edward.models.random_variable import _RANDOM_VARIABLE_COLLECTION
-
-
-def get_session():
-  """Get the globally defined TensorFlow session.
-
-  If the session is not already defined, then the function will create
-  a global session.
-
-  Returns:
-    _ED_SESSION: tf.InteractiveSession.
-  """
-  global _ED_SESSION
-  if tf.get_default_session() is None:
-    _ED_SESSION = tf.InteractiveSession()
-  else:
-    _ED_SESSION = tf.get_default_session()
-
-  save_stderr = sys.stderr
-  try:
-    import os
-    sys.stderr = open(os.devnull, 'w')  # suppress keras import
-    from keras import backend as K
-    sys.stderr = save_stderr
-    have_keras = True
-  except ImportError:
-    sys.stderr = save_stderr
-    have_keras = False
-  if have_keras:
-    K.set_session(_ED_SESSION)
-
-  return _ED_SESSION
 
 
 def random_variables(graph=None):
