@@ -9,6 +9,7 @@ from edward.inferences.conjugacy import *
 from edward.inferences.gan_inference import *
 from edward.inferences.gibbs import *
 from edward.inferences.hmc import *
+from edward.inferences.hmcda import *
 from edward.inferences.implicit_klqp import *
 from edward.inferences.inference import *
 from edward.inferences.klpq import *
@@ -46,6 +47,7 @@ _allowed_symbols = [
     'MAP',
     'MetropolisHastings',
     'MonteCarlo',
+    'HMCDA',
     'SGLD',
     'SGHMC',
     'VariationalInference',
