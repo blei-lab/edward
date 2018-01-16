@@ -2,8 +2,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import numpy as np
-import six
 import sys
 import tensorflow as tf
 
@@ -54,20 +52,3 @@ def random_variables(graph=None):
     graph = tf.get_default_graph()
 
   return _RANDOM_VARIABLE_COLLECTION[graph]
-
-
-def set_seed(x):
-  """Set seed for both NumPy and TensorFlow.
-
-  Args:
-    x: int, float.
-      seed
-  """
-  node_names = list(six.iterkeys(tf.get_default_graph()._nodes_by_name))
-  if len(node_names) > 0 and node_names != ['keras_learning_phase']:
-    raise RuntimeError("Seeding is not supported after initializing "
-                       "part of the graph. "
-                       "Please move set_seed to the beginning of your code.")
-
-  np.random.seed(x)
-  tf.set_random_seed(x)
