@@ -5,6 +5,7 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
+from edward.inferences import docstrings as doc
 from edward.inferences.inference import (
     call_function_up_to_args, make_intercept)
 from edward.models.core import Trace
@@ -15,65 +16,32 @@ except Exception as e:
   raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
+@doc.set_doc(
+    args=(doc.arg_model +
+          doc.arg_variational +
+          doc.arg_align_latent +
+          doc.arg_align_data +
+          doc.arg_scale +
+          doc.arg_n_samples +
+          doc.arg_auto_transform +
+          doc.arg_collections +
+          doc.arg_args_kwargs),
+    returns=doc.return_loss_surrogate_loss,
+    notes_model_parameters=doc.notes_model_parameters,
+    notes_conditional_inference=doc.notes_conditional_inference_samples,
+    notes_regularization_losses=doc.notes_regularization_losses)
 def klpq(model, variational, align_latent, align_data,
          scale=lambda name: 1.0, n_samples=1, auto_transform=True,
          collections=None, *args, **kwargs):
   """Variational inference with the KL divergence
 
-  $\\text{KL}( p(z \mid x) \| q(z) ).$
+  $\\text{KL}( p(z \mid x) \| q(z) )
+    = \mathbb{E}_{p(z \mid x)} [ \log p(z \mid x) - \log q(z; \lambda) ]$.
 
-  To perform the optimization, this class uses a technique from
+  To perform the optimization, this function uses a technique from
   adaptive importance sampling [@oh1992adaptive].
 
-  #### Notes
-
-  `KLpq` also optimizes any model parameters $p(z\mid x;
-  \\theta)$. It does this by variational EM, maximizing
-
-  $\mathbb{E}_{p(z \mid x; \lambda)} [ \log p(x, z; \\theta) ]$
-
-  with respect to $\\theta$.
-
-  In conditional inference, we infer $z` in $p(z, \\beta
-  \mid x)$ while fixing inference over $\\beta$ using another
-  distribution $q(\\beta)$. During gradient calculation, instead
-  of using the model's density
-
-  $\log p(x, z^{(s)}), z^{(s)} \sim q(z; \lambda),$
-
-  for each sample $s=1,\ldots,S$, `KLpq` uses
-
-  $\log p(x, z^{(s)}, \\beta^{(s)}),$
-
-  where $z^{(s)} \sim q(z; \lambda)$ and$\\beta^{(s)}
-  \sim q(\\beta)$.
-
-  The objective function also adds to itself a summation over all
-  tensors in the `REGULARIZATION_LOSSES` collection.
-  """
-  """Create an inference algorithm.
-
-  Args:
-    latent_vars: list of RandomVariable or
-                 dict of RandomVariable to RandomVariable.
-      Collection of random variables to perform inference on. If
-      list, each random variable will be implictly optimized using a
-      `Normal` random variable that is defined internally with a
-      free parameter per location and scale and is initialized using
-      standard normal draws. The random variables to approximate
-      must be continuous.
-    n_samples: int, optional.
-      Number of samples from variational model for calculating
-      stochastic gradients.
-  """
-  """Build loss function
-
-  $\\text{KL}( p(z \mid x) \| q(z) )
-    = \mathbb{E}_{p(z \mid x)} [ \log p(z \mid x) - \log q(z; \lambda) ]$
-
-  and stochastic gradients based on importance sampling.
-
-  The loss function can be estimated as
+  The loss function can be estimated up to a constant as
 
   $\sum_{s=1}^S [
     w_{\\text{norm}}(z^s; \lambda) (\log p(x, z^s) - \log q(z^s; \lambda) ],$
@@ -90,6 +58,43 @@ def klpq(model, variational, align_latent, align_data,
 
   $- \sum_{s=1}^S [
     w_{\\text{norm}}(z^s; \lambda) \\nabla_{\lambda} \log q(z^s; \lambda) ].$
+
+  Args:
+  @{args}
+
+  Returns:
+  @{returns}
+
+  #### Notes
+
+  Probabilistic programs may have random variables which vary across
+  executions. The algorithm returns calculations following `n_samples`
+  executions of the model and variational programs.
+
+  @{notes_model_parameters}
+
+  @{notes_conditional_inference}
+
+  @{notes_regularization_losses}
+
+  #### Examples
+
+  ```python
+  def model():
+    mu = Normal(loc=0.0, scale=1.0, name="mu")
+    x = Normal(loc=mu, scale=1.0, sample_shape=10, name="x")
+
+  def variational():
+    qmu = Normal(loc=tf.get_variable("loc", []),
+                 scale=tf.nn.softplus(tf.get_variable("shape", [])),
+                 name="qmu")
+
+  loss, surrogate_loss = ed.klpq(
+      model, variational,
+      align_latent=lambda name: "qmu" if name == "mu" else None,
+      align_data=lambda name: "x" if name == "x" else None,
+      x=x_data)
+  ```
   """
   p_log_prob = [0.0] * n_samples
   q_log_prob = [0.0] * n_samples

@@ -5,9 +5,19 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
+from edward.inferences import docstrings as doc
 from edward.inferences.inference import call_function_up_to_args
 
 
+@doc.set_doc(
+    args=(doc.arg_model +
+          doc.arg_discriminator +
+          doc.arg_align_data +
+          doc.arg_collections +
+          doc.arg_args_kwargs)[:-1],
+    returns=doc.return_loss_loss_d,
+    notes_discriminator_scope=doc.notes_discriminator_scope,
+    notes_regularization_losses=doc.notes_regularization_losses)
 def gan_inference(model, discriminator, align_data,
                   collections=None, *args, **kwargs):
   """Parameter estimation with GAN-style training
@@ -17,45 +27,37 @@ def gan_inference(model, discriminator, align_data,
   models. These models do not require a tractable density and assume
   only a program that generates samples.
 
+  Args:
+  @{args}
+
+  `model` must return the generated data.
+
+  Returns:
+  @{returns}
+
   #### Notes
 
-  `GANInference` does not support latent variable inference. Note
-  that GAN-style training also samples from the prior: this does not
-  work well for latent variables that are shared across many data
-  points (global variables).
+  @{notes_discriminator_scope}
 
-  In building the computation graph for inference, the
-  discriminator's parameters can be accessed with the variable scope
-  "Disc".
-
-  GANs also only work for one observed random variable in `data`.
-
-  The objective function also adds to itself a summation over all
-  tensors in the `REGULARIZATION_LOSSES` collection.
+  @{notes_regularization_losses}
 
   #### Examples
 
   ```python
-  z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
-  x = generative_network(z)
+  def model():
+    z = Normal(loc=0.0, scale=1.0, sample_shape=[256, 25])
+    x = generative_network(z, name="x")
+    return x
 
-  inference = ed.GANInference({x: x_data}, discriminator)
+  def discriminator(x):
+    net = tf.layers.dense(x, 256, activation=tf.nn.relu)
+    return tf.layers.dense(net, 1, activation=tf.sigmoid)
+
+  loss, loss_d = ed.gan_inference(
+      model, discriminator,
+      align_data=lambda name: "x_data" if name == "x" else None,
+      x_data=x_data)
   ```
-  """
-  """Create an inference algorithm.
-
-  Args:
-    data: dict.
-      Data dictionary which binds observed variables (of type
-      `RandomVariable` or `tf.Tensor`) to their realizations (of
-      type `tf.Tensor`).  It can also bind placeholders (of type
-      `tf.Tensor`) used in the model to their realizations.
-    discriminator: function.
-      Function (with parameters) to discriminate samples. It should
-      output logit probabilities (real-valued) and not probabilities
-      in $[0, 1]$.
-
-  `model` must return the generated data.
   """
   x_fake = call_function_up_to_args(model, *args, **kwargs)
   key = align_data(x_fake.name.split(':')[0])

@@ -5,47 +5,77 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
+from edward.inferences import docstrings as doc
 from edward.inferences.inference import call_function_up_to_args
 from edward.models.core import Trace
 
 
-def bigan_inference(model, variational, discriminator, align_data,
-                    align_latent, collections=None, *args, **kwargs):
+@doc.set_doc(
+    args=(doc.arg_model +
+          doc.arg_variational +
+          doc.arg_discriminator +
+          doc.arg_align_latent +
+          doc.arg_align_data +
+          doc.arg_collections +
+          doc.arg_args_kwargs)[:-1],
+    returns=doc.return_loss_loss_d,
+    notes_discriminator_scope=doc.notes_discriminator_scope,
+    notes_regularization_losses=doc.notes_regularization_losses)
+def bigan_inference(model, variational, discriminator, align_latent,
+                    align_data, collections=None, *args, **kwargs):
   """Adversarially Learned Inference [@dumuolin2017adversarially] or
   Bidirectional Generative Adversarial Networks [@donahue2017adversarial]
   for joint learning of generator and inference networks.
+
+  The function matches a mapping from data to latent variables and a
+  mapping from latent variables to data through a joint discriminator.
 
   Works for the class of implicit (and differentiable) probabilistic
   models. These models do not require a tractable density and assume
   only a program that generates samples.
 
+  Args:
+  @{args}
+
+  `align_latent` must only align one random variable in `model` and
+  `variational`. `model` must return the generated data. `variational`
+  assumes a random variable output and not an implicit density (or at
+  least recorded on trace).
+
+  Returns:
+  @{returns}
+
   #### Notes
 
-  `BiGANInference` matches a mapping from data to latent variables and a
-  mapping from latent variables to data through a joint
-  discriminator.
+  @{notes_discriminator_scope}
 
-  In building the computation graph for inference, the
-  discriminator's parameters can be accessed with the variable scope
-  "Disc".
-  In building the computation graph for inference, the
-  encoder and decoder parameters can be accessed with the variable scope
-  "Gen".
-
-  The objective function also adds to itself a summation over all tensors
-  in the `REGULARIZATION_LOSSES` collection.
+  @{notes_regularization_losses}
 
   #### Examples
 
   ```python
-  with tf.variable_scope("Gen"):
-    xf = gen_data(z_ph)
-    zf = gen_latent(x_ph)
-  inference = ed.BiGANInference({z_ph: zf}, {xf: x_ph}, discriminator)
-  ```
+  def model():
+    z = Normal(loc=0.0, scale=1.0, sample_shape=[256, 25], name="z")
+    x = generative_network(z, name="x")
+    return x
 
-  `align_latent` must only align one random variable in `model` and
-  `variational`. `model` must return the generated data.
+  def variational(x_data):
+    net = tf.layers.dense(x_data, 25 * 2)
+    qz = Normal(loc=net[:, :25],
+                scale=tf.nn.softplus(net[:, 25:]),
+                sample_shape=[256,],
+                name="qz")
+
+  def discriminator(x):
+    net = tf.layers.dense(x, 256, activation=tf.nn.relu)
+    return tf.layers.dense(net, 1, activation=tf.sigmoid)
+
+  loss, loss_d = ed.bigan_inference(
+      model, variational, discriminator,
+      align_latent=lambda name: "qz" if name == "z" else None,
+      align_data=lambda name: "x_data" if name == "x" else None,
+      x_data=x_data)
+  ```
   """
   with Trace() as posterior_trace:
     call_function_up_to_args(variational, *args, **kwargs)

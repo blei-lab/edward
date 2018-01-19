@@ -5,11 +5,24 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
+from edward.inferences import docstrings as doc
 from edward.inferences.inference import (
     call_function_up_to_args, make_intercept)
 from edward.models.core import Trace
 
 
+@doc.set_doc(
+    args_part_one=(doc.arg_model +
+                   doc.arg_variational +
+                   doc.arg_align_latent +
+                   doc.arg_align_data +
+                   doc.arg_scale +
+                   doc.arg_n_samples)[:-1],
+    args_part_two=(doc.arg_auto_transform +
+                   doc.arg_collections +
+                   doc.arg_args_kwargs)[:-1],
+    notes_conditional_inference=doc.notes_conditional_inference_samples,
+    notes_regularization_losses=doc.notes_regularization_losses)
 def wake_sleep(model, variational, align_latent, align_data,
                scale=lambda name: 1.0, n_samples=1, phase_q='sleep',
                auto_transform=True, collections=None, *args, **kwargs):
@@ -38,35 +51,50 @@ def wake_sleep(model, variational, align_latent, align_data,
   corresponds to minimizing the reverse KL $\\text{KL}(p\|q)$ in
   expectation over the data distribution.
 
-  #### Notes
-
-  In conditional inference, we infer $z$ in $p(z, \\beta
-  \mid x)$ while fixing inference over $\\beta$ using another
-  distribution $q(\\beta)$. During gradient calculation, instead
-  of using the model's density
-
-  $\log p(x, z^{(s)}), z^{(s)} \sim q(z; \lambda),$
-
-  for each sample $s=1,\ldots,S$, `WakeSleep` uses
-
-  $\log p(x, z^{(s)}, \\beta^{(s)}),$
-
-  where $z^{(s)} \sim q(z; \lambda)$ and $\\beta^{(s)}
-  \sim q(\\beta)$.
-
-  The objective function also adds to itself a summation over all
-  tensors in the `REGULARIZATION_LOSSES` collection.
-  """
-  """
   Args:
-    n_samples: int, optional.
-      Number of samples for calculating stochastic gradients during
-      wake and sleep phases.
-    phase_q: str, optional.
+  @{args_part_one}
+    phase_q: str.
       Phase for updating parameters of q. If 'sleep', update using
       a sample from p. If 'wake', update using a sample from q.
       (Unlike reparameterization gradients, the sample is held
       fixed.)
+  @{args_part_two}
+
+  Returns:
+    Pair of scalar tf.Tensors, representing losses for training p
+    and q respectively.
+
+  #### Notes
+
+  Probabilistic programs may have random variables which vary across
+  executions. The algorithm returns calculations following `n_samples`
+  executions of the model and variational programs.
+
+  @{notes_conditional_inference}
+
+  @{notes_regularization_losses}
+
+  #### Examples
+
+  ```python
+  def model():
+    z = Normal(loc=0.0, scale=1.0, sample_shape=[256, 25], name="z")
+    net = tf.layers.dense(z, 512, activation=tf.nn.relu)
+    net = tf.layers.dense(net, 28 * 28, activation=None)
+    x = Normal(loc=net, scale=1.0, name="x")
+
+  def variational(x):
+    net = tf.layers.dense(x, 25 * 2)
+    qz = Normal(loc=net[:, :25],
+                scale=tf.nn.softplus(net[:, 25:]),
+                name="qz")
+
+  loss_p, loss_q = ed.wake_sleep(
+      model, variational,
+      align_latent=lambda name: "qz" if name == "z" else None,
+      align_data=lambda name: "x" if name == "x" else None,
+      x=x_data)
+  ```
   """
   p_log_prob = [0.0] * n_samples
   q_log_prob = [0.0] * n_samples

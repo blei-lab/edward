@@ -5,9 +5,19 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
+from edward.inferences import docstrings as doc
 from edward.inferences.inference import call_function_up_to_args
 
 
+@doc.set_doc(
+    args_part_one=(doc.arg_model +
+                   doc.arg_discriminator +
+                   doc.arg_align_data)[:-1],
+    args_part_twoe=(doc.arg_collections +
+                    doc.arg_args_kwargs)[:-1],
+    returns=doc.return_loss_loss_d,
+    notes_discriminator_scope=doc.notes_discriminator_scope,
+    notes_regularization_losses=doc.notes_regularization_losses)
 def wgan_inference(model, discriminator, align_data,
                    penalty=10.0, collections=None, *args, **kwargs):
   """Parameter estimation with GAN-style training
@@ -18,50 +28,54 @@ def wgan_inference(model, discriminator, align_data,
   models. These models do not require a tractable density and assume
   only a program that generates samples.
 
+  Args:
+  @{args_part_one}
+    penalty: float.
+      Scalar value to enforce gradient penalty that ensures the
+      gradients have norm equal to 1 [@gulrajani2017improved]. Set to
+      None (or 0.0) if using no penalty.
+  @{args_part_two}
+
+  `model` must return the generated data.
+
+  Returns:
+  @{returns}
+
+  #### Notes
+
   The original WGAN clips weight parameters of the discriminator as an
   approximation to the 1-Lipschitz constraint. To clip weights, one
   must manually add a clipping op and then call it after each gradient
   update during training. For example:
 
   ```python
-  ... = wgan_inference(data, discriminator, penalty=None)
+  ... = wgan_inference(..., penalty=None)
   var_list = tf.get_collection(
       tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
   clip_op = [w.assign(tf.clip_by_value(w, -0.1, 0.1)) for w in var_list]
   ```
 
-  #### Notes
+  @{notes_discriminator_scope}
 
-  Argument-wise, the only difference from `GANInference` is
-  conceptual: the `discriminator` is better described as a test
-  function or critic. `WGANInference` continues to use
-  `discriminator` only to share methods and attributes with
-  `GANInference`.
-
-  The objective function also adds to itself a summation over all
-  tensors in the `REGULARIZATION_LOSSES` collection.
+  @{notes_regularization_losses}
 
   #### Examples
 
   ```python
-  z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
-  x = generative_network(z)
+  def model():
+    z = Normal(loc=0.0, scale=1.0, sample_shape=[256, 25])
+    x = generative_network(z, name="x")
+    return x
 
-  inference = ed.WGANInference({x: x_data}, discriminator)
+  def discriminator(x):
+    net = tf.layers.dense(x, 256, activation=tf.nn.relu)
+    return tf.layers.dense(net, 1, activation=tf.sigmoid)
+
+  loss, loss_d = ed.wgan_inference(
+      model, discriminator,
+      align_data=lambda name: "x_data" if name == "x" else None,
+      x_data=x_data)
   ```
-  """
-  """Initialize inference algorithm. It initializes hyperparameters
-  and builds ops for the algorithm's computation graph.
-
-  Args:
-    penalty: float, optional.
-      Scalar value to enforce gradient penalty that ensures the
-      gradients have norm equal to 1 [@gulrajani2017improved]. Set to
-      None (or 0.0) if using no penalty.
-    clip: float, optional.
-      Value to clip weights by. Default is no clipping.
-
-  `model` must return the generated data.
   """
   x_fake = call_function_up_to_args(model, *args, **kwargs)
   key = align_data(x_fake.name.split(':')[0])

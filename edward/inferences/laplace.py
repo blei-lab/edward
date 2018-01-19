@@ -5,6 +5,7 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
+from edward.inferences import docstrings as doc
 from edward.inferences.inference import call_function_up_to_args
 from edward.inferences import docstrings as doc
 from edward.inferences.map import map
@@ -18,6 +19,15 @@ except Exception as e:
   raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
+@doc.set_doc(
+    args=(doc.arg_model +
+          doc.arg_variational +
+          doc.arg_align_latent +
+          doc.arg_align_data +
+          doc.arg_scale +
+          doc.arg_auto_transform +
+          doc.arg_collections +
+          doc.arg_args_kwargs)[:-1])
 def laplace(model, variational, align_latent, align_data,
             scale=lambda name: 1.0, auto_transform=True,
             collections=None, *args, **kwargs):
@@ -26,10 +36,13 @@ def laplace(model, variational, align_latent, align_data,
   It approximates the posterior distribution using a multivariate
   normal distribution centered at the mode of the posterior.
 
-  We implement this by running `MAP` to find the posterior mode.
+  We implement this by running `ed.map` to find the posterior mode.
   This forms the mean of the normal approximation. We then compute the
   inverse Hessian at the mode of the posterior. This forms the
   covariance of the normal approximation.
+
+  Args:
+  @{args}
 
   #### Notes
 
@@ -42,8 +55,8 @@ def laplace(model, variational, align_latent, align_data,
   Random variables with both scalar batch and event shape are not
   supported as `tf.hessians` is currently not applicable to scalars.
 
-  Note that `Laplace` finds the location parameter of the normal
-  approximation using `MAP`, which is performed on the latent
+  Note that this function finds the location parameter of the normal
+  approximation using `ed.map`, which is performed on the latent
   variable's original (constrained) support. The scale parameter
   is calculated by evaluating the Hessian of $-\log p(x, z)$ in the
   constrained space and under the mode. This implies the Laplace
@@ -53,29 +66,23 @@ def laplace(model, variational, align_latent, align_data,
   #### Examples
 
   ```python
-  X = tf.placeholder(tf.float32, [N, D])
-  w = Normal(loc=tf.zeros(D), scale=tf.ones(D))
-  y = Normal(loc=ed.dot(X, w), scale=tf.ones(N))
+  def model(X):
+    w = Normal(loc=tf.zeros(D), scale=tf.ones(D), name="w")
+    y = Normal(loc=tf.tensordot(X, w, [[1], [0]]), scale=tf.ones(N), name="y")
 
-  qw = MultivariateNormalTriL(
-      loc=tf.Variable(tf.random_normal([D])),
-      scale_tril=tf.Variable(tf.random_normal([D, D])))
+  def variational():
+    qw = MultivariateNormalTriL(
+        loc=tf.Variable(tf.random_normal([D])),
+        scale_tril=tf.Variable(tf.random_normal([D, D])),
+        name="qw")
 
-  inference = ed.Laplace({w: qw}, data={X: X_train, y: y_train})
+  loss = ed.laplace(
+      model, variational,
+      align_latent=lambda name: "qw" if name == "w" else None,
+      align_data=lambda name: "y" if name == "y" else None,
+      X=X_data,
+      y=y_data)
   ```
-  """
-  """Create an inference algorithm.
-
-  Args:
-    latent_vars: list of RandomVariable or
-                 dict of RandomVariable to RandomVariable.
-      Collection of random variables to perform inference on. If list,
-      each random variable will be implictly optimized using a
-      `MultivariateNormalTriL` random variable that is defined
-      internally with unconstrained support and is initialized using
-      standard normal draws. If dictionary, each random
-      variable must be a `MultivariateNormalDiag`,
-      `MultivariateNormalTriL`, or `Normal` random variable.
   """
   variational_pointmass = _make_variational_pointmass(
       variational, *args, **kwargs)

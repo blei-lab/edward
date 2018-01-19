@@ -5,11 +5,24 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
+from edward.inferences import docstrings as doc
 from edward.inferences.inference import (
     call_function_up_to_args, make_intercept)
 from edward.models.core import Trace
 
 
+@doc.set_doc(
+    args_part_one=(doc.arg_model +
+                   doc.arg_variational)[:-1],
+    args_part_two=(doc.arg_align_latent +
+                   doc.arg_align_data)[:-1],
+    args_part_three=(doc.arg_scale +
+                     doc.arg_auto_transform +
+                     doc.arg_collections +
+                     doc.arg_args_kwargs)[:-1],
+    returns=doc.return_loss_loss_d,
+    notes_discriminator_scope=doc.notes_discriminator_scope,
+    notes_regularization_losses=doc.notes_regularization_losses)
 def klqp_implicit(model, variational, discriminator, align_latent,
                   align_data, align_latent_global=lambda name: name,
                   ratio_loss='log', scale=lambda name: 1.0,
@@ -33,23 +46,8 @@ def klqp_implicit(model, variational, discriminator, align_latent,
   random variables (`rv`) satisfies `rv.is_reparameterized` and
   `rv.is_continuous`.
 
-  #### Notes
-
-  Unlike `GANInference`, `discriminator` takes dict's as input,
-  and must subset to the appropriate values through lexical scoping
-  from the previously defined model and latent variables. This is
-  necessary as the discriminator can take an arbitrary set of data,
-  latent, and global variables.
-
-  Note the type for `discriminator`'s output changes when one
-  passes in the `scale` argument to `initialize()`.
-
-  The objective function also adds to itself a summation over all
-  tensors in the `REGULARIZATION_LOSSES` collection.
-  """
-  """Create an inference algorithm.
-
   Args:
+  @{args_part_one}
     discriminator: function.
       Function (with parameters). Unlike `GANInference`, it is
       interpreted as a ratio estimator rather than a discriminator.
@@ -58,23 +56,41 @@ def klqp_implicit(model, variational, discriminator, align_latent,
       discriminators, it can take a batch of data points and local
       variables, of size $M$, and output a vector of length
       $M$.
-    global_vars: dict of RandomVariable to RandomVariable, optional.
+  @{args_part_two}
+    align_latent_global: dict of RandomVariable to RandomVariable.
       Identifying which variables in `latent_vars` are global
       variables, shared across data points. These will not be
       encompassed in the ratio estimation problem, and will be
       estimated with tractable variational approximations.
-  """
-  """Initialize inference algorithm. It initializes hyperparameters
-  and builds ops for the algorithm's computation graph.
-
-  Args:
-    ratio_loss: str or fn, optional.
+    ratio_loss: str or fn.
       Loss function minimized to get the ratio estimator. 'log' or 'hinge'.
       Alternatively, one can pass in a function of two inputs,
       `psamples` and `qsamples`, and output a point-wise value
       with shape matching the shapes of the two inputs.
-  """
-  """Build loss function
+  @{args_part_three}
+
+  Unlike `GANInference`, `discriminator` takes dict's as input,
+  and must subset to the appropriate values through lexical scoping
+  from the previously defined model and latent variables. This is
+  necessary as the discriminator can take an arbitrary set of data,
+  latent, and global variables.
+
+  align_latent aligns all global and local latents;
+  align_global_latent only aligns global latents.
+
+  Returns:
+  @{returns}
+
+  #### Notes
+
+  Note the type for `discriminator`'s output changes when one
+  passes in the `scale` argument to `initialize()`.
+
+  @{notes_discriminator_scope}
+
+  @{notes_regularization_losses}
+
+  Build loss function
 
   $-\Big(\mathbb{E}_{q(\\beta)} [\log p(\\beta) - \log q(\\beta) ] +
       \sum_{n=1}^N \mathbb{E}_{q(\\beta)q(z_n\mid\\beta)} [
@@ -97,8 +113,6 @@ def klqp_implicit(model, variational, discriminator, align_latent,
   Gradients are taken using the reparameterization trick
   [@kingma2014auto].
 
-  #### Notes
-
   This also includes model parameters $p(x, z, \\beta; \\theta)$
   and variational distributions with inference networks
   $q(z\mid x)$.
@@ -114,8 +128,32 @@ def klqp_implicit(model, variational, discriminator, align_latent,
     because it complicates the code;
   + analytic KL/swapping out the penalty term for the globals.
 
-  align_latent aligns all global and local latents;
-  align_global_latent only aligns global latents.
+  #### Examples
+
+  ```python
+  def model():
+    z = Normal(loc=0.0, scale=1.0, sample_shape=[256, 25], name="z")
+    x = generative_network(z, name="x")
+    return x
+
+  def variational(x):
+    net = tf.layers.dense(x_data, 25 * 2)
+    qz = Normal(loc=net[:, :25],
+                scale=tf.nn.softplus(net[:, 25:]),
+                name="qz")
+
+  def ratio_estimator(data, local_vars, global_vars):
+    # concatenated input has shape (batch_size, 28*28 + 25)
+    net = tf.concat([data["x"], local_vars["z"]], 1)
+    net = tf.layers.dense(net, 256, activation=tf.nn.relu)
+    return tf.layers.dense(net, 1, activation=tf.sigmoid)
+
+  loss, loss_d = ed.klqp_implicit(
+      model, variational, ratio_estimator,
+      align_latent=lambda name: "qz" if name == "z" else None,
+      align_data=lambda name: "x" if name == "x" else None,
+      x=x_data)
+  ```
   """
   if callable(ratio_loss):
     ratio_loss = ratio_loss

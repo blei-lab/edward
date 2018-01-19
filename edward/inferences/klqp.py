@@ -5,6 +5,7 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
+from edward.inferences import docstrings as doc
 from edward.inferences.inference import (
     call_function_up_to_args, make_intercept)
 from edward.models.core import Trace
@@ -18,6 +19,21 @@ except Exception as e:
 tfd = tf.contrib.distributions
 
 
+@doc.set_doc(
+    args=(doc.arg_model +
+          doc.arg_variational +
+          doc.arg_align_latent +
+          doc.arg_align_data +
+          doc.arg_scale +
+          doc.arg_n_samples +
+          doc.arg_kl_scaling +
+          doc.arg_auto_transform +
+          doc.arg_collections +
+          doc.arg_args_kwargs)[:-1],
+    returns=doc.return_loss_surrogate_loss,
+    notes_model_parameters=doc.notes_model_parameters,
+    notes_conditional_inference=doc.notes_conditional_inference_samples,
+    notes_regularization_losses=doc.notes_regularization_losses)
 def klqp(model, variational, align_latent, align_data,
          scale=lambda name: 1.0, n_samples=1, kl_scaling=lambda name: 1.0,
          auto_transform=True, collections=None, *args, **kwargs):
@@ -25,92 +41,17 @@ def klqp(model, variational, align_latent, align_data,
 
   $\\text{KL}( q(z; \lambda) \| p(z \mid x) ).$
 
-  This class minimizes the objective by automatically selecting from a
-  variety of black box inference techniques.
+  This function returns a loss and surrogate loss
+  [@schulman2015stochastic; @ruiz2016generalized; @ritchie2016deep].
+  The surrogate loss' autodiff automates selection of two black box
+  gradient estimators given a variational factor:
 
-  Args:
-    model: function whose inputs are a subset of `args` (e.g., for
-      discriminative). Output is not used.
-      TODO auto_transform docstring
-      Collection of random variables to perform inference on.
-      If list, each random variable will be implictly optimized using
-      a `Normal` random variable that is defined internally with a
-      free parameter per location and scale and is initialized using
-      standard normal draws. The random variables to approximate must
-      be continuous.
-    variational: function whose inputs are a subset of `args` (e.g.,
-      for amortized). Output is not used.
-    align_latent: function of string, aligning `model` latent
-      variables with `variational`. It takes a model variable's name
-      as input and returns a string, indexing `variational`'s trace;
-      else identity.
-    align_data: function of string, aligning `model` observed
-      variables with data. It takes a model variable's name as input
-      and returns an integer, indexing `args`; else identity.
-    scale: function of string, aligning `model` observed
-      variables with scale factors. It takes a model variable's name
-      as input and returns a scale factor; else 1.0. The scale
-      factor's shape must be broadcastable; it is multiplied
-      element-wise to the random variable. For example, this is useful
-      for mini-batch scaling when inferring global variables, or
-      applying masks on a random variable.
-    n_samples: int, optional.
-      Number of samples from variational model for calculating
-      stochastic gradients.
-    kl_scaling: function of string, aligning `model` latent
-      variables with KL scale factors. This provides option to scale
-      terms when using ELBO with KL divergence. If the KL divergence
-      terms are
+  1. score function gradients [@paisley2012variational] with
+     Rao-Blackwellization [@ranganath2014black];
+  2. reparameterization gradients [@kingma2014auto].
 
-      $\\alpha_p \mathbb{E}_{q(z\mid x, \lambda)} [
-            \log q(z\mid x, \lambda) - \log p(z)],$
-
-      then pass {$p(z)$: $\\alpha_p$} as `kl_scaling`,
-      where $\\alpha_p$ is a tensor. Its shape must be broadcastable;
-      it is multiplied element-wise to the batchwise KL terms.
-    args: data inputs. It is passed at compile-time in Graph
-      mode or runtime in Eager mode.
-
-  #### Notes
-
-  `KLqp` also optimizes any model parameters $p(z \mid x;
-  \\theta)$. It does this by variational EM, maximizing
-
-  $\mathbb{E}_{q(z; \lambda)} [ \log p(x, z; \\theta) ]$
-
-  with respect to $\\theta$.
-
-  In conditional inference, we infer $z$ in $p(z, \\beta
-  \mid x)$ while fixing inference over $\\beta$ using another
-  distribution $q(\\beta)$. During gradient calculation, instead
-  of using the model's density
-
-  $\log p(x, z^{(s)}), z^{(s)} \sim q(z; \lambda),$
-
-  for each sample $s=1,\ldots,S$, `KLqp` uses
-
-  $\log p(x, z^{(s)}, \\beta^{(s)}),$
-
-  where $z^{(s)} \sim q(z; \lambda)$ and $\\beta^{(s)}
-  \sim q(\\beta)$.
-
-  The objective function also adds to itself a summation over all
-  tensors in the `REGULARIZATION_LOSSES` collection.
-
-  ##
-
-  $-\\text{ELBO} =
-      -\mathbb{E}_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]$
-
-  KLqp supports
-
-  1. score function gradients [@paisley2012variational]
-  2. reparameterization gradients [@kingma2014auto]
-
-  of the loss function.
-
-  If the KL divergence between the variational model and the prior
-  is tractable, then the loss function can be written as
+  If the KL divergence between a variational factor and its aligned
+  prior is tractable, then the loss function can be written as
 
   $-\mathbb{E}_{q(z; \lambda)}[\log p(x \mid z)] +
       \\text{KL}( q(z; \lambda) \| p(z) ),$
@@ -119,24 +60,48 @@ def klqp(model, variational, align_latent, align_data,
   compute this automatically when $p(z)$ and $q(z; \lambda)$ are
   Normal.
 
-  This class minimizes the objective using the score function gradient
-  and Rao-Blackwellization [@ranganath2014black].
-
-  Computed by sampling from :math:`q(z;\lambda)` and evaluating the
-  expectation using Monte Carlo sampling and Rao-Blackwellization.
-
-  The implementation takes the surrogate loss approach. See
-  @schulman2015stochastic; @ruiz2016generalized; @ritchie2016deep.
-
-  #### Notes
-
   Current Rao-Blackwellization is limited to Rao-Blackwellizing across
   stochastic nodes in the computation graph. It does not
   Rao-Blackwellize within a node such as when a node represents
   multiple random variables via non-scalar batch shape.
+  Rao-Blackwellization is performed at runtime for each sample.
 
-  The objective function also adds to itself a summation over all
-  tensors in the `REGULARIZATION_LOSSES` collection.
+  Args:
+  @{args}
+
+  Returns:
+  @{returns}
+
+  #### Notes
+
+  Probabilistic programs may have random variables which vary across
+  executions. The algorithm returns calculations following `n_samples`
+  executions of the model and variational programs.
+
+  @{notes_model_parameters}
+
+  @{notes_conditional_inference}
+
+  @{notes_regularization_losses}
+
+  #### Examples
+
+  ```python
+  def model():
+    mu = Normal(loc=0.0, scale=1.0, name="mu")
+    x = Normal(loc=mu, scale=1.0, sample_shape=10, name="x")
+
+  def variational():
+    qmu = Normal(loc=tf.get_variable("loc", []),
+                 scale=tf.nn.softplus(tf.get_variable("shape", [])),
+                 name="qmu")
+
+  loss, surrogate_loss = ed.klqp(
+      model, variational,
+      align_latent=lambda name: "qmu" if name == "mu" else None,
+      align_data=lambda name: "x" if name == "x" else None,
+      x=x_data)
+  ```
   """
   # TODO control variates
   # + baseline, learnable baseline
@@ -215,6 +180,20 @@ def klqp(model, variational, align_latent, align_data,
   return loss, surrogate_loss
 
 
+@doc.set_doc(
+    args=(doc.arg_model +
+          doc.arg_variational +
+          doc.arg_align_latent +
+          doc.arg_align_data +
+          doc.arg_scale +
+          doc.arg_n_samples +
+          doc.arg_auto_transform +
+          doc.arg_collections +
+          doc.arg_args_kwargs)[:-1],
+    returns=doc.return_loss,
+    notes_model_parameters=doc.notes_model_parameters,
+    notes_conditional_inference=doc.notes_conditional_inference_samples,
+    notes_regularization_losses=doc.notes_regularization_losses)
 def klqp_reparameterization(model, variational, align_latent, align_data,
                             scale=lambda name: 1.0, n_samples=1,
                             auto_transform=True, collections=None,
@@ -223,14 +202,8 @@ def klqp_reparameterization(model, variational, align_latent, align_data,
 
   $\\text{KL}( q(z; \lambda) \| p(z \mid x) ).$
 
-  This class minimizes the objective using the reparameterization
-  gradient.
-
-  The objective function also adds to itself a summation over all
-  tensors in the `REGULARIZATION_LOSSES` collection.
-
-  Build loss function equal to KL(q||p) up to a constant. Its
-  automatic differentiation is a stochastic gradient of
+  This function builds a loss function equal to KL(q||p) up to a
+  constant. Its automatic differentiation is a stochastic gradient of
 
   $-\\text{ELBO} =
       -\mathbb{E}_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]$
@@ -240,11 +213,42 @@ def klqp_reparameterization(model, variational, align_latent, align_data,
   Computed by sampling from $q(z;\lambda)$ and evaluating the
   expectation using Monte Carlo sampling.
 
-  Note if user defines constrained posterior, then auto_transform
-  can do inference on real-valued; then test time user can use
-  constrained. If user defines unconstrained posterior, then how to
-  work with constrained at test time? For now, user must manually
-  write the bijectors according to transform.
+  Args:
+  @{args}
+
+  Returns:
+  @{returns}
+
+  #### Notes
+
+  Probabilistic programs may have random variables which vary across
+  executions. The algorithm returns calculations following `n_samples`
+  executions of the model and variational programs.
+
+  @{notes_model_parameters}
+
+  @{notes_conditional_inference}
+
+  @{notes_regularization_losses}
+
+  #### Examples
+
+  ```python
+  def model():
+    mu = Normal(loc=0.0, scale=1.0, name="mu")
+    x = Normal(loc=mu, scale=1.0, sample_shape=10, name="x")
+
+  def variational():
+    qmu = Normal(loc=tf.get_variable("loc", []),
+                 scale=tf.nn.softplus(tf.get_variable("shape", [])),
+                 name="qmu")
+
+  loss = ed.klqp_reparameterization(
+      model, variational,
+      align_latent=lambda name: "qmu" if name == "mu" else None,
+      align_data=lambda name: "x" if name == "x" else None,
+      x=x_data)
+  ```
   """
   p_log_prob = [0.0] * n_samples
   q_log_prob = [0.0] * n_samples
@@ -303,19 +307,11 @@ def klqp_reparameterization_kl(model, variational, align_latent, align_data,
 
   $\\text{KL}( q(z; \lambda) \| p(z \mid x) ).$
 
-  This class minimizes the objective using the reparameterization
-  gradient and an analytic KL term.
+  This function builds a loss function equal to KL(q||p) up to a
+  constant. Its automatic differentiation is a stochastic gradient of
 
-  The objective function also adds to itself a summation over all
-  tensors in the `REGULARIZATION_LOSSES` collection.
-
-  Build loss function. Its automatic differentiation
-  is a stochastic gradient of
-
-  .. math::
-
-    -\\text{ELBO} =  - ( \mathbb{E}_{q(z; \lambda)} [ \log p(x \mid z) ]
-          + \\text{KL}(q(z; \lambda) \| p(z)) )
+  $-\\text{ELBO} =
+      -\mathbb{E}_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]$
 
   based on the reparameterization trick [@kingma2014auto].
 
@@ -323,6 +319,43 @@ def klqp_reparameterization_kl(model, variational, align_latent, align_data,
 
   Computed by sampling from $q(z;\lambda)$ and evaluating the
   expectation using Monte Carlo sampling.
+
+  Args:
+  @{args}
+
+  Returns:
+  @{returns}
+
+  #### Notes
+
+  Probabilistic programs may have random variables which vary across
+  executions. The algorithm returns calculations following `n_samples`
+  executions of the model and variational programs.
+
+  @{notes_model_parameters}
+
+  @{notes_conditional_inference}
+
+  @{notes_regularization_losses}
+
+  #### Examples
+
+  ```python
+  def model():
+    mu = Normal(loc=0.0, scale=1.0, name="mu")
+    x = Normal(loc=mu, scale=1.0, sample_shape=10, name="x")
+
+  def variational():
+    qmu = Normal(loc=tf.get_variable("loc", []),
+                 scale=tf.nn.softplus(tf.get_variable("shape", [])),
+                 name="qmu")
+
+  loss = ed.klqp_reparameterization_kl(
+      model, variational,
+      align_latent=lambda name: "qmu" if name == "mu" else None,
+      align_data=lambda name: "x" if name == "x" else None,
+      x=x_data)
+  ```
   """
   p_log_lik = [0.0] * n_samples
   for s in range(n_samples):
@@ -381,18 +414,54 @@ def klqp_score(model, variational, align_latent, align_data,
 
   $\\text{KL}( q(z; \lambda) \| p(z \mid x) ).$
 
-  This class minimizes the objective using the score function
-  gradient.
+  This function builds a loss function equal to KL(q||p) up to a
+  constant. It also builds a surrogate loss whose automatic
+  differentiation is a stochastic gradient of
 
-  Build loss function equal to KL(q||p) up to a constant. It
-  returns an surrogate loss function whose automatic differentiation
-  is based on the score function estimator [@paisley2012variational].
+  $-\\text{ELBO} =
+      -\mathbb{E}_{q(z; \lambda)} [ \log p(x, z) - \log q(z; \lambda) ]$
+
+  based on the score function estimator [@paisley2012variational].
 
   Computed by sampling from $q(z;\lambda)$ and evaluating the
   expectation using Monte Carlo sampling.
 
-  The objective function also adds to itself a summation over all
-  tensors in the `REGULARIZATION_LOSSES` collection.
+  Args:
+  @{args}
+
+  Returns:
+  @{returns}
+
+  #### Notes
+
+  Probabilistic programs may have random variables which vary across
+  executions. The algorithm returns calculations following `n_samples`
+  executions of the model and variational programs.
+
+  @{notes_model_parameters}
+
+  @{notes_conditional_inference}
+
+  @{notes_regularization_losses}
+
+  #### Examples
+
+  ```python
+  def model():
+    mu = Normal(loc=0.0, scale=1.0, name="mu")
+    x = Normal(loc=mu, scale=1.0, sample_shape=10, name="x")
+
+  def variational():
+    qmu = Normal(loc=tf.get_variable("loc", []),
+                 scale=tf.nn.softplus(tf.get_variable("shape", [])),
+                 name="qmu")
+
+  loss, surrogate_loss = ed.klqp_score(
+      model, variational,
+      align_latent=lambda name: "qmu" if name == "mu" else None,
+      align_data=lambda name: "x" if name == "x" else None,
+      x=x_data)
+  ```
   """
   p_log_prob = [0.0] * n_samples
   q_log_prob = [0.0] * n_samples

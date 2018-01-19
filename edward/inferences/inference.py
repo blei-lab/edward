@@ -107,22 +107,22 @@ def train(model, inference=None,
   4. Run finalize (post-training) ops.
 
   Args:
-    n_iter: int, optional.
+    n_iter: int.
       Number of iterations for algorithm when calling `run()`.
       Alternatively if controlling inference manually, it is the
       expected number of calls to `update()`; this number determines
       tracking information during the print progress.
-    n_print: int, optional.
+    n_print: int.
       Number of iterations for each print progress. To suppress print
       progress, then specify 0. Default is `int(n_iter / 100)`.
-    logdir: str, optional.
+    logdir: str.
       Directory where event file will be written. For details,
       see `tf.summary.FileWriter`. Default is to log nothing.
-    log_timestamp: bool, optional.
+    log_timestamp: bool.
       If True (and `logdir` is specified), create a subdirectory of
       `logdir` to save the specific run results. The subdirectory's
       name is the current UTC timestamp with format 'YYYYMMDD_HHMMSS'.
-    variables: list, optional.
+    variables: list.
       A list of TensorFlow variables to initialize during inference.
       Default is to initialize all variables (this includes
       reinitializing variables that were already initialized). To
@@ -191,7 +191,7 @@ def _summary_variables(latent_vars=None, data=None, variables=None,
   the variable has scalar shape; otherwise forms a `tf.summary.histogram`.
 
   Args:
-    variables: list, optional.
+    variables: list.
       Specifies the list of variables to log after each `n_print`
       steps. If None, will log all variables. If `[]`, no variables
       will be logged.
@@ -229,16 +229,16 @@ def _optimize(loss, grads_and_vars, collections=None, var_list=None,
   grads_and_vars.
 
   Args:
-    optimizer: str or tf.train.Optimizer, optional.
+    optimizer: str or tf.train.Optimizer.
       A TensorFlow optimizer, to use for optimizing the variational
       objective. Alternatively, one can pass in the name of a
       TensorFlow optimizer, and default parameters for the optimizer
       will be used.
-    use_prettytensor: bool, optional.
+    use_prettytensor: bool.
       `True` if aim to use PrettyTensor optimizer (when using
       PrettyTensor) or `False` if aim to use TensorFlow optimizer.
       Defaults to TensorFlow.
-    global_step: tf.Variable, optional.
+    global_step: tf.Variable.
       A TensorFlow variable to hold the global step.
   """
   if collections is not None:
@@ -311,7 +311,7 @@ def _default_update(progbar, n_print, summarize=None, train_writer=None,
   Args:
     args: things like `loss`
     kwargs: things like 'feed_dict'
-    feed_dict: dict, optional.
+    feed_dict: dict.
       Feed dictionary for a TensorFlow session run. It is used to feed
       placeholders that are not fed during initialization.
 
@@ -347,7 +347,7 @@ def _gan_update(train_op, train_op_d, n_print, summarize=None,
   """Run one iteration of optimization.
 
   Args:
-    variables: str, optional.
+    variables: str.
       Which set of variables to update. Either "Disc" or "Gen".
       Default is both.
 
