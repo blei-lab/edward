@@ -35,8 +35,14 @@ class test_sgd_class(tf.test.TestCase):
     s_n = tf.Variable(tf.zeros(2))
     n = tf.Variable(tf.constant(1.))
 
-    optimizer = KucukelbirOptimizer(t=t, delta=delta, eta=eta)
-    train = optimizer.apply_gradients(n, s_n, grads_and_vars)
+    optimizer = KucukelbirOptimizer(
+      t=t,
+      delta=delta,
+      eta=eta,
+      s_n=s_n,
+      n=n
+    )
+    train = optimizer.apply_gradients(grads_and_vars)
     increment_n = n.assign_add(1.)
 
     actual_grads_and_vars = []
