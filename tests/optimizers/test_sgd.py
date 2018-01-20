@@ -31,8 +31,8 @@ class test_sgd_class(tf.test.TestCase):
       t=0.1,
       delta=10e-3,
       eta=1e-1,
-      s_n=tf.Variable([0., 0.]),
-      n=tf.Variable(1.)
+      s_n=tf.Variable([0., 0.], trainable=False),
+      n=tf.Variable(1., trainable=False)
     )
     train = optimizer.apply_gradients(grads_and_vars)
 
