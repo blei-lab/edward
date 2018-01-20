@@ -8,6 +8,8 @@ import tensorflow as tf
 class KucukelbirOptimizer:
 
   """
+  Used for RSVI (Rejection-Sampling Variational Inference).
+
   # TODO: add me
   """
 
@@ -29,4 +31,5 @@ class KucukelbirOptimizer:
 
       updated_var = var.assign_add(-p_n * grad)
       ops.append(updated_var)
+    ops.append(self.n.assign_add(1.))
     return ops

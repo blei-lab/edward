@@ -16,34 +16,25 @@ class test_sgd_class(tf.test.TestCase):
       [(2.6070995, 0.7563643), (1.0711095, 1.8410041)]
     ]
 
-    t = 0.1
-    delta = 10e-3
-    eta = 1e-1
-
+    x = tf.constant([3., 4., 5.])
+    y = tf.constant([.8, .1, .1])
     w1 = tf.Variable(tf.constant(1.))
     w2 = tf.Variable(tf.constant(2.))
     var_list = [w1, w2]
-
-    x = tf.constant([3., 4., 5.])
-    y = tf.constant([.8, .1, .1])
 
     pred = tf.nn.softmax(x * w1 * w2)
     loss = tf.reduce_mean(-tf.reduce_sum(y*tf.log(pred)))
     grads = tf.gradients(loss, var_list)
     grads_and_vars = list(zip(grads, var_list))
 
-    s_n = tf.Variable(tf.zeros(2))
-    n = tf.Variable(tf.constant(1.))
-
     optimizer = KucukelbirOptimizer(
-      t=t,
-      delta=delta,
-      eta=eta,
-      s_n=s_n,
-      n=n
+      t=0.1,
+      delta=10e-3,
+      eta=1e-1,
+      s_n=tf.Variable([0., 0.]),
+      n=tf.Variable(1.)
     )
     train = optimizer.apply_gradients(grads_and_vars)
-    increment_n = n.assign_add(1.)
 
     actual_grads_and_vars = []
 
@@ -52,7 +43,6 @@ class test_sgd_class(tf.test.TestCase):
       for i in range(3):
         actual_grads_and_vars.append(sess.run(grads_and_vars))
         _ = sess.run(train)
-        _ = sess.run(increment_n)
 
     self.assertAllClose(
       actual_grads_and_vars, expected_grads_and_vars, atol=1e-9)
