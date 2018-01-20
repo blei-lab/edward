@@ -181,8 +181,8 @@ class test_klqp_class(tf.test.TestCase):
   def test_kucukelbir_grad(self):
     expected_grads_and_vars = [
       [(3.1018744, 1.0), (1.5509372, 2.0)],
-      [(2.7902498, 0.84341073), (1.241244, 1.8959416)],
-      [(2.6070995, 0.694741731383), (1.0711095, 1.80355358733)]
+      [(2.7902498, 0.8434107), (1.241244, 1.8959416)],
+      [(2.6070995, 0.7563643), (1.0711095, 1.8410041)]
     ]
     t = 0.1
     delta = 10e-3
@@ -226,7 +226,7 @@ class test_klqp_class(tf.test.TestCase):
       for i in range(3):
         actual_grads_and_vars = sess.run(grads_and_vars)
         self.assertAllClose(
-          actual_grads_and_vars, expected_grads_and_vars[i], rtol=5e-2, atol=5e-2)
+          actual_grads_and_vars, expected_grads_and_vars[i], atol=1e-9)
         _ = sess.run(train)
         _ = sess.run(increment_n)
 
