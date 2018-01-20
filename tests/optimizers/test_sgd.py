@@ -1,0 +1,63 @@
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+import tensorflow as tf
+
+from edward.optimizers import alp_optimizer_apply_gradients
+
+
+class test_sgd_class(tf.test.TestCase):
+
+  def test_kucukelbir_grad(self):
+    expected_grads_and_vars = [
+      [(3.1018744, 1.0), (1.5509372, 2.0)],
+      [(2.7902498, 0.8434107), (1.241244, 1.8959416)],
+      [(2.6070995, 0.7563643), (1.0711095, 1.8410041)]
+    ]
+    t = 0.1
+    delta = 10e-3
+    eta = 1e-1
+
+    def alp_optimizer_apply_gradients(n, s_n, grads_and_vars):
+      ops = []
+      for i, (grad, var) in enumerate(grads_and_vars):
+        updated_s_n = s_n[i].assign( (t * grad**2) + (1 - t) * s_n[i] )
+
+        p_n_first = eta * n**(-.5 + delta)
+        p_n_second = (1 + tf.sqrt(updated_s_n[i]))**(-1)
+        p_n = p_n_first * p_n_second
+
+        updated_var = var.assign_add(-p_n * grad)
+        ops.append(updated_var)
+      return ops
+
+    w1 = tf.Variable(tf.constant(1.))
+    w2 = tf.Variable(tf.constant(2.))
+    var_list = [w1, w2]
+
+    x = tf.constant([3., 4., 5.])
+    y = tf.constant([.8, .1, .1])
+
+    pred = tf.nn.softmax(x * w1 * w2)
+    loss = tf.reduce_mean(-tf.reduce_sum(y*tf.log(pred)))
+    grads = tf.gradients(loss, var_list)
+    grads_and_vars = list(zip(grads, var_list))
+
+    s_n = tf.Variable(tf.zeros(2))
+    n = tf.Variable(tf.constant(1.))
+
+    train = alp_optimizer_apply_gradients(n, s_n, grads_and_vars)
+    increment_n = n.assign_add(1.)
+
+    actual_grads_and_vars = []
+
+    with self.test_session() as sess:
+      tf.global_variables_initializer().run()
+      for i in range(3):
+        actual_grads_and_vars.append(sess.run(grads_and_vars))
+        _ = sess.run(train)
+        _ = sess.run(increment_n)
+
+    self.assertAllClose(
+      actual_grads_and_vars, expected_grads_and_vars, atol=1e-9)
