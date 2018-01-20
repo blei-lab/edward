@@ -401,3 +401,13 @@ def _wgan_update(clip_op, variables=None, *args, **kwargs):
     sess.run(clip_op)
 
   return info_dict
+
+
+def _build_n_accept(collections):
+  # TODO for monte carlo methods
+  n_accept = tf.Variable(0, trainable=False, name="n_accept")
+  n_accept_over_t = n_accept / t
+  if collections is not None:
+    tf.summary.scalar("n_accept", n_accept,
+                      collections=collections)
+  return n_accept_over_t

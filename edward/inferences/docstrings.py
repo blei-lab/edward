@@ -18,7 +18,6 @@ import sys
 def set_doc(**kwargs):
   """Decorator to programmatically set the docstring."""
   def _update(cls_or_fn):
-    # Trim indenting level of current doc.
     doc = trim(cls_or_fn.__doc__)
     for k, v in six.iteritems(kwargs):
       # Capture each @{k} reference to replace with v.
@@ -70,6 +69,13 @@ arg_align_latent = """
     as input and returns a string, indexing `variational`'s trace.
     Other inputs must return None.
 """[1:]
+arg_align_latent_monte_carlo = """
+  align_latent: function of string, aligning `model` latent
+    variables with posterior trace. It takes a model variable's name
+    as input and returns a string. The return output determines the
+    name of the returned dictionary of states' keys. If None,
+    will not perform inference over them.
+"""[1:]
 arg_args_kwargs = """
   args, kwargs: data inputs. `kwargs`' keys are directly the argument
     keys in `model` (and if present, `variational`). Data inputs are
@@ -87,6 +93,9 @@ arg_discriminator = """
     Function (with parameters) to discriminate samples. It should
     output logit probabilities (real-valued) and not probabilities
     in $[0, 1]$.
+"""[1:]
+arg_current_grads_target_log_prob = """
+  current_grads_target_log_prob:
 """[1:]
 arg_kl_scaling = """
   kl_scaling: function of string, aligning `model` latent
@@ -127,10 +136,39 @@ arg_scale = """
     for mini-batch scaling when inferring global variables, or
     applying masks on a random variable.
 """[1:]
+arg_current_state = """
+  current_state: Tensor or list of Tensors. Each element is a
+    posterior variable whose name is its current state. If the model
+    encounters a latent variable not aligned with a key in `states`,
+    its state is a draw from the distribution. Default is None
+    (equivalent to empty dict).
+"""[1:]
+arg_step_size = """
+  step_size: float.
+    Step size of numerical integrator. The implementation may be
+    extended in the future to enable a step size per random variable
+    (`step_size` would be a callable).
+"""[1:]
+arg_current_target_log_prob = """
+  current_target_log_prob:
+"""[1:]
 arg_variational = """
   variational: function whose inputs are a subset of `args` (e.g.,
     for amortized). Output is not used.
 """[1:]
+notes_conditional_inference = """
+In conditional inference, we infer $z$ in $p(z, \\beta
+\mid x)$ while fixing inference over $\\beta$ using another
+distribution $q(\\beta)$. During calculations, this function uses an
+estimate of the marginal density,
+
+$\log p(x, z) = \log \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
+              \\approx \log p(x, z, \\beta^*)$
+
+leveraging a single Monte Carlo sample, where $\\beta^* \sim
+q(\\beta)$. This is unbiased (and therefore asymptotically exact as a
+pseudo-marginal method) if $q(\\beta) = p(\\beta \mid x)$.
+"""[1:-1]
 notes_conditional_inference_samples = """
 In conditional inference, we infer $z$ in $p(z, \\beta
 \mid x)$ while fixing inference over $\\beta$ using another
@@ -150,6 +188,46 @@ notes_discriminator_scope = """
 In building the computation graph for inference, the
 discriminator's parameters can be accessed with the variable scope
 "Disc".
+"""[1:-1]
+notes_mcmc_programs = """
+Probabilistic programs may have random variables which vary across
+executions. At each iteration, the MCMC algorithm transitions across
+the (finite) list of latent variables seen during one execution of
+the model. The previous state is read from `states`: if the
+execution encounters a latent variable not existing in `states`, the
+previous state is a draw from the prior.
+
+We recommend updating `states` with the sampler's output after each
+iteration. For example, in Eager mode:
+```python
+states = {}
+for _ in range(10000):
+  new_states, ... = mcmc(..., states=states, ...)
+  states.update(new_states)
+```
+This caches previous states within the `states` dictionary. States
+are only updated when the associated latent variable is seen again
+in the model's execution. As long as every latent variable of
+interest appears in the execution with non-zero probability, the
+distribution of each state is guaranteed to converge to the target
+distribution.
+
+This idea can be seen as a joint version of single-site
+Metropolis-Hastings [@wingate2011lightweight], but note it does not
+rerun any part of the program. In fact, the newly transitioned states
+given old states may not actually be a valid output of the program.
+For example, consider
+```python
+def model():
+  x = Bernoulli(probs=0.5)
+  if tf.cast(x, tf.bool):
+    y = Normal(0.0, 1.0)
+  else:
+    y = Gamma(1.0, 1.0)
+  return x, y
+```
+Given a previous state from (Bernoulli, Normal), the proposal might
+generate (0, -0.3), which is not in the program's support.
 """[1:-1]
 notes_model_parameters = """
 The function also enables optimizing model parameters $p(z \mid x;
@@ -175,6 +253,11 @@ return_loss_surrogate_loss = """
   Pair of scalar tf.Tensors, representing the loss and surrogate loss
   respectively. The surrogate loss' automatic differentiation is the
   gradient to follow for optimization.
+"""[1:-1]
+return_samples = """
+  Dict of tf.Tensor. The keys are according to the return values of
+  `align_latent`. The associated values are the transitioned states
+  from the Markov chain.
 """[1:-1]
 return_surrogate_loss = """
   Scalar tf.Tensor representing the surrogate loss. Its automatic

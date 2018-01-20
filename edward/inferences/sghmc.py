@@ -5,125 +5,248 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
-from edward.inferences.monte_carlo import MonteCarlo
-from edward.models import RandomVariable, Empirical
+from edward.inferences import docstrings as doc
+from edward.inferences.inference import (
+    call_function_up_to_args, make_intercept)
+from edward.models.core import Node, Trace
 
 
-class SGHMC(MonteCarlo):
+@doc.set_doc(
+    args_part_one=(doc.arg_model +
+                   doc.arg_align_latent_monte_carlo +
+                   doc.arg_align_data +
+                   doc.arg_current_state +
+                   doc.arg_step_size)[:-1],
+    args_part_two=(doc.arg_current_target_log_prob +
+                   doc.arg_current_grads_target_log_prob +
+                   doc.arg_auto_transform +
+                   doc.arg_collections +
+                   doc.arg_args_kwargs)[:-1],
+    returns=doc.return_samples,
+    notes_mcmc_programs=doc.notes_mcmc_programs,
+    notes_conditional_inference=doc.notes_conditional_inference)
+def sghmc(model,
+          align_latent,
+          align_data,
+          # current_state=None,  # TODO kwarg before arg
+          current_state,
+          momentum,
+          momentum_state,
+          learning_rate,
+          friction=0.1,
+          preconditioner_decay_rate=0.95,
+          num_pseudo_batches=1,
+          diagonal_bias=1e-8,
+          target_log_prob=None,
+          grads_target_log_prob=None,
+          auto_transform=True,
+          collections=None,
+          *args, **kwargs):
   """Stochastic gradient Hamiltonian Monte Carlo [@chen2014stochastic].
+
+  SGHMC simulates Hamiltonian dynamics with friction using a discretized
+  integrator. Its discretization error goes to zero as the learning
+  rate decreases. Namely, it implements the update equations from (15)
+  of @chen2014stochastic.
+
+  This function implements an adaptive mass matrix using RMSProp.
+  Namely, it uses the update from pre-conditioned SGLD
+  [@li2016preconditioned] extended to second-order Langevin dynamics
+  (SGHMC): the preconditioner is equal to the inverse of the mass
+  matrix [@chen2014stochastic].
+
+  Works for any probabilistic program whose latent variables of
+  interest are differentiable. If `auto_transform=True`, the latent
+  variables may exist on any constrained differentiable support.
+
+  Args:
+  @{args_part_one}
+    friction: float.
+      Constant scale on the friction term in the Hamiltonian system.
+      The implementation may be extended in the future to enable a
+      friction per random variable (`friction` would be a callable).
+    momentum:
+    momentum_state:
+    learning_rate:
+    friction:
+    preconditioner_decay_rate:
+    num_pseudo_batches:
+    diagonal_bias:
+  @{args_part_two}
+
+  Returns:
+  @{returns}
 
   #### Notes
 
-  In conditional inference, we infer $z$ in $p(z, \\beta
-  \mid x)$ while fixing inference over $\\beta$ using another
-  distribution $q(\\beta)$.
-  `SGHMC` substitutes the model's log marginal density
+  @{notes_mcmc_programs}
 
-  $\log p(x, z) = \log \mathbb{E}_{q(\\beta)} [ p(x, z, \\beta) ]
-                \\approx \log p(x, z, \\beta^*)$
-
-  leveraging a single Monte Carlo sample, where $\\beta^* \sim
-  q(\\beta)$. This is unbiased (and therefore asymptotically exact as a
-  pseudo-marginal method) if $q(\\beta) = p(\\beta \mid x)$.
+  @{notes_conditional_inference}
 
   #### Examples
 
+  Consider the following setup.
   ```python
-  mu = Normal(loc=0.0, scale=1.0)
-  x = Normal(loc=mu, scale=1.0, sample_shape=10)
-
-  qmu = Empirical(tf.Variable(tf.zeros(500)))
-  inference = ed.SGHMC({mu: qmu}, {x: np.zeros(10, dtype=np.float32)})
+  def model():
+    mu = Normal(loc=0.0, scale=1.0, name="mu")
+    x = Normal(loc=mu, scale=1.0, sample_shape=10, name="x")
+  ```
+  In graph mode, build `tf.Variable`s which are updated via the Markov
+  chain. The update op is fetched at runtime over many iterations.
+  ```python
+  qmu = tf.get_variable("qmu", initializer=1.)
+  qmu_mom = tf.get_variable("qmu_mom", initializer=0.)
+  qmu_mom_state = tf.get_variable("qmu_mom_state", initializer=0.)
+  new_state, new_momentum, new_momentum_state = ed.sghmc(
+      model,
+      ...,
+      current_state=qmu,
+      momentum=qmu_mom,
+      momentum_state=qmu_mom_state,
+      align_latent=lambda name: "qmu" if name == "mu" else None,
+      align_data=lambda name: "x_data" if name == "x" else None,
+      x_data=x_data)
+  qmu_update = qmu.assign(new_state)
+  qmu_mom_update = qmu_mom.assign(new_momentum)
+  qmu_mom_state_update = qmu_mom_state.assign(new_momentum_state)
+  ```
+  In eager mode, call the function at runtime, updating its inputs
+  such as `state`.
+  ```python
+  qmu = 1.
+  qmu_mom = None
+  qmu_mom_state = None
+  for _ in range(1000):
+    new_state, new_momentum, new_momentum_state = ed.sghmc(
+        model,
+        ...,
+        current_state=qmu,
+        momentum=qmu_mom,
+        momentum_state=qmu_mom_state,
+        align_latent=lambda name: "qmu" if name == "mu" else None,
+        align_data=lambda name: "x_data" if name == "x" else None,
+        x_data=x_data)
+    qmu = new_state
+    qmu_mom = new_momentum
+    qmu_mom_state = new_momentum_state
   ```
   """
-  def __init__(self, *args, **kwargs):
-    super(SGHMC, self).__init__(*args, **kwargs)
+  def _target_log_prob_fn(*fargs):
+    """Target's unnormalized log-joint density as a function of states."""
+    posterior_trace = {state.name.split(':')[0]: Node(arg)
+                       for state, arg in zip(states, fargs)}
+    intercept = make_intercept(
+        posterior_trace, align_data, align_latent, args, kwargs)
+    with Trace(intercept=intercept) as model_trace:
+      call_function_up_to_args(model, *args, **kwargs)
 
-  def initialize(self, step_size=0.25, friction=0.1, *args, **kwargs):
-    """Initialize inference algorithm.
+    p_log_prob = 0.0
+    for name, node in six.iteritems(model_trace):
+      if align_latent(name) is not None or align_data(name) is not None:
+        rv = node.value
+        p_log_prob += tf.reduce_sum(rv.log_prob(rv.value))
+    return p_log_prob
 
-    Args:
-      step_size: float.
-        Constant scale factor of learning rate.
-      friction: float.
-        Constant scale on the friction term in the Hamiltonian system.
-    """
-    self.step_size = step_size
-    self.friction = friction
-    self.v = {z: tf.Variable(tf.zeros(qz.params.shape[1:], dtype=qz.dtype))
-              for z, qz in six.iteritems(self.latent_vars)}
-    return super(SGHMC, self).initialize(*args, **kwargs)
+  is_list_like = lambda x: isinstance(x, (tuple, list))
+  maybe_list = lambda x: list(x) if is_list_like(x) else [x]
+  states = maybe_list(current_state)
 
-  def build_update(self):
-    """Simulate Hamiltonian dynamics with friction using a discretized
-    integrator. Its discretization error goes to zero as the learning
-    rate decreases.
+  out = kernel(
+      target_log_prob_fn=_target_log_prob_fn,
+      current_state=current_state,
+      momentum=momentum,
+      momentum_state=momentum_state,
+      learning_rate=learning_rate,
+      frictions=friction,
+      preconditioner_decay_rate=preconditioner_decay_rate,
+      num_pseudo_batches=num_pseudo_batches,
+      diagonal_bias=diagonal_bias,
+      current_target_log_prob=target_log_prob,
+      current_grads_target_log_prob=grads_target_log_prob)
+  return out
 
-    Implements the update equations from (15) of @chen2014stochastic.
-    """
-    old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
-                  for z, qz in six.iteritems(self.latent_vars)}
-    old_v_sample = {z: v for z, v in six.iteritems(self.v)}
 
-    # Simulate Hamiltonian dynamics with friction.
-    learning_rate = self.step_size * 0.01
-    grad_log_joint = tf.gradients(self._log_joint(old_sample),
-                                  list(six.itervalues(old_sample)))
+def kernel(target_log_prob_fn,
+           current_state,
+           momentum,
+           momentum_state,
+           learning_rate,
+           frictions=0.1,
+           preconditioner_decay_rate=0.95,
+           num_pseudo_batches=1,
+           diagonal_bias=1e-8,
+           current_target_log_prob=None,
+           current_grads_target_log_prob=None,
+           name=None):
+  """Pre-conditioned SGHMC.
 
-    # v_sample is so named b/c it represents a velocity rather than momentum.
-    sample = {}
-    v_sample = {}
-    for z, grad_log_p in zip(six.iterkeys(old_sample), grad_log_joint):
-      qz = self.latent_vars[z]
-      event_shape = qz.event_shape
-      stddev = tf.sqrt(tf.cast(learning_rate * self.friction, qz.dtype))
-      normal = tf.random_normal(event_shape, dtype=qz.dtype)
-      sample[z] = old_sample[z] + old_v_sample[z]
-      v_sample[z] = ((1.0 - 0.5 * self.friction) * old_v_sample[z] +
-                     learning_rate * tf.convert_to_tensor(grad_log_p) +
-                     stddev * normal)
+  Args:
+    ...
+    momentum:
+    momentum_state: Auxiliary momentums for states (the other is
+      momentum for the preconditioner RMSProp.)
+    learning_rate: From tf.contrib.bayesflow.SGLDOptimizer.
+    frictions:
+    preconditioner_decay_rate: From tf.contrib.bayesflow.SGLDOptimizer.
+    num_pseudo_batches: From tf.contrib.bayesflow.SGLDOptimizer.
+    diagonal_bias: From tf.contrib.bayesflow.SGLDOptimizer.
+    ...
+  """
+  is_list_like = lambda x: isinstance(x, (tuple, list))
+  maybe_list = lambda x: list(x) if is_list_like(x) else [x]
+  states = maybe_list(current_state)
+  momentums = maybe_list(momentum)
+  momentums_states = maybe_list(momentum_state)
+  with tf.name_scope(name, "sghmc_kernel", states):
+    with tf.name_scope("initialize"):
+      if current_target_log_prob is None:
+        current_target_log_prob = target_log_prob_fn(*states)
+      if current_grads_target_log_prob is None:
+        current_grads_target_log_prob = tf.gradients(current_target_log_prob, states)
 
-    # Update Empirical random variables.
-    assign_ops = []
-    for z, qz in six.iteritems(self.latent_vars):
-      variable = qz.get_variables()[0]
-      assign_ops.append(tf.scatter_update(variable, self.t, sample[z]))
-      assign_ops.append(tf.assign(self.v[z], v_sample[z]).op)
+    next_states = []
+    next_momentums_states = []
+    for state, mom, grad in zip(states, momentums, current_grads_target_log_prob):
+      state_update, mom_state_update = _apply_noisy_update(
+          mom, grad, learning_rate,
+          friction, mom_state,
+          diagonal_bias, num_pseudo_batches)
+      next_state = state + learning_rate * state_update
+      # TODO doesn't this scale the noise incorrectly by additional
+      # learning_rate during the update? (same in sgld_optimizer)
+      next_mom_state = mom + learning_rate * mom_state_update
+      momentum = (mom + (1.0 - preconditioner_decay_rate) *
+                  (tf.square(grad) - mom))
+      next_states.append(next_state)
+      next_momentums_states.append(next_mom_state)
+      momentums.append(momentum)
 
-    # Increment n_accept.
-    assign_ops.append(self.n_accept.assign_add(1))
-    return tf.group(*assign_ops)
+    maybe_flatten = lambda x: x if is_list_like(state) else x[0]
+    next_state = maybe_flatten(next_states)
+    next_momentum_state = maybe_flatten(next_momentums_states)
+    momentum = maybe_flatten(momentums)
+    return [
+        next_state,
+        next_momentum_state,
+        momentum,
+    ]
 
-  def _log_joint(self, z_sample):
-    """Utility function to calculate model's log joint density,
-    log p(x, z), for inputs z (and fixed data x).
 
-    Args:
-      z_sample: dict.
-        Latent variable keys to samples.
-    """
-    scope = tf.get_default_graph().unique_name("inference")
-    # Form dictionary in order to replace conditioning on prior or
-    # observed variable with conditioning on a specific value.
-    dict_swap = z_sample.copy()
-    for x, qx in six.iteritems(self.data):
-      if isinstance(x, RandomVariable):
-        if isinstance(qx, RandomVariable):
-          qx_copy = copy(qx, scope=scope)
-          dict_swap[x] = qx_copy.value
-        else:
-          dict_swap[x] = qx
-
-    log_joint = 0.0
-    for z in six.iterkeys(self.latent_vars):
-      z_copy = copy(z, dict_swap, scope=scope)
-      log_joint += tf.reduce_sum(
-          self.scale.get(z, 1.0) * z_copy.log_prob(dict_swap[z]))
-
-    for x in six.iterkeys(self.data):
-      if isinstance(x, RandomVariable):
-        x_copy = copy(x, dict_swap, scope=scope)
-        log_joint += tf.reduce_sum(
-            self.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
-
-    return log_joint
+def _apply_noisy_update(mom, grad, learning_rate,
+                        friction, mom_state,
+                        diagonal_bias, num_pseudo_batches):
+  """Adapted from tf.contrib.bayesflow.SGLDOptimizer._apply_noisy_update."""
+  from tensorflow.python.ops import array_ops
+  from tensorflow.python.ops import math_ops
+  from tensorflow.python.ops import random_ops
+  stddev = math_ops.cast(math_ops.rsqrt(2 * learning_rate * friction), grad.dtype)
+  preconditioner = math_ops.rsqrt(
+      mom + math_ops.cast(diagonal_bias, grad.dtype))
+  state_update = preconditioner * mom_state
+  mom_state_update = (
+      -grad * math_ops.cast(num_pseudo_batches,
+                            grad.dtype) +
+      friction * tf.matmul(preconditioner, mom_state) +
+      random_ops.random_normal(array_ops.shape(grad), 1.0, dtype=grad.dtype) *
+      stddev)
+  return state_update, mom_state_update
