@@ -198,37 +198,40 @@ class test_klqp_class(tf.test.TestCase):
         p_n = p_n_first * p_n_second
 
         updated_var = var.assign_add(-p_n * grad)
-        ops.append((updated_s_n[i], p_n_first, p_n_second, p_n, updated_var))
+        ops.append(updated_var)
       return ops
 
+    w1 = tf.Variable(tf.constant(1.))
+    w2 = tf.Variable(tf.constant(2.))
+    var_list = [w1, w2]
+
+    x = tf.constant([3., 4., 5.])
+    y = tf.constant([.8, .1, .1])
+
+    pred = tf.nn.softmax(x * w1 * w2)
+    loss = tf.reduce_mean(-tf.reduce_sum(y*tf.log(pred)))
+    grads = tf.gradients(loss, var_list)
+    grads_and_vars = list(zip(grads, var_list))
+
+    s_n = tf.Variable(tf.zeros(2))
+    n = tf.Variable(tf.constant(1.))
+
+    train = alp_optimizer_apply_gradients(n, s_n, grads_and_vars)
+    increment_n = n.assign_add(1.)
+    #
+
+    actual_grads_and_vars = []
+
     with self.test_session() as sess:
-      w1 = tf.Variable(tf.constant(1.))
-      w2 = tf.Variable(tf.constant(2.))
-      var_list = [w1, w2]
-
-      x = tf.constant([3., 4., 5.])
-      y = tf.constant([.8, .1, .1])
-
-      pred = tf.nn.softmax(x * w1 * w2)
-      loss = tf.reduce_mean(-tf.reduce_sum(y*tf.log(pred)))
-      grads = tf.gradients(loss, var_list)
-      grads_and_vars = list(zip(grads, var_list))
-
-      s_n = tf.Variable(tf.zeros(2))
-      n = tf.Variable(tf.constant(1.))
-
-      train = alp_optimizer_apply_gradients(n, s_n, grads_and_vars)
-      increment_n = n.assign_add(1.)
-
-      init = tf.global_variables_initializer()
-      sess.run(init)
-
+      tf.global_variables_initializer().run()
       for i in range(3):
-        actual_grads_and_vars = sess.run(grads_and_vars)
-        self.assertAllClose(
-          actual_grads_and_vars, expected_grads_and_vars[i], atol=1e-9)
+        actual_grads_and_vars.append(sess.run(grads_and_vars))
         _ = sess.run(train)
         _ = sess.run(increment_n)
+
+    # import pdb; pdb.set_trace()
+    self.assertAllClose(
+      actual_grads_and_vars, expected_grads_and_vars, atol=1e-9)
 
 
 if __name__ == '__main__':
