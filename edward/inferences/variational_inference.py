@@ -117,7 +117,6 @@ class VariationalInference(Inference):
 
     with tf.variable_scope(None, default_name="optimizer") as scope:
       if not use_prettytensor:
-        self.grads_and_vars = grads_and_vars  # debug
         self.train = optimizer.apply_gradients(grads_and_vars,
                                                global_step=global_step)
       else:
@@ -153,8 +152,11 @@ class VariationalInference(Inference):
 
     sess = get_session()
     # TODO: delete me
-    # grads_and_vars_debug = sess.run([self.grads_and_vars], feed_dict)
-    _, t, loss = sess.run([self.train, self.increment_t, self.loss], feed_dict)
+    import pdb; pdb.set_trace()
+    # _, t, loss = sess.run([self.train, self.increment_t, self.loss], feed_dict)
+    _, t, loss, grads_and_vars_debug = sess.run([self.train, self.increment_t, self.loss, self.grads_and_vars], feed_dict)
+    import pdb; pdb.set_trace()
+
 
     if self.debug:
       sess.run(self.op_check, feed_dict)
@@ -164,7 +166,7 @@ class VariationalInference(Inference):
         summary = sess.run(self.summarize, feed_dict)
         self.train_writer.add_summary(summary, t)
 
-    return {'t': t, 'loss': loss}
+    return {'t': t, 'loss': loss, 'grads_and_vars_debug': grads_and_vars_debug}
 
   def print_progress(self, info_dict):
     """Print progress to output.

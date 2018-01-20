@@ -30,6 +30,6 @@ class KucukelbirOptimizer:
       p_n = p_n_first * p_n_second
 
       updated_var = var.assign_add(-p_n * grad)
-      ops.append(updated_var)
-    ops.append(self.n.assign_add(1.))
+      ops.append((grad, updated_var))
+    # ops.append((tf.add(self.n, 1.), self.n))
     return ops
