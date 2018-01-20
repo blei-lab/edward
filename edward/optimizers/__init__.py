@@ -9,7 +9,7 @@ from edward.optimizers.sgd import *
 from tensorflow.python.util.all_util import remove_undocumented
 
 _allowed_symbols = [
-    'alp_optimizer_apply_gradients',
+    'KucukelbirOptimizer',
 ]
 
 remove_undocumented(__name__, allowed_exception_list=_allowed_symbols)
