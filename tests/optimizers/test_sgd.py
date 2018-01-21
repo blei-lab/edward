@@ -32,7 +32,7 @@ class test_sgd_class(tf.test.TestCase):
       delta=10e-3,
       eta=1e-1,
       s_n=tf.Variable([0., 0.], trainable=False),
-      n=tf.Variable(1., trainable=False)
+      n=tf.Variable(0., trainable=False)
     )
     train = optimizer.apply_gradients(grads_and_vars)
 
@@ -43,7 +43,6 @@ class test_sgd_class(tf.test.TestCase):
       for i in range(3):
         actual_grads_and_vars.append(sess.run(grads_and_vars))
         _ = sess.run(train)
-        _ = sess.run(optimizer.n.assign_add(1.))
 
     self.assertAllClose(
       actual_grads_and_vars, expected_grads_and_vars, atol=1e-9)
