@@ -20,7 +20,7 @@ class KucukelbirOptimizer:
     self.s_n = s_n
     self.n = n
 
-  def apply_gradients(self, grads_and_vars):
+  def apply_gradients(self, grads_and_vars, global_step=None):
     self.n = tf.assign_add(self.n, 1.)
     ops = []
     for i, (grad, var) in enumerate(grads_and_vars):
