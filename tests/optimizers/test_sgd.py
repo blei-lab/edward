@@ -29,7 +29,7 @@ class test_sgd_class(tf.test.TestCase):
 
     optimizer = KucukelbirOptimizer(
       t=0.1,
-      delta=10e-3,
+      delta=10e-16,
       eta=1e-1,
       s_n=tf.Variable([0., 0.], trainable=False),
       n=tf.Variable(0., trainable=False)
@@ -40,6 +40,5 @@ class test_sgd_class(tf.test.TestCase):
       tf.global_variables_initializer().run()
       for i in range(3):
         actual_grads_and_vars = sess.run(grads_and_vars)
-        self.assertAllClose(
-          actual_grads_and_vars, expected_grads_and_vars[i], atol=1e-9)
+        self.assertAllClose(actual_grads_and_vars, expected_grads_and_vars[i], atol=1e-9)
         _ = sess.run(train)
