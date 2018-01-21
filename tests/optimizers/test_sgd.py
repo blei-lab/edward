@@ -36,13 +36,10 @@ class test_sgd_class(tf.test.TestCase):
     )
     train = optimizer.apply_gradients(grads_and_vars)
 
-    actual_grads_and_vars = []
-
     with self.test_session() as sess:
       tf.global_variables_initializer().run()
       for i in range(3):
-        actual_grads_and_vars.append(sess.run(grads_and_vars))
+        actual_grads_and_vars = sess.run(grads_and_vars)
+        self.assertAllClose(
+          actual_grads_and_vars, expected_grads_and_vars[i], atol=1e-9)
         _ = sess.run(train)
-
-    self.assertAllClose(
-      actual_grads_and_vars, expected_grads_and_vars, atol=1e-9)
