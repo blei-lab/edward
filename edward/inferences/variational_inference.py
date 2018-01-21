@@ -9,6 +9,7 @@ import tensorflow as tf
 
 from edward.inferences.inference import Inference
 from edward.models import RandomVariable
+from edward.optimizers import KucukelbirOptimizer
 from edward.util import get_session, get_variables
 
 
@@ -67,6 +68,8 @@ class VariationalInference(Inference):
 
     self.loss, grads_and_vars = self.build_loss_and_gradients(var_list)
 
+    self.grads_and_vars = grads_and_vars
+
     if self.logging:
       tf.summary.scalar("loss", self.loss, collections=[self._summary_key])
       for grad, var in grads_and_vars:
@@ -110,6 +113,14 @@ class VariationalInference(Inference):
         optimizer = tf.train.FtrlOptimizer(learning_rate)
       elif optimizer == 'rmsprop':
         optimizer = tf.train.RMSPropOptimizer(learning_rate)
+      elif optimizer == 'kucukelbir':
+        optimizer = KucukelbirOptimizer(
+          t=0.1,
+          delta=10e-3,
+          eta=1e-1,
+          s_n=tf.Variable([0., 0.], trainable=False),
+          n=tf.Variable(0., trainable=False)
+        )
       else:
         raise ValueError('Optimizer class not found:', optimizer)
     elif not isinstance(optimizer, tf.train.Optimizer):
@@ -151,11 +162,9 @@ class VariationalInference(Inference):
         feed_dict[key] = value
 
     sess = get_session()
-    # TODO: delete me
-    import pdb; pdb.set_trace()
     # _, t, loss = sess.run([self.train, self.increment_t, self.loss], feed_dict)
+    # TODO: delete me
     _, t, loss, grads_and_vars_debug = sess.run([self.train, self.increment_t, self.loss, self.grads_and_vars], feed_dict)
-    import pdb; pdb.set_trace()
 
 
     if self.debug:
