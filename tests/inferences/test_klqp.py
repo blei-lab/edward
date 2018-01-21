@@ -89,6 +89,9 @@ class test_klqp_class(tf.test.TestCase):
 
         inference.run(*args, **kwargs)
 
+        self.assertAllClose(qalpha.eval(), 25., atol=1e-2)
+        self.assertAllClose(qbeta.eval(), 6., atol=1e-2)
+
   def _test_multinomial_dirichlet(self, Inference, *args, **kwargs):
       with self.test_session() as sess:
         x_data = tf.constant([2, 7, 1], dtype=np.float32)
@@ -174,7 +177,7 @@ class test_klqp_class(tf.test.TestCase):
     self._test_poisson_gamma(
       ed.RejectionSamplingKLqp,
       n_samples=1,
-      n_iter=500,
+      n_iter=5000,
       optimizer='kucukelbir'
     )
     # self._test_multinomial_dirichlet(
