@@ -166,7 +166,6 @@ class VariationalInference(Inference):
     # TODO: delete me
     _, t, loss, grads_and_vars_debug = sess.run([self.train, self.increment_t, self.loss, self.grads_and_vars], feed_dict)
 
-
     if self.debug:
       sess.run(self.op_check, feed_dict)
 
