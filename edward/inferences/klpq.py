@@ -32,7 +32,7 @@ class KLpq(VariationalInference):
 
   with respect to $\\theta$.
 
-  In conditional inference, we infer $z` in $p(z, \\beta
+  In conditional inference, we infer $z$ in $p(z, \\beta
   \mid x)$ while fixing inference over $\\beta$ using another
   distribution $q(\\beta)$. During gradient calculation, instead
   of using the model's density

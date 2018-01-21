@@ -123,7 +123,6 @@ class Inference(object):
         Passed into `initialize`.
     """
     self.initialize(*args, **kwargs)
-
     if variables is None:
       init = tf.global_variables_initializer()
     else:
@@ -144,6 +143,7 @@ class Inference(object):
 
     for _ in range(self.n_iter):
       info_dict = self.update()
+      print(info_dict)
       self.print_progress(info_dict)
 
     self.finalize()

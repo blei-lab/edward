@@ -6,7 +6,8 @@ import edward as ed
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Bernoulli, Normal
+from edward.models import Bernoulli, Normal, Dirichlet, Multinomial, \
+  Gamma, Poisson
 
 
 class test_klqp_class(tf.test.TestCase):
@@ -42,6 +43,69 @@ class test_klqp_class(tf.test.TestCase):
       new_t, new_variables = sess.run([inference.t, variables])
       self.assertEqual(new_t, 0)
       self.assertNotEqual(old_variables, new_variables)
+
+  def _test_poisson_gamma(self, Inference, *args, **kwargs):
+      with self.test_session() as sess:
+        x_data = np.array([2, 8, 3, 6, 1], dtype=np.int32)
+
+        rate = Gamma(5.0, 1.0)
+        x = Poisson(rate=rate, sample_shape=5)
+
+        qalpha = tf.nn.softplus(tf.Variable(tf.random_normal([])))
+        qbeta = tf.nn.softplus(tf.Variable(tf.random_normal([])))
+        qgamma = Gamma(qalpha, qbeta, allow_nan_stats=False)
+
+        # Gamma rejection sampler variables
+        def gamma_reparam_func(epsilon, alpha, beta):
+
+          def _gamma_reparam_func(alpha=alpha, beta=beta, epsilon=epsilon):
+            a = alpha - (1. / 3)
+            b = tf.sqrt(9 * alpha - 3)
+            c = 1 + (epsilon / b)
+            z = a * c**3
+            return z
+
+          def _gamma_reparam_func_alpha_lt_1(alpha=alpha, beta=beta, epsilon=epsilon):
+            z_tilde = _gamma_reparam_func(alpha=alpha + 1, beta=beta)
+            u = np.random.uniform()
+            z = u ** (1 / alpha) * z_tilde
+            return z
+
+          z = tf.cond(tf.less(alpha, 1.), _gamma_reparam_func_alpha_lt_1, _gamma_reparam_func)
+          z = tf.cond(tf.equal(beta, 1.), lambda: z, lambda: tf.divide(z, beta))
+          return z
+
+        gamma_rejection_sampler_vars = {
+          'reparam_func': gamma_reparam_func,
+          'epsilon_likelihood': Normal(loc=0.0, scale=1.0),
+          'm': 10.
+        }
+
+        # sum(x_data) = 20
+        # len(x_data) = 5
+        # analytic solution: Gamma(alpha=5+20, beta=1+5)
+        inference = Inference({rate: qgamma}, data={x: x_data},
+          rejection_sampler_vars={Gamma: gamma_rejection_sampler_vars})
+
+        inference.run(*args, **kwargs)
+
+        self.assertAllClose(qalpha.eval(), 25., atol=1e-2)
+        self.assertAllClose(qbeta.eval(), 6., atol=1e-2)
+
+  def _test_multinomial_dirichlet(self, Inference, *args, **kwargs):
+      with self.test_session() as sess:
+        x_data = tf.constant([2, 7, 1], dtype=np.float32)
+
+        probs = Dirichlet([1., 1., 1.])
+        x = Multinomial(total_count=10.0, probs=probs)
+
+        qalpha = tf.Variable(tf.random_normal([3]))
+        qprobs = Dirichlet(qalpha)
+
+        # analytic solution: Dirichlet(alpha=[1+2, 1+7, 1+1])
+        inference = Inference({probs: qprobs}, data={x: x_data})
+
+        inference.run(*args, **kwargs)
 
   def _test_model_parameter(self, Inference, *args, **kwargs):
     with self.test_session() as sess:
@@ -108,6 +172,17 @@ class test_klqp_class(tf.test.TestCase):
     self._test_normal_normal(
         ed.ScoreRBKLqp, default=True, n_samples=5, n_iter=5000)
     self._test_model_parameter(ed.ScoreRBKLqp, n_iter=50)
+
+  def test_rejection_sampling_klqp(self):
+    self._test_poisson_gamma(
+      ed.RejectionSamplingKLqp,
+      n_samples=1,
+      n_iter=5000,
+      optimizer='kucukelbir'
+    )
+    # self._test_multinomial_dirichlet(
+    #   ed.RejectionSamplingKLqp, n_samples=5, n_iter=5000)
+
 
 if __name__ == '__main__':
   ed.set_seed(42)
