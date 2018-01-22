@@ -10,11 +10,6 @@ from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import RandomVariable
 from edward.util import check_latent_vars, copy
 
-try:
-  from edward.models import Uniform
-except Exception as e:
-  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
-
 
 class MetropolisHastings(MonteCarlo):
   """Metropolis-Hastings [@metropolis1953equation; @hastings1970monte].
@@ -139,8 +134,7 @@ class MetropolisHastings(MonteCarlo):
         ratio -= tf.reduce_sum(x_zold.log_prob(dict_swap[x]))
 
     # Accept or reject sample.
-    u = Uniform(low=tf.constant(0.0, dtype=ratio.dtype),
-                high=tf.constant(1.0, dtype=ratio.dtype)).sample()
+    u = tf.random_uniform([], dtype=ratio.dtype)
     accept = tf.log(u) < ratio
     sample_values = tf.cond(accept, lambda: list(six.itervalues(new_sample)),
                             lambda: list(six.itervalues(old_sample)))

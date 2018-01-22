@@ -10,11 +10,6 @@ from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import RandomVariable
 from edward.util import copy
 
-try:
-  from edward.models import Normal, Uniform
-except Exception as e:
-  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
-
 
 class HMC(MonteCarlo):
   """Hamiltonian Monte Carlo, also known as hybrid Monte Carlo
@@ -93,9 +88,7 @@ class HMC(MonteCarlo):
     old_r_sample = OrderedDict()
     for z, qz in six.iteritems(self.latent_vars_unconstrained):
       event_shape = qz.event_shape
-      normal = Normal(loc=tf.zeros(event_shape, dtype=qz.dtype),
-                      scale=tf.ones(event_shape, dtype=qz.dtype))
-      old_r_sample[z] = normal.sample()
+      old_r_sample[z] = tf.random_normal(event_shape, dtype=qz.dtype)
 
     # Simulate Hamiltonian dynamics.
     new_sample, new_r_sample = leapfrog(old_sample, old_r_sample,
@@ -112,8 +105,7 @@ class HMC(MonteCarlo):
     ratio -= self._log_joint_unconstrained(old_sample)
 
     # Accept or reject sample.
-    u = Uniform(low=tf.constant(0.0, dtype=ratio.dtype),
-                high=tf.constant(1.0, dtype=ratio.dtype)).sample()
+    u = tf.random_uniform([], dtype=ratio.dtype)
     accept = tf.log(u) < ratio
     sample_values = tf.cond(accept, lambda: list(six.itervalues(new_sample)),
                             lambda: list(six.itervalues(old_sample)))
