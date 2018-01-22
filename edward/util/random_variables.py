@@ -11,10 +11,11 @@ from edward.models.random_variable import RandomVariable
 from edward.models.random_variables import TransformedDistribution
 from edward.models import PointMass
 from edward.util.graphs import random_variables
-from tensorflow.contrib.distributions import bijectors
 from tensorflow.core.framework import attr_value_pb2
 from tensorflow.python.framework.ops import set_shapes_for_outputs
 from tensorflow.python.util import compat
+
+tfb = tf.contrib.distributions.bijectors
 
 
 def check_data(data):
@@ -809,13 +810,13 @@ def transform(x, *args, **kwargs):
     x: RandomVariable.
       Continuous random variable to transform.
     *args, **kwargs: optional.
-      Arguments to overwrite when forming the ``TransformedDistribution``.
+      Arguments to overwrite when forming the `TransformedDistribution`.
       For example, manually specify the transformation by passing in
-      the ``bijector`` argument.
+      the `bijector` argument.
 
   Returns:
     RandomVariable.
-    A ``TransformedDistribution`` random variable, or the provided random
+    A `TransformedDistribution` random variable, or the provided random
     variable if no transformation was applied.
 
   #### Examples
@@ -839,13 +840,13 @@ def transform(x, *args, **kwargs):
     raise AttributeError(msg)
 
   if support == '01':
-    bij = bijectors.Invert(bijectors.Sigmoid())
+    bij = tfb.Invert(tfb.Sigmoid())
     new_support = 'real'
   elif support == 'nonnegative':
-    bij = bijectors.Invert(bijectors.Softplus())
+    bij = tfb.Invert(tfb.Softplus())
     new_support = 'real'
   elif support == 'simplex':
-    bij = bijectors.Invert(bijectors.SoftmaxCentered(event_ndims=1))
+    bij = tfb.Invert(tfb.SoftmaxCentered(event_ndims=1))
     new_support = 'multivariate_real'
   elif support in ('real', 'multivariate_real'):
     return x
