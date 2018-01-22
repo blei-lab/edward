@@ -13,6 +13,7 @@ from edward.models import RandomVariable
 from tensorflow.contrib.distributions import Distribution
 from tensorflow.contrib.distributions import FULLY_REPARAMETERIZED
 
+
 class AutoRegressive(RandomVariable, Distribution):
   # a 1-D AR(1) process
   # a[t + 1] = a[t] + eps with eps ~ N(0, sig**2)
@@ -34,7 +35,7 @@ class AutoRegressive(RandomVariable, Distribution):
     if 'name' not in kwargs:
       kwargs['name'] = 'AutoRegressive'
 
-    super(AutoRegressive , self).__init__(*args, **kwargs)
+    super(AutoRegressive, self).__init__(*args, **kwargs)
 
     self._args = (T, a, sig)
 
@@ -44,7 +45,8 @@ class AutoRegressive(RandomVariable, Distribution):
     return tf.reduce_sum(lpdf)
 
   def _sample_n(self, n, seed=None):
-    return tf.scan(lambda acc, x: self.a * acc + x, self.shocks._sample_n(n, seed))
+    return tf.scan(lambda acc, x: self.a * acc + x,
+                   self.shocks._sample_n(n, seed))
 
 
 class test_ar_process(tf.test.TestCase):
@@ -63,7 +65,10 @@ class test_ar_process(tf.test.TestCase):
 
     # use scipy to find max likelihood
     def cost(z):
-      return np.sum((x_data - z)**2)/eta**2 + np.sum((z[1:] - r * z[:-1])**2)/sig**2 + z[0]**2/sig**2
+      initial = z[0]**2 / sig**2
+      ar = np.sum((z[1:] - r * z[:-1])**2) / sig**2
+      data = np.sum((x_data - z)**2) / eta**2
+      return initial + ar + data
 
     mle = minimize(cost, np.zeros(T)).x
 
