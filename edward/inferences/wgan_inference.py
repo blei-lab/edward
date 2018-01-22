@@ -8,11 +8,6 @@ import tensorflow as tf
 from edward.inferences.gan_inference import GANInference
 from edward.util import get_session
 
-try:
-  from edward.models import Uniform
-except Exception as e:
-  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
-
 
 class WGANInference(GANInference):
   """Parameter estimation with GAN-style training
@@ -81,9 +76,7 @@ class WGANInference(GANInference):
     if self.penalty is None or self.penalty == 0:
       penalty = 0.0
     else:
-      eps = Uniform().sample(x_true.shape[0])
-      while eps.shape.ndims < x_true.shape.ndims:
-        eps = tf.expand_dims(eps, -1)
+      eps = tf.random_uniform(tf.shape(x_true))
       x_interpolated = eps * x_true + (1.0 - eps) * x_fake
       with tf.variable_scope("Disc", reuse=True):
         d_interpolated = self.discriminator(x_interpolated)

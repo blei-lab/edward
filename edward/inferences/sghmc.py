@@ -9,11 +9,6 @@ from edward.inferences.monte_carlo import MonteCarlo
 from edward.models import RandomVariable, Empirical
 from edward.util import copy
 
-try:
-  from edward.models import Normal
-except Exception as e:
-  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
-
 
 class SGHMC(MonteCarlo):
   """Stochastic gradient Hamiltonian Monte Carlo [@chen2014stochastic].
@@ -82,14 +77,12 @@ class SGHMC(MonteCarlo):
     for z, grad_log_p in zip(six.iterkeys(old_sample), grad_log_joint):
       qz = self.latent_vars[z]
       event_shape = qz.event_shape
-      normal = Normal(
-          loc=tf.zeros(event_shape, dtype=qz.dtype),
-          scale=(tf.sqrt(tf.cast(learning_rate * self.friction, qz.dtype)) *
-                 tf.ones(event_shape, dtype=qz.dtype)))
+      stddev = tf.sqrt(tf.cast(learning_rate * self.friction, qz.dtype))
+      normal = tf.random_normal(event_shape, dtype=qz.dtype)
       sample[z] = old_sample[z] + old_v_sample[z]
       v_sample[z] = ((1.0 - 0.5 * self.friction) * old_v_sample[z] +
                      learning_rate * tf.convert_to_tensor(grad_log_p) +
-                     normal.sample())
+                     stddev * normal)
 
     # Update Empirical random variables.
     assign_ops = []
