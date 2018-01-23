@@ -14,6 +14,11 @@ class test_rejection_samplers_class(tf.test.TestCase):
     beta = tf.constant(2.)
     epsilon = tf.constant(.5)
     with self.test_session() as sess:
-      z = GammaRejectionSampler.h(epsilon, alpha, beta)
-      self.assertAllClose(GammaRejectionSampler.h_inverse(z, alpha, beta).eval(),
+      sampler = GammaRejectionSampler
+      z = sampler.h(epsilon, alpha, beta)
+
+      self.assertAllClose(sampler.h_inverse(z, alpha, beta).eval(),
         epsilon.eval(), atol=1e-6)
+      # np.log(scipy.stats.norm(.5))
+      self.assertAllClose(sampler.log_prob_s(epsilon).eval(),
+        -1.0439385332046727, atol=1e-6)
