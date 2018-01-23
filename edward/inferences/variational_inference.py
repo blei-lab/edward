@@ -9,7 +9,6 @@ import tensorflow as tf
 
 from edward.inferences.inference import Inference
 from edward.models import RandomVariable
-from edward.optimizers import KucukelbirOptimizer
 from edward.util import get_session, get_variables
 
 
