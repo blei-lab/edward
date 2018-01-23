@@ -1189,9 +1189,8 @@ def build_score_rb_loss_and_gradients(inference, var_list):
 def build_rejection_sampling_loss_and_gradients(inference, var_list):
     """
     """
-    p_log_prob = [0.0] * inference.n_samples
-    q_log_prob = [0.0] * inference.n_samples
-    r_log_prob = [0.0] * inference.n_samples
+    rep = [0.0] * inference.n_samples
+    cor = [0.0] * inference.n_samples
     base_scope = tf.get_default_graph().unique_name("inference") + '/'
     for s in range(inference.n_samples):
       # Form dictionary in order to replace conditioning on prior or
@@ -1206,84 +1205,62 @@ def build_rejection_sampling_loss_and_gradients(inference, var_list):
           else:
             dict_swap[x] = qx
 
+      p_log_prob = 0.
+      q_log_prob = 0.
+      r_log_prob = 0.
+
       for z, qz in six.iteritems(inference.latent_vars):
         # Copy q(z) to obtain new set of posterior samples.
         qz_copy = copy(qz, scope=scope)
-
-        # Of course, this will evaluate to `True`. We just do this as a simple first pass.
-        if 'rsvi':
-          # --- RSVI
-
-          # Get variable shortnames
-          qz_class = qz.__class__
-          epsilon_likelihood = inference.rejection_sampler_vars[qz_class]['epsilon_likelihood']
-          reparam_func = inference.rejection_sampler_vars[qz_class]['reparam_func']
-          m = inference.rejection_sampler_vars[qz_class]['m']
-          alpha = qz.parameters['concentration']
-          beta = qz.parameters['rate']
-
-          # Sample
-
-          # TODO: pass in the real `qalpha` and `qbeta`
-          # TODO: pass in the real `qz`
-          epsilon = epsilon_likelihood.value()
-          sample = reparam_func(epsilon, alpha, beta)
-          eps_prob = epsilon_likelihood.prob(epsilon)
-          qz_prob = qz.prob(sample)
-          random_uniform = tf.random_uniform([])
-
-          # We need this line. However, let's just accept for now.
-          # if random_uniform * m * eps_prob <= qz_prob:
-
-          # RSVI ---
-        else:
-          z = qz_copy.value()
-
-        dict_swap[z] = sample
-
-        q_log_prob[s] += tf.reduce_sum(
+        dict_swap[z] = qz_copy.value()
+        q_log_prob += tf.reduce_sum(
             inference.scale.get(z, 1.0) * qz_copy.log_prob(dict_swap[z]))
-        r_log_prob[s] += tf.reduce_sum(
-            inference.scale.get(z, 1.0) * epsilon_likelihood.log_prob(dict_swap[z]))
 
       for z in six.iterkeys(inference.latent_vars):
         z_copy = copy(z, dict_swap, scope=scope)
-        p_log_prob[s] += tf.reduce_sum(
+        p_log_prob += tf.reduce_sum(
             inference.scale.get(z, 1.0) * z_copy.log_prob(dict_swap[z]))
+
+      for z, qz in six.iteritems(inference.latent_vars):
+        rej_sampler = samplers[qz.__class__]
+        # TODO: how do we get per-qz variables in here?
+        epsilon_ = rej_sampler.h_inverse(dict_swap[z], alpha?, beta?)
+        z_ = rej_sampler.h(epsilon, alpha?, beta?)
+        r_log_prob += -tf.gradients(z_, epsilon_)
 
       for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
           x_copy = copy(x, dict_swap, scope=scope)
-          p_log_prob[s] += tf.reduce_sum(
+          p_log_prob += tf.reduce_sum(
               inference.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
 
-    p_log_prob = tf.reduce_mean(p_log_prob)
-    q_log_prob = tf.reduce_mean(q_log_prob)
-    r_log_prob = tf.reduce_mean(r_log_prob)
+      rep[s] = p_log_prob
+      cor[s] = tf.stop_gradient(p_log_prob) * (q_log_prob - r_log_prob)
 
+    rep = tf.reduce_mean(rep)
+    cor = tf.reduce_mean(cor)
     q_entropy = tf.reduce_sum([
         tf.reduce_sum(qz.entropy())
         for z, qz in six.iteritems(inference.latent_vars)])
-
     reg_penalty = tf.reduce_sum(tf.losses.get_regularization_losses())
 
+    loss = -(rep + q_entropy - reg_penalty)
+
     if inference.logging:
-      tf.summary.scalar("loss/p_log_prob", p_log_prob,
+      tf.summary.scalar("loss/reparam_objective", rep,
+                        collections=[inference._summary_key])
+      tf.summary.scalar("loss/correction_term", cor,
                         collections=[inference._summary_key])
       tf.summary.scalar("loss/q_entropy", q_entropy,
                         collections=[inference._summary_key])
       tf.summary.scalar("loss/reg_penalty", reg_penalty,
                         collections=[inference._summary_key])
 
-    loss = -(p_log_prob + q_entropy - reg_penalty)
+    # TODO: fill in gradients
+    # g_rep =
+    # g_cor =
+    # g_entropy =
 
-    # RSVI gradient components
-    model_grad = tf.gradients(p_log_prob, sample)[0]
-    q_entropy_grad = tf.gradients(q_entropy, var_list)
-    g_rep = [model_grad * grad for grad in tf.gradients(sample, var_list)]
-    g_cor = [p_log_prob * grad for grad in tf.gradients(q_log_prob - r_log_prob, var_list)]
-    grad_summands = zip(*[g_rep, g_cor, q_entropy_grad])
-
-    grads = [tf.reduce_sum(summand) for summand in grad_summands]
+    # grads = tf.gradients(loss, var_list)
     grads_and_vars = list(zip(grads, var_list))
     return loss, grads_and_vars
