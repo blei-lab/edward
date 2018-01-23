@@ -9,6 +9,8 @@ import tensorflow as tf
 
 class GammaRejectionSampler:
 
+  # As implemented in https://github.com/blei-lab/ars-reparameterization/blob/master/gamma/demo.ipynb
+
   @staticmethod
   def h(epsilon, alpha, beta):
     a = alpha - (1. / 3)
