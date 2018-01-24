@@ -6,7 +6,8 @@ import six
 import tensorflow as tf
 
 from edward.inferences.variational_inference import VariationalInference
-from edward.models import RandomVariable
+from edward.models import RandomVariable, Gamma
+from edward.samplers import GammaRejectionSampler
 from edward.util import copy, get_descendants
 
 try:
@@ -1189,6 +1190,10 @@ def build_score_rb_loss_and_gradients(inference, var_list):
 def build_rejection_sampling_loss_and_gradients(inference, var_list):
     """
     """
+    rej_samplers = {
+      Gamma: GammaRejectionSampler
+    }
+
     rep = [0.0] * inference.n_samples
     cor = [0.0] * inference.n_samples
     base_scope = tf.get_default_graph().unique_name("inference") + '/'
@@ -1222,11 +1227,9 @@ def build_rejection_sampling_loss_and_gradients(inference, var_list):
             inference.scale.get(z, 1.0) * z_copy.log_prob(dict_swap[z]))
 
       for z, qz in six.iteritems(inference.latent_vars):
-        rej_sampler = samplers[qz.__class__]
-        # TODO: how do we get per-qz variables in here?
-        epsilon_ = rej_sampler.h_inverse(dict_swap[z], alpha?, beta?)
-        z_ = rej_sampler.h(epsilon, alpha?, beta?)
-        r_log_prob += -tf.gradients(z_, epsilon_)
+        sampler = rej_samplers[qz.__class__](density=qz)
+        epsilon = sampler.h_inverse(dict_swap[z])
+        r_log_prob += -tf.gradients(dict_swap[z], epsilon)
 
       for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
@@ -1256,11 +1259,11 @@ def build_rejection_sampling_loss_and_gradients(inference, var_list):
       tf.summary.scalar("loss/reg_penalty", reg_penalty,
                         collections=[inference._summary_key])
 
-    # TODO: fill in gradients
-    # g_rep =
-    # g_cor =
-    # g_entropy =
+    g_rep = tf.gradients(rep, var_list)
+    g_cor = tf.gradients(cor, var_list)
+    g_entropy = tf.gradients(q_entropy, var_list)
 
-    # grads = tf.gradients(loss, var_list)
+    grad_summands = zip(*[g_rep, g_cor, q_entropy_grad])
+    grads = [tf.reduce_sum(summand) for summand in grad_summands]
     grads_and_vars = list(zip(grads, var_list))
     return loss, grads_and_vars
