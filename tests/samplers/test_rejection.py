@@ -4,20 +4,20 @@ from __future__ import print_function
 
 import tensorflow as tf
 
+from edward.models import Gamma
 from edward.samplers import GammaRejectionSampler
 
 
 class test_rejection_samplers_class(tf.test.TestCase):
 
   def test_gamma_rejection_sampler(self):
-    alpha = tf.constant(4.)
-    beta = tf.constant(2.)
+    gamma = Gamma(4., 2.)
     epsilon = tf.constant(.5)
     with self.test_session() as sess:
-      sampler = GammaRejectionSampler
-      z = sampler.h(epsilon, alpha, beta)
+      sampler = GammaRejectionSampler(density=gamma)
+      z = sampler.h(epsilon)
 
-      self.assertAllClose(sampler.h_inverse(z, alpha, beta).eval(),
+      self.assertAllClose(sampler.h_inverse(z).eval(),
         epsilon.eval(), atol=1e-6)
       # np.log(scipy.stats.norm(.5))
       self.assertAllClose(sampler.log_prob_s(epsilon).eval(),
