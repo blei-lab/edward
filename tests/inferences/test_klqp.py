@@ -51,46 +51,19 @@ class test_klqp_class(tf.test.TestCase):
         rate = Gamma(5.0, 1.0)
         x = Poisson(rate=rate, sample_shape=5)
 
-        qalpha = tf.nn.softplus(tf.Variable(tf.random_normal([])))
-        qbeta = tf.nn.softplus(tf.Variable(tf.random_normal([])))
+        qalpha = tf.nn.softplus(tf.Variable(tf.random_normal([]), name='qalpha'))
+        qbeta = tf.nn.softplus(tf.Variable(tf.random_normal([]), name='qbeta'))
         qgamma = Gamma(qalpha, qbeta, allow_nan_stats=False)
-
-        # Gamma rejection sampler variables
-        def gamma_reparam_func(epsilon, alpha, beta):
-
-          def _gamma_reparam_func(alpha=alpha, beta=beta, epsilon=epsilon):
-            a = alpha - (1. / 3)
-            b = tf.sqrt(9 * alpha - 3)
-            c = 1 + (epsilon / b)
-            z = a * c**3
-            return z
-
-          def _gamma_reparam_func_alpha_lt_1(alpha=alpha, beta=beta, epsilon=epsilon):
-            z_tilde = _gamma_reparam_func(alpha=alpha + 1, beta=beta)
-            u = np.random.uniform()
-            z = u ** (1 / alpha) * z_tilde
-            return z
-
-          z = tf.cond(tf.less(alpha, 1.), _gamma_reparam_func_alpha_lt_1, _gamma_reparam_func)
-          z = tf.cond(tf.equal(beta, 1.), lambda: z, lambda: tf.divide(z, beta))
-          return z
-
-        gamma_rejection_sampler_vars = {
-          'reparam_func': gamma_reparam_func,
-          'epsilon_likelihood': Normal(loc=0.0, scale=1.0),
-          'm': 10.
-        }
 
         # sum(x_data) = 20
         # len(x_data) = 5
         # analytic solution: Gamma(alpha=5+20, beta=1+5)
-        inference = Inference({rate: qgamma}, data={x: x_data},
-          rejection_sampler_vars={Gamma: gamma_rejection_sampler_vars})
+        inference = Inference({rate: qgamma}, data={x: x_data})
 
         inference.run(*args, **kwargs)
 
-        self.assertAllClose(qalpha.eval(), 25., atol=1e-2)
-        self.assertAllClose(qbeta.eval(), 6., atol=1e-2)
+        self.assertAllClose(tf.nn.softplus(qalpha).eval(), 25., atol=1e-2)
+        self.assertAllClose(tf.nn.softplus(qbeta).eval(), 6., atol=1e-2)
 
   def _test_multinomial_dirichlet(self, Inference, *args, **kwargs):
       with self.test_session() as sess:
@@ -178,7 +151,8 @@ class test_klqp_class(tf.test.TestCase):
       ed.RejectionSamplingKLqp,
       n_samples=1,
       n_iter=5000,
-      optimizer='kucukelbir'
+      optimizer='rmsprop',
+      global_step=tf.Variable(0, trainable=False, name="global_step")
     )
     # self._test_multinomial_dirichlet(
     #   ed.RejectionSamplingKLqp, n_samples=5, n_iter=5000)
