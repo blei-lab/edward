@@ -617,7 +617,6 @@ class ScoreRBKLqp(VariationalInference):
     return build_score_rb_loss_and_gradients(self, var_list)
 
 
-# TODO: you can probably make another base class that implements a `sample` method?
 class RejectionSamplingKLqp(VariationalInference):
 
     """
