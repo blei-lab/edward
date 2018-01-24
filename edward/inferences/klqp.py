@@ -1217,19 +1217,18 @@ def build_rejection_sampling_loss_and_gradients(inference, var_list):
       for z, qz in six.iteritems(inference.latent_vars):
         # Copy q(z) to obtain new set of posterior samples.
         qz_copy = copy(qz, scope=scope)
+        sampler = rej_samplers[qz_copy.__class__](density=qz)
         dict_swap[z] = qz_copy.value()
+        epsilon = sampler.h_inverse(tf.stop_gradient(dict_swap[z]))
+        dict_swap[z] = sampler.h(epsilon)
         q_log_prob += tf.reduce_sum(
             inference.scale.get(z, 1.0) * qz_copy.log_prob(dict_swap[z]))
+        r_log_prob += -tf.gradients(dict_swap[z], epsilon)[0]
 
       for z in six.iterkeys(inference.latent_vars):
         z_copy = copy(z, dict_swap, scope=scope)
         p_log_prob += tf.reduce_sum(
             inference.scale.get(z, 1.0) * z_copy.log_prob(dict_swap[z]))
-
-      for z, qz in six.iteritems(inference.latent_vars):
-        sampler = rej_samplers[qz.__class__](density=qz)
-        epsilon = sampler.h_inverse(dict_swap[z])
-        r_log_prob += -tf.gradients(dict_swap[z], epsilon)
 
       for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
@@ -1263,7 +1262,7 @@ def build_rejection_sampling_loss_and_gradients(inference, var_list):
     g_cor = tf.gradients(cor, var_list)
     g_entropy = tf.gradients(q_entropy, var_list)
 
-    grad_summands = zip(*[g_rep, g_cor, q_entropy_grad])
+    grad_summands = zip(*[g_rep, g_cor, g_entropy])
     grads = [tf.reduce_sum(summand) for summand in grad_summands]
     grads_and_vars = list(zip(grads, var_list))
     return loss, grads_and_vars

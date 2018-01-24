@@ -87,7 +87,7 @@ class VariationalInference(Inference):
       global_step = tf.Variable(0, trainable=False, name="global_step")
 
     if isinstance(global_step, tf.Variable):
-      starter_learning_rate = 0.1
+      starter_learning_rate = 0.01
       learning_rate = tf.train.exponential_decay(starter_learning_rate,
                                                  global_step,
                                                  100, 0.9, staircase=True)
@@ -112,14 +112,6 @@ class VariationalInference(Inference):
         optimizer = tf.train.FtrlOptimizer(learning_rate)
       elif optimizer == 'rmsprop':
         optimizer = tf.train.RMSPropOptimizer(learning_rate)
-      elif optimizer == 'kucukelbir':
-        optimizer = KucukelbirOptimizer(
-          t=0.1,
-          delta=10e-3,
-          eta=1e-1,
-          s_n=tf.Variable([0., 0.], trainable=False),
-          n=tf.Variable(0., trainable=False)
-        )
       else:
         raise ValueError('Optimizer class not found:', optimizer)
     elif not isinstance(optimizer, tf.train.Optimizer):
