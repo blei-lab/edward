@@ -65,7 +65,7 @@ class ImplicitKLqp(GANInference):
         discriminators, it can take a batch of data points and local
         variables, of size $M$, and output a vector of length
         $M$.
-      global_vars: dict of RandomVariable to RandomVariable, optional.
+      global_vars: dict of RandomVariable to RandomVariable.
         Identifying which variables in `latent_vars` are global
         variables, shared across data points. These will not be
         encompassed in the ratio estimation problem, and will be
@@ -88,7 +88,7 @@ class ImplicitKLqp(GANInference):
     and builds ops for the algorithm's computation graph.
 
     Args:
-      ratio_loss: str or fn, optional.
+      ratio_loss: str or fn.
         Loss function minimized to get the ratio estimator. 'log' or 'hinge'.
         Alternatively, one can pass in a function of two inputs,
         `psamples` and `qsamples`, and output a point-wise value

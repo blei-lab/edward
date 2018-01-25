@@ -47,9 +47,9 @@ class HMC(MonteCarlo):
     and builds ops for the algorithm's computation graph.
 
     Args:
-      step_size: float, optional.
+      step_size: float.
         Step size of numerical integrator.
-      n_steps: int, optional.
+      n_steps: int.
         Number of steps of numerical integrator.
     """
     self.step_size = step_size

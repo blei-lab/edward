@@ -44,9 +44,9 @@ class SGHMC(MonteCarlo):
     """Initialize inference algorithm.
 
     Args:
-      step_size: float, optional.
+      step_size: float.
         Constant scale factor of learning rate.
-      friction: float, optional.
+      friction: float.
         Constant scale on the friction term in the Hamiltonian system.
     """
     self.step_size = step_size

@@ -87,7 +87,7 @@ class KLpq(VariationalInference):
     and builds ops for the algorithm's computation graph.
 
     Args:
-      n_samples: int, optional.
+      n_samples: int.
         Number of samples from variational model for calculating
         stochastic gradients.
     """

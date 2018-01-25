@@ -36,7 +36,7 @@ class Gibbs(MonteCarlo):
     """Create an inference algorithm.
 
     Args:
-      proposal_vars: dict of RandomVariable to RandomVariable, optional.
+      proposal_vars: dict of RandomVariable to RandomVariable.
         Collection of random variables to perform inference on; each is
         binded to its complete conditionals which Gibbs cycles draws on.
         If not specified, default is to use `ed.complete_conditional`.
@@ -55,7 +55,7 @@ class Gibbs(MonteCarlo):
     and builds ops for the algorithm's computation graph.
 
     Args:
-      scan_order: list or str, optional.
+      scan_order: list or str.
         The scan order for each Gibbs update. If list, it is the
         deterministic order of latent variables. An element in the list
         can be a `RandomVariable` or itself a list of
@@ -71,7 +71,7 @@ class Gibbs(MonteCarlo):
     """Run one iteration of sampling.
 
     Args:
-      feed_dict: dict, optional.
+      feed_dict: dict.
         Feed dictionary for a TensorFlow session run. It is used to feed
         placeholders that are not fed during initialization.
 

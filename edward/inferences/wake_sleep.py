@@ -63,10 +63,10 @@ class WakeSleep(VariationalInference):
     and builds ops for the algorithm's computation graph.
 
     Args:
-      n_samples: int, optional.
+      n_samples: int.
         Number of samples for calculating stochastic gradients during
         wake and sleep phases.
-      phase_q: str, optional.
+      phase_q: str.
         Phase for updating parameters of q. If 'sleep', update using
         a sample from p. If 'wake', update using a sample from q.
         (Unlike reparameterization gradients, the sample is held

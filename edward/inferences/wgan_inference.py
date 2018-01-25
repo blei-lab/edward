@@ -46,11 +46,11 @@ class WGANInference(GANInference):
     and builds ops for the algorithm's computation graph.
 
     Args:
-      penalty: float, optional.
+      penalty: float.
         Scalar value to enforce gradient penalty that ensures the
         gradients have norm equal to 1 [@gulrajani2017improved]. Set to
         None (or 0.0) if using no penalty.
-      clip: float, optional.
+      clip: float.
         Value to clip weights by. Default is no clipping.
     """
     self.penalty = penalty

@@ -153,19 +153,19 @@ def copy(org_instance, dict_swap=None, scope="copied",
   Args:
     org_instance: RandomVariable, tf.Operation, tf.Tensor, or tf.Variable.
       Node to add in graph with replaced ancestors.
-    dict_swap: dict, optional.
+    dict_swap: dict.
       Random variables, variables, tensors, or operations to swap with.
       Its keys are what `org_instance` may depend on, and its values are
       the corresponding object (not necessarily of the same class
       instance, but must have the same type, e.g., float32) that is used
       in exchange.
-    scope: str, optional.
+    scope: str.
       A scope for the new node(s). This is used to avoid name
       conflicts with the original node(s).
-    replace_itself: bool, optional
+    replace_itself: bool.
       Whether to replace `org_instance` itself if it exists in
       `dict_swap`. (This is used for the recursion.)
-    copy_q: bool, optional.
+    copy_q: bool.
       Whether to copy the replaced tensors too (if not already
       copied within the new scope). Otherwise will reuse them.
     copy_parent_rvs:
@@ -451,7 +451,7 @@ def get_ancestors(x, collection=None):
   Args:
     x: RandomVariable or tf.Tensor.
       Query node to find ancestors of.
-    collection: list of RandomVariable, optional.
+    collection: list of RandomVariable.
       The collection of random variables to check with respect to;
       defaults to all random variables in the graph.
 
@@ -503,7 +503,7 @@ def get_blanket(x, collection=None):
   Args:
     x: RandomVariable or tf.Tensor.
       Query node to find Markov blanket of.
-    collection: list of RandomVariable, optional.
+    collection: list of RandomVariable.
       The collection of random variables to check with respect to;
       defaults to all random variables in the graph.
 
@@ -539,7 +539,7 @@ def get_children(x, collection=None):
   Args:
     x: RandomVariable or tf.Tensor>
       Query node to find children of.
-    collection: list of RandomVariable, optional>
+    collection: list of RandomVariable.
       The collection of random variables to check with respect to;
       defaults to all random variables in the graph.
 
@@ -592,7 +592,7 @@ def get_descendants(x, collection=None):
   Args:
     x: RandomVariable or tf.Tensor.
       Query node to find descendants of.
-    collection: list of RandomVariable, optional.
+    collection: list of RandomVariable.
       The collection of random variables to check with respect to;
       defaults to all random variables in the graph.
 
@@ -645,7 +645,7 @@ def get_parents(x, collection=None):
   Args:
     x: RandomVariable or tf.Tensor.
       Query node to find parents of.
-    collection: list of RandomVariable, optional.
+    collection: list of RandomVariable.
       The collection of random variables to check with respect to;
       defaults to all random variables in the graph.
 
@@ -697,7 +697,7 @@ def get_siblings(x, collection=None):
   Args:
     x: RandomVariable or tf.Tensor.
       Query node to find siblings of.
-    collection: list of RandomVariable, optional.
+    collection: list of RandomVariable.
       The collection of random variables to check with respect to;
       defaults to all random variables in the graph.
 
@@ -729,7 +729,7 @@ def get_variables(x, collection=None):
   Args:
     x: RandomVariable or tf.Tensor.
       Query node to find parents of.
-    collection: list of tf.Variable, optional.
+    collection: list of tf.Variable.
       The collection of variables to check with respect to; defaults to
       all variables in the graph.
 
@@ -785,7 +785,7 @@ def is_independent(a, b, condition=None):
        Query node(s).
     b: RandomVariable or list of RandomVariable.
        Query node(s).
-    condition: RandomVariable or list of RandomVariable, optional.
+    condition: RandomVariable or list of RandomVariable.
        Random variable(s) to condition on.
 
   Returns:
@@ -867,7 +867,7 @@ def transform(x, *args, **kwargs):
   Args:
     x: RandomVariable.
       Continuous random variable to transform.
-    *args, **kwargs: optional.
+    *args, **kwargs:
       Arguments to overwrite when forming the `TransformedDistribution`.
       For example, manually specify the transformation by passing in
       the `bijector` argument.

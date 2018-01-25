@@ -62,14 +62,14 @@ class MonteCarlo(Inference):
     """Create an inference algorithm.
 
     Args:
-      latent_vars: list or dict, optional.
+      latent_vars: list or dict.
         Collection of random variables (of type `RandomVariable` or
         `tf.Tensor`) to perform inference on. If list, each random
         variable will be approximated using a `Empirical` random
         variable that is defined internally (with unconstrained
         support). If dictionary, each value in the dictionary must be a
         `Empirical` random variable.
-      data: dict, optional.
+      data: dict.
         Data dictionary which binds observed variables (of type
         `RandomVariable` or `tf.Tensor`) to their realizations (of
         type `tf.Tensor`). It can also bind placeholders (of type
@@ -111,7 +111,7 @@ class MonteCarlo(Inference):
     """Run one iteration of sampling.
 
     Args:
-      feed_dict: dict, optional.
+      feed_dict: dict.
         Feed dictionary for a TensorFlow session run. It is used to feed
         placeholders that are not fed during initialization.
 

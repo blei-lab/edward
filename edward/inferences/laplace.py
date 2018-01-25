@@ -136,7 +136,7 @@ class Laplace(MAP):
     Computes the Hessian at the mode.
 
     Args:
-      feed_dict: dict, optional.
+      feed_dict: dict.
         Feed dictionary for a TensorFlow session run during evaluation
         of Hessian. It is used to feed placeholders that are not fed
         during initialization.
