@@ -6,7 +6,7 @@ import six
 import tensorflow as tf
 
 from edward.inferences.map import map
-from edward.models import PointMass, RandomVariable
+from edward.models import RandomVariable
 from edward.util import get_session, get_variables
 from edward.util import copy, transform
 

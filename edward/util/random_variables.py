@@ -8,7 +8,6 @@ import tensorflow as tf
 from copy import deepcopy
 from edward.models.random_variable import RandomVariable
 from edward.models.random_variables import TransformedDistribution
-from edward.models import PointMass
 from edward.util.graphs import random_variables
 from tensorflow.core.framework import attr_value_pb2
 from tensorflow.python.framework.ops import set_shapes_for_outputs
@@ -764,6 +763,8 @@ def is_independent(a, b, condition=None):
         for parent in get_parents(node):
           schedule.append((parent, "child"))
 
+      # TODO
+      from edward.models import PointMass
       if not isinstance(node, PointMass) and node not in bottom_marked:
         bottom_marked.add(node)
         if node in A:
