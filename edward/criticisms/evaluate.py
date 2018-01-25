@@ -58,10 +58,10 @@ def evaluate(metrics, data, n_samples=500, output_key=None, seed=None):
       `RandomVariable` or `tf.Tensor`) to their realizations (of
       type `tf.Tensor`). It can also bind placeholders (of type
       `tf.Tensor`) used in the model to their realizations.
-    n_samples: int, optional.
+    n_samples: int.
       Number of posterior samples for making predictions, using the
       posterior predictive distribution.
-    output_key: RandomVariable or tf.Tensor, optional.
+    output_key: RandomVariable or tf.Tensor.
       It is the key in `data` which corresponds to the model's output.
     seed: a Python integer. Used to create a random seed for the
       distribution

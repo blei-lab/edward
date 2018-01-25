@@ -34,11 +34,11 @@ def ppc(T, data, latent_vars=None, n_samples=100):
       `RandomVariable` or `tf.Tensor`) to their realizations (of
       type `tf.Tensor`). It can also bind placeholders (of type
       `tf.Tensor`) used in the model to their realizations.
-    latent_vars: dict, optional.
+    latent_vars: dict.
       Collection of random variables (of type `RandomVariable` or
       `tf.Tensor`) binded to their inferred posterior. This argument
       is used when the discrepancy is a function of latent variables.
-    n_samples: int, optional.
+    n_samples: int.
       Number of replicated data sets.
 
   Returns:

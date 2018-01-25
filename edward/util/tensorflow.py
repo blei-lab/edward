@@ -62,11 +62,11 @@ def rbf(X, X2=None, lengthscale=1.0, variance=1.0):
   Args:
     X: tf.Tensor.
       N x D matrix of N data points each with D features.
-    X2: tf.Tensor, optional.
+    X2: tf.Tensor.
       N x D matrix of N data points each with D features.
-    lengthscale: tf.Tensor, optional.
+    lengthscale: tf.Tensor.
       Lengthscale parameter, a positive scalar or D-dimensional vector.
-    variance: tf.Tensor, optional.
+    variance: tf.Tensor.
       Output variance parameter, a positive scalar.
 
   #### Examples

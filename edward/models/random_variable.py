@@ -77,12 +77,12 @@ class RandomVariable(object):
     """Create a new random variable.
 
     Args:
-      sample_shape: tf.TensorShape, optional.
+      sample_shape: tf.TensorShape.
         Shape of samples to draw from the random variable.
-      value: tf.Tensor, optional.
+      value: tf.Tensor.
         Fixed tensor to associate with random variable. Must have shape
         `sample_shape + batch_shape + event_shape`.
-      collections: list, optional.
+      collections: list.
         Optional list of graph collections (lists). The random variable is
         added to these collections. Defaults to `[ed.random_variables()]`.
     """
@@ -194,10 +194,10 @@ class RandomVariable(object):
     passed, the default session is used.
 
     Args:
-      session: tf.BaseSession, optional.
+      session: tf.BaseSession.
         The `tf.Session` to use to evaluate this random variable. If
         none, the default session is used.
-      feed_dict: dict, optional.
+      feed_dict: dict.
         A dictionary that maps `tf.Tensor` objects to feed values. See
         `tf.Session.run()` for a description of the valid feed values.
 

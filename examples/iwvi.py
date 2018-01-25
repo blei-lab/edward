@@ -43,10 +43,8 @@ class IWVI(VariationalInference):
   def initialize(self, K=5, *args, **kwargs):
     """Initialization.
 
-    Parameters
-    ----------
-    K : int, optional
-      Number of importance samples.
+    Args:
+      K: int. Number of importance samples.
     """
     self.K = K
     return super(IWVI, self).initialize(*args, **kwargs)
@@ -55,10 +53,8 @@ class IWVI(VariationalInference):
     """Build loss function. Its automatic differentiation
     is a stochastic gradient of
 
-    .. math::
-
-      -E_{q(z^1; \lambda), ..., q(z^K; \lambda)} [
-      \log 1/K \sum_{k=1}^K p(x, z^k)/q(z^k; \lambda) ]
+    $-\mathbb{E}_{q(z^1; \lambda), ..., q(z^K; \lambda)} [
+      \log 1/K \sum_{k=1}^K p(x, z^k)/q(z^k; \lambda) ]$
 
     based on the reparameterization trick.
     """

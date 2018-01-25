@@ -43,7 +43,7 @@ class SGLD(MonteCarlo):
   def initialize(self, step_size=0.25, *args, **kwargs):
     """
     Args:
-      step_size: float, optional.
+      step_size: float.
         Constant scale factor of learning rate.
     """
     self.step_size = step_size

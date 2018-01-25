@@ -77,7 +77,7 @@ def complete_conditional(rv, cond_set=None):
   Args:
     rv: RandomVariable.
       The random variable whose conditional distribution we are interested in.
-    cond_set: iterable of RandomVariable, optional.
+    cond_set: iterable of RandomVariable.
       The set of random variables we want to condition on. Default is all
       random variables in the graph. (It makes no difference if `cond_set`
       does or does not include `rv`.)

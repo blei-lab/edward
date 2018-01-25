@@ -55,12 +55,12 @@ class Inference(object):
     """Create an inference algorithm.
 
     Args:
-      latent_vars: dict, optional.
+      latent_vars: dict.
         Collection of latent variables (of type `RandomVariable` or
         `tf.Tensor`) to perform inference on. Each random variable is
         binded to another random variable; the latter will infer the
         former conditional on data.
-      data: dict, optional.
+      data: dict.
         Data dictionary which binds observed variables (of type
         `RandomVariable` or `tf.Tensor`) to their realizations (of
         type `tf.Tensor`). It can also bind placeholders (of type
@@ -110,12 +110,12 @@ class Inference(object):
     individually.
 
     Args:
-      variables: list, optional.
+      variables: list.
         A list of TensorFlow variables to initialize during inference.
         Default is to initialize all variables (this includes
         reinitializing variables that were already initialized). To
         avoid initializing any variables, pass in an empty list.
-      use_coordinator: bool, optional.
+      use_coordinator: bool.
         Whether to start and stop queue runners during inference using a
         TensorFlow coordinator. For example, queue runners are necessary
         for batch training with file readers.
@@ -164,39 +164,39 @@ class Inference(object):
     No methods which build ops should be called outside `initialize()`.
 
     Args:
-      n_iter: int, optional.
+      n_iter: int.
         Number of iterations for algorithm when calling `run()`.
         Alternatively if controlling inference manually, it is the
         expected number of calls to `update()`; this number determines
         tracking information during the print progress.
-      n_print: int, optional.
+      n_print: int.
         Number of iterations for each print progress. To suppress print
         progress, then specify 0. Default is `int(n_iter / 100)`.
-      scale: dict of RandomVariable to tf.Tensor, optional.
+      scale: dict of RandomVariable to tf.Tensor.
         A tensor to scale computation for any random variable that it is
         binded to. Its shape must be broadcastable; it is multiplied
         element-wise to the random variable. For example, this is useful
         for mini-batch scaling when inferring global variables, or
         applying masks on a random variable.
-      auto_transform: bool, optional.
+      auto_transform: bool.
         Whether to automatically transform continuous latent variables
         of unequal support to be on the unconstrained space. It is
         only applied if the argument is `True`, the latent variable
         pair are `ed.RandomVariable`s with the `support` attribute,
         the supports are both continuous and unequal.
-      logdir: str, optional.
+      logdir: str.
         Directory where event file will be written. For details,
         see `tf.summary.FileWriter`. Default is to log nothing.
-      log_timestamp: bool, optional.
+      log_timestamp: bool.
         If True (and `logdir` is specified), create a subdirectory of
         `logdir` to save the specific run results. The subdirectory's
         name is the current UTC timestamp with format 'YYYYMMDD_HHMMSS'.
-      log_vars: list, optional.
+      log_vars: list.
         Specifies the list of variables to log after each `n_print`
         steps. If None, will log all variables. If `[]`, no variables
         will be logged. `logdir` must be specified for variables to be
         logged.
-      debug: bool, optional.
+      debug: bool.
         If True, add checks for `NaN` and `Inf` to all computations
         in the graph. May result in substantially slower execution
         times.
@@ -291,7 +291,7 @@ class Inference(object):
     Any derived class of `Inference` **must** implement this method.
 
     Args:
-      feed_dict: dict, optional.
+      feed_dict: dict.
         Feed dictionary for a TensorFlow session run. It is used to feed
         placeholders that are not fed during initialization.
 
@@ -344,7 +344,7 @@ class Inference(object):
     the variable has scalar shape; otherwise forms a `tf.summary.histogram`.
 
     Args:
-      log_vars: list, optional.
+      log_vars: list.
         Specifies the list of variables to log after each `n_print`
         steps. If None, will log all variables. If `[]`, no variables
         will be logged.

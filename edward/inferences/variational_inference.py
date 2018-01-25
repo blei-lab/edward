@@ -32,20 +32,20 @@ class VariationalInference(Inference):
     and builds ops for the algorithm's computation graph.
 
     Args:
-      optimizer: str or tf.train.Optimizer, optional.
+      optimizer: str or tf.train.Optimizer.
         A TensorFlow optimizer, to use for optimizing the variational
         objective. Alternatively, one can pass in the name of a
         TensorFlow optimizer, and default parameters for the optimizer
         will be used.
-      var_list: list of tf.Variable, optional.
+      var_list: list of tf.Variable.
         List of TensorFlow variables to optimize over. Default is all
         trainable variables that `latent_vars` and `data` depend on,
         excluding those that are only used in conditionals in `data`.
-      use_prettytensor: bool, optional.
+      use_prettytensor: bool.
         `True` if aim to use PrettyTensor optimizer (when using
         PrettyTensor) or `False` if aim to use TensorFlow optimizer.
         Defaults to TensorFlow.
-      global_step: tf.Variable, optional.
+      global_step: tf.Variable.
         A TensorFlow variable to hold the global step.
     """
     super(VariationalInference, self).initialize(*args, **kwargs)
@@ -134,7 +134,7 @@ class VariationalInference(Inference):
     """Run one iteration of optimization.
 
     Args:
-      feed_dict: dict, optional.
+      feed_dict: dict.
         Feed dictionary for a TensorFlow session run. It is used to feed
         placeholders that are not fed during initialization.
 

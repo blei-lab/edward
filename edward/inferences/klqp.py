@@ -88,10 +88,10 @@ class KLqp(VariationalInference):
     and builds ops for the algorithm's computation graph.
 
     Args:
-      n_samples: int, optional.
+      n_samples: int.
         Number of samples from variational model for calculating
         stochastic gradients.
-      kl_scaling: dict of RandomVariable to tf.Tensor, optional.
+      kl_scaling: dict of RandomVariable to tf.Tensor.
         Provides option to scale terms when using ELBO with KL divergence.
         If the KL divergence terms are
 
@@ -209,7 +209,7 @@ class ReparameterizationKLqp(VariationalInference):
     and builds ops for the algorithm's computation graph.
 
     Args:
-      n_samples: int, optional.
+      n_samples: int.
         Number of samples from variational model for calculating
         stochastic gradients.
     """
@@ -269,10 +269,10 @@ class ReparameterizationKLKLqp(VariationalInference):
     and builds ops for the algorithm's computation graph.
 
     Args:
-      n_samples: int, optional.
+      n_samples: int.
         Number of samples from variational model for calculating
         stochastic gradients.
-      kl_scaling: dict of RandomVariable to tf.Tensor, optional.
+      kl_scaling: dict of RandomVariable to tf.Tensor.
         Provides option to scale terms when using ELBO with KL divergence.
         If the KL divergence terms are
 
@@ -343,7 +343,7 @@ class ReparameterizationEntropyKLqp(VariationalInference):
     and builds ops for the algorithm's computation graph.
 
     Args:
-      n_samples: int, optional.
+      n_samples: int.
         Number of samples from variational model for calculating
         stochastic gradients.
     """
@@ -404,7 +404,7 @@ class ScoreKLqp(VariationalInference):
     and builds ops for the algorithm's computation graph.
 
     Args:
-      n_samples: int, optional.
+      n_samples: int.
         Number of samples from variational model for calculating
         stochastic gradients.
     """
@@ -464,10 +464,10 @@ class ScoreKLKLqp(VariationalInference):
     and builds ops for the algorithm's computation graph.
 
     Args:
-      n_samples: int, optional.
+      n_samples: int.
         Number of samples from variational model for calculating
         stochastic gradients.
-      kl_scaling: dict of RandomVariable to tf.Tensor, optional.
+      kl_scaling: dict of RandomVariable to tf.Tensor.
         Provides option to scale terms when using ELBO with KL divergence.
         If the KL divergence terms are
 
@@ -538,7 +538,7 @@ class ScoreEntropyKLqp(VariationalInference):
     and builds ops for the algorithm's computation graph.
 
     Args:
-      n_samples: int, optional.
+      n_samples: int.
         Number of samples from variational model for calculating
         stochastic gradients.
     """
@@ -605,7 +605,7 @@ class ScoreRBKLqp(VariationalInference):
     and builds ops for the algorithm's computation graph.
 
     Args:
-      n_samples: int, optional.
+      n_samples: int.
         Number of samples from variational model for calculating
         stochastic gradients.
     """

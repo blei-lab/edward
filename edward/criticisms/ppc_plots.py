@@ -55,7 +55,7 @@ def ppc_stat_hist_plot(y_stats, yrep_stats, stat_name=None, **kwargs):
       Float representing statistic value of observed data.
     yrep_stats: np.ndarray.
       A 1-D NumPy array.
-    stat_name: string, optional.
+    stat_name: string.
       Optional string value for including statistic name in legend.
     **kwargs:
       Keyword arguments used by seaborn.distplot can be given to customize plot.

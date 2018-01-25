@@ -69,25 +69,25 @@ class GANInference(VariationalInference):
     and builds ops for the algorithm's computation graph.
 
     Args:
-      optimizer: str or tf.train.Optimizer, optional.
+      optimizer: str or tf.train.Optimizer.
         A TensorFlow optimizer, to use for optimizing the generator
         objective. Alternatively, one can pass in the name of a
         TensorFlow optimizer, and default parameters for the optimizer
         will be used.
-      optimizer_d: str or tf.train.Optimizer, optional.
+      optimizer_d: str or tf.train.Optimizer.
         A TensorFlow optimizer, to use for optimizing the discriminator
         objective. Alternatively, one can pass in the name of a
         TensorFlow optimizer, and default parameters for the optimizer
         will be used.
-      global_step: tf.Variable, optional.
+      global_step: tf.Variable.
         Optional `Variable` to increment by one after the variables
         for the generator have been updated. See
         `tf.train.Optimizer.apply_gradients`.
-      global_step_d: tf.Variable, optional.
+      global_step_d: tf.Variable.
         Optional `Variable` to increment by one after the variables
         for the discriminator have been updated. See
         `tf.train.Optimizer.apply_gradients`.
-      var_list: list of tf.Variable, optional.
+      var_list: list of tf.Variable.
         List of TensorFlow variables to optimize over (in the generative
         model). Default is all trainable variables that `latent_vars`
         and `data` depend on.
@@ -155,10 +155,10 @@ class GANInference(VariationalInference):
     """Run one iteration of optimization.
 
     Args:
-      feed_dict: dict, optional.
+      feed_dict: dict.
         Feed dictionary for a TensorFlow session run. It is used to feed
         placeholders that are not fed during initialization.
-      variables: str, optional.
+      variables: str.
         Which set of variables to update. Either "Disc" or "Gen".
         Default is both.
 
