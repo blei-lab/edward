@@ -8,37 +8,52 @@ import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
 
-from edward.models import Empirical, Normal
+from edward.models import Normal
+
+
+def model():
+  mu = Normal(loc=0.0, scale=1.0, name="mu")
+  x = Normal(loc=mu, scale=1.0, sample_shape=50, name="x")
+  return x
 
 
 def main(_):
-  ed.set_seed(42)
+  tf.set_random_seed(42)
 
-  # DATA
   x_data = np.array([0.0] * 50)
 
-  # MODEL: Normal-Normal with known variance
-  mu = Normal(loc=0.0, scale=1.0)
-  x = Normal(loc=mu, scale=1.0, sample_shape=50)
-
-  # INFERENCE
-  qmu = Empirical(params=tf.get_variable("qmu/params", [1000],
-                                         initializer=tf.zeros_initializer()))
-
   # analytic solution: N(loc=0.0, scale=\sqrt{1/51}=0.140)
-  inference = ed.HMC({mu: qmu}, data={x: x_data})
-  inference.run()
+  qmu = tf.get_variable("qmu", [])
+  new_state, kernel_results = ed.hmc(
+      model,
+      step_size=0.2,
+      current_state=qmu,
+      align_latent=lambda name: {"mu" : "qmu"}.get(name),
+      align_data=lambda name: {"x": "x"}.get(name),
+      x=x_data)
 
-  # CRITICISM
-  sess = ed.get_session()
-  mean, stddev = sess.run([qmu.mean(), qmu.stddev()])
+  qmu_update = qmu.assign(new_state)
+
+  sess = tf.Session()
+  sess.run(tf.global_variables_initializer())
+
+  samples = []
+  num_accept = 0
+  for t in range(2500):
+    sample, accept = sess.run([qmu_update, kernel_results.is_accepted])
+    samples.append(sample)
+    num_accept += float(accept)
+    if t % 100 == 0:
+      print("Step {}, Acceptance Rate {:.3}".format(t, num_accept / max(t, 1)))
+
+  samples = samples[500:]
+
+  mean = np.mean(samples)
+  stddev = np.std(samples)
   print("Inferred posterior mean:")
   print(mean)
   print("Inferred posterior stddev:")
   print(stddev)
-
-  # Check convergence with visual diagnostics.
-  samples = sess.run(qmu.params)
 
   # Plot histogram.
   plt.hist(samples, bins='auto')
