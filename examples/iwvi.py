@@ -105,7 +105,7 @@ def main(_):
   # MODEL
   X = tf.placeholder(tf.float32, [N, D])
   w = Normal(loc=tf.zeros(D), scale=tf.ones(D))
-  y = Bernoulli(logits=ed.dot(X, w))
+  y = Bernoulli(logits=tf.tensordot(X, w, [[1], [0]]))
 
   # INFERENCE
   qw = Normal(loc=tf.get_variable("qw/loc", [D]),

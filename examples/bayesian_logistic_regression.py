@@ -41,7 +41,7 @@ def main(_):
   X = tf.placeholder(tf.float32, [FLAGS.N, FLAGS.D])
   w = Normal(loc=tf.zeros(FLAGS.D), scale=3.0 * tf.ones(FLAGS.D))
   b = Normal(loc=tf.zeros([]), scale=3.0 * tf.ones([]))
-  y = Bernoulli(logits=ed.dot(X, w) + b)
+  y = Bernoulli(logits=tf.tensordot(X, w, [[1], [0]]) + b)
 
   # INFERENCE
   qw = Empirical(params=tf.get_variable("qw/params", [FLAGS.T, FLAGS.D]))
@@ -73,7 +73,8 @@ def main(_):
   # Build samples from inferred posterior.
   n_samples = 50
   inputs = np.linspace(-5, 3, num=400, dtype=np.float32).reshape((400, 1))
-  probs = tf.stack([tf.sigmoid(ed.dot(inputs, qw.sample()) + qb.sample())
+  probs = tf.stack([tf.sigmoid(tf.tensordot(inputs, qw.sample(), [[1], [0]]) +
+                               qb.sample())
                     for _ in range(n_samples)])
 
   for t in range(inference.n_iter):

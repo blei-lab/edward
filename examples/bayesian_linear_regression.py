@@ -49,7 +49,7 @@ def main(_):
   X = tf.placeholder(tf.float32, [FLAGS.N, FLAGS.D])
   w = Normal(loc=tf.zeros(FLAGS.D), scale=tf.ones(FLAGS.D))
   b = Normal(loc=tf.zeros(1), scale=tf.ones(1))
-  y = Normal(loc=ed.dot(X, w) + b, scale=tf.ones(FLAGS.N))
+  y = Normal(loc=tf.tensordot(X, w, [[1], [0]]) + b, scale=tf.ones(N))
 
   # INFERENCE
   qw = Empirical(params=tf.get_variable("qw/params", [FLAGS.T, FLAGS.D]))
@@ -68,7 +68,7 @@ def main(_):
   # Posterior predictive checks.
   y_post = ed.copy(y, {w: qw, b: qb})
   # This is equivalent to
-  # y_post = Normal(loc=ed.dot(X, qw) + qb, scale=tf.ones(FLAGS.N))
+  # y_post = Normal(loc=tf.tensordot(X, qw, [[1], [0]]) + qb, scale=tf.ones(N))
 
   print("Mean squared error on test data:")
   print(ed.evaluate('mean_squared_error', data={X: X_test, y_post: y_test}))

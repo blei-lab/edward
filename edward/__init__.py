@@ -27,7 +27,7 @@ from edward.inferences import (
     wgan_inference)
 # from edward.inferences import MonteCarlo, HMC, MetropolisHastings, SGLD, SGHMC, Gibbs
 from edward.util import (
-    copy, dot,
+    copy,
     get_ancestors, get_blanket, get_children, get_control_variate_coef,
     get_descendants, get_parents, get_siblings, get_variables,
     is_independent, random_variables,
@@ -65,7 +65,6 @@ _allowed_symbols = [
     'wgan_inference',
     'Gibbs',
     'copy',
-    'dot',
     'get_ancestors',
     'get_blanket',
     'get_children',
