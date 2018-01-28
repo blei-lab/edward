@@ -26,12 +26,14 @@ from edward.inferences import (
     wake_sleep,
     wgan_inference)
 # from edward.inferences import MonteCarlo, HMC, MetropolisHastings, SGLD, SGHMC, Gibbs
-from edward.models import Trace
+from edward.models import (
+    Trace,
+    random_variables)
 from edward.util import (
     copy,
     get_ancestors, get_blanket, get_children, get_control_variate_coef,
     get_descendants, get_parents, get_siblings, get_variables,
-    is_independent, random_variables,
+    is_independent,
     transform)
 from edward.version import __version__, VERSION
 

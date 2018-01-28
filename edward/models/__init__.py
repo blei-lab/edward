@@ -13,6 +13,7 @@ from edward.models import core as _module
 _allowed_symbols = [
     'RandomVariable',
     'Trace',
+    'random_variables',
 ]
 for name in dir(_module):
   obj = getattr(_module, name)
