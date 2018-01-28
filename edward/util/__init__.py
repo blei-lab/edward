@@ -23,7 +23,6 @@ _allowed_symbols = [
     'get_variables',
     'is_independent',
     'random_variables',
-    'rbf',
     'to_simplex',
     'transform',
 ]
