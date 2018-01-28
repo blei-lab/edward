@@ -2,14 +2,11 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-from edward import criticisms
 from edward import inferences
 from edward import models
 from edward import util
 
 # Direct imports for convenience
-from edward.criticisms import (
-    evaluate, ppc, ppc_density_plot, ppc_stat_hist_plot)
 from edward.inferences import (
     bigan_inference,
     complete_conditional,
@@ -42,14 +39,9 @@ from tensorflow.python.util.all_util import remove_undocumented
 
 # Export modules and constants.
 _allowed_symbols = [
-    'criticisms',
     'inferences',
     'models',
     'util',
-    'evaluate',
-    'ppc',
-    'ppc_density_plot',
-    'ppc_stat_hist_plot',
     'bigan_inference',
     'complete_conditional',
     'gan_inference',
@@ -99,5 +91,5 @@ _allowed_symbols = [
 # Remove all extra symbols that don't have a docstring or are not explicitly
 # referenced in the whitelist.
 remove_undocumented(__name__, _allowed_symbols, [
-    criticisms, inferences, models, util
+    inferences, models, util
 ])
