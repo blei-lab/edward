@@ -216,37 +216,37 @@ class RandomVariable(object):
 
   def get_ancestors(self, collection=None):
     """Get ancestor random variables."""
-    from edward.util.random_variables import get_ancestors
+    from edward.models.queries import get_ancestors
     return get_ancestors(self, collection)
 
   def get_blanket(self, collection=None):
     """Get the random variable's Markov blanket."""
-    from edward.util.random_variables import get_blanket
+    from edward.models.queries import get_blanket
     return get_blanket(self, collection)
 
   def get_children(self, collection=None):
     """Get child random variables."""
-    from edward.util.random_variables import get_children
+    from edward.models.queries import get_children
     return get_children(self, collection)
 
   def get_descendants(self, collection=None):
     """Get descendant random variables."""
-    from edward.util.random_variables import get_descendants
+    from edward.models.queries import get_descendants
     return get_descendants(self, collection)
 
   def get_parents(self, collection=None):
     """Get parent random variables."""
-    from edward.util.random_variables import get_parents
+    from edward.models.queries import get_parents
     return get_parents(self, collection)
 
   def get_siblings(self, collection=None):
     """Get sibling random variables."""
-    from edward.util.random_variables import get_siblings
+    from edward.models.queries import get_siblings
     return get_siblings(self, collection)
 
   def get_variables(self, collection=None):
     """Get TensorFlow variables that the random variable depends on."""
-    from edward.util.random_variables import get_variables
+    from edward.models.queries import get_variables
     return get_variables(self, collection)
 
   def get_shape(self):

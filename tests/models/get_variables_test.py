@@ -4,8 +4,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from edward.models import Bernoulli, Normal
-from edward.util import get_variables
+from edward.models import Bernoulli, Normal, get_variables
 
 
 class test_get_variables_class(tf.test.TestCase):

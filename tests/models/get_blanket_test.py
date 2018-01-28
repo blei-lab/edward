@@ -4,8 +4,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from edward.models import Bernoulli, Normal
-from edward.util import get_blanket
+from edward.models import Bernoulli, Normal, get_blanket
 
 
 class test_get_blanket_class(tf.test.TestCase):

@@ -4,11 +4,10 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from edward.models import Bernoulli, Normal
-from edward.util import get_children
+from edward.models import Bernoulli, Normal, get_parents
 
 
-class test_get_children_class(tf.test.TestCase):
+class test_get_parents_class(tf.test.TestCase):
 
   def test_v_structure(self):
     """a -> b -> e <- d <- c"""
@@ -18,11 +17,11 @@ class test_get_children_class(tf.test.TestCase):
       c = Normal(0.0, 1.0)
       d = Normal(c, 1.0)
       e = Normal(b * d, 1.0)
-      self.assertEqual(get_children(a), [b])
-      self.assertEqual(get_children(b), [e])
-      self.assertEqual(get_children(c), [d])
-      self.assertEqual(get_children(d), [e])
-      self.assertEqual(get_children(e), [])
+      self.assertEqual(get_parents(a), [])
+      self.assertEqual(get_parents(b), [a])
+      self.assertEqual(get_parents(c), [])
+      self.assertEqual(get_parents(d), [c])
+      self.assertEqual(set(get_parents(e)), set([b, d]))
 
   def test_a_structure(self):
     """e <- d <- a -> b -> c"""
@@ -32,11 +31,11 @@ class test_get_children_class(tf.test.TestCase):
       c = Normal(b, 1.0)
       d = Normal(a, 1.0)
       e = Normal(d, 1.0)
-      self.assertEqual(set(get_children(a)), set([b, d]))
-      self.assertEqual(get_children(b), [c])
-      self.assertEqual(get_children(c), [])
-      self.assertEqual(get_children(d), [e])
-      self.assertEqual(get_children(e), [])
+      self.assertEqual(get_parents(a), [])
+      self.assertEqual(get_parents(b), [a])
+      self.assertEqual(get_parents(c), [b])
+      self.assertEqual(get_parents(d), [a])
+      self.assertEqual(get_parents(e), [d])
 
   def test_chain_structure(self):
     """a -> b -> c -> d -> e"""
@@ -46,11 +45,11 @@ class test_get_children_class(tf.test.TestCase):
       c = Normal(b, 1.0)
       d = Normal(c, 1.0)
       e = Normal(d, 1.0)
-      self.assertEqual(get_children(a), [b])
-      self.assertEqual(get_children(b), [c])
-      self.assertEqual(get_children(c), [d])
-      self.assertEqual(get_children(d), [e])
-      self.assertEqual(get_children(e), [])
+      self.assertEqual(get_parents(a), [])
+      self.assertEqual(get_parents(b), [a])
+      self.assertEqual(get_parents(c), [b])
+      self.assertEqual(get_parents(d), [c])
+      self.assertEqual(get_parents(e), [d])
 
   def test_tensor(self):
     with self.test_session():
@@ -58,10 +57,10 @@ class test_get_children_class(tf.test.TestCase):
       b = tf.constant(2.0)
       c = a + b
       d = Normal(c, 1.0)
-      self.assertEqual(get_children(a), [d])
-      self.assertEqual(get_children(b), [d])
-      self.assertEqual(get_children(c), [d])
-      self.assertEqual(get_children(d), [])
+      self.assertEqual(get_parents(a), [])
+      self.assertEqual(get_parents(b), [])
+      self.assertEqual(get_parents(c), [a])
+      self.assertEqual(get_parents(d), [a])
 
   def test_control_flow(self):
     with self.test_session():
@@ -70,11 +69,11 @@ class test_get_children_class(tf.test.TestCase):
       c = tf.constant(0.0)
       d = tf.cond(tf.cast(a, tf.bool), lambda: b, lambda: c)
       e = Normal(d, 1.0)
-      self.assertEqual(get_children(a), [e])
-      self.assertEqual(get_children(b), [e])
-      self.assertEqual(get_children(c), [e])
-      self.assertEqual(get_children(d), [e])
-      self.assertEqual(get_children(e), [])
+      self.assertEqual(get_parents(a), [])
+      self.assertEqual(get_parents(b), [])
+      self.assertEqual(get_parents(c), [])
+      self.assertEqual(set(get_parents(d)), set([a, b]))
+      self.assertEqual(set(get_parents(e)), set([a, b]))
 
   def test_scan(self):
     """copied from test_chain_structure"""
@@ -87,11 +86,11 @@ class test_get_children_class(tf.test.TestCase):
       c = Normal(cumsum(b), tf.ones([3]))
       d = Normal(cumsum(c), tf.ones([3]))
       e = Normal(cumsum(d), tf.ones([3]))
-      self.assertEqual(get_children(a), [b])
-      self.assertEqual(get_children(b), [c])
-      self.assertEqual(get_children(c), [d])
-      self.assertEqual(get_children(d), [e])
-      self.assertEqual(get_children(e), [])
+      self.assertEqual(get_parents(a), [])
+      self.assertEqual(get_parents(b), [a])
+      self.assertEqual(get_parents(c), [b])
+      self.assertEqual(get_parents(d), [c])
+      self.assertEqual(get_parents(e), [d])
 
 if __name__ == '__main__':
   tf.test.main()

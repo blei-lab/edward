@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from edward.inferences.map import map
 from edward.models import RandomVariable
-from edward.util import get_variables
+from edward.models.queries import get_variables
 from edward.util import copy, transform
 
 try:

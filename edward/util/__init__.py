@@ -11,15 +11,7 @@ from tensorflow.python.util.all_util import remove_undocumented
 
 _allowed_symbols = [
     'copy',
-    'get_ancestors',
-    'get_blanket',
-    'get_children',
     'get_control_variate_coef',
-    'get_descendants',
-    'get_parents',
-    'get_siblings',
-    'get_variables',
-    'is_independent',
     'transform',
 ]
 
