@@ -41,13 +41,13 @@ USER edward
 # Python
 ARG python_version=3.5.3-0
 ARG python_qt_version=4
-RUN conda update conda &&\
-	conda install -y python=${python_version} && \
+RUN conda install -y python=${python_version} && \
     pip install observations numpy six tensorflow keras prettytensor && \
     pip install ipdb pytest pytest-cov python-coveralls coverage==3.7.1 pytest-xdist pep8 pytest-pep8 pydot_ng && \
     conda install Pillow scikit-learn matplotlib notebook pandas seaborn pyyaml h5py && \
     conda install -y pyqt=${python_qt_version} && \
     pip install edward && \
+	conda update conda &&\
 	conda update -all &&\
     conda clean -yt
 
