@@ -5,7 +5,6 @@ from __future__ import division
 from __future__ import print_function
 
 from edward.util.graphs import *
-from edward.util.progbar import *
 from edward.util.random_variables import *
 from edward.util.tensorflow import *
 
@@ -23,7 +22,6 @@ _allowed_symbols = [
     'get_siblings',
     'get_variables',
     'is_independent',
-    'Progbar',
     'random_variables',
     'rbf',
     'to_simplex',
