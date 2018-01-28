@@ -43,55 +43,6 @@ def dot(x, y):
     return tf.reshape(tf.matmul(mat, tf.expand_dims(vec, 1)), [-1])
 
 
-def to_simplex(x):
-  """Transform real vector of length `(K-1)` to a simplex of dimension `K`
-  using a backward stick breaking construction.
-
-  Args:
-    x: tf.Tensor.
-      A 1-D or 2-D tensor.
-
-  Returns:
-    tf.Tensor.
-    A tensor of same shape as input but with last dimension of
-    size `K`.
-
-  Raises:
-    InvalidArgumentError.
-    If the input has Inf or NaN values.
-
-  #### Notes
-
-  x as a 3-D or higher tensor is not guaranteed to be supported.
-  """
-  x = tf.cast(x, dtype=tf.float32)
-  dependencies = [tf.verify_tensor_all_finite(x, msg='')]
-  x = control_flow_ops.with_dependencies(dependencies, x)
-
-  if isinstance(x, (tf.Tensor, tf.Variable)):
-    shape = x.get_shape().as_list()
-  else:
-    shape = x.shape
-
-  if len(shape) == 1:
-    K_minus_one = shape[0]
-    eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one), dtype=tf.float32))
-    z = tf.sigmoid(eq + x)
-    pil = tf.concat([z, tf.constant([1.0])], 0)
-    piu = tf.concat([tf.constant([1.0]), 1.0 - z], 0)
-    S = tf.cumprod(piu)
-    return S * pil
-  else:
-    n_rows = shape[0]
-    K_minus_one = shape[1]
-    eq = -tf.log(tf.cast(K_minus_one - tf.range(K_minus_one), dtype=tf.float32))
-    z = tf.sigmoid(eq + x)
-    pil = tf.concat([z, tf.ones([n_rows, 1])], 1)
-    piu = tf.concat([tf.ones([n_rows, 1]), 1.0 - z], 1)
-    S = tf.cumprod(piu, axis=1)
-    return S * pil
-
-
 def get_control_variate_coef(f, h):
   """Returns scalar used by control variates method for variance reduction in
   Monte Carlo methods.

@@ -31,7 +31,7 @@ from edward.util import (
     get_ancestors, get_blanket, get_children, get_control_variate_coef,
     get_descendants, get_parents, get_siblings, get_variables,
     is_independent, random_variables,
-    to_simplex, transform)
+    transform)
 from edward.version import __version__, VERSION
 
 from tensorflow.python.util.all_util import remove_undocumented
@@ -76,7 +76,6 @@ _allowed_symbols = [
     'get_variables',
     'is_independent',
     'random_variables',
-    'to_simplex',
     'transform',
     '__version__',
     'VERSION',
