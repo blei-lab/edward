@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Sparse Gamma deep exponential family (Ranganath et al., 2015). We
 apply it as a topic model on the collection of NIPS 2011 conference
 papers.

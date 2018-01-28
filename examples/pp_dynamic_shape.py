@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Dynamic shapes.
 
 We build a random variable whose size depends on a sample from another

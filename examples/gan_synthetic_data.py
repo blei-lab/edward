@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Generative adversarial network for toy Gaussian data
 (Goodfellow et al., 2014).
 

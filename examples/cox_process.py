@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """A Cox process model for spatial analysis
 (Cox, 1955; Miller et al., 2014).
 

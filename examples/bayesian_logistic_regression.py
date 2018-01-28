@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Bayesian logistic regression using Hamiltonian Monte Carlo.
 
 We visualize the fit.

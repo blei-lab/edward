@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Generate `toy_data.tfrecords`."""
 from __future__ import absolute_import
 from __future__ import division

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Rasch model (Rasch, 1960)."""
 from __future__ import absolute_import
 from __future__ import division

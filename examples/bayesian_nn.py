@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Bayesian neural network using variational inference
 (see, e.g., Blundell et al. (2015); Kucukelbir et al. (2016)).
 

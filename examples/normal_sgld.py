@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Correlated normal posterior. Inference with stochastic gradient
 Langevin dynamics.
 """

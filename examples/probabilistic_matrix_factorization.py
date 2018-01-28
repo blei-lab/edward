@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Probabilistic matrix factorization using variational inference.
 
 Visualizes the actual and the estimated rating matrices as heatmaps.

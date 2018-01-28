@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Dirichlet process.
 
 We implement sample generation from a Dirichlet process (with no base

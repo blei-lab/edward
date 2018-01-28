@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Convolutional variational auto-encoder for binarized MNIST.
 
 The neural networks are written with Pretty Tensor.

@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """LSTM language model on text8.
 
 Default hyperparameters achieve ~78.4 NLL at epoch 50, ~76.1423 NLL at

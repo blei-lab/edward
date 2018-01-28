@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Correlated normal posterior. Inference with Hamiltonian Monte Carlo.
 """
 from __future__ import absolute_import

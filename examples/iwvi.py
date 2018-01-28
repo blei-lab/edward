@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """A demo of how to develop new inference algorithms in Edward. Here
 we implement importance-weighted variational inference. We test it on
 logistic regression.

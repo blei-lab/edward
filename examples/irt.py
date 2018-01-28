@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Bayesian Item Response Theory (IRT) Mixed Effects Model
 using variational inference.
 

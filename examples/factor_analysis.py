@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Logistic factor analysis on MNIST. Using Monte Carlo EM, with HMC
 for the E-step and MAP for the M-step. We fit to just one data
 point in MNIST.

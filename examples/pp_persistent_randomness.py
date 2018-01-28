@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Persistent randomness.
 
 Our language defines random variables. They enable memoization in the

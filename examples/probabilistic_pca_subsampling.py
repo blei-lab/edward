@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Probabilistic principal components analysis (Tipping and Bishop, 1999).
 
 Inference uses data subsampling.

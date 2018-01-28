@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Stochastic recursion.
 
 We sample from a geometric random variable by using samples from

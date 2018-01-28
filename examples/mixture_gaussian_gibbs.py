@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Mixture of Gaussians, with block Gibbs for inference.
 """
 from __future__ import absolute_import

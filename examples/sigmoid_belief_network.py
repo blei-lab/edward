@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Sigmoid belief network (Neal, 1990) trained on the Caltech 101
 Silhouettes data set.
 

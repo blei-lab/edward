@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Bayesian linear regression using stochastic gradient Hamiltonian
 Monte Carlo.
 

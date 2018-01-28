@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Wasserstein generative adversarial network for toy Gaussian data
 (Arjovsky et al., 2017). A gradient penalty is used to approximate the
 1-Lipschitz functional family in the Wasserstein distance (Gulrajani

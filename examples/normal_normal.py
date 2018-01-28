@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Normal-normal model using Hamiltonian Monte Carlo."""
 from __future__ import absolute_import
 from __future__ import division

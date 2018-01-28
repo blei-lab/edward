@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """ InverseGamma-Normal model
 
 Posterior inference with Metropolis Hastings

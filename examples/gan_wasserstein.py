@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Wasserstein generative adversarial network for MNIST (Arjovsky et
 al., 2017). It modifies GANs (Goodfellow et al., 2014) to optimize
 under the Wasserstein distance.

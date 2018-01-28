@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Bayesian linear regression. Inference uses data subsampling and
 scales the log-likelihood.
 

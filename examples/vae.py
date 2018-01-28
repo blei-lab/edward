@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Variational auto-encoder for MNIST data.
 
 References

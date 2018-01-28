@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Dirichlet-Categorical model.
 
 Posterior inference with Edward's BBVI.

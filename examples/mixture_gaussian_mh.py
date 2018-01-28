@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Mixture of Gaussians.
 
 Perform inference with Metropolis-Hastings. It utterly fails. This is
