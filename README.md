@@ -15,8 +15,9 @@ It supports __modeling__ with
 
 + Directed graphical models
 + Neural networks (via libraries such as
-    [Keras](http://keras.io) and [TensorFlow
-    Slim](https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim))
+    [`tf.layers`](https://www.tensorflow.org/api_docs/python/tf/layers)
+    and
+    [Keras](http://keras.io))
 + Implicit generative models
 + Bayesian nonparametrics and probabilistic programs
 
