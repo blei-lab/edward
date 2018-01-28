@@ -37,8 +37,7 @@ from edward.models import (
     is_independent,
     random_variables)
 from edward.util import (
-    get_control_variate_coef,
-    transform)
+    get_control_variate_coef)
 from edward.version import __version__, VERSION
 
 from tensorflow.python.util.all_util import remove_undocumented
@@ -76,7 +75,6 @@ _allowed_symbols = [
     'get_variables',
     'is_independent',
     'random_variables',
-    'transform',
     '__version__',
     'VERSION',
 ]

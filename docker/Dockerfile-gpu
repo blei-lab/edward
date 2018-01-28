@@ -42,7 +42,7 @@ USER edward
 # Python
 ARG python_version=3.5.3-0
 RUN conda install -y python=${python_version} && \
-    pip install observations numpy six tensorflow-gpu keras prettytensor && \
+    pip install observations numpy six tensorflow-gpu keras && \
     pip install ipdb pytest pytest-cov python-coveralls coverage==3.7.1 pytest-xdist pep8 pytest-pep8 pydot_ng && \
     conda install Pillow scikit-learn matplotlib notebook pandas seaborn pyyaml h5py && \
     pip install edward && \

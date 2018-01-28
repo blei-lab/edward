@@ -6,7 +6,7 @@ import six
 import tensorflow as tf
 
 from edward.inferences import docstrings as doc
-from edward.inferences.inference import call_function_up_to_args
+from edward.inferences.util import call_function_up_to_args
 
 
 @doc.set_doc(
