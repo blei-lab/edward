@@ -34,10 +34,10 @@ install:
   - source activate test-environment
   - pip install pep8 pytest-pep8 pytest-xdist
   - pip install python-coveralls pytest-cov
-  - pip install keras==2.0.4
+  - pip install keras
   - pip install matplotlib seaborn scipy
   - pip install networkx==1.9.1 observations sklearn
-  - pip install tensorflow==1.4.0
+  - pip install tensorflow==1.5.0
   - pip install nbformat nbconvert jupyter_client jupyter
   - python setup.py install
 script:

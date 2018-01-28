@@ -17,7 +17,6 @@ import tensorflow as tf
 
 from edward.models import Bernoulli, Normal
 from edward.util import Progbar
-from keras.layers import Dense
 from observations import mnist
 from scipy.misc import imsave
 
@@ -56,16 +55,16 @@ x_train_generator = generator(x_train, M)
 # Define a subgraph of the full model, corresponding to a minibatch of
 # size M.
 z = Normal(loc=tf.zeros([M, d]), scale=tf.ones([M, d]))
-hidden = Dense(256, activation='relu')(z.value())
-x = Bernoulli(logits=Dense(28 * 28)(hidden))
+hidden = tf.layers.dense(z, 256, activation='relu')
+x = Bernoulli(logits=tf.layers.dense(hidden, 28 * 28))
 
 # INFERENCE
 # Define a subgraph of the variational model, corresponding to a
 # minibatch of size M.
 x_ph = tf.placeholder(tf.int32, [M, 28 * 28])
-hidden = Dense(256, activation='relu')(tf.cast(x_ph, tf.float32))
-qz = Normal(loc=Dense(d)(hidden),
-            scale=Dense(d, activation='softplus')(hidden))
+hidden = tf.layers.dense(tf.cast(x_ph, tf.float32), 256, activation='relu')
+qz = Normal(loc=tf.layers.dense(hidden, d),
+            scale=tf.layers.dense(hidden, d, activation='softplus'))
 
 # Bind p(x, z) and q(z | x) to the same TensorFlow placeholder for x.
 inference = ed.KLqp({z: qz}, data={x: x_ph})
