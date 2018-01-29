@@ -31,7 +31,7 @@ def main(_):
   # Posterior inference
   # Probabilistic model
   ig = InverseGamma(alpha, beta)
-  xn = Normal(FLAGS.loc, tf.ones([FLAGS.N]) * tf.sqrt(ig))
+  xn = Normal(FLAGS.loc, tf.sqrt(ig), sample_shape=FLAGS.N)
 
   # Inference
   qig = Empirical(params=tf.get_variable(

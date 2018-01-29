@@ -25,10 +25,8 @@ def main(_):
   X_data = np.random.binomial(1, expit(trait_true - thresh_true))
 
   # MODEL
-  trait = Normal(loc=tf.zeros([FLAGS.nsubj, 1]),
-                 scale=tf.ones([FLAGS.nsubj, 1]))
-  thresh = Normal(loc=tf.zeros([1, FLAGS.nitem]),
-                  scale=tf.ones([1, FLAGS.nitem]))
+  trait = Normal(loc=0.0, scale=1.0, sample_shape=[FLAGS.nsubj, 1])
+  thresh = Normal(loc=0.0, scale=1.0, sample_shape=[1, FLAGS.nitem])
   X = Bernoulli(logits=trait - thresh)
 
   # INFERENCE

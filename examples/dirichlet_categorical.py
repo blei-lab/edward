@@ -27,7 +27,7 @@ def main(_):
 
   # MODEL
   pi = Dirichlet(tf.ones(4))
-  z = Categorical(probs=tf.ones([FLAGS.N, 1]) * pi)
+  z = Categorical(probs=pi, sample_shape=FLAGS.N)
 
   # INFERENCE
   qpi = Dirichlet(tf.nn.softplus(

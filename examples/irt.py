@@ -54,18 +54,18 @@ def main(_):
   question_ids = data['question_id'].values.astype(int)
 
   # MODEL
-  lnvar_students = Normal(loc=tf.zeros(1), scale=tf.ones(1))
-  lnvar_questions = Normal(loc=tf.zeros(1), scale=tf.ones(1))
+  lnvar_students = Normal(loc=0.0, scale=1.0)
+  lnvar_questions = Normal(loc=0.0, scale=1.0)
 
   sigma_students = tf.sqrt(tf.exp(lnvar_students))
   sigma_questions = tf.sqrt(tf.exp(lnvar_questions))
 
   overall_mu = Normal(loc=tf.zeros(1), scale=tf.ones(1))
 
-  student_etas = Normal(loc=tf.zeros(FLAGS.n_students),
-                        scale=sigma_students * tf.ones(FLAGS.n_students))
-  question_etas = Normal(loc=tf.zeros(FLAGS.n_questions),
-                         scale=sigma_questions * tf.ones(FLAGS.n_questions))
+  student_etas = Normal(loc=0.0, scale=sigma_students,
+                        sample_shape=FLAGS.n_students)
+  question_etas = Normal(loc=0.0, scale=sigma_questions,
+                         sample_shape=FLAGS.n_questions)
 
   observation_logodds = (tf.gather(student_etas, student_ids) +
                          tf.gather(question_etas, question_ids) +
@@ -82,13 +82,13 @@ def main(_):
       scale=tf.nn.softplus(
           tf.get_variable("qquestions/scale", [FLAGS.n_questions])))
   qlnvarstudents = Normal(
-      loc=tf.get_variable("qlnvarstudents/loc", [1]),
+      loc=tf.get_variable("qlnvarstudents/loc", []),
       scale=tf.nn.softplus(
-          tf.get_variable("qlnvarstudents/scale", [1])))
+          tf.get_variable("qlnvarstudents/scale", [])))
   qlnvarquestions = Normal(
-      loc=tf.get_variable("qlnvarquestions/loc", [1]),
+      loc=tf.get_variable("qlnvarquestions/loc", []),
       scale=tf.nn.softplus(
-          tf.get_variable("qlnvarquestions/scale", [1])))
+          tf.get_variable("qlnvarquestions/scale", [])))
   qmu = Normal(
       loc=tf.get_variable("qmu/loc", [1]),
       scale=tf.nn.softplus(

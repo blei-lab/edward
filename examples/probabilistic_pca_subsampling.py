@@ -50,10 +50,8 @@ def main(_):
   x_train = build_toy_dataset(FLAGS.N, FLAGS.D, FLAGS.K)
 
   # MODEL
-  w = Normal(loc=tf.zeros([FLAGS.D, FLAGS.K]),
-             scale=10.0 * tf.ones([FLAGS.D, FLAGS.K]))
-  z = Normal(loc=tf.zeros([FLAGS.M, FLAGS.K]),
-             scale=tf.ones([FLAGS.M, FLAGS.K]))
+  w = Normal(loc=0.0, scale=10.0, sample_shape=[FLAGS.D, FLAGS.K])
+  z = Normal(loc=0.0, scale=1.0, sample_shape=[FLAGS.M, FLAGS.K])
   x = Normal(loc=tf.matmul(w, z, transpose_b=True),
              scale=tf.ones([FLAGS.D, FLAGS.M]))
 
