@@ -10,37 +10,43 @@ import tensorflow as tf
 
 from edward.models import Empirical, Normal
 
-ed.set_seed(42)
 
-# DATA
-x_data = np.array([0.0] * 50)
+def main(_):
+  ed.set_seed(42)
 
-# MODEL: Normal-Normal with known variance
-mu = Normal(loc=0.0, scale=1.0)
-x = Normal(loc=tf.ones(50) * mu, scale=1.0)
+  # DATA
+  x_data = np.array([0.0] * 50)
 
-# INFERENCE
-qmu = Empirical(params=tf.Variable(tf.zeros(1000)))
+  # MODEL: Normal-Normal with known variance
+  mu = Normal(loc=0.0, scale=1.0)
+  x = Normal(loc=tf.ones(50) * mu, scale=1.0)
 
-# analytic solution: N(loc=0.0, scale=\sqrt{1/51}=0.140)
-inference = ed.HMC({mu: qmu}, data={x: x_data})
-inference.run()
+  # INFERENCE
+  qmu = Empirical(params=tf.get_variable("qmu/params", [1000],
+                                         initializer=tf.zeros_initializer()))
 
-# CRITICISM
-sess = ed.get_session()
-mean, stddev = sess.run([qmu.mean(), qmu.stddev()])
-print("Inferred posterior mean:")
-print(mean)
-print("Inferred posterior stddev:")
-print(stddev)
+  # analytic solution: N(loc=0.0, scale=\sqrt{1/51}=0.140)
+  inference = ed.HMC({mu: qmu}, data={x: x_data})
+  inference.run()
 
-# Check convergence with visual diagnostics.
-samples = sess.run(qmu.params)
+  # CRITICISM
+  sess = ed.get_session()
+  mean, stddev = sess.run([qmu.mean(), qmu.stddev()])
+  print("Inferred posterior mean:")
+  print(mean)
+  print("Inferred posterior stddev:")
+  print(stddev)
 
-# Plot histogram.
-plt.hist(samples, bins='auto')
-plt.show()
+  # Check convergence with visual diagnostics.
+  samples = sess.run(qmu.params)
 
-# Trace plot.
-plt.plot(samples)
-plt.show()
+  # Plot histogram.
+  plt.hist(samples, bins='auto')
+  plt.show()
+
+  # Trace plot.
+  plt.plot(samples)
+  plt.show()
+
+if __name__ == "__main__":
+  tf.app.run()

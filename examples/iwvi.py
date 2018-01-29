@@ -91,28 +91,32 @@ class IWVI(VariationalInference):
     return loss, grads_and_vars
 
 
-ed.set_seed(42)
-N = 5000  # number of data points
-D = 10  # number of features
+def main(_):
+  ed.set_seed(42)
+  N = 5000  # number of data points
+  D = 10  # number of features
 
-# DATA
-w_true = np.random.randn(D)
-X_data = np.random.randn(N, D)
-p = expit(np.dot(X_data, w_true))
-y_data = np.array([np.random.binomial(1, i) for i in p])
+  # DATA
+  w_true = np.random.randn(D)
+  X_data = np.random.randn(N, D)
+  p = expit(np.dot(X_data, w_true))
+  y_data = np.array([np.random.binomial(1, i) for i in p])
 
-# MODEL
-X = tf.placeholder(tf.float32, [N, D])
-w = Normal(loc=tf.zeros(D), scale=tf.ones(D))
-y = Bernoulli(logits=ed.dot(X, w))
+  # MODEL
+  X = tf.placeholder(tf.float32, [N, D])
+  w = Normal(loc=tf.zeros(D), scale=tf.ones(D))
+  y = Bernoulli(logits=ed.dot(X, w))
 
-# INFERENCE
-qw = Normal(loc=tf.Variable(tf.random_normal([D])),
-            scale=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
+  # INFERENCE
+  qw = Normal(loc=tf.get_variable("qw/loc", [D]),
+              scale=tf.nn.softplus(tf.get_variable("qw/scale", [D])))
 
-inference = IWVI({w: qw}, data={X: X_data, y: y_data})
-inference.run(K=5, n_iter=1000)
+  inference = IWVI({w: qw}, data={X: X_data, y: y_data})
+  inference.run(K=5, n_iter=1000)
 
-# CRITICISM
-print("Mean squared error in true values to inferred posterior mean:")
-print(tf.reduce_mean(tf.square(w_true - qw.mean())).eval())
+  # CRITICISM
+  print("Mean squared error in true values to inferred posterior mean:")
+  print(tf.reduce_mean(tf.square(w_true - qw.mean())).eval())
+
+if __name__ == "__main__":
+  tf.app.run()

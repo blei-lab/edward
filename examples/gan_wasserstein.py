@@ -19,7 +19,15 @@ import tensorflow as tf
 
 from edward.models import Uniform
 from observations import mnist
-from tensorflow.contrib import slim
+
+tf.flags.DEFINE_string("data_dir", default="/tmp/data", help="")
+tf.flags.DEFINE_string("out_dir", default="/tmp/out", help="")
+tf.flags.DEFINE_integer("M", default=128, help="Batch size during training.")
+tf.flags.DEFINE_integer("d", default=10, help="Latent dimension.")
+
+FLAGS = tf.flags.FLAGS
+if not os.path.exists(FLAGS.out_dir):
+  os.makedirs(FLAGS.out_dir)
 
 
 def generator(array, batch_size):
@@ -40,15 +48,15 @@ def generator(array, batch_size):
 
 
 def generative_network(eps):
-  h1 = slim.fully_connected(eps, 128, activation_fn=tf.nn.relu)
-  x = slim.fully_connected(h1, 784, activation_fn=tf.sigmoid)
-  return x
+  net = tf.layers.dense(eps, 128, activation=tf.nn.relu)
+  net = tf.layers.dense(net, 784, activation=tf.sigmoid)
+  return net
 
 
 def discriminative_network(x):
-  h1 = slim.fully_connected(x, 128, activation_fn=tf.nn.relu)
-  h2 = slim.fully_connected(h1, 1, activation_fn=None)
-  return h2
+  net = tf.layers.dense(x, 128, activation=tf.nn.relu)
+  net = tf.layers.dense(net, 1, activation=None)
+  return net
 
 
 def plot(samples):
@@ -67,57 +75,55 @@ def plot(samples):
   return fig
 
 
-ed.set_seed(42)
+def main(_):
+  ed.set_seed(42)
 
-data_dir = "/tmp/data"
-out_dir = "/tmp/out"
-if not os.path.exists(out_dir):
-  os.makedirs(out_dir)
-M = 128  # batch size during training
-d = 10  # latent dimension
+  # DATA. MNIST batches are fed at training time.
+  (x_train, _), (x_test, _) = mnist(FLAGS.data_dir)
+  x_train_generator = generator(x_train, FLAGS.M)
+  x_ph = tf.placeholder(tf.float32, [FLAGS.M, 784])
 
-# DATA. MNIST batches are fed at training time.
-(x_train, _), (x_test, _) = mnist(data_dir)
-x_train_generator = generator(x_train, M)
-x_ph = tf.placeholder(tf.float32, [M, 784])
+  # MODEL
+  with tf.variable_scope("Gen"):
+    eps = Uniform(low=tf.zeros([FLAGS.M, FLAGS.d]) - 1.0,
+                  high=tf.ones([FLAGS.M, FLAGS.d]))
+    x = generative_network(eps)
 
-# MODEL
-with tf.variable_scope("Gen"):
-  eps = Uniform(low=tf.zeros([M, d]) - 1.0, high=tf.ones([M, d]))
-  x = generative_network(eps)
+  # INFERENCE
+  optimizer = tf.train.RMSPropOptimizer(learning_rate=5e-5)
+  optimizer_d = tf.train.RMSPropOptimizer(learning_rate=5e-5)
 
-# INFERENCE
-optimizer = tf.train.RMSPropOptimizer(learning_rate=5e-5)
-optimizer_d = tf.train.RMSPropOptimizer(learning_rate=5e-5)
+  inference = ed.WGANInference(
+      data={x: x_ph}, discriminator=discriminative_network)
+  inference.initialize(
+      optimizer=optimizer, optimizer_d=optimizer_d,
+      n_iter=15000, n_print=1000, clip=0.01, penalty=None)
 
-inference = ed.WGANInference(
-    data={x: x_ph}, discriminator=discriminative_network)
-inference.initialize(
-    optimizer=optimizer, optimizer_d=optimizer_d,
-    n_iter=15000, n_print=1000, clip=0.01, penalty=None)
+  sess = ed.get_session()
+  tf.global_variables_initializer().run()
 
-sess = ed.get_session()
-tf.global_variables_initializer().run()
+  idx = np.random.randint(FLAGS.M, size=16)
+  i = 0
+  for t in range(inference.n_iter):
+    if t % inference.n_print == 0:
+      samples = sess.run(x)
+      samples = samples[idx, ]
 
-idx = np.random.randint(M, size=16)
-i = 0
-for t in range(inference.n_iter):
-  if t % inference.n_print == 0:
-    samples = sess.run(x)
-    samples = samples[idx, ]
+      fig = plot(samples)
+      plt.savefig(os.path.join(FLAGS.out_dir, '{}.png').format(
+          str(i).zfill(3)), bbox_inches='tight')
+      plt.close(fig)
+      i += 1
 
-    fig = plot(samples)
-    plt.savefig(os.path.join(out_dir, '{}.png').format(
-        str(i).zfill(3)), bbox_inches='tight')
-    plt.close(fig)
-    i += 1
+    x_batch = next(x_train_generator)
+    for _ in range(5):
+      inference.update(feed_dict={x_ph: x_batch}, variables="Disc")
 
-  x_batch = next(x_train_generator)
-  for _ in range(5):
-    inference.update(feed_dict={x_ph: x_batch}, variables="Disc")
+    info_dict = inference.update(feed_dict={x_ph: x_batch}, variables="Gen")
+    # note: not printing discriminative objective; ``info_dict`` above
+    # does not store it since updating only "Gen"
+    info_dict['t'] = info_dict['t'] // 6  # say set of 6 updates is 1 iteration
+    inference.print_progress(info_dict)
 
-  info_dict = inference.update(feed_dict={x_ph: x_batch}, variables="Gen")
-  # note: not printing discriminative objective; ``info_dict`` above
-  # does not store it since updating only "Gen"
-  info_dict['t'] = info_dict['t'] // 6  # say set of 6 updates is 1 iteration
-  inference.print_progress(info_dict)
+if __name__ == "__main__":
+  tf.app.run()

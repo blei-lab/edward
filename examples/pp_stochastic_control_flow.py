@@ -27,11 +27,15 @@ def geometric(p):
   return sample
 
 
-p = 0.1
-geom = geometric(p)
+def main(_):
+  p = 0.1
+  geom = geometric(p)
 
-sess = tf.Session()
-samples = [sess.run(geom) for _ in range(1000)]
-plt.hist(samples, bins='auto')
-plt.title("Geometric({0})".format(p))
-plt.show()
+  sess = tf.Session()
+  samples = [sess.run(geom) for _ in range(1000)]
+  plt.hist(samples, bins='auto')
+  plt.title("Geometric({0})".format(p))
+  plt.show()
+
+if __name__ == "__main__":
+  tf.app.run()

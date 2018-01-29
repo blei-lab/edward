@@ -12,23 +12,32 @@ import tensorflow as tf
 
 from edward.models import Categorical, Dirichlet
 
-N = 1000
-K = 4
+tf.flags.DEFINE_integer("N", default=1000, help="")
+tf.flags.DEFINE_integer("K", default=4, help="")
 
-# DATA
-pi_true = np.random.dirichlet(np.array([20.0, 30.0, 10.0, 10.0]))
-z_data = np.array([np.random.choice(K, 1, p=pi_true)[0] for n in range(N)])
-print('pi={}'.format(pi_true))
+FLAGS = tf.flags.FLAGS
 
-# MODEL
-pi = Dirichlet(tf.ones(4))
-z = Categorical(probs=tf.ones([N, 1]) * pi)
 
-# INFERENCE
-qpi = Dirichlet(tf.nn.softplus(tf.Variable(tf.random_normal([K]))))
+def main(_):
+  # DATA
+  pi_true = np.random.dirichlet(np.array([20.0, 30.0, 10.0, 10.0]))
+  z_data = np.array([np.random.choice(FLAGS.K, 1, p=pi_true)[0]
+                     for n in range(FLAGS.N)])
+  print('pi={}'.format(pi_true))
 
-inference = ed.KLqp({pi: qpi}, data={z: z_data})
-inference.run(n_iter=1500, n_samples=30)
+  # MODEL
+  pi = Dirichlet(tf.ones(4))
+  z = Categorical(probs=tf.ones([FLAGS.N, 1]) * pi)
 
-sess = ed.get_session()
-print('Inferred pi={}'.format(sess.run(qpi.mean())))
+  # INFERENCE
+  qpi = Dirichlet(tf.nn.softplus(
+      tf.get_variable("qpi/concentration", [FLAGS.K])))
+
+  inference = ed.KLqp({pi: qpi}, data={z: z_data})
+  inference.run(n_iter=1500, n_samples=30)
+
+  sess = ed.get_session()
+  print('Inferred pi={}'.format(sess.run(qpi.mean())))
+
+if __name__ == "__main__":
+  tf.app.run()

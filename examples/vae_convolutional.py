@@ -20,7 +20,16 @@ from edward.models import Bernoulli, Normal
 from edward.util import Progbar
 from observations import mnist
 from scipy.misc import imsave
-from tensorflow.contrib import slim
+
+tf.flags.DEFINE_string("data_dir", default="/tmp/data", help="")
+tf.flags.DEFINE_string("out_dir", default="/tmp/out", help="")
+tf.flags.DEFINE_integer("M", default=128, help="Batch size during training.")
+tf.flags.DEFINE_integer("d", default=10, help="Latent dimension.")
+tf.flags.DEFINE_integer("n_epoch", default=100, help="")
+
+FLAGS = tf.flags.FLAGS
+if not os.path.exists(FLAGS.out_dir):
+  os.makedirs(FLAGS.out_dir)
 
 
 def generator(array, batch_size):
@@ -46,17 +55,19 @@ def generative_network(z):
 
   logits = neural_network(z)
   """
-  with slim.arg_scope([slim.conv2d_transpose],
-                      activation_fn=tf.nn.elu,
-                      normalizer_fn=slim.batch_norm,
-                      normalizer_params={'scale': True}):
-    net = tf.reshape(z, [M, 1, 1, d])
-    net = slim.conv2d_transpose(net, 128, 3, padding='VALID')
-    net = slim.conv2d_transpose(net, 64, 5, padding='VALID')
-    net = slim.conv2d_transpose(net, 32, 5, stride=2)
-    net = slim.conv2d_transpose(net, 1, 5, stride=2, activation_fn=None)
-    net = slim.flatten(net)
-    return net
+  net = tf.reshape(z, [FLAGS.M, 1, 1, FLAGS.d])
+  net = tf.layers.conv2d_transpose(net, 128, 3, padding='VALID')
+  net = tf.layers.batch_normalization(net)
+  net = tf.nn.elu(net)
+  net = tf.layers.conv2d_transpose(net, 64, 5, padding='VALID')
+  net = tf.layers.batch_normalization(net)
+  net = tf.nn.elu(net)
+  net = tf.layers.conv2d_transpose(net, 32, 5, strides=2, padding='SAME')
+  net = tf.layers.batch_normalization(net)
+  net = tf.nn.elu(net)
+  net = tf.layers.conv2d_transpose(net, 1, 5, strides=2, padding='SAME')
+  net = tf.reshape(net, [FLAGS.M, -1])
+  return net
 
 
 def inference_network(x):
@@ -65,76 +76,74 @@ def inference_network(x):
 
   loc, scale = neural_network(x)
   """
-  with slim.arg_scope([slim.conv2d, slim.fully_connected],
-                      activation_fn=tf.nn.elu,
-                      normalizer_fn=slim.batch_norm,
-                      normalizer_params={'scale': True}):
-    net = tf.reshape(x, [M, 28, 28, 1])
-    net = slim.conv2d(net, 32, 5, stride=2)
-    net = slim.conv2d(net, 64, 5, stride=2)
-    net = slim.conv2d(net, 128, 5, padding='VALID')
-    net = slim.dropout(net, 0.9)
-    net = slim.flatten(net)
-    params = slim.fully_connected(net, d * 2, activation_fn=None)
-
-  loc = params[:, :d]
-  scale = tf.nn.softplus(params[:, d:])
+  net = tf.reshape(x, [FLAGS.M, 28, 28, 1])
+  net = tf.layers.conv2d(net, 32, 5, strides=2, padding='SAME')
+  net = tf.layers.batch_normalization(net)
+  net = tf.nn.elu(net)
+  net = tf.layers.conv2d(net, 64, 5, strides=2, padding='SAME')
+  net = tf.layers.batch_normalization(net)
+  net = tf.nn.elu(net)
+  net = tf.layers.conv2d(net, 128, 5, padding='VALID')
+  net = tf.layers.batch_normalization(net)
+  net = tf.nn.elu(net)
+  net = tf.layers.dropout(net, 0.1)
+  net = tf.reshape(net, [FLAGS.M, -1])
+  net = tf.layers.dense(net, FLAGS.d * 2, activation=None)
+  loc = net[:, :FLAGS.d]
+  scale = tf.nn.softplus(net[:, FLAGS.d:])
   return loc, scale
 
 
-ed.set_seed(42)
+def main(_):
+  ed.set_seed(42)
 
-data_dir = "/tmp/data"
-out_dir = "/tmp/out"
-if not os.path.exists(out_dir):
-  os.makedirs(out_dir)
-M = 128  # batch size during training
-d = 10  # latent dimension
+  # DATA. MNIST batches are fed at training time.
+  (x_train, _), (x_test, _) = mnist(FLAGS.data_dir)
+  x_train_generator = generator(x_train, FLAGS.M)
 
-# DATA. MNIST batches are fed at training time.
-(x_train, _), (x_test, _) = mnist(data_dir)
-x_train_generator = generator(x_train, M)
+  # MODEL
+  z = Normal(loc=tf.zeros([FLAGS.M, FLAGS.d]),
+             scale=tf.ones([FLAGS.M, FLAGS.d]))
+  logits = generative_network(z)
+  x = Bernoulli(logits=logits)
 
-# MODEL
-z = Normal(loc=tf.zeros([M, d]), scale=tf.ones([M, d]))
-logits = generative_network(z)
-x = Bernoulli(logits=logits)
+  # INFERENCE
+  x_ph = tf.placeholder(tf.int32, [FLAGS.M, 28 * 28])
+  loc, scale = inference_network(tf.cast(x_ph, tf.float32))
+  qz = Normal(loc=loc, scale=scale)
 
-# INFERENCE
-x_ph = tf.placeholder(tf.int32, [M, 28 * 28])
-loc, scale = inference_network(tf.cast(x_ph, tf.float32))
-qz = Normal(loc=loc, scale=scale)
+  # Bind p(x, z) and q(z | x) to the same placeholder for x.
+  inference = ed.KLqp({z: qz}, data={x: x_ph})
+  optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
+  inference.initialize(optimizer=optimizer)
 
-# Bind p(x, z) and q(z | x) to the same placeholder for x.
-data = {x: x_ph}
-inference = ed.KLqp({z: qz}, data)
-optimizer = tf.train.AdamOptimizer(0.01, epsilon=1.0)
-inference.initialize(optimizer=optimizer)
+  hidden_rep = tf.sigmoid(logits)
 
-hidden_rep = tf.sigmoid(logits)
+  tf.global_variables_initializer().run()
 
-tf.global_variables_initializer().run()
+  n_iter_per_epoch = x_train.shape[0] // FLAGS.M
+  for epoch in range(1, FLAGS.n_epoch + 1):
+    print("Epoch: {0}".format(epoch))
+    avg_loss = 0.0
 
-n_epoch = 100
-n_iter_per_epoch = x_train.shape[0] // M
-for epoch in range(1, n_epoch + 1):
-  print("Epoch: {0}".format(epoch))
-  avg_loss = 0.0
+    pbar = Progbar(n_iter_per_epoch)
+    for t in range(1, n_iter_per_epoch + 1):
+      pbar.update(t)
+      x_batch = next(x_train_generator)
+      info_dict = inference.update(feed_dict={x_ph: x_batch})
+      avg_loss += info_dict['loss']
 
-  pbar = Progbar(n_iter_per_epoch)
-  for t in range(1, n_iter_per_epoch + 1):
-    pbar.update(t)
-    x_batch = next(x_train_generator)
-    info_dict = inference.update(feed_dict={x_ph: x_batch})
-    avg_loss += info_dict['loss']
+    # Print a lower bound to the average marginal likelihood for an
+    # image.
+    avg_loss /= n_iter_per_epoch
+    avg_loss /= FLAGS.M
+    print("-log p(x) <= {:0.3f}".format(avg_loss))
 
-  # Print a lower bound to the average marginal likelihood for an
-  # image.
-  avg_loss = avg_loss / n_iter_per_epoch
-  avg_loss = avg_loss / M
-  print("-log p(x) <= {:0.3f}".format(avg_loss))
+    # Visualize hidden representations.
+    images = hidden_rep.eval()
+    for m in range(FLAGS.M):
+      imsave(os.path.join(FLAGS.out_dir, '%d.png') % m,
+             images[m].reshape(28, 28))
 
-  # Visualize hidden representations.
-  images = hidden_rep.eval()
-  for m in range(M):
-    imsave(os.path.join(out_dir, '%d.png') % m, images[m].reshape(28, 28))
+if __name__ == "__main__":
+  tf.app.run()

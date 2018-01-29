@@ -11,8 +11,6 @@ import tensorflow as tf
 from matplotlib import pyplot as plt
 from edward.models import Empirical, MultivariateNormalTriL
 
-plt.style.use("ggplot")
-
 
 def mvn_plot_contours(z, label=False, ax=None):
   """Plot the contours of 2-d Normal or MultivariateNormal object.
@@ -37,29 +35,34 @@ def mvn_plot_contours(z, label=False, ax=None):
     plt.clabel(cs, inline=1, fontsize=10)
 
 
-ed.set_seed(42)
+def main(_):
+  ed.set_seed(42)
 
-# MODEL
-z = MultivariateNormalTriL(
-    loc=tf.ones(2),
-    scale_tril=tf.cholesky(tf.constant([[1.0, 0.8], [0.8, 1.0]])))
+  # MODEL
+  z = MultivariateNormalTriL(
+      loc=tf.ones(2),
+      scale_tril=tf.cholesky(tf.constant([[1.0, 0.8], [0.8, 1.0]])))
 
-# INFERENCE
-qz = Empirical(params=tf.Variable(tf.random_normal([1000, 2])))
+  # INFERENCE
+  qz = Empirical(params=tf.get_variable("qz/params", [1000, 2]))
 
-inference = ed.HMC({z: qz})
-inference.run()
+  inference = ed.HMC({z: qz})
+  inference.run()
 
-# CRITICISM
-sess = ed.get_session()
-mean, stddev = sess.run([qz.mean(), qz.stddev()])
-print("Inferred posterior mean:")
-print(mean)
-print("Inferred posterior stddev:")
-print(stddev)
+  # CRITICISM
+  sess = ed.get_session()
+  mean, stddev = sess.run([qz.mean(), qz.stddev()])
+  print("Inferred posterior mean:")
+  print(mean)
+  print("Inferred posterior stddev:")
+  print(stddev)
 
-fig, ax = plt.subplots()
-trace = sess.run(qz.params)
-ax.scatter(trace[:, 0], trace[:, 1], marker=".")
-mvn_plot_contours(z, ax=ax)
-plt.show()
+  fig, ax = plt.subplots()
+  trace = sess.run(qz.params)
+  ax.scatter(trace[:, 0], trace[:, 1], marker=".")
+  mvn_plot_contours(z, ax=ax)
+  plt.show()
+
+if __name__ == "__main__":
+  plt.style.use("ggplot")
+  tf.app.run()

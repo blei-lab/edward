@@ -13,6 +13,12 @@ import tensorflow as tf
 
 from edward.models import Normal
 
+tf.flags.DEFINE_integer("N", default=50, help="Number of users.")
+tf.flags.DEFINE_integer("M", default=60, help="Number of movies.")
+tf.flags.DEFINE_integer("D", default=3, help="Number of latent factors.")
+
+FLAGS = tf.flags.FLAGS
+
 
 def build_toy_dataset(U, V, N, M, noise_std=0.1):
   R = np.dot(np.transpose(U), V) + np.random.normal(0, noise_std, size=(N, M))
@@ -24,43 +30,49 @@ def get_indicators(N, M, prob_std=0.5):
   return ind
 
 
-N = 50  # number of users
-M = 60  # number of movies
-D = 3  # number of latent factors
+def main(_):
+  # true latent factors
+  U_true = np.random.randn(FLAGS.D, FLAGS.N)
+  V_true = np.random.randn(FLAGS.D, FLAGS.M)
 
-# true latent factors
-U_true = np.random.randn(D, N)
-V_true = np.random.randn(D, M)
+  # DATA
+  R_true = build_toy_dataset(U_true, V_true, FLAGS.N, FLAGS.M)
+  I_train = get_indicators(FLAGS.N, FLAGS.M)
+  I_test = 1 - I_train
 
-# DATA
-R_true = build_toy_dataset(U_true, V_true, N, M)
-I_train = get_indicators(N, M)
-I_test = 1 - I_train
+  # MODEL
+  I = tf.placeholder(tf.float32, [FLAGS.N, FLAGS.M])
+  U = Normal(loc=tf.zeros([FLAGS.D, FLAGS.N]),
+             scale=tf.ones([FLAGS.D, FLAGS.N]))
+  V = Normal(loc=tf.zeros([FLAGS.D, FLAGS.M]),
+             scale=tf.ones([FLAGS.D, FLAGS.M]))
+  R = Normal(loc=tf.matmul(tf.transpose(U), V) * I,
+             scale=tf.ones([FLAGS.N, FLAGS.M]))
 
-# MODEL
-I = tf.placeholder(tf.float32, [N, M])
-U = Normal(loc=tf.zeros([D, N]), scale=tf.ones([D, N]))
-V = Normal(loc=tf.zeros([D, M]), scale=tf.ones([D, M]))
-R = Normal(loc=tf.matmul(tf.transpose(U), V) * I, scale=tf.ones([N, M]))
+  # INFERENCE
+  qU = Normal(loc=tf.get_variable("qU/loc", [FLAGS.D, FLAGS.N]),
+              scale=tf.nn.softplus(
+                  tf.get_variable("qU/scale", [FLAGS.D, FLAGS.N])))
+  qV = Normal(loc=tf.get_variable("qV/loc", [FLAGS.D, FLAGS.M]),
+              scale=tf.nn.softplus(
+                  tf.get_variable("qV/scale", [FLAGS.D, FLAGS.M])))
 
-# INFERENCE
-qU = Normal(loc=tf.Variable(tf.random_normal([D, N])),
-            scale=tf.nn.softplus(tf.Variable(tf.random_normal([D, N]))))
-qV = Normal(loc=tf.Variable(tf.random_normal([D, M])),
-            scale=tf.nn.softplus(tf.Variable(tf.random_normal([D, M]))))
+  inference = ed.KLqp({U: qU, V: qV}, data={R: R_true, I: I_train})
+  inference.run()
 
-inference = ed.KLqp({U: qU, V: qV}, data={R: R_true, I: I_train})
-inference.run()
+  # CRITICISM
+  qR = Normal(loc=tf.matmul(tf.transpose(qU), qV),
+              scale=tf.ones([FLAGS.N, FLAGS.M]))
 
-# CRITICISM
-qR = Normal(loc=tf.matmul(tf.transpose(qU), qV), scale=tf.ones([N, M]))
+  print("Mean squared error on test data:")
+  print(ed.evaluate('mean_squared_error', data={qR: R_true, I: I_test}))
 
-print("Mean squared error on test data:")
-print(ed.evaluate('mean_squared_error', data={qR: R_true, I: I_test}))
+  plt.imshow(R_true, cmap='hot')
+  plt.show()
 
-plt.imshow(R_true, cmap='hot')
-plt.show()
+  R_est = tf.matmul(tf.transpose(qU), qV).eval()
+  plt.imshow(R_est, cmap='hot')
+  plt.show()
 
-R_est = tf.matmul(tf.transpose(qU), qV).eval()
-plt.imshow(R_est, cmap='hot')
-plt.show()
+if __name__ == "__main__":
+  tf.app.run()

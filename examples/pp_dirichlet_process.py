@@ -17,8 +17,6 @@ import tensorflow as tf
 
 from edward.models import Bernoulli, Beta, DirichletProcess, Exponential, Normal
 
-plt.style.use('ggplot')
-
 
 def dirichlet_process(alpha):
   """Demo of stochastic while loop for stick breaking construction."""
@@ -37,56 +35,61 @@ def dirichlet_process(alpha):
   return stick_num
 
 
-dp = dirichlet_process(10.0)
+def main(_):
+  dp = dirichlet_process(10.0)
 
-# The number of sticks broken is dynamic, changing across evaluations.
-sess = tf.Session()
-print(sess.run(dp))
-print(sess.run(dp))
+  # The number of sticks broken is dynamic, changing across evaluations.
+  sess = tf.Session()
+  print(sess.run(dp))
+  print(sess.run(dp))
 
-# Demo of the DirichletProcess random variable in Edward.
-base = Normal(0.0, 1.0)
+  # Demo of the DirichletProcess random variable in Edward.
+  base = Normal(0.0, 1.0)
 
-# Highly concentrated DP.
-alpha = 1.0
-dp = DirichletProcess(alpha, base)
-x = dp.sample(1000)
-samples = sess.run(x)
-plt.hist(samples, bins=100, range=(-3.0, 3.0))
-plt.title("DP({0}, N(0, 1))".format(alpha))
-plt.show()
+  # Highly concentrated DP.
+  alpha = 1.0
+  dp = DirichletProcess(alpha, base)
+  x = dp.sample(1000)
+  samples = sess.run(x)
+  plt.hist(samples, bins=100, range=(-3.0, 3.0))
+  plt.title("DP({0}, N(0, 1))".format(alpha))
+  plt.show()
 
-# More spread out DP.
-alpha = 50.0
-dp = DirichletProcess(alpha, base)
-x = dp.sample(1000)
-samples = sess.run(x)
-plt.hist(samples, bins=100, range=(-3.0, 3.0))
-plt.title("DP({0}, N(0, 1))".format(alpha))
-plt.show()
+  # More spread out DP.
+  alpha = 50.0
+  dp = DirichletProcess(alpha, base)
+  x = dp.sample(1000)
+  samples = sess.run(x)
+  plt.hist(samples, bins=100, range=(-3.0, 3.0))
+  plt.title("DP({0}, N(0, 1))".format(alpha))
+  plt.show()
 
-# States persist across calls to sample() in a DP.
-alpha = 1.0
-dp = DirichletProcess(alpha, base)
-x = dp.sample(50)
-y = dp.sample(75)
-samples_x, samples_y = sess.run([x, y])
-plt.subplot(211)
-plt.hist(samples_x, bins=100, range=(-3.0, 3.0))
-plt.title("DP({0}, N(0, 1)) across two calls to sample()".format(alpha))
-plt.subplot(212)
-plt.hist(samples_y, bins=100, range=(-3.0, 3.0))
-plt.show()
+  # States persist across calls to sample() in a DP.
+  alpha = 1.0
+  dp = DirichletProcess(alpha, base)
+  x = dp.sample(50)
+  y = dp.sample(75)
+  samples_x, samples_y = sess.run([x, y])
+  plt.subplot(211)
+  plt.hist(samples_x, bins=100, range=(-3.0, 3.0))
+  plt.title("DP({0}, N(0, 1)) across two calls to sample()".format(alpha))
+  plt.subplot(212)
+  plt.hist(samples_y, bins=100, range=(-3.0, 3.0))
+  plt.show()
 
-# ``theta`` is the distribution indirectly returned by the DP.
-# Fetching theta is the same as fetching the Dirichlet process.
-dp = DirichletProcess(alpha, base)
-theta = Normal(0.0, 1.0, value=tf.cast(dp, tf.float32))
-print(sess.run([dp, theta]))
-print(sess.run([dp, theta]))
+  # ``theta`` is the distribution indirectly returned by the DP.
+  # Fetching theta is the same as fetching the Dirichlet process.
+  dp = DirichletProcess(alpha, base)
+  theta = Normal(0.0, 1.0, value=tf.cast(dp, tf.float32))
+  print(sess.run([dp, theta]))
+  print(sess.run([dp, theta]))
 
-# DirichletProcess can also take in non-scalar concentrations and bases.
-alpha = tf.constant([0.1, 0.6, 0.4])
-base = Exponential(rate=tf.ones([5, 2]))
-dp = DirichletProcess(alpha, base)
-print(dp)
+  # DirichletProcess can also take in non-scalar concentrations and bases.
+  alpha = tf.constant([0.1, 0.6, 0.4])
+  base = Exponential(rate=tf.ones([5, 2]))
+  dp = DirichletProcess(alpha, base)
+  print(dp)
+
+if __name__ == "__main__":
+  plt.style.use('ggplot')
+  tf.app.run()

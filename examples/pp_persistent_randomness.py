@@ -25,7 +25,11 @@ def eye_color(person):
     return Categorical(probs=tf.ones(3) / 3, name=person)
 
 
-# Only two categorical random variables are created.
-eye_color('bob')
-eye_color('alice')
-eye_color('bob')
+def main(_):
+  # Only two categorical random variables are created.
+  eye_color('bob')
+  eye_color('alice')
+  eye_color('bob')
+
+if __name__ == "__main__":
+  tf.app.run()
