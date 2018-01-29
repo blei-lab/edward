@@ -1,7 +1,5 @@
 """Convolutional variational auto-encoder for binarized MNIST.
 
-The neural networks are written with TensorFlow Slim.
-
 References
 ----------
 http://edwardlib.org/tutorials/decoder
