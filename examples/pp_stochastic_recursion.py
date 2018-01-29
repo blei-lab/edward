@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Stochastic recursion.
 
 We sample from a geometric random variable by using samples from
@@ -38,9 +37,13 @@ def geometric(p):
     return tf.cond(cond, fn1, fn2)
 
 
-p = tf.constant(0.9)
-geom = geometric(p)
+def main(_):
+  p = tf.constant(0.9)
+  geom = geometric(p)
 
-sess = tf.Session()
-samples = [sess.run(geom) for _ in range(1000)]
-plt.hist(samples, bins='auto')
+  sess = tf.Session()
+  samples = [sess.run(geom) for _ in range(1000)]
+  plt.hist(samples, bins='auto')
+
+if __name__ == "__main__":
+  tf.app.run()

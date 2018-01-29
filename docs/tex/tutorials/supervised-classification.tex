@@ -113,8 +113,8 @@ the value for this placeholder according to data.
 Perform variational inference.
 Define the variational model to be a fully factorized normal.
 \begin{lstlisting}[language=Python]
-qf = Normal(loc=tf.Variable(tf.random_normal([N])),
-            scale=tf.nn.softplus(tf.Variable(tf.random_normal([N]))))
+qf = Normal(loc=tf.get_variable("qf/loc", [N]),
+            scale=tf.nn.softplus(tf.get_variable("qf/scale", [N])))
 \end{lstlisting}
 
 Run variational inference for \texttt{500} iterations.

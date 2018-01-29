@@ -105,8 +105,8 @@ See this extended tutorial about
 One could instead run variational inference. This requires specifying
 a variational model and instantiating \texttt{KLqp}.
 \begin{lstlisting}[language=Python]
-qz = Normal(loc=tf.Variable(tf.random_normal([N * K])),
-            scale=tf.nn.softplus(tf.Variable(tf.random_normal([N * K]))))
+qz = Normal(loc=tf.get_variable("qz/loc", [N * K]),
+            scale=tf.nn.softplus(tf.get_variable("qz/scale", [N * K])))
 inference = ed.KLqp({z: qz}, data={x: x_train})
 \end{lstlisting}
 See this extended tutorial about

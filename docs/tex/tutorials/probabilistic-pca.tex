@@ -112,10 +112,10 @@ variational inference to minimize the $\text{KL}(q\|p)$ divergence
 measure.
 
 \begin{lstlisting}[language=Python]
-qw = Normal(loc=tf.Variable(tf.random_normal([D, K])),
-            scale=tf.nn.softplus(tf.Variable(tf.random_normal([D, K]))))
-qz = Normal(loc=tf.Variable(tf.random_normal([N, K])),
-            scale=tf.nn.softplus(tf.Variable(tf.random_normal([N, K]))))
+qw = Normal(loc=tf.get_variable("qw/loc", [D, K]),
+            scale=tf.nn.softplus(tf.get_variable("qw/scale", [D, K])))
+qz = Normal(loc=tf.get_variable("qz/loc", [N, K]),
+            scale=tf.nn.softplus(tf.get_variable("qz/scale", [N, K])))
 
 inference = ed.KLqp({w: qw, z: qz}, data={x: x_train})
 inference.run(n_iter=500, n_print=100, n_samples=10)

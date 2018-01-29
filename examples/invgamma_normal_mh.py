@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """ InverseGamma-Normal model
 
 Posterior inference with Metropolis Hastings
@@ -13,29 +12,37 @@ import tensorflow as tf
 
 from edward.models import InverseGamma, Normal, Empirical
 
-N = 1000
+tf.flags.DEFINE_integer("N", default=1000, help="Number of data points.")
+tf.flags.DEFINE_float("loc", default=7.0, help="")
+tf.flags.DEFINE_float("scale", default=0.7, help="")
 
-# Data generation (known mean)
-loc = 7.0
-scale = 0.7
-xn_data = np.random.normal(loc, scale, N)
-print('scale={}'.format(scale))
+FLAGS = tf.flags.FLAGS
 
-# Prior definition
-alpha = tf.Variable(0.5, trainable=False)
-beta = tf.Variable(0.7, trainable=False)
 
-# Posterior inference
-# Probabilistic model
-ig = InverseGamma(alpha, beta)
-xn = Normal(loc, tf.ones([N]) * tf.sqrt(ig))
+def main(_):
+  # Data generation (known mean)
+  xn_data = np.random.normal(FLAGS.loc, FLAGS.scale, FLAGS.N)
+  print('scale={}'.format(FLAGS.scale))
 
-# Inference
-qig = Empirical(params=tf.Variable(tf.zeros(1000) + 0.5))
-proposal_ig = InverseGamma(2.0, 2.0)
-inference = ed.MetropolisHastings({ig: qig},
-                                  {ig: proposal_ig}, data={xn: xn_data})
-inference.run()
+  # Prior definition
+  alpha = 0.5
+  beta = 0.7
 
-sess = ed.get_session()
-print('Inferred scale={}'.format(sess.run(tf.sqrt(qig.mean()))))
+  # Posterior inference
+  # Probabilistic model
+  ig = InverseGamma(alpha, beta)
+  xn = Normal(FLAGS.loc, tf.ones([FLAGS.N]) * tf.sqrt(ig))
+
+  # Inference
+  qig = Empirical(params=tf.get_variable(
+      "qig/params", [1000], initializer=tf.constant_initializer(0.5)))
+  proposal_ig = InverseGamma(2.0, 2.0)
+  inference = ed.MetropolisHastings({ig: qig},
+                                    {ig: proposal_ig}, data={xn: xn_data})
+  inference.run()
+
+  sess = ed.get_session()
+  print('Inferred scale={}'.format(sess.run(tf.sqrt(qig.mean()))))
+
+if __name__ == "__main__":
+  tf.app.run()

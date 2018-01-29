@@ -78,8 +78,8 @@ and use the algorithm \href{/api/ed/KLqp}{\texttt{ed.KLqp}}.
 \begin{lstlisting}[language=Python]
 from edward.models import Normal
 
-qx = Normal(loc=tf.Variable(tf.random_normal([])),
-            scale=tf.nn.softplus(tf.Variable(tf.random_normal([]))))
+qx = Normal(loc=tf.get_variable("qx/loc", []),
+            scale=tf.nn.softplus(tf.get_variable("qx/scale", [])))
 
 inference = ed.KLqp({x: qx})
 inference.run()
@@ -140,7 +140,7 @@ and use the algorithm \href{/api/ed/HMC}{\texttt{ed.HMC}}.
 \begin{lstlisting}[language=Python]
 from edward.models import Empirical
 
-qx = Empirical(params=tf.Variable(tf.random_normal([1000])))
+qx = Empirical(params=tf.get_variable("qx/params", [1000]))
 
 inference = ed.HMC({x: qx})
 inference.run(step_size=0.8)

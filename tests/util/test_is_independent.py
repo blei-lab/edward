@@ -59,6 +59,5 @@ class test_is_independent_class(tf.test.TestCase):
     self.assertFalse(is_independent(e, f, [b, d]))
     self.assertFalse(is_independent(e, f, [a, b, c, d]))
 
-
 if __name__ == '__main__':
   tf.test.main()

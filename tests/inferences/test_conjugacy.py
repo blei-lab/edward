@@ -325,6 +325,5 @@ class test_conjugacy_class(tf.test.TestCase):
     true_p_z /= true_p_z.sum(1, keepdims=True)
     self.assertAllClose(z_cond_p, true_p_z)
 
-
 if __name__ == '__main__':
   tf.test.main()

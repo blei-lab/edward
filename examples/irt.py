@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Bayesian Item Response Theory (IRT) Mixed Effects Model
 using variational inference.
 
@@ -16,6 +15,12 @@ import tensorflow as tf
 
 from edward.models import Normal, Bernoulli
 from scipy.special import expit
+
+tf.flags.DEFINE_integer("n_students", default=50000, help="")
+tf.flags.DEFINE_integer("n_questions", default=2000, help="")
+tf.flags.DEFINE_integer("n_obs", default=200000, help="")
+
+FLAGS = tf.flags.FLAGS
 
 
 def build_toy_dataset(n_students, n_questions, n_obs,
@@ -38,99 +43,103 @@ def build_toy_dataset(n_students, n_questions, n_obs,
   return data, student_etas, question_etas
 
 
-ed.set_seed(42)
+def main(_):
+  ed.set_seed(42)
 
-n_students = 50000
-n_questions = 2000
-n_obs = 200000
+  # DATA
+  data, true_s_etas, true_q_etas = build_toy_dataset(
+      FLAGS.n_students, FLAGS.n_questions, FLAGS.n_obs)
+  obs = data['outcomes'].values
+  student_ids = data['student_id'].values.astype(int)
+  question_ids = data['question_id'].values.astype(int)
 
-# DATA
-data, true_s_etas, true_q_etas = build_toy_dataset(
-    n_students, n_questions, n_obs)
-obs = data['outcomes'].values
-student_ids = data['student_id'].values.astype(int)
-question_ids = data['question_id'].values.astype(int)
+  # MODEL
+  lnvar_students = Normal(loc=tf.zeros(1), scale=tf.ones(1))
+  lnvar_questions = Normal(loc=tf.zeros(1), scale=tf.ones(1))
 
-# MODEL
-lnvar_students = Normal(loc=tf.zeros(1), scale=tf.ones(1))
-lnvar_questions = Normal(loc=tf.zeros(1), scale=tf.ones(1))
+  sigma_students = tf.sqrt(tf.exp(lnvar_students))
+  sigma_questions = tf.sqrt(tf.exp(lnvar_questions))
 
-sigma_students = tf.sqrt(tf.exp(lnvar_students))
-sigma_questions = tf.sqrt(tf.exp(lnvar_questions))
+  overall_mu = Normal(loc=tf.zeros(1), scale=tf.ones(1))
 
-overall_mu = Normal(loc=tf.zeros(1), scale=tf.ones(1))
+  student_etas = Normal(loc=tf.zeros(FLAGS.n_students),
+                        scale=sigma_students * tf.ones(FLAGS.n_students))
+  question_etas = Normal(loc=tf.zeros(FLAGS.n_questions),
+                         scale=sigma_questions * tf.ones(FLAGS.n_questions))
 
-student_etas = Normal(loc=tf.zeros(n_students),
-                      scale=sigma_students * tf.ones(n_students))
-question_etas = Normal(loc=tf.zeros(n_questions),
-                       scale=sigma_questions * tf.ones(n_questions))
+  observation_logodds = (tf.gather(student_etas, student_ids) +
+                         tf.gather(question_etas, question_ids) +
+                         overall_mu)
+  outcomes = Bernoulli(logits=observation_logodds)
 
-observation_logodds = tf.gather(student_etas, student_ids) + \
-    tf.gather(question_etas, question_ids) + \
-    overall_mu
-outcomes = Bernoulli(logits=observation_logodds)
+  # INFERENCE
+  qstudents = Normal(
+      loc=tf.get_variable("qstudents/loc", [FLAGS.n_students]),
+      scale=tf.nn.softplus(
+          tf.get_variable("qstudents/scale", [FLAGS.n_students])))
+  qquestions = Normal(
+      loc=tf.get_variable("qquestions/loc", [FLAGS.n_questions]),
+      scale=tf.nn.softplus(
+          tf.get_variable("qquestions/scale", [FLAGS.n_questions])))
+  qlnvarstudents = Normal(
+      loc=tf.get_variable("qlnvarstudents/loc", [1]),
+      scale=tf.nn.softplus(
+          tf.get_variable("qlnvarstudents/scale", [1])))
+  qlnvarquestions = Normal(
+      loc=tf.get_variable("qlnvarquestions/loc", [1]),
+      scale=tf.nn.softplus(
+          tf.get_variable("qlnvarquestions/scale", [1])))
+  qmu = Normal(
+      loc=tf.get_variable("qmu/loc", [1]),
+      scale=tf.nn.softplus(
+          tf.get_variable("qmu/scale", [1])))
 
+  latent_vars = {
+      overall_mu: qmu,
+      lnvar_students: qlnvarstudents,
+      lnvar_questions: qlnvarquestions,
+      student_etas: qstudents,
+      question_etas: qquestions
+  }
+  data = {outcomes: obs}
+  inference = ed.KLqp(latent_vars, data)
+  inference.initialize(n_print=2, n_iter=50)
 
-# INFERENCE
-qstudents = Normal(
-    loc=tf.Variable(tf.random_normal([n_students])),
-    scale=tf.nn.softplus(tf.Variable(tf.random_normal([n_students]))))
-qquestions = Normal(
-    loc=tf.Variable(tf.random_normal([n_questions])),
-    scale=tf.nn.softplus(tf.Variable(tf.random_normal([n_questions]))))
-qlnvarstudents = Normal(
-    loc=tf.Variable(tf.random_normal([1])),
-    scale=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
-qlnvarquestions = Normal(
-    loc=tf.Variable(tf.random_normal([1])),
-    scale=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
-qmu = Normal(
-    loc=tf.Variable(tf.random_normal([1])),
-    scale=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
+  qstudents_mean = qstudents.mean()
+  qquestions_mean = qquestions.mean()
 
-latent_vars = {
-    overall_mu: qmu,
-    lnvar_students: qlnvarstudents,
-    lnvar_questions: qlnvarquestions,
-    student_etas: qstudents,
-    question_etas: qquestions
-}
-data = {outcomes: obs}
-inference = ed.KLqp(latent_vars, data)
-inference.initialize(n_print=2, n_iter=50)
+  tf.global_variables_initializer().run()
 
-qstudents_mean = qstudents.mean()
-qquestions_mean = qquestions.mean()
+  f, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
+  ax1.set_ylim([-3.0, 3.0])
+  ax2.set_ylim([-3.0, 3.0])
+  ax1.set_xlim([-3.0, 3.0])
+  ax2.set_xlim([-3.0, 3.0])
 
-tf.global_variables_initializer().run()
+  for t in range(inference.n_iter):
+    info_dict = inference.update()
+    inference.print_progress(info_dict)
 
-f, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
-ax1.set_ylim([-3.0, 3.0])
-ax2.set_ylim([-3.0, 3.0])
-ax1.set_xlim([-3.0, 3.0])
-ax2.set_xlim([-3.0, 3.0])
+    if t % inference.n_print == 0:
+      # CRITICISM
+      ax1.clear()
+      ax2.clear()
+      ax1.set_ylim([-3.0, 3.0])
+      ax2.set_ylim([-3.0, 3.0])
+      ax1.set_xlim([-3.0, 3.0])
+      ax2.set_xlim([-3.0, 3.0])
 
-for t in range(inference.n_iter):
-  info_dict = inference.update()
-  inference.print_progress(info_dict)
+      ax1.set_title('Student Intercepts')
+      ax2.set_title('Question Intercepts')
+      ax1.set_xlabel('True Student Random Intercepts')
+      ax1.set_ylabel('Estimated Student Random Intercepts')
+      ax2.set_xlabel('True Question Random Intercepts')
+      ax2.set_ylabel('Estimated Question Random Intercepts')
 
-  if t % inference.n_print == 0:
-    # CRITICISM
-    ax1.clear()
-    ax2.clear()
-    ax1.set_ylim([-3.0, 3.0])
-    ax2.set_ylim([-3.0, 3.0])
-    ax1.set_xlim([-3.0, 3.0])
-    ax2.set_xlim([-3.0, 3.0])
+      ax1.scatter(true_s_etas, qstudents_mean.eval(), s=0.05)
+      ax2.scatter(true_q_etas, qquestions_mean.eval(), s=0.05)
+      plt.draw()
+      plt.pause(2.0 / 60.0)
 
-    ax1.set_title('Student Intercepts')
-    ax2.set_title('Question Intercepts')
-    ax1.set_xlabel('True Student Random Intercepts')
-    ax1.set_ylabel('Estimated Student Random Intercepts')
-    ax2.set_xlabel('True Question Random Intercepts')
-    ax2.set_ylabel('Estimated Question Random Intercepts')
-
-    ax1.scatter(true_s_etas, qstudents_mean.eval(), s=0.05)
-    ax2.scatter(true_q_etas, qquestions_mean.eval(), s=0.05)
-    plt.draw()
-    plt.pause(2.0 / 60.0)
+if __name__ == "__main__":
+  tf.app.run()

@@ -244,6 +244,5 @@ class test_copy_class(tf.test.TestCase):
       x_new_val, y_new_val = sess.run([x_new, y_new])
       self.assertAllClose(abs(x_new_val), y_new_val)
 
-
 if __name__ == '__main__':
   tf.test.main()

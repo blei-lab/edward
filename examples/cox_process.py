@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """A Cox process model for spatial analysis
 (Cox, 1955; Miller et al., 2014).
 
@@ -29,6 +28,11 @@ from edward.models import MultivariateNormalTriL, Normal, Poisson
 from edward.util import rbf
 from scipy.stats import multivariate_normal, poisson
 
+tf.flags.DEFINE_integer("N", default=308, help="Number of NBA players.")
+tf.flags.DEFINE_integer("V", default=2, help="Number of shot locations.")
+
+FLAGS = tf.flags.FLAGS
+
 
 def build_toy_dataset(N, V):
   """A simulator mimicking the data set from 2015-2016 NBA season with
@@ -43,26 +47,30 @@ def build_toy_dataset(N, V):
 
   return x
 
-ed.set_seed(42)
 
-N = 308  # number of NBA players
-V = 2  # number of shot locations
+def main(_):
+  ed.set_seed(42)
 
-# DATA
-x_data = build_toy_dataset(N, V)
+  # DATA
+  x_data = build_toy_dataset(FLAGS.N, FLAGS.V)
 
-# MODEL
-x_ph = tf.placeholder(tf.float32, [N, V])  # inputs to Gaussian Process
+  # MODEL
+  x_ph = tf.placeholder(tf.float32, [FLAGS.N, FLAGS.V])
 
-# Form (N, V, V) covariance, one matrix per data point.
-K = tf.stack([rbf(tf.reshape(xn, [V, 1])) + tf.diag([1e-6, 1e-6])
-              for xn in tf.unstack(x_ph)])
-f = MultivariateNormalTriL(loc=tf.zeros([N, V]), scale_tril=tf.cholesky(K))
-x = Poisson(rate=tf.exp(f))
+  # Form (N, V, V) covariance, one matrix per data point.
+  K = tf.stack([rbf(tf.reshape(xn, [FLAGS.V, 1])) + tf.diag([1e-6, 1e-6])
+                for xn in tf.unstack(x_ph)])
+  f = MultivariateNormalTriL(loc=tf.zeros([FLAGS.N, FLAGS.V]),
+                             scale_tril=tf.cholesky(K))
+  x = Poisson(rate=tf.exp(f))
 
-# INFERENCE
-qf = Normal(loc=tf.Variable(tf.random_normal([N, V])),
-            scale=tf.nn.softplus(tf.Variable(tf.random_normal([N, V]))))
+  # INFERENCE
+  qf = Normal(
+      loc=tf.get_variable("qf/loc", [FLAGS.N, FLAGS.V]),
+      scale=tf.nn.softplus(tf.get_variable("qf/scale", [FLAGS.N, FLAGS.V])))
 
-inference = ed.KLqp({f: qf}, data={x: x_data, x_ph: x_data})
-inference.run(n_iter=5000)
+  inference = ed.KLqp({f: qf}, data={x: x_data, x_ph: x_data})
+  inference.run(n_iter=5000)
+
+if __name__ == "__main__":
+  tf.app.run()

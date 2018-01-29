@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Mixture of Gaussians.
 
 Perform inference with Metropolis-Hastings. It utterly fails. This is
@@ -20,9 +19,16 @@ import numpy as np
 import six
 import tensorflow as tf
 
-from edward.models import \
-    Categorical, Dirichlet, Empirical, InverseGamma, Normal
+from edward.models import (
+    Categorical, Dirichlet, Empirical, InverseGamma, Normal)
 from scipy.stats import norm
+
+tf.flags.DEFINE_integer("N", default=500, help="Number of data points.")
+tf.flags.DEFINE_integer("K", default=2, help="Number of components.")
+tf.flags.DEFINE_integer("D", default=2, help="Dimensionality of data.")
+tf.flags.DEFINE_integer("T", default=5000, help="Number of posterior samples.")
+
+FLAGS = tf.flags.FLAGS
 
 
 def build_toy_dataset(N):
@@ -37,55 +43,67 @@ def build_toy_dataset(N):
   return x
 
 
-N = 500  # number of data points
-K = 2  # number of components
-D = 2  # dimensionality of data
-ed.set_seed(42)
+def main(_):
+  ed.set_seed(42)
 
-# DATA
-x_data = build_toy_dataset(N)
+  # DATA
+  x_data = build_toy_dataset(FLAGS.N)
 
-# MODEL
-pi = Dirichlet(concentration=tf.constant([1.0] * K))
-mu = Normal(loc=tf.zeros([K, D]), scale=tf.ones([K, D]))
-sigma = InverseGamma(concentration=tf.ones([K, D]), rate=tf.ones([K, D]))
-c = Categorical(logits=tf.tile(
-    tf.reshape(tf.log(pi) - tf.log(1.0 - pi), [1, K]), [N, 1]))
-x = Normal(loc=tf.gather(mu, c), scale=tf.gather(sigma, c))
+  # MODEL
+  pi = Dirichlet(concentration=tf.ones(FLAGS.K))
+  mu = Normal(loc=tf.zeros([FLAGS.K, FLAGS.D]),
+              scale=tf.ones([FLAGS.K, FLAGS.D]))
+  sigma = InverseGamma(concentration=tf.ones([FLAGS.K, FLAGS.D]),
+                       rate=tf.ones([FLAGS.K, FLAGS.D]))
+  c = Categorical(logits=tf.tile(
+      tf.reshape(tf.log(pi) - tf.log(1.0 - pi), [1, FLAGS.K]), [FLAGS.N, 1]))
+  x = Normal(loc=tf.gather(mu, c), scale=tf.gather(sigma, c))
 
-# INFERENCE
-T = 5000
-qpi = Empirical(params=tf.Variable(tf.ones([T, K]) / K))
-qmu = Empirical(params=tf.Variable(tf.zeros([T, K, D])))
-qsigma = Empirical(params=tf.Variable(tf.ones([T, K, D])))
-qc = Empirical(params=tf.Variable(tf.zeros([T, N], dtype=tf.int32)))
+  # INFERENCE
+  qpi = Empirical(params=tf.get_variable(
+      "qpi/params",
+      [FLAGS.T, FLAGS.K],
+      initializer=tf.constant_initializer(1.0 / FLAGS.K)))
+  qmu = Empirical(params=tf.get_variable("qmu/params",
+                                         [FLAGS.T, FLAGS.K, FLAGS.D],
+                                         initializer=tf.zeros_initializer()))
+  qsigma = Empirical(params=tf.get_variable("qsigma/params",
+                                            [FLAGS.T, FLAGS.K, FLAGS.D],
+                                            initializer=tf.ones_initializer()))
+  qc = Empirical(params=tf.get_variable("qc/params",
+                                        [FLAGS.T, FLAGS.N],
+                                        initializer=tf.zeros_initializer(),
+                                        dtype=tf.int32))
 
-gpi = Dirichlet(concentration=tf.constant([1.4, 1.6]))
-gmu = Normal(loc=tf.constant([[1.0, 1.0], [-1.0, -1.0]]),
-             scale=tf.constant([[0.5, 0.5], [0.5, 0.5]]))
-gsigma = InverseGamma(concentration=tf.constant([[1.1, 1.1], [1.1, 1.1]]),
-                      rate=tf.constant([[1.0, 1.0], [1.0, 1.0]]))
-gc = Categorical(logits=tf.zeros([N, K]))
+  gpi = Dirichlet(concentration=tf.constant([1.4, 1.6]))
+  gmu = Normal(loc=tf.constant([[1.0, 1.0], [-1.0, -1.0]]),
+               scale=tf.constant([[0.5, 0.5], [0.5, 0.5]]))
+  gsigma = InverseGamma(concentration=tf.constant([[1.1, 1.1], [1.1, 1.1]]),
+                        rate=tf.constant([[1.0, 1.0], [1.0, 1.0]]))
+  gc = Categorical(logits=tf.zeros([FLAGS.N, FLAGS.K]))
 
-inference = ed.MetropolisHastings(
-    latent_vars={pi: qpi, mu: qmu, sigma: qsigma, c: qc},
-    proposal_vars={pi: gpi, mu: gmu, sigma: gsigma, c: gc},
-    data={x: x_data})
+  inference = ed.MetropolisHastings(
+      latent_vars={pi: qpi, mu: qmu, sigma: qsigma, c: qc},
+      proposal_vars={pi: gpi, mu: gmu, sigma: gsigma, c: gc},
+      data={x: x_data})
 
-inference.initialize()
+  inference.initialize()
 
-sess = ed.get_session()
-tf.global_variables_initializer().run()
+  sess = ed.get_session()
+  tf.global_variables_initializer().run()
 
-for _ in range(inference.n_iter):
-  info_dict = inference.update()
-  inference.print_progress(info_dict)
+  for _ in range(inference.n_iter):
+    info_dict = inference.update()
+    inference.print_progress(info_dict)
 
-  t = info_dict['t']
-  if t == 1 or t % inference.n_print == 0:
-    qpi_mean, qmu_mean = sess.run([qpi.mean(), qmu.mean()])
-    print("")
-    print("Inferred membership probabilities:")
-    print(qpi_mean)
-    print("Inferred cluster means:")
-    print(qmu_mean)
+    t = info_dict['t']
+    if t == 1 or t % inference.n_print == 0:
+      qpi_mean, qmu_mean = sess.run([qpi.mean(), qmu.mean()])
+      print("")
+      print("Inferred membership probabilities:")
+      print(qpi_mean)
+      print("Inferred cluster means:")
+      print(qmu_mean)
+
+if __name__ == "__main__":
+  tf.app.run()

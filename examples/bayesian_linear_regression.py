@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Bayesian linear regression using stochastic gradient Hamiltonian
 Monte Carlo.
 
@@ -20,6 +19,16 @@ import tensorflow as tf
 
 from edward.models import Normal, Empirical
 
+tf.flags.DEFINE_integer("N", default=40, help="Number of data points.")
+tf.flags.DEFINE_integer("D", default=1, help="Number of features.")
+tf.flags.DEFINE_integer("T", default=5000, help="Number of posterior samples.")
+tf.flags.DEFINE_integer("nburn", default=100,
+                        help="Number of burn-in samples.")
+tf.flags.DEFINE_integer("stride", default=10,
+                        help="Frequency with which to plots samples.")
+
+FLAGS = tf.flags.FLAGS
+
 
 def build_toy_dataset(N, noise_std=0.5):
   X = np.concatenate([np.linspace(0, 2, num=N / 2),
@@ -29,73 +38,70 @@ def build_toy_dataset(N, noise_std=0.5):
   return X, y
 
 
-ed.set_seed(42)
+def main(_):
+  ed.set_seed(42)
 
-N = 40  # number of data points
-D = 1  # number of features
+  # DATA
+  X_train, y_train = build_toy_dataset(FLAGS.N)
+  X_test, y_test = build_toy_dataset(FLAGS.N)
 
-# DATA
-X_train, y_train = build_toy_dataset(N)
-X_test, y_test = build_toy_dataset(N)
+  # MODEL
+  X = tf.placeholder(tf.float32, [FLAGS.N, FLAGS.D])
+  w = Normal(loc=tf.zeros(FLAGS.D), scale=tf.ones(FLAGS.D))
+  b = Normal(loc=tf.zeros(1), scale=tf.ones(1))
+  y = Normal(loc=ed.dot(X, w) + b, scale=tf.ones(FLAGS.N))
 
-# MODEL
-X = tf.placeholder(tf.float32, [N, D])
-w = Normal(loc=tf.zeros(D), scale=tf.ones(D))
-b = Normal(loc=tf.zeros(1), scale=tf.ones(1))
-y = Normal(loc=ed.dot(X, w) + b, scale=tf.ones(N))
+  # INFERENCE
+  qw = Empirical(params=tf.get_variable("qw/params", [FLAGS.T, FLAGS.D]))
+  qb = Empirical(params=tf.get_variable("qb/params", [FLAGS.T, 1]))
 
-# INFERENCE
-T = 5000                        # Number of samples.
-nburn = 100                     # Number of burn-in samples.
-stride = 10                    # Frequency with which to plot samples.
-qw = Empirical(params=tf.Variable(tf.random_normal([T, D])))
-qb = Empirical(params=tf.Variable(tf.random_normal([T, 1])))
+  inference = ed.SGHMC({w: qw, b: qb}, data={X: X_train, y: y_train})
+  inference.run(step_size=1e-3)
 
-inference = ed.SGHMC({w: qw, b: qb}, data={X: X_train, y: y_train})
-inference.run(step_size=1e-3)
+  # CRITICISM
 
+  # Plot posterior samples.
+  sns.jointplot(qb.params.eval()[FLAGS.nburn:FLAGS.T:FLAGS.stride],
+                qw.params.eval()[FLAGS.nburn:FLAGS.T:FLAGS.stride])
+  plt.show()
 
-# CRITICISM
+  # Posterior predictive checks.
+  y_post = ed.copy(y, {w: qw, b: qb})
+  # This is equivalent to
+  # y_post = Normal(loc=ed.dot(X, qw) + qb, scale=tf.ones(FLAGS.N))
 
-# Plot posterior samples.
-sns.jointplot(qb.params.eval()[nburn:T:stride],
-              qw.params.eval()[nburn:T:stride])
-plt.show()
+  print("Mean squared error on test data:")
+  print(ed.evaluate('mean_squared_error', data={X: X_test, y_post: y_test}))
 
-# Posterior predictive checks.
-y_post = ed.copy(y, {w: qw, b: qb})
-# This is equivalent to
-# y_post = Normal(loc=ed.dot(X, qw) + qb, scale=tf.ones(N))
+  print("Displaying prior predictive samples.")
+  n_prior_samples = 10
 
-print("Mean squared error on test data:")
-print(ed.evaluate('mean_squared_error', data={X: X_test, y_post: y_test}))
+  w_prior = w.sample(n_prior_samples).eval()
+  b_prior = b.sample(n_prior_samples).eval()
 
-print("Displaying prior predictive samples.")
-n_prior_samples = 10
+  plt.scatter(X_train, y_train)
 
-w_prior = w.sample(n_prior_samples).eval()
-b_prior = b.sample(n_prior_samples).eval()
+  inputs = np.linspace(-1, 10, num=400)
+  for ns in range(n_prior_samples):
+      output = inputs * w_prior[ns] + b_prior[ns]
+      plt.plot(inputs, output)
 
-plt.scatter(X_train, y_train)
+  plt.show()
 
-inputs = np.linspace(-1, 10, num=400)
-for ns in range(n_prior_samples):
-    output = inputs * w_prior[ns] + b_prior[ns]
-    plt.plot(inputs, output)
+  print("Displaying posterior predictive samples.")
+  n_posterior_samples = 10
 
-plt.show()
+  w_post = qw.sample(n_posterior_samples).eval()
+  b_post = qb.sample(n_posterior_samples).eval()
 
-print("Displaying posterior predictive samples.")
-n_posterior_samples = 10
+  plt.scatter(X_train, y_train)
 
-w_post = qw.sample(n_posterior_samples).eval()
-b_post = qb.sample(n_posterior_samples).eval()
+  inputs = np.linspace(-1, 10, num=400)
+  for ns in range(n_posterior_samples):
+      output = inputs * w_post[ns] + b_post[ns]
+      plt.plot(inputs, output)
 
-plt.scatter(X_train, y_train)
+  plt.show()
 
-inputs = np.linspace(-1, 10, num=400)
-for ns in range(n_posterior_samples):
-    output = inputs * w_post[ns] + b_post[ns]
-    plt.plot(inputs, output)
-
-plt.show()
+if __name__ == "__main__":
+  tf.app.run()

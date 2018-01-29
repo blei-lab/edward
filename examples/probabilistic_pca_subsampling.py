@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """Probabilistic principal components analysis (Tipping and Bishop, 1999).
 
 Inference uses data subsampling.
@@ -17,6 +16,13 @@ import tensorflow as tf
 
 from edward.models import Normal
 
+tf.flags.DEFINE_integer("N", default=5000, help="Number of data points.")
+tf.flags.DEFINE_integer("M", default=100, help="Batch size during training.")
+tf.flags.DEFINE_integer("D", default=2, help="Data dimensionality.")
+tf.flags.DEFINE_integer("K", default=1, help="Latent dimensionality.")
+
+FLAGS = tf.flags.FLAGS
+
 
 def build_toy_dataset(N, D, K, sigma=1):
   x_train = np.zeros((D, N))
@@ -32,62 +38,62 @@ def build_toy_dataset(N, D, K, sigma=1):
   return x_train
 
 
-def next_batch(M):
-  idx_batch = np.random.choice(N, M)
+def next_batch(x_train, M):
+  idx_batch = np.random.choice(FLAGS.N, M)
   return x_train[:, idx_batch], idx_batch
 
 
-ed.set_seed(142)
+def main(_):
+  ed.set_seed(142)
 
-N = 5000  # number of data points
-M = 100  # minibatch size
-D = 2  # data dimensionality
-K = 1  # latent dimensionality
+  # DATA
+  x_train = build_toy_dataset(FLAGS.N, FLAGS.D, FLAGS.K)
 
-# DATA
+  # MODEL
+  w = Normal(loc=tf.zeros([FLAGS.D, FLAGS.K]),
+             scale=10.0 * tf.ones([FLAGS.D, FLAGS.K]))
+  z = Normal(loc=tf.zeros([FLAGS.M, FLAGS.K]),
+             scale=tf.ones([FLAGS.M, FLAGS.K]))
+  x = Normal(loc=tf.matmul(w, z, transpose_b=True),
+             scale=tf.ones([FLAGS.D, FLAGS.M]))
 
-x_train = build_toy_dataset(N, D, K)
+  # INFERENCE
+  qw_variables = [tf.get_variable("qw/loc", [FLAGS.D, FLAGS.K]),
+                  tf.get_variable("qw/scale", [FLAGS.D, FLAGS.K])]
+  qw = Normal(loc=qw_variables[0], scale=tf.nn.softplus(qw_variables[1]))
 
-# MODEL
+  qz_variables = [tf.get_variable("qz/loc", [FLAGS.N, FLAGS.K]),
+                  tf.get_variable("qz/scale", [FLAGS.N, FLAGS.K])]
+  idx_ph = tf.placeholder(tf.int32, FLAGS.M)
+  qz = Normal(loc=tf.gather(qz_variables[0], idx_ph),
+              scale=tf.nn.softplus(tf.gather(qz_variables[1], idx_ph)))
 
-w = Normal(loc=tf.zeros([D, K]), scale=10.0 * tf.ones([D, K]))
-z = Normal(loc=tf.zeros([M, K]), scale=tf.ones([M, K]))
-x = Normal(loc=tf.matmul(w, z, transpose_b=True), scale=tf.ones([D, M]))
+  x_ph = tf.placeholder(tf.float32, [FLAGS.D, FLAGS.M])
+  inference_w = ed.KLqp({w: qw}, data={x: x_ph, z: qz})
+  inference_z = ed.KLqp({z: qz}, data={x: x_ph, w: qw})
 
-# INFERENCE
+  scale_factor = float(FLAGS.N) / FLAGS.M
+  inference_w.initialize(scale={x: scale_factor, z: scale_factor},
+                         var_list=qz_variables,
+                         n_samples=5)
+  inference_z.initialize(scale={x: scale_factor, z: scale_factor},
+                         var_list=qw_variables,
+                         n_samples=5)
 
-qw_variables = [tf.Variable(tf.random_normal([D, K])),
-                tf.Variable(tf.random_normal([D, K]))]
-qw = Normal(loc=qw_variables[0], scale=tf.nn.softplus(qw_variables[1]))
+  sess = ed.get_session()
+  tf.global_variables_initializer().run()
+  for _ in range(inference_w.n_iter):
+    x_batch, idx_batch = next_batch(x_train, FLAGS.M)
+    for _ in range(5):
+      inference_z.update(feed_dict={x_ph: x_batch, idx_ph: idx_batch})
 
-qz_variables = [tf.Variable(tf.random_normal([N, K])),
-                tf.Variable(tf.random_normal([N, K]))]
-idx_ph = tf.placeholder(tf.int32, M)
-qz = Normal(loc=tf.gather(qz_variables[0], idx_ph),
-            scale=tf.nn.softplus(tf.gather(qz_variables[1], idx_ph)))
+    info_dict = inference_w.update(feed_dict={x_ph: x_batch, idx_ph: idx_batch})
+    inference_w.print_progress(info_dict)
 
-x_ph = tf.placeholder(tf.float32, [D, M])
-inference_w = ed.KLqp({w: qw}, data={x: x_ph, z: qz})
-inference_z = ed.KLqp({z: qz}, data={x: x_ph, w: qw})
+    t = info_dict['t']
+    if t % 100 == 0:
+      print("\nInferred principal axes:")
+      print(sess.run(qw.mean()))
 
-inference_w.initialize(scale={x: float(N) / M, z: float(N) / M},
-                       var_list=qz_variables,
-                       n_samples=5)
-inference_z.initialize(scale={x: float(N) / M, z: float(N) / M},
-                       var_list=qw_variables,
-                       n_samples=5)
-
-sess = ed.get_session()
-tf.global_variables_initializer().run()
-for _ in range(inference_w.n_iter):
-  x_batch, idx_batch = next_batch(M)
-  for _ in range(5):
-    inference_z.update(feed_dict={x_ph: x_batch, idx_ph: idx_batch})
-
-  info_dict = inference_w.update(feed_dict={x_ph: x_batch, idx_ph: idx_batch})
-  inference_w.print_progress(info_dict)
-
-  t = info_dict['t']
-  if t % 100 == 0:
-    print("\nInferred principal axes:")
-    print(sess.run(qw.mean()))
+if __name__ == "__main__":
+  tf.app.run()

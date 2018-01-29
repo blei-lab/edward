@@ -47,18 +47,17 @@ Observations lets you load an extensive collection of data sets with
 minimal effort under a one-line interface. Observations was originally
 developed for Edward and it has since become a standalone library for
 general machine learning.
-  \item Neural networks are supported through four libraries:
+  \item Neural networks are supported through any library operating
+    on TensorFlow. For example:
   \texttt{tf.layers},
   \href{http://keras.io}{Keras} (>=1.0)
 \begin{lstlisting}[language=JSON]
 pip install keras==2.0.4
 \end{lstlisting}
+  and
   \href{https://github.com/tensorflow/tensorflow/tree/master/tensorflow/contrib/slim}{TensorFlow Slim}
-  (native in TensorFlow), and
-  \href{https://github.com/google/prettytensor}{PrettyTensor} (>=0.7.4)
-\begin{lstlisting}[language=JSON]
-pip install prettytensor
-\end{lstlisting}
+  (native in TensorFlow).
+
 Note that for Keras 2.0.5 and beyond, all neural net layer transformations cannot be directly applied on random variables anymore. For example, if \texttt{x} is a \texttt{ed.RandomVariable} object, one must call \texttt{tf.convert_to_tensor} before applying it to a layer transformation, \texttt{Dense(256)(tf.convert_to_tensor(x))}.
 See \href{https://github.com/fchollet/keras/issues/6979}{here} for more details.
   \item Notebooks require

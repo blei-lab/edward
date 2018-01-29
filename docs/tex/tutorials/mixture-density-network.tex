@@ -62,21 +62,20 @@ feedforward network. That is, the membership probabilities and
 per-component mean and standard deviation are given by the output of a
 feedforward network.
 
-We leverage TensorFlow Slim to construct neural networks. We specify
+We use \texttt{tf.layers} to construct neural networks. We specify
 a three-layer network with 15 hidden units for each hidden layer.
 
 \begin{lstlisting}[language=Python]
 from edward.models import Categorical, Mixture, Normal
-from tensorflow.contrib import slim
 
 def neural_network(X):
   """loc, scale, logits = NN(x; theta)"""
   # 2 hidden layers with 15 hidden units
-  hidden1 = slim.fully_connected(X, 15)
-  hidden2 = slim.fully_connected(hidden1, 15)
-  locs = slim.fully_connected(hidden2, K, activation_fn=None)
-  scales = slim.fully_connected(hidden2, K, activation_fn=tf.exp)
-  logits = slim.fully_connected(hidden2, K, activation_fn=None)
+  net = tf.layers.dense(X, 15, activation=tf.nn.relu)
+  net = tf.layers.dense(net, 15, activation=tf.nn.relu)
+  locs = tf.layers.dense(net, K, activation=None)
+  scales = tf.layers.dense(net, K, activation=tf.exp)
+  logits = tf.layers.dense(net, K, activation=None)
   return locs, scales, logits
 
 K = 20  # number of mixture components
