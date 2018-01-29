@@ -51,6 +51,5 @@ class test_integer_init(tf.test.TestCase):
                           data={y: y_train})
       inference.run(n_iter=1)
 
-
 if __name__ == '__main__':
   tf.test.main()

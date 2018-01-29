@@ -183,6 +183,5 @@ class test_simplify_class(tf.test.TestCase):
     did_something, new_expr = add_const_simplify(new_expr)
     self.assertFalse(did_something)
 
-
 if __name__ == '__main__':
   tf.test.main()

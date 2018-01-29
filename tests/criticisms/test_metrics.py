@@ -110,6 +110,5 @@ class test_metrics_class(tf.test.TestCase):
       for metric in all_metrics_with_binary_averaging:
         self._check_averaging(metric, y_true, y_pred)
 
-
 if __name__ == '__main__':
   tf.test.main()
