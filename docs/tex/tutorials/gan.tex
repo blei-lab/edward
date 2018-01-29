@@ -81,19 +81,18 @@ $p(\mathbf{\epsilon})$ is interpreted as random noise injected to
 produce stochasticity in a physical system; it is typically a fixed
 uniform or normal distribution with some latent dimensionality.
 
-In Edward, we build the model as follows, using TensorFlow Slim to
+In Edward, we build the model as follows, using \texttt{tf.layers} to
 specify the neural network. It defines a 2-layer fully connected neural
 network and outputs a vector of length $28\times28$ with values in
 $[0,1]$.
 
 \begin{lstlisting}[language=Python]
 from edward.models import Uniform
-from tensorflow.contrib import slim
 
 def generative_network(eps):
-  h1 = slim.fully_connected(eps, 128, activation_fn=tf.nn.relu)
-  x = slim.fully_connected(h1, 784, activation_fn=tf.sigmoid)
-  return x
+  net = tf.layers.dense(eps, 128, activation=tf.nn.relu)
+  net = tf.layers.dense(net, 784, activation=tf.sigmoid)
+  return net
 
 with tf.variable_scope("Gen"):
   eps = Uniform(tf.zeros([M, d]) - 1.0, tf.ones([M, d]))
@@ -132,9 +131,10 @@ probability in the logit (unconstrained) scale.
 
 \begin{lstlisting}[language=Python]
 def discriminative_network(x):
-  h1 = slim.fully_connected(x, 128, activation_fn=tf.nn.relu)
-  logit = slim.fully_connected(h1, 1, activation_fn=None)
-  return logit
+  """Outputs probability in logits."""
+  net = tf.layers.dense(x, 128, activation=tf.nn.relu)
+  net = tf.layers.dense(net, 1, activation=None)
+  return net
 \end{lstlisting}
 
 Let $p^*(\mathbf{x})$ represent the true data distribution.

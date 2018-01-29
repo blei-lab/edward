@@ -64,17 +64,17 @@ Next, make inferences about the model from data. We will use variational
 inference. Specify a normal approximation over the weights and biases.
 
 \begin{lstlisting}[language=Python]
-qW_0 = Normal(loc=tf.Variable(tf.zeros([1, 2])),
-              scale=tf.nn.softplus(tf.Variable(tf.zeros([1, 2]))))
-qW_1 = Normal(loc=tf.Variable(tf.zeros([2, 1])),
-              scale=tf.nn.softplus(tf.Variable(tf.zeros([2, 1]))))
-qb_0 = Normal(loc=tf.Variable(tf.zeros(2)),
-              scale=tf.nn.softplus(tf.Variable(tf.zeros(2))))
-qb_1 = Normal(loc=tf.Variable(tf.zeros(1)),
-              scale=tf.nn.softplus(tf.Variable(tf.zeros(1))))
+qW_0 = Normal(loc=tf.get_variable("qW_0/loc", [D, 2]),
+              scale=tf.nn.softplus(tf.get_variable("qW_0/scale", [D, 2])))
+qW_1 = Normal(loc=tf.get_variable("qW_1/loc", [2, 1]),
+              scale=tf.nn.softplus(tf.get_variable("qW_1/scale", [2, 1])))
+qb_0 = Normal(loc=tf.get_variable("qb_0/loc", [2]),
+              scale=tf.nn.softplus(tf.get_variable("qb_0/scale", [2])))
+qb_1 = Normal(loc=tf.get_variable("qb_1/loc", [1]),
+              scale=tf.nn.softplus(tf.get_variable("qb_1/scale", [1])))
 \end{lstlisting}
 
-Defining \texttt{tf.Variable} allows the variational factors'
+Defining \texttt{tf.get_variable} allows the variational factors'
 parameters to vary. They are all initialized at 0. The standard
 deviation parameters are constrained to be greater than zero according
 to a

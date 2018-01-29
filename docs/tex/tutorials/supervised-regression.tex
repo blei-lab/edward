@@ -78,10 +78,10 @@ We now turn to inferring the posterior using variational inference.
 Define the variational model to be a fully factorized normal across
 the weights.
 \begin{lstlisting}[language=Python]
-qw = Normal(loc=tf.Variable(tf.random_normal([D])),
-            scale=tf.nn.softplus(tf.Variable(tf.random_normal([D]))))
-qb = Normal(loc=tf.Variable(tf.random_normal([1])),
-            scale=tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
+qw = Normal(loc=tf.get_variable("qw/loc", [D]),
+            scale=tf.nn.softplus(tf.get_variable("qw/scale", [D])))
+qb = Normal(loc=tf.get_variable("qb/loc", [1]),
+            scale=tf.nn.softplus(tf.get_variable("qb/scale", [1])))
 \end{lstlisting}
 
 Run variational inference with the Kullback-Leibler divergence, using

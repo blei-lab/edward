@@ -147,10 +147,19 @@ approximate the posteriors using the collection of samples.
 
 \begin{lstlisting}[language=Python]
 T = 500  # number of MCMC samples
-qpi = Empirical(tf.Variable(tf.ones([T, K]) / K))
-qmu = Empirical(tf.Variable(tf.zeros([T, K, D])))
-qsigmasq = Empirical(tf.Variable(tf.ones([T, K, D])))
-qz = Empirical(tf.Variable(tf.zeros([T, N], dtype=tf.int32)))
+qpi = Empirical(tf.get_variable(
+    "qpi/params", [T, K],
+    initializer=tf.constant_initializer(1.0 / K)))
+qmu = Empirical(tf.get_variable(
+    "qmu/params", [T, K, D],
+    initializer=tf.zeros_initializer()))
+qsigmasq = Empirical(tf.get_variable(
+    "qsigmasq/params", [T, K, D],
+    initializer=tf.ones_initializer()))
+qz = Empirical(tf.get_variable(
+    "qz/params", [T, N],
+    initializer=tf.zeros_initializer(),
+    dtype=tf.int32))
 \end{lstlisting}
 
 Run Gibbs sampling. We write the training loop explicitly, so that we can track
