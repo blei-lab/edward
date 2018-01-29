@@ -1,7 +1,4 @@
-"""Dirichlet-Categorical model.
-
-Posterior inference with Edward's BBVI.
-"""
+"""Dirichlet-Categorical with variational inference."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -23,7 +20,7 @@ def main(_):
   pi_true = np.random.dirichlet(np.array([20.0, 30.0, 10.0, 10.0]))
   z_data = np.array([np.random.choice(FLAGS.K, 1, p=pi_true)[0]
                      for n in range(FLAGS.N)])
-  print('pi={}'.format(pi_true))
+  print("pi: {}".format(pi_true))
 
   # MODEL
   pi = Dirichlet(tf.ones(4))
@@ -37,7 +34,7 @@ def main(_):
   inference.run(n_iter=1500, n_samples=30)
 
   sess = ed.get_session()
-  print('Inferred pi={}'.format(sess.run(qpi.mean())))
+  print("Inferred pi: {}".format(sess.run(qpi.mean())))
 
 if __name__ == "__main__":
   tf.app.run()

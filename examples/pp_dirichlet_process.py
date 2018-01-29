@@ -2,7 +2,7 @@
 
 We implement sample generation from a Dirichlet process (with no base
 distribution) via its stick breaking construction. It is a streamlined
-implementation of the ``DirichletProcess`` random variable in Edward.
+implementation of the `DirichletProcess` random variable in Edward.
 
 References
 ----------
@@ -77,7 +77,7 @@ def main(_):
   plt.hist(samples_y, bins=100, range=(-3.0, 3.0))
   plt.show()
 
-  # ``theta`` is the distribution indirectly returned by the DP.
+  # `theta` is the distribution indirectly returned by the DP.
   # Fetching theta is the same as fetching the Dirichlet process.
   dp = DirichletProcess(alpha, base)
   theta = Normal(0.0, 1.0, value=tf.cast(dp, tf.float32))

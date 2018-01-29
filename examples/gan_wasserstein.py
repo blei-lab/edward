@@ -120,7 +120,7 @@ def main(_):
       inference.update(feed_dict={x_ph: x_batch}, variables="Disc")
 
     info_dict = inference.update(feed_dict={x_ph: x_batch}, variables="Gen")
-    # note: not printing discriminative objective; ``info_dict`` above
+    # note: not printing discriminative objective; `info_dict` above
     # does not store it since updating only "Gen"
     info_dict['t'] = info_dict['t'] // 6  # say set of 6 updates is 1 iteration
     inference.print_progress(info_dict)

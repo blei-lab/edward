@@ -1,7 +1,4 @@
-""" InverseGamma-Normal model
-
-Posterior inference with Metropolis Hastings
-"""
+"""InverseGamma-Normal with Metropolis-Hastings."""
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -22,7 +19,7 @@ FLAGS = tf.flags.FLAGS
 def main(_):
   # Data generation (known mean)
   xn_data = np.random.normal(FLAGS.loc, FLAGS.scale, FLAGS.N)
-  print('scale={}'.format(FLAGS.scale))
+  print("scale: {}".format(FLAGS.scale))
 
   # Prior definition
   alpha = 0.5
@@ -42,7 +39,7 @@ def main(_):
   inference.run()
 
   sess = ed.get_session()
-  print('Inferred scale={}'.format(sess.run(tf.sqrt(qig.mean()))))
+  print("Inferred scale: {}".format(sess.run(tf.sqrt(qig.mean()))))
 
 if __name__ == "__main__":
   tf.app.run()
