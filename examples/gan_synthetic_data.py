@@ -98,7 +98,7 @@ def main(_):
   ed.set_seed(42)
 
   # DATA. We use a placeholder to represent a minibatch. During
-  # inference, we generate data on the fly and feed ``x_ph``.
+  # inference, we generate data on the fly and feed `x_ph`.
   x_ph = tf.placeholder(tf.float32, [FLAGS.M, 1])
 
   # MODEL

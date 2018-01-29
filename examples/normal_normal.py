@@ -19,7 +19,7 @@ def main(_):
 
   # MODEL: Normal-Normal with known variance
   mu = Normal(loc=0.0, scale=1.0)
-  x = Normal(loc=tf.ones(50) * mu, scale=1.0)
+  x = Normal(loc=mu, scale=1.0, sample_shape=50)
 
   # INFERENCE
   qmu = Empirical(params=tf.get_variable("qmu/params", [1000],

@@ -42,10 +42,8 @@ def main(_):
 
   # MODEL
   I = tf.placeholder(tf.float32, [FLAGS.N, FLAGS.M])
-  U = Normal(loc=tf.zeros([FLAGS.D, FLAGS.N]),
-             scale=tf.ones([FLAGS.D, FLAGS.N]))
-  V = Normal(loc=tf.zeros([FLAGS.D, FLAGS.M]),
-             scale=tf.ones([FLAGS.D, FLAGS.M]))
+  U = Normal(loc=0.0, scale=1.0, sample_shape=[FLAGS.D, FLAGS.N])
+  V = Normal(loc=0.0, scale=1.0, sample_shape=[FLAGS.D, FLAGS.M])
   R = Normal(loc=tf.matmul(tf.transpose(U), V) * I,
              scale=tf.ones([FLAGS.N, FLAGS.M]))
 

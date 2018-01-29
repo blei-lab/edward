@@ -51,12 +51,10 @@ def main(_):
 
   # MODEL
   pi = Dirichlet(concentration=tf.ones(FLAGS.K))
-  mu = Normal(loc=tf.zeros([FLAGS.K, FLAGS.D]),
-              scale=tf.ones([FLAGS.K, FLAGS.D]))
-  sigma = InverseGamma(concentration=tf.ones([FLAGS.K, FLAGS.D]),
-                       rate=tf.ones([FLAGS.K, FLAGS.D]))
-  c = Categorical(logits=tf.tile(
-      tf.reshape(tf.log(pi) - tf.log(1.0 - pi), [1, FLAGS.K]), [FLAGS.N, 1]))
+  mu = Normal(0.0, 1.0, sample_shape=[FLAGS.K, FLAGS.D])
+  sigma = InverseGamma(concentration=1.0, rate=1.0,
+                       sample_shape=[FLAGS.K, FLAGS.D])
+  c = Categorical(logits=tf.log(pi) - tf.log(1.0 - pi), sample_shape=FLAGS.N)
   x = Normal(loc=tf.gather(mu, c), scale=tf.gather(sigma, c))
 
   # INFERENCE
