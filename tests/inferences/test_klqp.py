@@ -144,11 +144,14 @@ class test_klqp_class(tf.test.TestCase):
       g_cor = tf.gradients(cor, var_list)
       g_entropy = tf.gradients(q_entropy, var_list)
 
+      grad_summands = zip(*[g_rep, g_cor, g_entropy])
+      grads = [tf.reduce_sum(summand) for summand in grad_summands]
+      grads_and_vars = list(zip(grads, var_list))
+
       tf.global_variables_initializer().run()
 
-      self.assertAllClose([g.eval() for g in g_rep], expected_g_reparam, rtol=1e-9, atol=1e-9)
-      self.assertAllClose([g.eval() for g in g_cor], expected_g_score, rtol=1e-9, atol=1e-9)
-      self.assertAllClose([g.eval() for g in g_entropy], expected_g_entropy, rtol=1e-9, atol=1e-9)
+      self.assertAllClose([g.eval() for g, v in grads_and_vars],
+        expected_g_reparam + expected_g_score + expected_g_entropy, rtol=1e-9, atol=1e-9)
 
   def _test_model_parameter(self, Inference, *args, **kwargs):
     with self.test_session() as sess:
