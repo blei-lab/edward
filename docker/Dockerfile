@@ -48,7 +48,7 @@ RUN conda install -y python=${python_version} && \
     conda install -y pyqt=${python_qt_version} && \
     pip install edward && \
 	conda update conda &&\
-	conda update -all &&\
+	conda update --all &&\
     conda clean -yt
 
 ENV PYTHONPATH='/src/:$PYTHONPATH'
