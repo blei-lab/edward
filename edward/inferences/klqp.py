@@ -1186,9 +1186,36 @@ def build_score_rb_loss_and_gradients(inference, var_list):
   return loss, grads_and_vars
 
 
-def build_rejection_sampling_loss_and_gradients(inference, var_list):
+def build_rejection_sampling_loss_and_gradients(inference, var_list, epsilon=None):
     """
     """
+    # dict_swap = {
+    #     'gamma': sampler.H(MY_EPSILON),
+    #     'x': tf.constant(x)
+    # }
+    # # z_copy = Gamma(a0, b0)
+    # x_copy = Poisson(dict_swap['gamma'])
+    # qz_copy = Gamma(MY_ALPHA, MY_BETA)
+    #
+    # r_log_prob = -tf.log(tf.gradients(dict_swap['gamma'], MY_EPSILON))
+    #
+    # q_log_prob = qz_copy.log_prob(dict_swap['gamma'])
+    # p_log_prob = tf.reduce_sum(z_copy.log_prob(dict_swap['gamma']))
+    # p_log_prob += tf.reduce_sum(x_copy.log_prob(dict_swap['x']))
+    #
+    # q_entropy = tf.reduce_sum([tf.reduce_sum(qz_copy.entropy())])
+    #
+    # rep = p_log_prob
+    # cor = tf.stop_gradient(p_log_prob) * (q_log_prob - r_log_prob)
+    #
+    # g_rep = tf.gradients(rep, var_list)
+    # g_cor = tf.gradients(cor, var_list)
+    # g_entropy = tf.gradients(q_entropy, var_list)
+    #
+    # grad_summands = zip(*[g_rep, g_cor, g_entropy])
+    # grads = [tf.reduce_sum(summand) for summand in grad_summands]
+    # grads_and_vars = list(zip(grads, var_list))
+
     rej_samplers = {
       Gamma: GammaRejectionSampler
     }
@@ -1217,12 +1244,17 @@ def build_rejection_sampling_loss_and_gradients(inference, var_list):
         # Copy q(z) to obtain new set of posterior samples.
         qz_copy = copy(qz, scope=scope)
         sampler = rej_samplers[qz_copy.__class__](density=qz)
-        dict_swap[z] = qz_copy.value()
-        epsilon = sampler.h_inverse(tf.stop_gradient(dict_swap[z]))
+
+        # dict_swap[z] = qz_copy.value()
+        # epsilon = sampler.h_inverse(tf.stop_gradient(dict_swap[z]))
+
+        if not epsilon:  # temporary
+          import sys; sys.exit()
+
         dict_swap[z] = sampler.h(epsilon)
         q_log_prob += tf.reduce_sum(
             inference.scale.get(z, 1.0) * qz_copy.log_prob(dict_swap[z]))
-        r_log_prob += -tf.gradients(dict_swap[z], epsilon)[0]
+        r_log_prob += -tf.log(tf.gradients(dict_swap[z], epsilon))
 
       for z in six.iterkeys(inference.latent_vars):
         z_copy = copy(z, dict_swap, scope=scope)
