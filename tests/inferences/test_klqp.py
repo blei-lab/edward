@@ -9,6 +9,8 @@ import tensorflow as tf
 from edward.models import Bernoulli, Normal, Dirichlet, Multinomial, \
   Gamma, Poisson
 
+from edward.inferences.klqp import build_rejection_sampling_loss_and_gradients
+
 
 class test_klqp_class(tf.test.TestCase):
 
@@ -80,6 +82,74 @@ class test_klqp_class(tf.test.TestCase):
 
         inference.run(*args, **kwargs)
 
+  def _test_build_rejection_sampling_loss_and_gradients(self, *args, **kwargs):
+    with self.test_session() as sess:
+      def unwrap(theta):
+        alpha = np.exp(theta[0]) + 1
+        beta = np.exp(theta[1])
+        return alpha, beta
+
+      th = np.array([-0.52817175, -1.07296862])
+      alpha, beta = unwrap(th)
+      eps = np.array([0.86540763])
+      a0, b0 = np.float64(1.0), np.float64(1.0)
+      x = np.array([3, 3, 3, 3, 0], dtype=np.float64)
+
+      expected_g_reparam = np.array([-10.348131898560453, 31.81539831675293])
+      expected_g_score = np.array([0.30550423741109256, 0.0])
+      expected_g_entropy = np.array([0.28863888798339055, -1.0])
+
+      class GammaRejectionSampler:
+
+        def __init__(self, alpha, beta):
+          self.alpha, self.beta = alpha, beta
+
+        def H(self, epsilon):
+          a = self.alpha - (1. / 3)
+          b = tf.sqrt(9 * self.alpha - 3)
+          c = 1 + (epsilon / b)
+          d = a * c**3
+          return d / self.beta
+
+      MY_UNCONSTRAINED_ALPHA = tf.Variable(th[0])
+      MY_UNCONSTRAINED_BETA = tf.Variable(th[1])
+      var_list = [MY_UNCONSTRAINED_ALPHA, MY_UNCONSTRAINED_BETA]
+      MY_THETA = [MY_UNCONSTRAINED_ALPHA, MY_UNCONSTRAINED_BETA]
+      MY_ALPHA = tf.exp(MY_UNCONSTRAINED_ALPHA) + 1
+      MY_BETA = tf.exp(MY_UNCONSTRAINED_BETA)
+      MY_EPSILON = tf.Variable(eps)
+
+      sampler = GammaRejectionSampler(MY_ALPHA, MY_BETA)
+
+      dict_swap = {
+          'gamma': sampler.H(MY_EPSILON),
+          'x': tf.constant(x)
+      }
+      z_copy = Gamma(a0, b0)
+      x_copy = Poisson(dict_swap['gamma'])
+      qz_copy = Gamma(MY_ALPHA, MY_BETA)
+
+      r_log_prob = -tf.log(tf.gradients(dict_swap['gamma'], MY_EPSILON))
+
+      q_log_prob = qz_copy.log_prob(dict_swap['gamma'])
+      p_log_prob = tf.reduce_sum(z_copy.log_prob(dict_swap['gamma']))
+      p_log_prob += tf.reduce_sum(x_copy.log_prob(dict_swap['x']))
+
+      q_entropy = tf.reduce_sum([tf.reduce_sum(qz_copy.entropy())])
+
+      rep = p_log_prob
+      cor = tf.stop_gradient(p_log_prob) * (q_log_prob - r_log_prob)
+
+      g_rep = tf.gradients(rep, var_list)
+      g_cor = tf.gradients(cor, var_list)
+      g_entropy = tf.gradients(q_entropy, var_list)
+
+      tf.global_variables_initializer().run()
+
+      self.assertAllClose([g.eval() for g in g_rep], expected_g_reparam, rtol=1e-9, atol=1e-9)
+      self.assertAllClose([g.eval() for g in g_cor], expected_g_score, rtol=1e-9, atol=1e-9)
+      self.assertAllClose([g.eval() for g in g_entropy], expected_g_entropy, rtol=1e-9, atol=1e-9)
+
   def _test_model_parameter(self, Inference, *args, **kwargs):
     with self.test_session() as sess:
       x_data = np.array([0, 1, 0, 0, 0, 0, 0, 0, 0, 1])
@@ -147,13 +217,14 @@ class test_klqp_class(tf.test.TestCase):
     self._test_model_parameter(ed.ScoreRBKLqp, n_iter=50)
 
   def test_rejection_sampling_klqp(self):
-    self._test_poisson_gamma(
-      ed.RejectionSamplingKLqp,
-      n_samples=1,
-      n_iter=5000,
-      optimizer='rmsprop',
-      global_step=tf.Variable(0, trainable=False, name="global_step")
-    )
+    self._test_build_rejection_sampling_loss_and_gradients()
+    # self._test_poisson_gamma(
+    #   ed.RejectionSamplingKLqp,
+    #   n_samples=1,
+    #   n_iter=5000,
+    #   optimizer='rmsprop',
+    #   global_step=tf.Variable(0, trainable=False, name="global_step")
+    # )
     # self._test_multinomial_dirichlet(
     #   ed.RejectionSamplingKLqp, n_samples=5, n_iter=5000)
 
