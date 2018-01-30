@@ -84,28 +84,6 @@ class test_klqp_class(tf.test.TestCase):
 
   def _test_build_rejection_sampling_loss_and_gradients(self, *args, **kwargs):
     with self.test_session() as sess:
-      # def unwrap(theta):
-      #   alpha = np.exp(theta[0]) + 1
-      #   beta = np.exp(theta[1])
-      #   return alpha, beta
-
-      # th = np.array([-0.52817175, -1.07296862])
-      # alpha, beta = unwrap(th)
-      # eps = np.array([0.86540763])
-      # a0, b0 = np.float64(1.0), np.float64(1.0)
-      # x = np.array([3, 3, 3, 3, 0], dtype=np.float64)
-
-      expected_g_reparam = np.array([-10.348131898560453, 31.81539831675293])
-      expected_g_score = np.array([0.30550423741109256, 0.0])
-      expected_g_entropy = np.array([0.28863888798339055, -1.0])
-
-      # MY_UNCONSTRAINED_ALPHA = tf.Variable(th[0])
-      # MY_UNCONSTRAINED_BETA = tf.Variable(th[1])
-      # var_list = [MY_UNCONSTRAINED_ALPHA, MY_UNCONSTRAINED_BETA]
-      # MY_ALPHA = tf.exp(MY_UNCONSTRAINED_ALPHA) + 1
-      # MY_BETA = tf.exp(MY_UNCONSTRAINED_BETA)
-      # MY_EPSILON = tf.Variable(eps)
-
       x_data = np.array([3, 3, 3, 3, 0], dtype=np.float32)
 
       rate = Gamma(1.0, 1.0)
@@ -113,8 +91,6 @@ class test_klqp_class(tf.test.TestCase):
 
       _qalpha = tf.Variable(-0.52817175, name='qalpha')
       _qbeta = tf.Variable(-1.07296862, name='qbeta')
-      epsilon = tf.Variable(0.86540763, name='epsilon')
-
       var_list = [_qalpha, _qbeta]
 
       qalpha = tf.exp(_qalpha) + 1
@@ -130,7 +106,12 @@ class test_klqp_class(tf.test.TestCase):
 
       tf.global_variables_initializer().run()
 
-      loss, grads_and_vars = build_rejection_sampling_loss_and_gradients(DummyInference(), var_list, epsilon=epsilon)
+      expected_g_reparam = np.array([-10.348131898560453, 31.81539831675293])
+      expected_g_score = np.array([0.30550423741109256, 0.0])
+      expected_g_entropy = np.array([0.28863888798339055, -1.0])
+
+      loss, grads_and_vars = build_rejection_sampling_loss_and_gradients(DummyInference(),
+        var_list, epsilon=tf.constant(0.86540763))
 
       self.assertAllClose([g.eval() for g, v in grads_and_vars],
         expected_g_reparam + expected_g_score + expected_g_entropy, rtol=1e-6, atol=1e-6)

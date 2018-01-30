@@ -1245,11 +1245,12 @@ def build_rejection_sampling_loss_and_gradients(inference, var_list, epsilon=Non
         qz_copy = copy(qz, scope=scope)
         sampler = rej_samplers[qz_copy.__class__](density=qz)
 
-        # dict_swap[z] = qz_copy.value()
-        # epsilon = sampler.h_inverse(tf.stop_gradient(dict_swap[z]))
 
-        if not epsilon:  # temporary
-          import sys; sys.exit()
+        if epsilon is not None:  # temporary
+          pass
+        else:
+          dict_swap[z] = qz_copy.value()
+          epsilon = sampler.h_inverse(dict_swap[z])
 
         dict_swap[z] = sampler.h(epsilon)
         q_log_prob += tf.reduce_sum(
