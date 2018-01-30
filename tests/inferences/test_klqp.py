@@ -184,13 +184,13 @@ class test_klqp_class(tf.test.TestCase):
 
   def test_rejection_sampling_klqp(self):
     self._test_build_rejection_sampling_loss_and_gradients()
-    # self._test_poisson_gamma(
-    #   ed.RejectionSamplingKLqp,
-    #   n_samples=1,
-    #   n_iter=5000,
-    #   optimizer='rmsprop',
-    #   global_step=tf.Variable(0, trainable=False, name="global_step")
-    # )
+    self._test_poisson_gamma(
+      ed.RejectionSamplingKLqp,
+      n_samples=1,
+      n_iter=5000,
+      optimizer='rmsprop',
+      global_step=tf.Variable(0, trainable=False, name="global_step")
+    )
     # self._test_multinomial_dirichlet(
     #   ed.RejectionSamplingKLqp, n_samples=5, n_iter=5000)
 
