@@ -187,7 +187,7 @@ class test_klqp_class(tf.test.TestCase):
     self._test_poisson_gamma(
       ed.RejectionSamplingKLqp,
       n_samples=1,
-      n_iter=5000,
+      n_iter=50,
       optimizer='rmsprop',
       global_step=tf.Variable(0, trainable=False, name="global_step")
     )

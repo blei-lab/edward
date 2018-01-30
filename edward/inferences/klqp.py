@@ -1222,23 +1222,24 @@ def build_rejection_sampling_loss_and_gradients(inference, var_list, epsilon=Non
           pass
         else:
           dict_swap[z] = qz_copy.value()
+          print('sample:', dict_swap[z])
           epsilon = sampler.h_inverse(dict_swap[z])
 
         dict_swap[z] = sampler.h(epsilon)
         q_log_prob += tf.reduce_sum(
-            inference.scale.get(z, 1.0) * qz_copy.log_prob(dict_swap[z]))
+          inference.scale.get(z, 1.0) * qz_copy.log_prob(dict_swap[z]))
         r_log_prob += -tf.log(tf.gradients(dict_swap[z], epsilon))
 
       for z in six.iterkeys(inference.latent_vars):
         z_copy = copy(z, dict_swap, scope=scope)
         p_log_prob += tf.reduce_sum(
-            inference.scale.get(z, 1.0) * z_copy.log_prob(dict_swap[z]))
+          inference.scale.get(z, 1.0) * z_copy.log_prob(dict_swap[z]))
 
       for x in six.iterkeys(inference.data):
         if isinstance(x, RandomVariable):
           x_copy = copy(x, dict_swap, scope=scope)
           p_log_prob += tf.reduce_sum(
-              inference.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
+            inference.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
 
       rep[s] = p_log_prob
       cor[s] = tf.stop_gradient(p_log_prob) * (q_log_prob - r_log_prob)
@@ -1246,8 +1247,8 @@ def build_rejection_sampling_loss_and_gradients(inference, var_list, epsilon=Non
     rep = tf.reduce_mean(rep)
     cor = tf.reduce_mean(cor)
     q_entropy = tf.reduce_sum([
-        tf.reduce_sum(qz.entropy())
-        for z, qz in six.iteritems(inference.latent_vars)])
+      tf.reduce_sum(qz.entropy())
+      for z, qz in six.iteritems(inference.latent_vars)])
     reg_penalty = tf.reduce_sum(tf.losses.get_regularization_losses())
 
     loss = -(rep + q_entropy - reg_penalty)

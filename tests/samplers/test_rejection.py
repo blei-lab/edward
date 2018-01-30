@@ -11,9 +11,9 @@ from edward.samplers import GammaRejectionSampler
 class test_rejection_samplers_class(tf.test.TestCase):
 
   def test_gamma_rejection_sampler(self):
-    gamma = Gamma(4., 2.)
-    epsilon = tf.constant(.5)
     with self.test_session() as sess:
+      gamma = Gamma(4., 2.)
+      epsilon = tf.constant(.5)
       sampler = GammaRejectionSampler(density=gamma)
       z = sampler.h(epsilon)
 
