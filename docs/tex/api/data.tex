@@ -40,7 +40,7 @@ x_data = tf.placeholder(tf.float32, [100, 25])  # placeholder of shape (100, 25)
 
 During inference, the user must manually feed the placeholders. At each
 step, call \texttt{inference.update()} while
-passing in a \texttt{feed_dict} dictionary
+passing in a \texttt{feed\_dict} dictionary
 which binds placeholders to realized values as an argument. As an example, see the
 \href{https://github.com/blei-lab/edward/blob/master/examples/vae.py}
 {variational auto-encoder} script.

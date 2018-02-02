@@ -40,7 +40,7 @@ MultivariateNormalTriL(loc=tf.zeros([2, 5, K]), scale_tril=tf.ones([2, 5, K, K])
 \end{lstlisting}
 
 Random variables are equipped with methods such as
-\texttt{log_prob()}, $\log p(\mathbf{x}\mid\theta^*)$,
+\texttt{log\_prob()}, $\log p(\mathbf{x}\mid\theta^*)$,
 \texttt{mean()}, $\mathbb{E}_{p(\mathbf{x}\mid\theta^*)}[\mathbf{x}]$,
 and \texttt{sample()}, $\mathbf{x}^*\sim p(\mathbf{x}\mid\theta^*)$.
 Further, each random variable is associated to a tensor $\mathbf{x}^*$ in the

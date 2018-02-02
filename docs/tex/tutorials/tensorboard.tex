@@ -166,12 +166,12 @@ tabs.
 
 Below we assume the above code is run twice with different
 configurations
-of the \texttt{n_samples} hyperparameter.
-We specified the log directory to be \texttt{log/n_samples_*}.
+of the \texttt{n\_samples} hyperparameter.
+We specified the log directory to be \texttt{log/n\_samples\_*}.
 By default, Edward also includes a timestamped subdirectory so that
 multiple runs of the same experiment have properly organized logs for
 TensorBoard. You can turn it off by specifying
-\texttt{log_timestamp=False} during inference.
+\texttt{log\_timestamp=False} during inference.
 
 \textbf{TensorBoard Scalars.}
 
@@ -184,8 +184,8 @@ the model or approximating family.
 
 With variational inference, we also include information such as the
 loss function and its decomposition into individual terms. This
-particular example shows that \texttt{n_samples=1} tends to have higher
-variance than \texttt{n_samples=5} but still converges to the same solution.
+particular example shows that \texttt{n\_samples=1} tends to have higher
+variance than \texttt{n\_samples=5} but still converges to the same solution.
 
 \textbf{TensorBoard Graphs.}
 

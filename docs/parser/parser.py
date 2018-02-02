@@ -218,7 +218,7 @@ class ReferenceResolver(object):
       if style == 'md':
         return '[`%s`](%s)' % (link_text, link)
       else:
-        return '\href{%s}{\\texttt{%s}}' % (link, link_text)
+        return '\href{%s}{\\texttt{%s}}' % (link, link_text.replace("_", "\_"))
     else:
       if style == 'md':
         return '[%s](%s)' % (link_text, link)
