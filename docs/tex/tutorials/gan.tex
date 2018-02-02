@@ -37,7 +37,7 @@ TensorFlow placeholder with a fixed batch size of $M$ images.
 We also define a helper function to select the next batch of data
 points from the full set of examples. It keeps track of the current
 batch index and returns the next batch using the function \texttt{next()}.
-We will generate batches from \texttt{x_train_generator} during inference.
+We will generate batches from \texttt{x\_train\_generator} during inference.
 
 \begin{lstlisting}[language=Python]
 from observations import mnist
@@ -179,7 +179,7 @@ of approximate inference.
 
 In Edward, the GAN algorithm (\texttt{GANInference}) simply takes the
 implicit density model on \texttt{x} as input, binded to its
-realizations \texttt{x_ph}. In addition, a parameterized function
+realizations \texttt{x\_ph}. In addition, a parameterized function
 \texttt{discriminator} is provided to distinguish their
 samples.
 

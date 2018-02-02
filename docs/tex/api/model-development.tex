@@ -26,16 +26,16 @@ class CustomRandomVariable(RandomVariable, Distribution):
 \end{lstlisting}
 
 One method that all Edward random variables call during instantiation is
-\texttt{_sample_n()}.
+\texttt{\_sample\_n()}.
 It takes an integer \texttt{n} as input and outputs a tensor of shape
-\texttt{(n,) + batch_shape + event_shape}, where \texttt{batch_shape}
+\texttt{(n,) + batch\_shape + event\_shape}, where \texttt{batch\_shape}
 is the number of independent distributions in the instantiated object
-and \texttt{event_shape} is the shape of an individual distribution.
+and \texttt{event\_shape} is the shape of an individual distribution.
 
 For examples of custom random variables developed in Edward, see
 \href{https://github.com/blei-lab/edward/blob/master/edward/models/empirical.py}{\texttt{empirical.py}}
 and
-\href{https://github.com/blei-lab/edward/blob/master/edward/models/point_mass.py}{\texttt{point_mass.py}}
+\href{https://github.com/blei-lab/edward/blob/master/edward/models/point_mass.py}{\texttt{point\_mass.py}}
 in the Github repository.
 For more details and more methods one can implement, see the API
 documentation in TensorFlow's
@@ -76,14 +76,14 @@ sess.run(x)
 ## 4.0
 \end{lstlisting}
 
-(Note the function \texttt{np_sample} should broadcast correctly if
+(Note the function \texttt{np\_sample} should broadcast correctly if
 you'd like to work with non-scalar parameters; it is not correct in
 this toy implementation.)
 
 Sometimes the random variable you'd like to work with does not even
 admit (easy) sampling, and you're only using it as a likelihood ``node'' rather
 than as some prior to parameters of another random variable.
-You can avoid having to implement \texttt{_sample_n} altogether:
+You can avoid having to implement \texttt{\_sample\_n} altogether:
 after creating \texttt{CustomRandomVariable}, instantiate it with the
 \texttt{value} argument:
 
@@ -92,6 +92,6 @@ x = CustomRandomVariable(custom_params=params, value=tf.zeros_like(params))
 \end{lstlisting}
 
 This fixes the associated value of the random variable to a bunch of
-zeros and avoids the \texttt{_sample_n} error that appears otherwise.
+zeros and avoids the \texttt{\_sample\_n} error that appears otherwise.
 Make sure that the value matches the desired shape of the random
 variable.

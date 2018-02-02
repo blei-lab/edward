@@ -37,7 +37,7 @@ to one.
 \subsubsection{Automated Transformations in Inference}
 
 To use automated transformations during inference, set the flag
-argument \texttt{auto_transform=True} in \texttt{inference.initialize}
+argument \texttt{auto\_transform=True} in \texttt{inference.initialize}
 (or the all-encompassing method \texttt{inference.run}):
 
 \begin{lstlisting}[language=Python]
@@ -46,10 +46,10 @@ inference.initialize(auto_transform=True)
 
 By default, the flag is already set to \texttt{True}.
 With this flag, any key-value pair passed into inference's
-\texttt{latent_vars} with unequal support is transformed to the
+\texttt{latent\_vars} with unequal support is transformed to the
 unconstrained space; no transformation is applied if already
 unconstrained. The algorithm is then run under
-\texttt{inference.latent_vars}, which explicitly stores the
+\texttt{inference.latent\_vars}, which explicitly stores the
 transformed latent variables and forgets the constrained ones.
 
 We illustrate automated transformations in a few inference examples.
@@ -68,7 +68,7 @@ family where we might use a normal variational
 approximation to implicitly approximate latent variables with Gamma
 priors (in
 \href{https://github.com/blei-lab/edward/blob/master/examples/deep_exponential_family.py}
-{\texttt{examples/deep_exponential_family.py}},
+{\texttt{examples/deep\_exponential\_family.py}},
 we explicitly define a non-negative variational approximation).
 
 \textbf{Variational inference.}
@@ -114,7 +114,7 @@ transformed distribution. We use the
 module in \texttt{tf.distributions} in order to handle invertible
 transformations.
 
-\texttt{qx_unconstrained} is a random variable distributed
+\texttt{qx\_unconstrained} is a random variable distributed
 according to a inverse-transformed (constrained) normal distribution.
 For example, if the automated transformation from non-negative to
 reals is $\log$, then the constrained approximation is a LogNormal

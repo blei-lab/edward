@@ -91,7 +91,7 @@ that minimizes the divergence measure $\text{KL}(q\| p)$.
 We instantiate two algorithms: a global inference over $\beta$ given
 the subset of $\mathbf{z}$ and a local inference over the subset of
 $\mathbf{z}$ given $\beta$.
-We also pass in a TensorFlow placeholder \texttt{x_ph} for the data,
+We also pass in a TensorFlow placeholder \texttt{x\_ph} for the data,
 so we can change the data at each step. (Alternatively,
 \href{/api/data}{batch tensors} can be used.)
 
@@ -114,7 +114,7 @@ Conceptually, the scale argument represents scaling for each random
 variable’s plate, as if we had seen that random variable $N/M$ as many
 times.
 
-We now run inference, assuming there is a \texttt{next_batch} function
+We now run inference, assuming there is a \texttt{next\_batch} function
 which provides the next batch of data.
 
 \begin{lstlisting}[language=Python]
@@ -151,7 +151,7 @@ idx_ph = tf.placeholder(tf.int32, [M])
 qz = Categorical(logits=tf.gather(qz_variables, idx_ph))
 \end{lstlisting}
 
-We define an index placeholder \texttt{idx_ph}. It will be fed index
+We define an index placeholder \texttt{idx\_ph}. It will be fed index
 values at runtime to determine which parameters correspond to a given
 data subsample.
 As an example, see the script for

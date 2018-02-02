@@ -28,7 +28,7 @@ theta = Beta(1.0, 1.0)
 x = Bernoulli(tf.ones(50) * theta)
 \end{lstlisting}
 For an example of it in use, see
-\href{https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli.py}{\texttt{examples/beta_bernoulli.py}}
+\href{https://github.com/blei-lab/edward/blob/master/examples/beta_bernoulli.py}{\texttt{examples/beta\_bernoulli.py}}
 in the Github repository.
 
 \textbf{Figure 2}. Variational auto-encoder for a data set of 28 x 28 pixel images
@@ -200,7 +200,7 @@ for _ in range(10000):
 For more details, see the
 \href{/api/inference-compositionality}{inference compositionality} webpage.
 See
-\href{https://github.com/blei-lab/edward/blob/master/examples/factor_analysis.py}{\texttt{examples/factor_analysis.py}} for
+\href{https://github.com/blei-lab/edward/blob/master/examples/factor_analysis.py}{\texttt{examples/factor\_analysis.py}} for
 a version performing Monte Carlo EM for logistic factor analysis
 in the Github repository.
 It leverages Hamiltonian Monte Carlo for the E-step to perform maximum
@@ -264,7 +264,7 @@ inference = ed.HMC({beta: qbeta}, data={y: y_data})
 inference.run(step_size=0.5 / N, n_steps=10)
 \end{lstlisting}
 For an example of it in use, see
-\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_logistic_regression.py}{\texttt{examples/bayesian_logistic_regression.py}}
+\href{https://github.com/blei-lab/edward/blob/master/examples/bayesian_logistic_regression.py}{\texttt{examples/bayesian\_logistic\_regression.py}}
 in the Github repository.
 
 \subsubsection{Appendix A. Model Examples}
@@ -287,7 +287,7 @@ x = tf.placeholder(tf.float32, [N, D])
 y = Bernoulli(logits=tf.matmul(tf.nn.tanh(tf.matmul(x, W_0) + b_0), W_1) + b_1)
 \end{lstlisting}
 For an example of it in use, see
-\href{https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py}{\texttt{examples/getting_started_example.py}}
+\href{https://github.com/blei-lab/edward/blob/master/examples/getting_started_example.py}{\texttt{examples/getting\_started\_example.py}}
 in the Github repository.
 
 \textbf{Figure 11}. Latent Dirichlet allocation \citep{blei2003latent}.
@@ -338,9 +338,9 @@ mu = dp.sample(N)
 x = Normal(loc=mu, scale=tf.ones([N, D]))
 \end{lstlisting}
 To see the essential component defining the \texttt{DirichletProcess}, see
-\href{https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py}{\texttt{examples/pp_dirichlet_process.py}}
+\href{https://github.com/blei-lab/edward/blob/master/examples/pp_dirichlet_process.py}{\texttt{examples/pp\_dirichlet\_process.py}}
 in the Github repository. Its source implementation can be found at
-\href{https://github.com/blei-lab/edward/blob/master/edward/models/dirichlet_process.py}{\texttt{edward/models/dirichlet_process.py}}.
+\href{https://github.com/blei-lab/edward/blob/master/edward/models/dirichlet_process.py}{\texttt{edward/models/dirichlet\_process.py}}.
 
 \subsubsection{Appendix B. Inference Examples}
 
@@ -358,6 +358,6 @@ in the Github repository.
 
 \textbf{Figure 16}. Exponential family embedding \citep{rudolph2016exponential}.
 A Github repository with comprehensive features is available at
-\href{https://github.com/mariru/exponential_family_embeddings}{mariru/exponential_family_embeddings}.
+\href{https://github.com/mariru/exponential_family_embeddings}{mariru/exponential\_family\_embeddings}.
 
 \subsubsection{References}\label{references}

@@ -69,7 +69,7 @@ Inference networks are easy to build in Edward.
 In the example below, a data point \texttt{x} is a 28 by 28 pixel
 image (from MNIST).
 
-We define a TensorFlow placeholder \texttt{x_ph} for the neural
+We define a TensorFlow placeholder \texttt{x\_ph} for the neural
 network's input, which is a batch of data points.
 \begin{lstlisting}[language=Python]
 x_ph = tf.placeholder(tf.float32, [M, 28 * 28])
@@ -100,7 +100,7 @@ An example script using this variational model can be found at
 {\texttt{examples/vae.py}} in the Github repository.
 An example with a convolutional architecture can be found at
 \href{https://github.com/blei-lab/edward/blob/master/examples/vae_convolutional_prettytensor.py}
-{\texttt{examples/vae_convolutional_prettytensor.py}} in the Github repository.
+{\texttt{examples/vae\_convolutional\_prettytensor.py}} in the Github repository.
 %We experiment with this model in the
 %\href{/tutorials/variational-autoencoder}{variational auto-encoder} tutorial.
 

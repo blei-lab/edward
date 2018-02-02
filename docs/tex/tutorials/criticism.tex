@@ -48,9 +48,9 @@ as classification error and mean absolute error.
 The \texttt{ed.evaluate()} method takes as input a set of metrics to
 evaluate, and a data dictionary. As with inference, the data dictionary binds the
 observed random variables in the model to realizations: in this case,
-it is the posterior predictive random variable of outputs \texttt{y_post} to
-\texttt{y_train} and a placeholder for inputs \texttt{x} to
-\texttt{x_train}.
+it is the posterior predictive random variable of outputs \texttt{y\_post} to
+\texttt{y\_train} and a placeholder for inputs \texttt{x} to
+\texttt{x\_train}.
 \begin{lstlisting}[language=Python]
 ed.evaluate('categorical_accuracy', data={y_post: y_train, x: x_train})
 ed.evaluate('mean_absolute_error', data={y_post: y_train, x: x_train})

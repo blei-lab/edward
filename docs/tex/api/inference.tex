@@ -20,7 +20,7 @@ indexed by parameters $\lambda$.
 
 In Edward, let \texttt{z} and \texttt{beta} be latent variables in the model,
 where we observe the random variable \texttt{x} with
-data \texttt{x_train}.
+data \texttt{x\_train}.
 Let \texttt{qz} and \texttt{qbeta} be random variables defined to
 approximate the posterior.
 We write this problem as follows:
@@ -34,7 +34,7 @@ first is a collection of latent random variables \texttt{beta} and
 \texttt{z}, along with ``posterior variables'' \texttt{qbeta} and
 \texttt{qz}, which are associated to their respective latent
 variables.  The second is a collection of observed random variables
-\texttt{x}, which is associated to the data \texttt{x_train}.
+\texttt{x}, which is associated to the data \texttt{x\_train}.
 
 Inference adjusts parameters of the distribution of \texttt{qbeta}
 and \texttt{qz} to be close to the
@@ -64,7 +64,7 @@ inference.finalize()
 
 \texttt{initialize()} builds the algorithm's update rules
 (computational graph) for $\lambda$;
-\texttt{tf.global_variables_initializer().run()} initializes $\lambda$
+\texttt{tf.global\_variables\_initializer().run()} initializes $\lambda$
 (TensorFlow variables in the graph);
 \texttt{update()} runs the graph once to update
 $\lambda$, which is called in a loop until convergence;
