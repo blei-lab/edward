@@ -106,7 +106,7 @@
     </div>
     <div class="nine columns">
 
-<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<div itemscope itemtype="http://developers.google.com/ReferenceObject">
 <meta itemprop="name" content="ed.get_variables" />
 </div>
 <h1 id="ed.get_variables">ed.get_variables</h1>
@@ -124,7 +124,7 @@
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>x</code></b>: RandomVariable or tf.Tensor. Query node to find parents of.</li>
-<li><b><code>collection</code></b>: list of tf.Variable, optional. The collection of variables to check with respect to; defaults to all variables in the graph.</li>
+<li><b><code>collection</code></b>: list of tf.Variable. The collection of variables to check with respect to; defaults to all variables in the graph.</li>
 </ul>
 <h4 id="returns">Returns:</h4>
 <p>list of tf.Variable. TensorFlow variables that x depends on.</p>

@@ -82,18 +82,18 @@
 </div>
 <div class="nine columns">
 <h2 id="latent-space-models-for-neural-data">Latent Space Models for Neural Data</h2>
-<p>Many scientific fields involve the study of network data, including social networks, networks in statistical physics, biological networks, and information networks <span class="citation">(Goldenberg, Zheng, Fienberg, &amp; Airoldi, 2010; Newman, 2010)</span>.</p>
-<p>What we can learn about nodes in a network from their connectivity patterns? We can begin to study this using a latent space model <span class="citation">(Hoff, Raftery, &amp; Handcock, 2002)</span>. Latent space models embed nodes in the network in a latent space, where the likelihood of forming an edge between two nodes depends on their distance in the latent space.</p>
+<p>Many scientific fields involve the study of network data, including social networks, networks in statistical physics, biological networks, and information networks <span class="citation" data-cites="newman2010networks goldenberg2010survey">(Goldenberg, Zheng, Fienberg, &amp; Airoldi, 2010; Newman, 2010)</span>.</p>
+<p>What we can learn about nodes in a network from their connectivity patterns? We can begin to study this using a latent space model <span class="citation" data-cites="hoff2002latent">(Hoff, Raftery, &amp; Handcock, 2002)</span>. Latent space models embed nodes in the network in a latent space, where the likelihood of forming an edge between two nodes depends on their distance in the latent space.</p>
 <p>We will analyze network data from neuroscience. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/latent_space_models.ipynb">here</a>.</p>
 <h3 id="data">Data</h3>
-<p>The data comes from <a href="http://www-personal.umich.edu/~mejn/netdata/">Mark Newman’s repository</a>. It is a weighted, directed network representing the neural network of the nematode <a href="https://en.wikipedia.org/wiki/Caenorhabditis_elegans">C. Elegans</a> compiled by <span class="citation">Watts &amp; Strogatz (1998)</span> using experimental data by <span class="citation">White, Southgate, Thomson, &amp; Brenner (1986)</span>.</p>
+<p>The data comes from <a href="http://www-personal.umich.edu/~mejn/netdata/">Mark Newman’s repository</a>. It is a weighted, directed network representing the neural network of the nematode <a href="https://en.wikipedia.org/wiki/Caenorhabditis_elegans">C. Elegans</a> compiled by <span class="citation" data-cites="watts1998collective">Watts &amp; Strogatz (1998)</span> using experimental data by <span class="citation" data-cites="white1986structure">White, Southgate, Thomson, &amp; Brenner (1986)</span>.</p>
 <p>The neural network consists of around <span class="math inline">\(300\)</span> neurons. Each connection between neurons is associated with a weight (positive integer) capturing the strength of the connection.</p>
 <p>First, we load the data.</p>
-<pre class="python" language="Python"><code>from observations import celegans
+<pre class="python" data-language="Python"><code>from observations import celegans
 
 x_train = celegans("~/data")</code></pre>
 <h3 id="model">Model</h3>
-<p>What can we learn about the neurons from their connectivity patterns? Using a latent space model <span class="citation">(Hoff et al., 2002)</span>, we will learn a latent embedding for each neuron to capture the similarities between them.</p>
+<p>What can we learn about the neurons from their connectivity patterns? Using a latent space model <span class="citation" data-cites="hoff2002latent">(Hoff et al., 2002)</span>, we will learn a latent embedding for each neuron to capture the similarities between them.</p>
 <p>Each neuron <span class="math inline">\(n\)</span> is a node in the network and is associated with a latent position <span class="math inline">\(z_n\in\mathbb{R}^K\)</span>. We place a Gaussian prior on each of the latent positions.</p>
 <p>The log-odds of an edge between node <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> is proportional to the Euclidean distance between the latent representations of the nodes <span class="math inline">\(|z_i- z_j|\)</span>. Here, we model the weights (<span class="math inline">\(Y_{ij}\)</span>) of the edges with a Poisson likelihood. The rate is the reciprocal of the distance in latent space. The generative process is as follows:</p>
 <ol>
@@ -103,7 +103,7 @@ z_n \sim N(0,I).\end{aligned}\]</span></li>
 Y_{ij} \sim \text{Poisson}\Bigg(\frac{1}{|z_i - z_j|}\Bigg).\end{aligned}\]</span></li>
 </ol>
 <p>In Edward, we write the model as follows.</p>
-<pre class="python" language="Python"><code>from edward.models import Normal, Poisson
+<pre class="python" data-language="Python"><code>from edward.models import Normal, Poisson
 
 N = x_train.shape[0]  # number of data points
 K = 3  # latent dimensionality
@@ -124,15 +124,15 @@ xp = 1.0 / tf.sqrt(xp + tf.diag(tf.zeros(N) + 1e3))
 x = Poisson(rate=xp)</code></pre>
 <h3 id="inference">Inference</h3>
 <p>Maximum a posteriori (MAP) estimation is simple in Edward. Two lines are required: Instantiating inference and running it.</p>
-<pre class="python" language="Python"><code>inference = ed.MAP([z], data={x: x_train})</code></pre>
+<pre class="python" data-language="Python"><code>inference = ed.MAP([z], data={x: x_train})</code></pre>
 <p>See this extended tutorial about <a href="/tutorials/map">MAP estimation in Edward</a>.</p>
 <p>One could instead run variational inference. This requires specifying a variational model and instantiating <code>KLqp</code>.</p>
-<pre class="python" language="Python"><code>qz = Normal(loc=tf.Variable(tf.random_normal([N * K])),
-            scale=tf.nn.softplus(tf.Variable(tf.random_normal([N * K]))))
+<pre class="python" data-language="Python"><code>qz = Normal(loc=tf.get_variable("qz/loc", [N * K]),
+            scale=tf.nn.softplus(tf.get_variable("qz/scale", [N * K])))
 inference = ed.KLqp({z: qz}, data={x: x_train})</code></pre>
 <p>See this extended tutorial about <a href="/tutorials/variational-inference">variational inference in Edward</a>.</p>
 <p>Finally, the following line runs the inference procedure for 2500 iterations.</p>
-<pre class="python" language="Python"><code>inference.run(n_iter=2500)</code></pre>
+<pre class="python" data-language="Python"><code>inference.run(n_iter=2500)</code></pre>
 <h3 id="acknowledgments">Acknowledgments</h3>
 <p>We thank Maja Rudolph for writing the initial version of this tutorial.</p>
 <h3 class="unnumbered" id="references">References</h3>

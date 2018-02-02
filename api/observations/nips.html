@@ -106,12 +106,12 @@
     </div>
     <div class="nine columns">
 
-<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<div itemscope itemtype="http://developers.google.com/ReferenceObject">
 <meta itemprop="name" content="observations.nips" />
 </div>
 <h1 id="observations.nips">observations.nips</h1>
 <pre class="python"><code>nips(path)</code></pre>
-<p>Load the NIPS conference papers 1987-2015 data set <span class="citation">(Perrone, Jenkins, Spano, &amp; Teh, 2016)</span>. It is in the form of a 11,463 x 5,812 matrix of word counts, containing 11,463 words and 5,811 NIPS conference papers (the first column contains the list of words). Each column contains the number of times each word appears in the corresponding document. The names of the columns give information about each document and its timestamp in the following format: <code>year_paperID</code>.</p>
+<p>Load the NIPS conference papers 1987-2015 data set <span class="citation" data-cites="perrone2016poisson">(Perrone, Jenkins, Spano, &amp; Teh, 2016)</span>. It is in the form of a 11,463 x 5,812 matrix of word counts, containing 11,463 words and 5,811 NIPS conference papers (the first column contains the list of words). Each column contains the number of times each word appears in the corresponding document. The names of the columns give information about each document and its timestamp in the following format: <code>year_paperID</code>.</p>
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>path</code></b>: str. Path to directory which either stores file or otherwise file will be downloaded and extracted there. Filename is <code>NIPS_1987-2015.csv</code>.</li>
@@ -120,7 +120,7 @@
 <p>Tuple of np.darray <code>x_train</code> and dictionary <code>metadata</code> of column headers (documents) and row headers (words).</p>
 <div id="refs" class="references">
 <div id="ref-perrone2016poisson">
-<p>Perrone, V., Jenkins, P. A., Spano, D., &amp; Teh, Y. W. (2016). Poisson random fields for dynamic feature models. <em>ArXiv Preprint ArXiv:1611.07460</em>.</p>
+<p>Perrone, V., Jenkins, P. A., Spano, D., &amp; Teh, Y. W. (2016). Poisson random fields for dynamic feature models. <em>arXiv Preprint arXiv:1611.07460</em>.</p>
 </div>
 </div>
     </div>

@@ -106,12 +106,12 @@
     </div>
     <div class="nine columns">
 
-<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<div itemscope itemtype="http://developers.google.com/ReferenceObject">
 <meta itemprop="name" content="observations.jsb_chorales" />
 </div>
 <h1 id="observations.jsb_chorales">observations.jsb_chorales</h1>
 <pre class="python"><code>jsb_chorales(path)</code></pre>
-<p>Load the corpus of 382 four-part harmonized chorales from J.S. Bach. There are 202 chorales in major keys of which 121 were used for training and 81 used for testing; and 180 chorales in minor keys split as 108 and 72 respectively <span class="citation">(Allan &amp; Williams, 2005)</span>. Data is loaded in the piano-roll representation <span class="citation">(Boulanger-Lewandowski, Bengio, &amp; Vincent, 2012)</span>, i.e., a binary matrix specifying which notes occur at each time step.</p>
+<p>Load the corpus of 382 four-part harmonized chorales from J.S. Bach. There are 202 chorales in major keys of which 121 were used for training and 81 used for testing; and 180 chorales in minor keys split as 108 and 72 respectively <span class="citation" data-cites="allan2005harmonising">(Allan &amp; Williams, 2005)</span>. Data is loaded in the piano-roll representation <span class="citation" data-cites="boulanger2012modeling">(Boulanger-Lewandowski, Bengio, &amp; Vincent, 2012)</span>, i.e., a binary matrix specifying which notes occur at each time step.</p>
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>path</code></b>: str. Path to directory which either stores file or otherwise file will be downloaded and extracted there. Filename is <code>JSB%20Chorales.pickle</code>.</li>

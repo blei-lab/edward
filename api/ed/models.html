@@ -106,7 +106,7 @@
     </div>
     <div class="nine columns">
 
-<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<div itemscope itemtype="http://developers.google.com/ReferenceObject">
 <meta itemprop="name" content="ed.models" />
 </div>
 <h1 id="module-ed.models">Module: ed.models</h1>
@@ -118,6 +118,7 @@
 <p><a href="../ed/models/BetaWithSoftplusConcentration"><code>class BetaWithSoftplusConcentration</code></a>: Beta with softplus transform of <code>concentration1</code> and <code>concentration0</code>.</p>
 <p><a href="../ed/models/Binomial"><code>class Binomial</code></a>: Binomial distribution.</p>
 <p><a href="../ed/models/Categorical"><code>class Categorical</code></a>: Categorical distribution.</p>
+<p><a href="../ed/models/Cauchy"><code>class Cauchy</code></a>: The Cauchy distribution with location <code>loc</code> and scale <code>scale</code>.</p>
 <p><a href="../ed/models/Chi2"><code>class Chi2</code></a>: Chi2 distribution.</p>
 <p><a href="../ed/models/Chi2WithAbsDf"><code>class Chi2WithAbsDf</code></a>: Chi2 with parameter transform <code>df = floor(abs(df))</code>.</p>
 <p><a href="../ed/models/ConditionalDistribution"><code>class ConditionalDistribution</code></a>: Distribution that supports intrinsic parameters (local latents).</p>
@@ -133,12 +134,15 @@
 <p><a href="../ed/models/Gamma"><code>class Gamma</code></a>: Gamma distribution.</p>
 <p><a href="../ed/models/GammaWithSoftplusConcentrationRate"><code>class GammaWithSoftplusConcentrationRate</code></a>: <code>Gamma</code> with softplus of <code>concentration</code> and <code>rate</code>.</p>
 <p><a href="../ed/models/Geometric"><code>class Geometric</code></a>: Geometric distribution.</p>
+<p><a href="../ed/models/HalfNormal"><code>class HalfNormal</code></a>: The Half Normal distribution with scale <code>scale</code>.</p>
+<p><a href="../ed/models/Independent"><code>class Independent</code></a>: Independent distribution from batch of distributions.</p>
 <p><a href="../ed/models/InverseGamma"><code>class InverseGamma</code></a>: InverseGamma distribution.</p>
 <p><a href="../ed/models/InverseGammaWithSoftplusConcentrationRate"><code>class InverseGammaWithSoftplusConcentrationRate</code></a>: <code>InverseGamma</code> with softplus of <code>concentration</code> and <code>rate</code>.</p>
 <p><a href="../ed/models/Laplace"><code>class Laplace</code></a>: The Laplace distribution with location <code>loc</code> and <code>scale</code> parameters.</p>
 <p><a href="../ed/models/LaplaceWithSoftplusScale"><code>class LaplaceWithSoftplusScale</code></a>: Laplace with softplus applied to <code>scale</code>.</p>
 <p><a href="../ed/models/Logistic"><code>class Logistic</code></a>: The Logistic distribution with location <code>loc</code> and <code>scale</code> parameters.</p>
 <p><a href="../ed/models/Mixture"><code>class Mixture</code></a>: Mixture distribution.</p>
+<p><a href="../ed/models/MixtureSameFamily"><code>class MixtureSameFamily</code></a>: Mixture (same-family) distribution.</p>
 <p><a href="../ed/models/Multinomial"><code>class Multinomial</code></a>: Multinomial distribution.</p>
 <p><a href="../ed/models/MultivariateNormalDiag"><code>class MultivariateNormalDiag</code></a>: The multivariate normal distribution on <code>R^k</code>.</p>
 <p><a href="../ed/models/MultivariateNormalDiagPlusLowRank"><code>class MultivariateNormalDiagPlusLowRank</code></a>: The multivariate normal distribution on <code>R^k</code>.</p>
@@ -152,17 +156,21 @@
 <p><a href="../ed/models/ParamMixture"><code>class ParamMixture</code></a>: A mixture distribution where all components are of the same family.</p>
 <p><a href="../ed/models/PointMass"><code>class PointMass</code></a>: PointMass random variable.</p>
 <p><a href="../ed/models/Poisson"><code>class Poisson</code></a>: Poisson distribution.</p>
+<p><a href="../ed/models/PoissonLogNormalQuadratureCompound"><code>class PoissonLogNormalQuadratureCompound</code></a>: <code>PoissonLogNormalQuadratureCompound</code> distribution.</p>
 <p><a href="../ed/models/QuantizedDistribution"><code>class QuantizedDistribution</code></a>: Distribution representing the quantization <code>Y = ceiling(X)</code>.</p>
 <p><a href="../ed/RandomVariable"><code>class RandomVariable</code></a>: Base class for random variables.</p>
 <p><a href="../ed/models/RelaxedBernoulli"><code>class RelaxedBernoulli</code></a>: RelaxedBernoulli distribution with temperature and logits parameters.</p>
 <p><a href="../ed/models/RelaxedOneHotCategorical"><code>class RelaxedOneHotCategorical</code></a>: RelaxedOneHotCategorical distribution with temperature and logits.</p>
-<p><a href="../ed/models/StudentT"><code>class StudentT</code></a>: Student's t-distribution.</p>
+<p><a href="../ed/models/SinhArcsinh"><code>class SinhArcsinh</code></a>: The SinhArcsinh transformation of a distribution on <code>(-inf, inf)</code>.</p>
+<p><a href="../ed/models/StudentT"><code>class StudentT</code></a>: Student’s t-distribution.</p>
 <p><a href="../ed/models/StudentTWithAbsDfSoftplusScale"><code>class StudentTWithAbsDfSoftplusScale</code></a>: StudentT with <code>df = floor(abs(df))</code> and <code>scale = softplus(scale)</code>.</p>
 <p><a href="../ed/models/TransformedDistribution"><code>class TransformedDistribution</code></a>: A Transformed Distribution.</p>
 <p><a href="../ed/models/Uniform"><code>class Uniform</code></a>: Uniform distribution with <code>low</code> and <code>high</code> parameters.</p>
 <p><a href="../ed/models/VectorDeterministic"><code>class VectorDeterministic</code></a>: Vector <code>Deterministic</code> distribution on <code>R^k</code>.</p>
+<p><a href="../ed/models/VectorDiffeomixture"><code>class VectorDiffeomixture</code></a>: VectorDiffeomixture distribution.</p>
 <p><a href="../ed/models/VectorExponentialDiag"><code>class VectorExponentialDiag</code></a>: The vectorization of the Exponential distribution on <code>R^k</code>.</p>
 <p><a href="../ed/models/VectorLaplaceDiag"><code>class VectorLaplaceDiag</code></a>: The vectorization of the Laplace distribution on <code>R^k</code>.</p>
+<p><a href="../ed/models/VectorSinhArcsinhDiag"><code>class VectorSinhArcsinhDiag</code></a>: The (diagonal) SinhArcsinh transformation of a distribution on <code>R^k</code>.</p>
 <p><a href="../ed/models/WishartCholesky"><code>class WishartCholesky</code></a>: The matrix Wishart distribution on positive definite matrices.</p>
 <p><a href="../ed/models/WishartFull"><code>class WishartFull</code></a>: The matrix Wishart distribution on positive definite matrices.</p>
     </div>

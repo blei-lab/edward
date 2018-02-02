@@ -93,7 +93,7 @@
 <p>We demonstrate with an example in Edward. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/supervised_classification.ipynb">here</a>.</p>
 <h3 id="data">Data</h3>
 <p>We use the <a href="https://stat.ethz.ch/R-manual/R-devel/library/MASS/html/crabs.html">crabs data set</a>, which consists of morphological measurements on a crab species. We are interested in predicting whether a given crab has the color form blue (encoded as 0) or orange (encoded as 1). We use all the numeric features in the dataset.</p>
-<pre class="python" language="Python"><code>from observations import crabs
+<pre class="python" data-language="Python"><code>from observations import crabs
 
 data, metadata = crabs(&quot;~/data&quot;)
 X_train = data[:100, 3:]
@@ -107,7 +107,7 @@ print(&quot;Number of features: {}&quot;.format(D))</code></pre>
 <pre><code>Number of data points: 100
 Number of features: 5</code></pre>
 <h3 id="model">Model</h3>
-<p>A Gaussian process is a powerful object for modeling nonlinear relationships between pairs of random variables. It defines a distribution over (possibly nonlinear) functions, which can be applied for representing our uncertainty around the true functional relationship. Here we define a Gaussian process model for classification <span class="citation">(Rasmussen &amp; Williams, 2006)</span>.</p>
+<p>A Gaussian process is a powerful object for modeling nonlinear relationships between pairs of random variables. It defines a distribution over (possibly nonlinear) functions, which can be applied for representing our uncertainty around the true functional relationship. Here we define a Gaussian process model for classification <span class="citation" data-cites="rasmussen2006gaussian">(Rasmussen &amp; Williams, 2006)</span>.</p>
 <p>Formally, a distribution over functions <span class="math inline">\(f:\mathbb{R}^D\to\mathbb{R}\)</span> can be specified by a Gaussian process <span class="math display">\[\begin{aligned}
   p(f)
   &amp;=
@@ -126,7 +126,7 @@ Number of features: 5</code></pre>
   &amp;=
   \text{Normal}(\mathbf{z} \mid \mathbf{0}, \mathbf{K}),\end{aligned}\]</span> with covariance matrix given as previously stated.</p>
 <p>Let’s build the model in Edward. We use a radial basis function (RBF) kernel, also known as the squared exponential or exponentiated quadratic. It returns the kernel matrix evaluated over all pairs of data points; we then Cholesky decompose the matrix to parameterize the multivariate normal distribution.</p>
-<pre class="python" language="Python"><code>from edward.models import Bernoulli, MultivariateNormalTriL
+<pre class="python" data-language="Python"><code>from edward.models import Bernoulli, MultivariateNormalTriL
 from edward.util import rbf
 
 X = tf.placeholder(tf.float32, [N, D])
@@ -135,10 +135,10 @@ y = Bernoulli(logits=f)</code></pre>
 <p>Here, we define a placeholder <code>X</code>. During inference, we pass in the value for this placeholder according to data.</p>
 <h3 id="inference">Inference</h3>
 <p>Perform variational inference. Define the variational model to be a fully factorized normal.</p>
-<pre class="python" language="Python"><code>qf = Normal(loc=tf.Variable(tf.random_normal([N])),
-            scale=tf.nn.softplus(tf.Variable(tf.random_normal([N]))))</code></pre>
+<pre class="python" data-language="Python"><code>qf = Normal(loc=tf.get_variable(&quot;qf/loc&quot;, [N]),
+            scale=tf.nn.softplus(tf.get_variable(&quot;qf/scale&quot;, [N])))</code></pre>
 <p>Run variational inference for <code>500</code> iterations.</p>
-<pre class="python" language="Python"><code>inference = ed.KLqp({f: qf}, data={X: X_train, y: y_train})
+<pre class="python" data-language="Python"><code>inference = ed.KLqp({f: qf}, data={X: X_train, y: y_train})
 inference.run(n_iter=500)</code></pre>
 <p>In this case <code>KLqp</code> defaults to minimizing the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure using the reparameterization gradient. For more details on inference, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>. (This example happens to be slow because evaluating and inverting full covariances in Gaussian processes happens to be slow.)</p>
 <h3 id="references" class="unnumbered">References</h3>

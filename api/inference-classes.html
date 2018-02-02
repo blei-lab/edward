@@ -130,10 +130,10 @@
 ~
 \text{Normal}(\beta\mid \mathbf{0}, \mathbf{I}).\]</span></p>
 <h3 id="variational-inference">Variational Inference</h3>
-<p>In variational inference, the idea is to posit a family of approximating distributions and to find the closest member in the family to the posterior <span class="citation">(Jordan, Ghahramani, Jaakkola, &amp; Saul, 1999)</span>. We write an approximating family, <span class="math display">\[\begin{aligned}
+<p>In variational inference, the idea is to posit a family of approximating distributions and to find the closest member in the family to the posterior <span class="citation" data-cites="jordan1999introduction">(Jordan, Ghahramani, Jaakkola, &amp; Saul, 1999)</span>. We write an approximating family, <span class="math display">\[\begin{aligned}
 q(\beta;\mu,\sigma) &amp;= \text{Normal}(\beta; \mu,\sigma), \\[1.5ex]
 q(\mathbf{z};\pi) &amp;= \text{Categorical}(\mathbf{z};\pi),\end{aligned}\]</span> using TensorFlow variables to represent its parameters <span class="math inline">\(\lambda=\{\pi,\mu,\sigma\}\)</span>.</p>
-<pre class="python" language="Python"><code>from edward.models import Categorical, Normal
+<pre class="python" data-language="Python"><code>from edward.models import Categorical, Normal
 
 qbeta = Normal(loc=tf.Variable(tf.zeros([K, D])),
                scale=tf.exp(tf.Variable(tf.zeros[K, D])))
@@ -142,7 +142,7 @@ qz = Categorical(logits=tf.Variable(tf.zeros[N, K]))
 inference = ed.VariationalInference({beta: qbeta, z: qz}, data={x: x_train})</code></pre>
 <p>Given an objective function, variational inference optimizes the family with respect to <code>tf.Variable</code>s.</p>
 <p>Specific variational inference algorithms inherit from the <code>VariationalInference</code> class to define their own methods, such as a loss function and gradient. For example, we represent MAP estimation with an approximating family (<code>qbeta</code> and <code>qz</code>) of <code>PointMass</code> random variables, i.e., with all probability mass concentrated at a point.</p>
-<pre class="python" language="Python"><code>from edward.models import PointMass
+<pre class="python" data-language="Python"><code>from edward.models import PointMass
 
 qbeta = PointMass(params=tf.Variable(tf.zeros([K, D])))
 qz = PointMass(params=tf.Variable(tf.zeros(N)))
@@ -150,27 +150,27 @@ qz = PointMass(params=tf.Variable(tf.zeros(N)))
 inference = ed.MAP({beta: qbeta, z: qz}, data={x: x_train})</code></pre>
 <p><code>MAP</code> inherits from <code>VariationalInference</code> and defines a loss function and update rules; it uses existing optimizers inside TensorFlow.</p>
 <h3 id="monte-carlo">Monte Carlo</h3>
-<p>Monte Carlo approximates the posterior using samples <span class="citation">(Robert &amp; Casella, 1999)</span>. Monte Carlo is an inference where the approximating family is an empirical distribution, <span class="math display">\[\begin{aligned}
+<p>Monte Carlo approximates the posterior using samples <span class="citation" data-cites="robert1999monte">(Robert &amp; Casella, 1999)</span>. Monte Carlo is an inference where the approximating family is an empirical distribution, <span class="math display">\[\begin{aligned}
 q(\beta; \{\beta^{(t)}\})
 &amp;= \frac{1}{T}\sum_{t=1}^T \delta(\beta, \beta^{(t)}), \\[1.5ex]
 q(\mathbf{z}; \{\mathbf{z}^{(t)}\})
 &amp;= \frac{1}{T}\sum_{t=1}^T \delta(\mathbf{z}, \mathbf{z}^{(t)}).\end{aligned}\]</span> The parameters are <span class="math inline">\(\lambda=\{\beta^{(t)},\mathbf{z}^{(t)}\}\)</span>.</p>
-<pre class="python" language="Python"><code>from edward.models import Empirical
+<pre class="python" data-language="Python"><code>from edward.models import Empirical
 
 T = 10000  # number of samples
 qbeta = Empirical(params=tf.Variable(tf.zeros([T, K, D]))
 qz = Empirical(params=tf.Variable(tf.zeros([T, N]))
 
 inference = ed.MonteCarlo({beta: qbeta, z: qz}, data={x: x_train})</code></pre>
-<p>Monte Carlo algorithms proceed by updating one sample <span class="math inline">\(\beta^{(t)},\mathbf{(z)}^{(t)}\)</span> at a time in the empirical approximation. Markov chain Monte Carlo does this sequentially to update the current sample (index <span class="math inline">\(t\)</span> of <code>tf.Variable</code>s) conditional on the last sample (index <span class="math inline">\(t-1\)</span> of <code>tf.Variable</code>s). Specific Monte Carlo samplers determine the update rules; they can use gradients such as in Hamiltonian Monte Carlo <span class="citation">(Neal, 2011)</span> and graph structure such as in sequential Monte Carlo <span class="citation">(Doucet, De Freitas, &amp; Gordon, 2001)</span>.</p>
+<p>Monte Carlo algorithms proceed by updating one sample <span class="math inline">\(\beta^{(t)},\mathbf{(z)}^{(t)}\)</span> at a time in the empirical approximation. Markov chain Monte Carlo does this sequentially to update the current sample (index <span class="math inline">\(t\)</span> of <code>tf.Variable</code>s) conditional on the last sample (index <span class="math inline">\(t-1\)</span> of <code>tf.Variable</code>s). Specific Monte Carlo samplers determine the update rules; they can use gradients such as in Hamiltonian Monte Carlo <span class="citation" data-cites="neal2011mcmc">(Neal, 2011)</span> and graph structure such as in sequential Monte Carlo <span class="citation" data-cites="doucet2001introduction">(Doucet, De Freitas, &amp; Gordon, 2001)</span>.</p>
 <h3 id="non-bayesian-methods">Non-Bayesian Methods</h3>
 <p>As a library for probabilistic modeling (not necessarily Bayesian modeling), Edward is agnostic to the paradigm for inference. This means Edward can use frequentist (population-based) inferences, strictly point estimation, and alternative foundations for parameter uncertainty.</p>
-<p>For example, Edward supports non-Bayesian methods such as generative adversarial networks (GANs) <span class="citation">(Goodfellow et al., 2014)</span>. For more details, see the <a href="/tutorials/gan">GAN tutorial</a>.</p>
+<p>For example, Edward supports non-Bayesian methods such as generative adversarial networks (GANs) <span class="citation" data-cites="goodfellow2014generative">(Goodfellow et al., 2014)</span>. For more details, see the <a href="/tutorials/gan">GAN tutorial</a>.</p>
 <p>In general, we think opening the door to non-Bayesian approaches is a crucial feature for probabilistic programming. This enables advances in other fields such as deep learning to be complementary: all is in service for probabilistic models and thus it makes sense to combine our efforts.</p>
 <h3 id="exact-inference">Exact Inference</h3>
-<p>In order to uncover conjugacy relationships between random variables (if they exist), we use symbolic algebra on nodes in the computational graph. Users can then integrate out variables to automatically derive classical Gibbs <span class="citation">(Gelfand &amp; Smith, 1990)</span>, mean-field updates <span class="citation">(Bishop, 2006)</span>, and exact inference.</p>
+<p>In order to uncover conjugacy relationships between random variables (if they exist), we use symbolic algebra on nodes in the computational graph. Users can then integrate out variables to automatically derive classical Gibbs <span class="citation" data-cites="gelfand1990sampling">(Gelfand &amp; Smith, 1990)</span>, mean-field updates <span class="citation" data-cites="bishop2006pattern">(Bishop, 2006)</span>, and exact inference.</p>
 <p>For example, can calculate a conjugate posterior analytically by using the <code>ed.complete_conditional</code> function:</p>
-<pre class="python" language="Python"><code>from edward.models import Bernoulli, Beta
+<pre class="python" data-language="Python"><code>from edward.models import Bernoulli, Beta
 
 # Beta-Bernoulli model
 pi = Beta(1.0, 1.0)

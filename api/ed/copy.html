@@ -106,7 +106,7 @@
     </div>
     <div class="nine columns">
 
-<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<div itemscope itemtype="http://developers.google.com/ReferenceObject">
 <meta itemprop="name" content="ed.copy" />
 </div>
 <h1 id="ed.copy">ed.copy</h1>
@@ -124,16 +124,16 @@
     copy_parent_rvs=True
 )</code></pre>
 <p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/util/random_variables.py"><code>edward/util/random_variables.py</code></a>.</p>
-<p>Build a new node in the TensorFlow graph from <code>org_instance</code>, where any of its ancestors existing in <code>dict_swap</code> are replaced with <code>dict_swap</code>'s corresponding value.</p>
-<p>Copying is done recursively. Any <code>Operation</code> whose output is required to copy <code>org_instance</code> is also copied (if it isn't already copied within the new scope).</p>
+<p>Build a new node in the TensorFlow graph from <code>org_instance</code>, where any of its ancestors existing in <code>dict_swap</code> are replaced with <code>dict_swap</code>’s corresponding value.</p>
+<p>Copying is done recursively. Any <code>Operation</code> whose output is required to copy <code>org_instance</code> is also copied (if it isn’t already copied within the new scope).</p>
 <p><code>tf.Variable</code>s, <code>tf.placeholder</code>s, and nodes of type <code>Queue</code> are always reused and not copied. In addition, <code>tf.Operation</code>s with operation-level seeds are copied with a new operation-level seed.</p>
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>org_instance</code></b>: RandomVariable, tf.Operation, tf.Tensor, or tf.Variable. Node to add in graph with replaced ancestors.</li>
-<li><b><code>dict_swap</code></b>: dict, optional. Random variables, variables, tensors, or operations to swap with. Its keys are what <code>org_instance</code> may depend on, and its values are the corresponding object (not necessarily of the same class instance, but must have the same type, e.g., float32) that is used in exchange.</li>
-<li><b><code>scope</code></b>: str, optional. A scope for the new node(s). This is used to avoid name conflicts with the original node(s).</li>
-<li><b><code>replace_itself</code></b>: bool, optional Whether to replace <code>org_instance</code> itself if it exists in <code>dict_swap</code>. (This is used for the recursion.)</li>
-<li><b><code>copy_q</code></b>: bool, optional. Whether to copy the replaced tensors too (if not already copied within the new scope). Otherwise will reuse them.</li>
+<li><b><code>dict_swap</code></b>: dict. Random variables, variables, tensors, or operations to swap with. Its keys are what <code>org_instance</code> may depend on, and its values are the corresponding object (not necessarily of the same class instance, but must have the same type, e.g., float32) that is used in exchange.</li>
+<li><b><code>scope</code></b>: str. A scope for the new node(s). This is used to avoid name conflicts with the original node(s).</li>
+<li><b><code>replace_itself</code></b>: bool. Whether to replace <code>org_instance</code> itself if it exists in <code>dict_swap</code>. (This is used for the recursion.)</li>
+<li><b><code>copy_q</code></b>: bool. Whether to copy the replaced tensors too (if not already copied within the new scope). Otherwise will reuse them.</li>
 <li><b><code>copy_parent_rvs</code></b>: Whether to copy parent random variables <code>org_instance</code> depends on. Otherwise will copy only the sample tensors and not the random variable class itself.</li>
 </ul>
 <h4 id="returns">Returns:</h4>

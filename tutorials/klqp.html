@@ -97,7 +97,7 @@
   \log q(\mathbf{z}\;;\;\lambda)
   -
   \log p(\mathbf{z} \mid \mathbf{x})
-  \big].\end{aligned}\]</span> The KL divergence is a non-symmetric, information theoretic measure of similarity between two probability distributions <span class="citation">(Hinton &amp; Camp, 1993; Jordan, Ghahramani, Jaakkola, &amp; Saul, 1999; Waterhouse, MacKay, &amp; Robinson, 1996)</span>.</p>
+  \big].\end{aligned}\]</span> The KL divergence is a non-symmetric, information theoretic measure of similarity between two probability distributions <span class="citation" data-cites="hinton1993keeping waterhouse1996bayesian jordan1999introduction">(Hinton &amp; Camp, 1993; Jordan, Ghahramani, Jaakkola, &amp; Saul, 1999; Waterhouse, MacKay, &amp; Robinson, 1996)</span>.</p>
 <h3 id="the-evidence-lower-bound">The Evidence Lower Bound</h3>
 <p>The above optimization problem is intractable because it directly depends on the posterior <span class="math inline">\(p(\mathbf{z} \mid \mathbf{x})\)</span>. To tackle this, consider the property <span class="math display">\[\begin{aligned}
   \log p(\mathbf{x})
@@ -160,7 +160,7 @@
   -
   \log q(\mathbf{z}\;;\;\lambda)
   \big)
-  \big].\end{aligned}\]</span> The gradient of the ELBO is an expectation over the variational model <span class="math inline">\(q(\mathbf{z}\;;\;\lambda)\)</span>; the only new ingredient it requires is the <em>score function</em> <span class="math inline">\(\nabla_\lambda \log q(\mathbf{z}\;;\;\lambda)\)</span> <span class="citation">(Paisley, Blei, &amp; Jordan, 2012; Ranganath, Gerrish, &amp; Blei, 2014)</span>.</p>
+  \big].\end{aligned}\]</span> The gradient of the ELBO is an expectation over the variational model <span class="math inline">\(q(\mathbf{z}\;;\;\lambda)\)</span>; the only new ingredient it requires is the <em>score function</em> <span class="math inline">\(\nabla_\lambda \log q(\mathbf{z}\;;\;\lambda)\)</span> <span class="citation" data-cites="paisley2012variational ranganath2014black">(Paisley, Blei, &amp; Jordan, 2012; Ranganath, Gerrish, &amp; Blei, 2014)</span>.</p>
 <p>We can use Monte Carlo integration to obtain noisy estimates of both the ELBO and its gradient. The basic procedure follows these steps:</p>
 <ol>
 <li>draw <span class="math inline">\(S\)</span> samples <span class="math inline">\(\{\mathbf{z}_s\}_1^S \sim q(\mathbf{z}\;;\;\lambda)\)</span>,</li>
@@ -183,7 +183,7 @@
   \nabla_\lambda \log q(\mathbf{z}_s\;;\;\lambda)
   \big].\end{aligned}\]</span> This is an unbiased estimate of the actual gradient of the ELBO.</p>
 <h2 id="reparameterization-gradient">Reparameterization gradient</h2>
-<p>If the model has differentiable latent variables, then it is generally advantageous to leverage gradient information from the model in order to better traverse the optimization space. One approach to doing this is the reparameterization gradient <span class="citation">(Kingma &amp; Welling, 2014; Rezende, Mohamed, &amp; Wierstra, 2014)</span>.</p>
+<p>If the model has differentiable latent variables, then it is generally advantageous to leverage gradient information from the model in order to better traverse the optimization space. One approach to doing this is the reparameterization gradient <span class="citation" data-cites="kingma2014auto rezende2014stochastic">(Kingma &amp; Welling, 2014; Rezende, Mohamed, &amp; Wierstra, 2014)</span>.</p>
 <p>Some variational distributions <span class="math inline">\(q(\mathbf{z}\;;\;\lambda)\)</span> admit useful reparameterizations. For example, we can reparameterize a normal distribution <span class="math inline">\(\mathbf{z} \sim \text{Normal}(\mu, \Sigma)\)</span> as <span class="math inline">\(\mathbf{z} \sim \mu + L \text{Normal}(0, I)\)</span> where <span class="math inline">\(\Sigma = LL^\top\)</span>. In general, write this as <span class="math display">\[\begin{aligned}
   \epsilon &amp;\sim q(\epsilon)\\
   \mathbf{z} &amp;= \mathbf{z}(\epsilon \;;\; \lambda),\end{aligned}\]</span> where <span class="math inline">\(\epsilon\)</span> is a random variable that does <strong>not</strong> depend on the variational parameters <span class="math inline">\(\lambda\)</span>. The deterministic function <span class="math inline">\(\mathbf{z}(\cdot;\lambda)\)</span> encapsulates the variational parameters instead, and following the process is equivalent to directly drawing <span class="math inline">\(\mathbf{z}\)</span> from the original distribution.</p>

@@ -91,13 +91,13 @@
 <h2 id="laplace-approximation">Laplace Approximation</h2>
 <p>(This tutorial follows the <a href="/tutorials/map">Maximum a posteriori estimation</a> tutorial.)</p>
 <p>Maximum a posteriori (MAP) estimation approximates the posterior <span class="math inline">\(p(\mathbf{z} \mid \mathbf{x})\)</span> with a point mass (delta function) by simply capturing its mode. MAP is attractive because it is fast and efficient. How can we use MAP to construct a better approximation to the posterior?</p>
-<p>The Laplace approximation <span class="citation">(Laplace, 1986)</span> is one way of improving a MAP estimate. The idea is to approximate the posterior with a normal distribution centered at the MAP estimate, <span class="math display">\[\begin{aligned}
+<p>The Laplace approximation <span class="citation" data-cites="laplace1986memoir">(Laplace, 1986)</span> is one way of improving a MAP estimate. The idea is to approximate the posterior with a normal distribution centered at the MAP estimate, <span class="math display">\[\begin{aligned}
   p(\mathbf{z} \mid \mathbf{x})
   &amp;\approx
   \text{Normal}(\mathbf{z}\;;\; \mathbf{z}_\text{MAP}, \Lambda^{-1}).\end{aligned}\]</span> This requires computing a precision matrix <span class="math inline">\(\Lambda\)</span>. Derived from a Taylor expansion, the Laplace approximation uses the Hessian of the negative log joint density at the MAP estimate. It is defined component-wise as <span class="math display">\[\begin{aligned}
   \Lambda_{ij}
   &amp;=
-  \frac{\partial^2}{\partial z_i \partial z_j} -\log p(\mathbf{x}, \mathbf{z}).\end{aligned}\]</span> For flat priors (which reduces MAP to maximum likelihood), the precision matrix is known as the observed Fisher information <span class="citation">(Fisher, 1925)</span>. Edward uses TensorFlow’s automatic differentiation, making this second-order gradient computation both simple and efficient to distribute.</p>
+  \frac{\partial^2}{\partial z_i \partial z_j} -\log p(\mathbf{x}, \mathbf{z}).\end{aligned}\]</span> For flat priors (which reduces MAP to maximum likelihood), the precision matrix is known as the observed Fisher information <span class="citation" data-cites="fisher1925theory">(Fisher, 1925)</span>. Edward uses TensorFlow’s automatic differentiation, making this second-order gradient computation both simple and efficient to distribute.</p>
 <p>For more details, see the <a href="/api/">API</a> as well as its implementation in Edward’s code base.</p>
 <h3 id="references" class="unnumbered">References</h3>
 <div id="refs" class="references">

@@ -89,11 +89,11 @@
     <div class="nine columns">
 
 <h2 id="mixture-density-networks">Mixture Density Networks</h2>
-<p>Mixture density networks (MDN) <span class="citation">(Bishop, 1994)</span> are a class of models obtained by combining a conventional neural network with a mixture density model.</p>
+<p>Mixture density networks (MDN) <span class="citation" data-cites="bishop1994mixture">(Bishop, 1994)</span> are a class of models obtained by combining a conventional neural network with a mixture density model.</p>
 <p>We demonstrate with an example in Edward. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/mixture_density_network.ipynb">here</a>.</p>
 <h3 id="data">Data</h3>
 <p>We use the same toy data from <a href="http://blog.otoro.net/2015/11/24/mixture-density-networks-with-tensorflow/">David Ha’s blog post</a>, where he explains MDNs. It is an inverse problem where for every input <span class="math inline">\(x_n\)</span> there are multiple outputs <span class="math inline">\(y_n\)</span>.</p>
-<pre class="python" language="Python"><code>from sklearn.model_selection import train_test_split
+<pre class="python" data-language="Python"><code>from sklearn.model_selection import train_test_split
 
 def build_toy_dataset(N):
   y_data = np.random.uniform(-10.5, 10.5, N)
@@ -118,22 +118,21 @@ sns.regplot(X_train, y_train, fit_reg=False)</code></pre>
 ## Size of output in test data: (1250,)</code></pre>
 <p><img src="/images/mixture-density-network-fig0.png" alt="image" width="650" /></p>
 <p>We define TensorFlow placeholders, which will be used to manually feed batches of data during inference. This is <a href="http://edwardlib.org/api/data">one of many ways</a> to train models with data in Edward.</p>
-<pre class="python" language="Python"><code>X_ph = tf.placeholder(tf.float32, [None, D])
+<pre class="python" data-language="Python"><code>X_ph = tf.placeholder(tf.float32, [None, D])
 y_ph = tf.placeholder(tf.float32, [None])</code></pre>
 <h3 id="model">Model</h3>
 <p>We use a mixture of 20 normal distributions parameterized by a feedforward network. That is, the membership probabilities and per-component mean and standard deviation are given by the output of a feedforward network.</p>
-<p>We leverage TensorFlow Slim to construct neural networks. We specify a three-layer network with 15 hidden units for each hidden layer.</p>
-<pre class="python" language="Python"><code>from edward.models import Categorical, Mixture, Normal
-from tensorflow.contrib import slim
+<p>We use <code>tf.layers</code> to construct neural networks. We specify a three-layer network with 15 hidden units for each hidden layer.</p>
+<pre class="python" data-language="Python"><code>from edward.models import Categorical, Mixture, Normal
 
 def neural_network(X):
   &quot;&quot;&quot;loc, scale, logits = NN(x; theta)&quot;&quot;&quot;
   # 2 hidden layers with 15 hidden units
-  hidden1 = slim.fully_connected(X, 15)
-  hidden2 = slim.fully_connected(hidden1, 15)
-  locs = slim.fully_connected(hidden2, K, activation_fn=None)
-  scales = slim.fully_connected(hidden2, K, activation_fn=tf.exp)
-  logits = slim.fully_connected(hidden2, K, activation_fn=None)
+  net = tf.layers.dense(X, 15, activation=tf.nn.relu)
+  net = tf.layers.dense(net, 15, activation=tf.nn.relu)
+  locs = tf.layers.dense(net, K, activation=None)
+  scales = tf.layers.dense(net, K, activation=tf.exp)
+  logits = tf.layers.dense(net, K, activation=None)
   return locs, scales, logits
 
 K = 20  # number of mixture components
@@ -145,18 +144,18 @@ components = [Normal(loc=loc, scale=scale) for loc, scale
                      tf.unstack(tf.transpose(scales)))]
 y = Mixture(cat=cat, components=components, value=tf.zeros_like(y_ph))</code></pre>
 <p>Note that we use the <code>Mixture</code> random variable. It collapses out the membership assignments for each data point and makes the model differentiable with respect to all its parameters. It takes a <code>Categorical</code> random variable as input—denoting the probability for each cluster assignment—as well as <code>components</code>, which is a list of individual distributions to mix over.</p>
-<p>For more background on MDNs, take a look at <a href="http://cbonnett.github.io/MDN.html">Christopher Bonnett’s blog post</a> or at <span class="citation">Bishop (1994)</span>.</p>
+<p>For more background on MDNs, take a look at <a href="http://cbonnett.github.io/MDN.html">Christopher Bonnett’s blog post</a> or at <span class="citation" data-cites="bishop1994mixture">Bishop (1994)</span>.</p>
 <h3 id="inference">Inference</h3>
 <p>We use MAP estimation, passing in the model and data set. See this extended tutorial about <a href="/tutorials/map">MAP estimation in Edward</a>.</p>
-<pre class="python" language="Python"><code>inference = ed.MAP(data={y: y_ph})</code></pre>
+<pre class="python" data-language="Python"><code>inference = ed.MAP(data={y: y_ph})</code></pre>
 <p>Here, we will manually control the inference and how data is passed into it at each step. Initialize the algorithm and the TensorFlow variables.</p>
-<pre class="python" language="Python"><code>optimizer = tf.train.AdamOptimizer(5e-3)
+<pre class="python" data-language="Python"><code>optimizer = tf.train.AdamOptimizer(5e-3)
 inference.initialize(optimizer=optimizer, var_list=tf.trainable_variables())
 
 sess = ed.get_session()
 tf.global_variables_initializer().run()</code></pre>
 <p>Now we train the MDN by calling <code>inference.update()</code>, passing in the data. The quantity <code>inference.loss</code> is the loss function (negative log-likelihood) at that step of inference. We also report the loss function on test data by calling <code>inference.loss</code> and where we feed test data to the TensorFlow placeholders instead of training data. We keep track of the losses under <code>train_loss</code> and <code>test_loss</code>.</p>
-<pre class="python" language="Python"><code>n_epoch = 1000
+<pre class="python" data-language="Python"><code>n_epoch = 1000
 train_loss = np.zeros(n_epoch)
 test_loss = np.zeros(n_epoch)
 for i in range(n_epoch):
@@ -167,10 +166,10 @@ for i in range(n_epoch):
 <p>Note a common failure mode when training MDNs is that an individual mixture distribution collapses to a point. This forces the standard deviation of the normal to be close to 0 and produces NaN values. We can prevent this by thresholding the standard deviation if desired.</p>
 <p>After training for a number of iterations, we get out the predictions we are interested in from the model: the predicted mixture weights, cluster means, and cluster standard deviations.</p>
 <p>To do this, we fetch their values from session, feeding test data <code>X_test</code> to the placeholder <code>X_ph</code>.</p>
-<pre class="python" language="Python"><code>pred_weights, pred_means, pred_std = sess.run(
+<pre class="python" data-language="Python"><code>pred_weights, pred_means, pred_std = sess.run(
     [tf.nn.softmax(logits), locs, scales], feed_dict={X_ph: X_test})</code></pre>
 <p>Let’s plot the log-likelihood of the training and test data as functions of the training epoch. The quantity <code>inference.loss</code> is the total log-likelihood, not the loss per data point. Below we plot the per-data point log-likelihood by dividing by the size of the train and test data respectively.</p>
-<pre class="python" language="Python"><code>fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 3.5))
+<pre class="python" data-language="Python"><code>fig, axes = plt.subplots(nrows=1, ncols=1, figsize=(16, 3.5))
 plt.plot(np.arange(n_epoch), -test_loss / len(X_test), label=&#39;Test&#39;)
 plt.plot(np.arange(n_epoch), -train_loss / len(X_train), label=&#39;Train&#39;)
 plt.legend(fontsize=20)
@@ -182,7 +181,7 @@ plt.show()</code></pre>
 <h3 id="criticism">Criticism</h3>
 <p>Let’s look at how individual examples perform. Note that as this is an inverse problem we can’t get the answer correct, but we can hope that the truth lies in area where the model has high probability.</p>
 <p>In this plot the truth is the vertical grey line while the blue line is the prediction of the mixture density network. As you can see, we didn’t do too bad.</p>
-<pre class="python" language="Python"><code>obj = [0, 4, 6]
+<pre class="python" data-language="Python"><code>obj = [0, 4, 6]
 fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(16, 6))
 
 plot_normal_mix(pred_weights[obj][0], pred_means[obj][0], pred_std[obj][0], axes[0], comp=False)
@@ -195,7 +194,7 @@ plot_normal_mix(pred_weights[obj][1], pred_means[obj][1], pred_std[obj][1], axes
 axes[2].axvline(x=y_test[obj][1], color=&#39;black&#39;, alpha=0.5)</code></pre>
 <p><img src="/images/mixture-density-network-fig2.png" alt="image" width="700" /></p>
 <p>We can check the ensemble by drawing samples of the prediction and plotting the density of those. The MDN has learned what we’d like it to learn.</p>
-<pre class="python" language="Python"><code>a = sample_from_mixture(X_test, pred_weights, pred_means, pred_std, amount=len(X_test))
+<pre class="python" data-language="Python"><code>a = sample_from_mixture(X_test, pred_weights, pred_means, pred_std, amount=len(X_test))
 sns.jointplot(a[:,0], a[:,1], kind=&quot;hex&quot;, color=&quot;#4CB391&quot;, ylim=(-10,10), xlim=(-14,14))</code></pre>
 <p><img src="/images/mixture-density-network-fig3.png" alt="image" width="700" /></p>
 <h3 id="acknowledgments">Acknowledgments</h3>

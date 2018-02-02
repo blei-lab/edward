@@ -106,12 +106,12 @@
     </div>
     <div class="nine columns">
 
-<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<div itemscope itemtype="http://developers.google.com/ReferenceObject">
 <meta itemprop="name" content="observations.piano_midi_de" />
 </div>
 <h1 id="observations.piano_midi_de">observations.piano_midi_de</h1>
 <pre class="python"><code>piano_midi_de(path)</code></pre>
-<p>Load the classical piano archive of piano-midi.de. It consists of 130 pieces randomly split into 92 training, 25 testing, and 13 validation pieces <span class="citation">(Poliner &amp; Ellis, 2007)</span>. Data is loaded in the piano-roll representation <span class="citation">(Boulanger-Lewandowski, Bengio, &amp; Vincent, 2012)</span>, i.e., a binary matrix specifying which notes occur at each time step.</p>
+<p>Load the classical piano archive of piano-midi.de. It consists of 130 pieces randomly split into 92 training, 25 testing, and 13 validation pieces <span class="citation" data-cites="poliner2007discriminative">(Poliner &amp; Ellis, 2007)</span>. Data is loaded in the piano-roll representation <span class="citation" data-cites="boulanger2012modeling">(Boulanger-Lewandowski, Bengio, &amp; Vincent, 2012)</span>, i.e., a binary matrix specifying which notes occur at each time step.</p>
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>path</code></b>: str. Path to directory which either stores file or otherwise file will be downloaded and extracted there. Filename is <code>Piano-midi.de.pickle</code>.</li>

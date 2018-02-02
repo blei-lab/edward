@@ -85,8 +85,8 @@
 <p>With linear mixed effects models, we wish to model a linear relationship for data points with inputs of varying type, categorized into subgroups, and associated to a real-valued output.</p>
 <p>We demonstrate with an example in Edward. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/linear_mixed_effects_models.ipynb">here</a>.</p>
 <h3 id="data">Data</h3>
-<p>We use the <code>InstEval</code> data set from the popular <a href="http://lme4.r-forge.r-project.org">lme4 R package</a> <span class="citation">(Bates, Mächler, Bolker, &amp; Walker, 2015)</span>. It is a data set of instructor evaluation ratings, where the inputs (covariates) include categories such as <code>students</code> and <code>departments</code>, and our response variable of interest is the instructor evaluation rating.</p>
-<pre class="python" language="Python"><code>import pandas as pd
+<p>We use the <code>InstEval</code> data set from the popular <a href="http://lme4.r-forge.r-project.org">lme4 R package</a> <span class="citation" data-cites="bates2015fitting">(Bates, Mächler, Bolker, &amp; Walker, 2015)</span>. It is a data set of instructor evaluation ratings, where the inputs (covariates) include categories such as <code>students</code> and <code>departments</code>, and our response variable of interest is the instructor evaluation rating.</p>
+<pre class="python" data-language="Python"><code>import pandas as pd
 from observations import insteval
 
 data, metadata = insteval("~/data")
@@ -109,7 +109,7 @@ test = data.drop(train.index)</code></pre>
 <li><code>departments</code> as <code>dept</code></li>
 <li><code>service</code> as <code>service</code></li>
 </ul>
-<pre class="python" language="Python"><code>s_train = train['s'].values
+<pre class="python" data-language="Python"><code>s_train = train['s'].values
 d_train = train['dcodes'].values
 dept_train = train['deptcodes'].values
 y_train = train['y'].values
@@ -122,7 +122,7 @@ dept_test = test['deptcodes'].values
 y_test = test['y'].values
 service_test = test['service'].values
 n_obs_test = test.shape[0]</code></pre>
-<pre class="python" language="Python"><code>n_s = max(s_train) + 1  # number of students
+<pre class="python" data-language="Python"><code>n_s = max(s_train) + 1  # number of students
 n_d = max(d_train) + 1  # number of instructors
 n_dept = max(dept_train) + 1  # number of departments
 n_obs = train.shape[0]  # number of observations
@@ -136,7 +136,7 @@ Number of instructors: 1128
 Number of departments: 14
 Number of observations: 58737</code></pre>
 <h3 id="model">Model</h3>
-<p>With linear regression, one makes an independence assumption where each data point regresses with a constant slope among each other. In our setting, the observations come from groups which may have varying slopes and intercepts. Thus we’d like to build a model that can capture this behavior <span class="citation">(Gelman &amp; Hill, 2006)</span>.</p>
+<p>With linear regression, one makes an independence assumption where each data point regresses with a constant slope among each other. In our setting, the observations come from groups which may have varying slopes and intercepts. Thus we’d like to build a model that can capture this behavior <span class="citation" data-cites="gelman2006data">(Gelman &amp; Hill, 2006)</span>.</p>
 <p>For examples of this phenomena:</p>
 <ul>
 <li>The observations from a single student are not independent of each other. Rather, some students may systematically give low (or high) lecture ratings.</li>
@@ -153,22 +153,22 @@ Number of observations: 58737</code></pre>
 <li>Select <code>service</code> as the fixed effect. It is a binary covariate corresponding to whether the lecture belongs to the lecturer’s main department. No matter how much additional data we collect, it can only take on the values in <span class="math inline">\(0\)</span> and <span class="math inline">\(1\)</span>.</li>
 <li>Select the categorical values of <code>students</code>, <code>teachers</code>, and <code>departments</code> as the random effects. Given more observations from the population of instructor evaluation ratings, we may be looking at new students, teachers, or departments.</li>
 </ul>
-<p>In the syntax of R’s lme4 package <span class="citation">(Bates et al., 2015)</span>, the model can be summarized as</p>
-<pre language="JSON"><code>y ~ 1 + (1|students) + (1|instructor) + (1|dept) + service</code></pre>
+<p>In the syntax of R’s lme4 package <span class="citation" data-cites="bates2015fitting">(Bates et al., 2015)</span>, the model can be summarized as</p>
+<pre data-language="JSON"><code>y ~ 1 + (1|students) + (1|instructor) + (1|dept) + service</code></pre>
 <p>where <code>1</code> denotes an intercept term, <code>(1|x)</code> denotes a random effect for <code>x</code>, and <code>x</code> denotes a fixed effect.</p>
-<pre class="python" language="Python"><code># Set up placeholders for the data inputs.
+<pre class="python" data-language="Python"><code># Set up placeholders for the data inputs.
 s_ph = tf.placeholder(tf.int32, [None])
 d_ph = tf.placeholder(tf.int32, [None])
 dept_ph = tf.placeholder(tf.int32, [None])
 service_ph = tf.placeholder(tf.float32, [None])
 
 # Set up fixed effects.
-mu = tf.Variable(tf.random_normal([]))
-service = tf.Variable(tf.random_normal([]))
+mu = tf.get_variable("mu", [])
+service = tf.get_variable("service", [])
 
-sigma_s = tf.sqrt(tf.exp(tf.Variable(tf.random_normal([]))))
-sigma_d = tf.sqrt(tf.exp(tf.Variable(tf.random_normal([]))))
-sigma_dept = tf.sqrt(tf.exp(tf.Variable(tf.random_normal([]))))
+sigma_s = tf.sqrt(tf.exp(tf.get_variable("sigma_s", [])))
+sigma_d = tf.sqrt(tf.exp(tf.get_variable("sigma_d", [])))
+sigma_dept = tf.sqrt(tf.exp(tf.get_variable("sigma_dept", [])))
 
 # Set up random effects.
 eta_s = Normal(loc=tf.zeros(n_s), scale=sigma_s * tf.ones(n_s))
@@ -182,15 +182,15 @@ yhat = (tf.gather(eta_s, s_ph) +
 y = Normal(loc=yhat, scale=tf.ones(n_obs))</code></pre>
 <h3 id="inference">Inference</h3>
 <p>Given data, we aim to infer the model’s fixed and random effects. In this analysis, we use variational inference with the <span class="math inline">\(\text{KL}(q\|p)\)</span> divergence measure. We specify fully factorized normal approximations for the random effects and pass in all training data for inference. Under the algorithm, the fixed effects will be estimated under a variational EM scheme.</p>
-<pre class="python" language="Python"><code>q_eta_s = Normal(
-    loc=tf.Variable(tf.random_normal([n_s])),
-    scale=tf.nn.softplus(tf.Variable(tf.random_normal([n_s]))))
+<pre class="python" data-language="Python"><code>q_eta_s = Normal(
+    loc=tf.get_variable("q_eta_s/loc", [n_s]),
+    scale=tf.nn.softplus(tf.get_variable("q_eta_s/scale", [n_s])))
 q_eta_d = Normal(
-    loc=tf.Variable(tf.random_normal([n_d])),
-    scale=tf.nn.softplus(tf.Variable(tf.random_normal([n_d]))))
+    loc=tf.get_variable("q_eta_d/loc", [n_d]),
+    scale=tf.nn.softplus(tf.get_variable("q_eta_d/scale", [n_d])))
 q_eta_dept = Normal(
-    loc=tf.Variable(tf.random_normal([n_dept])),
-    scale=tf.nn.softplus(tf.Variable(tf.random_normal([n_dept]))))
+    loc=tf.get_variable("q_eta_dept/loc", [n_dept]),
+    scale=tf.nn.softplus(tf.get_variable("q_eta_dept/scale", [n_dept])))
 
 latent_vars = {
     eta_s: q_eta_s,
@@ -206,12 +206,12 @@ inference = ed.KLqp(latent_vars, data)</code></pre>
 <p>One way to critique the fitted model is a residual plot, i.e., a plot of the difference between the predicted value and the observed value for each data point. Below we manually run inference, initializing the algorithm and performing individual updates within a loop. We form residual plots as the algorithm progresses. This helps us examine how the algorithm proceeds to infer the random and fixed effects from data.</p>
 <p>To form residuals, we first make predictions on test data. We do this by copying <code>yhat</code> defined in the model and replacing its dependence on random effects with their inferred means. During the algorithm, we evaluate the predictions, feeding in test inputs.</p>
 <p>We have also fit the same model <code>(y   service + (1|dept) + (1|s) + (1|d)</code>, fit on the entire InstEval dataset, specifically) in lme4. We have saved the random effect estimates and will compare them to our learned parameters.</p>
-<pre class="python" language="Python"><code>yhat_test = ed.copy(yhat, {
+<pre class="python" data-language="Python"><code>yhat_test = ed.copy(yhat, {
     eta_s: q_eta_s.mean(),
     eta_d: q_eta_d.mean(),
     eta_dept: q_eta_dept.mean()})</code></pre>
 <p>We now write the main loop.</p>
-<pre class="python" language="Python"><code>inference.initialize(n_print=20, n_iter=100)
+<pre class="python" data-language="Python"><code>inference.initialize(n_print=20, n_iter=100)
 tf.global_variables_initializer().run()
 
 for _ in range(inference.n_iter):
@@ -239,14 +239,14 @@ for _ in range(inference.n_iter):
 <p><img alt="image" src="/images/linear-mixed-effects-models-fig0.png" width="450"/></p>
 <p>The residuals appear normally distributed with mean 0. The residuals appear normally distributed with mean 0. This is a good sanity check for the model.</p>
 <p>We can also compare our learned parameters to those estimated by R’s ‘lme4‘.</p>
-<pre class="python" language="Python"><code>student_effects_lme4 = pd.read_csv('data/insteval_student_ranefs_r.csv')
+<pre class="python" data-language="Python"><code>student_effects_lme4 = pd.read_csv('data/insteval_student_ranefs_r.csv')
 instructor_effects_lme4 = pd.read_csv('data/insteval_instructor_ranefs_r.csv')
 dept_effects_lme4 = pd.read_csv('data/insteval_dept_ranefs_r.csv')
 
 student_effects_edward = q_eta_s.mean().eval()
 instructor_effects_edward = q_eta_d.mean().eval()
 dept_effects_edward = q_eta_dept.mean().eval()</code></pre>
-<pre class="python" language="Python"><code>plt.title("Student Effects Comparison")
+<pre class="python" data-language="Python"><code>plt.title("Student Effects Comparison")
 plt.xlim(-1, 1)
 plt.ylim(-1, 1)
 plt.xlabel("Student Effects from lme4")
@@ -256,7 +256,7 @@ plt.scatter(student_effects_lme4["(Intercept)"],
             alpha=0.25)
 plt.show()</code></pre>
 <p><img alt="image" src="/images/linear-mixed-effects-models-fig1.png" width="450"/></p>
-<pre class="python" language="Python"><code>plt.title("Instructor Effects Comparison")
+<pre class="python" data-language="Python"><code>plt.title("Instructor Effects Comparison")
 plt.xlim(-1.5, 1.5)
 plt.ylim(-1.5, 1.5)
 plt.xlabel("Instructor Effects from lme4")
@@ -267,7 +267,7 @@ plt.scatter(instructor_effects_lme4["(Intercept)"],
 plt.show()</code></pre>
 <p><img alt="image" src="/images/linear-mixed-effects-models-fig2.png" width="450"/></p>
 <p>Great! Our estimates for both student and instructor effects seem to match those from ‘lme4‘ closely. We have set up a slightly different model here (for example, our overall mean is regularized, as are our variances for student, department, and instructor effects, which is not true of ‘lme4‘s model), and we have a different inference method, so we should not expect to find exactly the same parameters as ‘lme4‘. But it is reassuring that they match up closely!</p>
-<pre class="python" language="Python"><code>#  Add in the intercept from R and edward
+<pre class="python" data-language="Python"><code>#  Add in the intercept from R and edward
 dept_effects_and_intercept_lme4 = 3.28259 + dept_effects_lme4["(Intercept)"]
 dept_effects_and_intercept_edward = mu.eval() + dept_effects_edward
 

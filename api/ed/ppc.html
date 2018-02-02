@@ -106,7 +106,7 @@
     </div>
     <div class="nine columns">
 
-<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<div itemscope itemtype="http://developers.google.com/ReferenceObject">
 <meta itemprop="name" content="ed.ppc" />
 </div>
 <h1 id="ed.ppc">ed.ppc</h1>
@@ -122,17 +122,17 @@
     n_samples=100
 )</code></pre>
 <p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/criticisms/ppc.py"><code>edward/criticisms/ppc.py</code></a>.</p>
-<p>Posterior predictive check <span class="citation">(Gelman, Meng, &amp; Stern, 1996; Meng, 1994; Rubin, 1984)</span>.</p>
-<p>PPC's form an empirical distribution for the predictive discrepancy,</p>
+<p>Posterior predictive check <span class="citation" data-cites="rubin1984bayesianly meng1994posterior gelman1996posterior">(Gelman, Meng, &amp; Stern, 1996; Meng, 1994; Rubin, 1984)</span>.</p>
+<p>PPC’s form an empirical distribution for the predictive discrepancy,</p>
 <p><span class="math inline">\(p(T\mid x) = \int p(T(x^{\text{rep}})\mid z) p(z\mid x) dz\)</span></p>
 <p>by drawing replicated data sets <span class="math inline">\(x^{\text{rep}}\)</span> and calculating <span class="math inline">\(T(x^{\text{rep}})\)</span> for each data set. Then it compares it to <span class="math inline">\(T(x)\)</span>.</p>
-<p>If <code>data</code> is inputted with the prior predictive distribution, then it is a prior predictive check <span class="citation">(Box, 1980)</span>.</p>
+<p>If <code>data</code> is inputted with the prior predictive distribution, then it is a prior predictive check <span class="citation" data-cites="box1980sampling">(Box, 1980)</span>.</p>
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>T</code></b>: function. Discrepancy function, which takes a dictionary of data and dictionary of latent variables as input and outputs a <code>tf.Tensor</code>.</li>
 <li><b><code>data</code></b>: dict. Data to compare to. It binds observed variables (of type <code>RandomVariable</code> or <code>tf.Tensor</code>) to their realizations (of type <code>tf.Tensor</code>). It can also bind placeholders (of type <code>tf.Tensor</code>) used in the model to their realizations.</li>
-<li><b><code>latent_vars</code></b>: dict, optional. Collection of random variables (of type <code>RandomVariable</code> or <code>tf.Tensor</code>) binded to their inferred posterior. This argument is used when the discrepancy is a function of latent variables.</li>
-<li><b><code>n_samples</code></b>: int, optional. Number of replicated data sets.</li>
+<li><b><code>latent_vars</code></b>: dict. Collection of random variables (of type <code>RandomVariable</code> or <code>tf.Tensor</code>) binded to their inferred posterior. This argument is used when the discrepancy is a function of latent variables.</li>
+<li><b><code>n_samples</code></b>: int. Number of replicated data sets.</li>
 </ul>
 <h4 id="returns">Returns:</h4>
 <p>list of np.ndarray. List containing the reference distribution, which is a NumPy array with <code>n_samples</code> elements,</p>

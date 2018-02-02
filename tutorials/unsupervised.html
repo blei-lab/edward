@@ -93,7 +93,7 @@
 <p>We demonstrate with an example in Edward. An interactive version with Jupyter notebook is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/unsupervised.ipynb">here</a>.</p>
 <h3 id="data">Data</h3>
 <p>Use a simulated data set of 2-dimensional data points <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^2\)</span>.</p>
-<pre class="python" language="Python"><code>def build_toy_dataset(N):
+<pre class="python" data-language="Python"><code>def build_toy_dataset(N):
   pi = np.array([0.4, 0.6])
   mus = [[1, 1], [-1, -1]]
   stds = [[0.1, 0.1], [0.1, 0.1]]
@@ -109,12 +109,12 @@ D = 2  # dimensionality of data
 
 x_train = build_toy_dataset(N)</code></pre>
 <p>We visualize the generated data points.</p>
-<pre class="python" language="Python"><code>plt.scatter(x_train[:, 0], x_train[:, 1])
+<pre class="python" data-language="Python"><code>plt.scatter(x_train[:, 0], x_train[:, 1])
 plt.axis([-3, 3, -3, 3])
 plt.show()</code></pre>
 <p><img src="/images/unsupervised-fig0.png" alt="image" width="700" /></p>
 <h3 id="model">Model</h3>
-<p>A mixture model is a model typically used for clustering. It assigns a mixture component to each data point, and this mixture component determines the distribution that the data point is generated from. A mixture of Gaussians uses Gaussian distributions to generate this data <span class="citation">(Bishop, 2006)</span>.</p>
+<p>A mixture model is a model typically used for clustering. It assigns a mixture component to each data point, and this mixture component determines the distribution that the data point is generated from. A mixture of Gaussians uses Gaussian distributions to generate this data <span class="citation" data-cites="bishop2006pattern">(Bishop, 2006)</span>.</p>
 <p>For a set of <span class="math inline">\(N\)</span> data points, the likelihood of each observation <span class="math inline">\(\mathbf{x}_n\)</span> is</p>
 <p><span class="math display">\[\begin{aligned}
   p(\mathbf{x}_n \mid \pi, \mu, \sigma)
@@ -138,7 +138,7 @@ plt.show()</code></pre>
   \text{InverseGamma}(\mathbf{\sigma}_k^2 \mid a, b).\end{aligned}\]</span></p>
 <p>We build two versions of the model in Edward: one jointly with the mixture assignments <span class="math inline">\(c_n\in\{0,\ldots,K-1\}\)</span> as latent variables, and another with them summed out.</p>
 <p>The joint version includes an explicit latent variable for the mixture assignments. We implement this with the <code>ParamMixture</code> random variable; it takes as input the mixing probabilities, the components’ parameters, and the distribution of the components. It is the distribution of the mixture conditional on mixture assignments. (Note we can also write this separately by first building a ‘Categorical‘ random variable for <code>z</code> and then building <code>x</code>; <code>ParamMixture</code> avoids requiring <code>tf.gather</code> which is slightly more efficient.)</p>
-<pre class="python" language="Python"><code>from edward.models import Dirichlet, InverseGamma, MultivariateNormalDiag, \
+<pre class="python" data-language="Python"><code>from edward.models import Dirichlet, InverseGamma, MultivariateNormalDiag, \
     Normal, ParamMixture
 
 K = 2  # number of components
@@ -151,7 +151,7 @@ x = ParamMixture(pi, {&#39;loc&#39;: mu, &#39;scale_diag&#39;: tf.sqrt(sigmasq)}
                  sample_shape=N)
 z = x.cat</code></pre>
 <p>The collapsed version marginalizes out the mixture assignments. We implement this with the <code>Mixture</code> random variable; it takes as input a Categorical distribution and a list of individual distribution components. It is the distribution of the mixture summing out the mixture assignments.</p>
-<pre class="python" language="Python"><code>from edward.models import Categorical, Dirichlet, InverseGamma, Mixture, \
+<pre class="python" data-language="Python"><code>from edward.models import Categorical, Dirichlet, InverseGamma, Mixture, \
     MultivariateNormalDiag, Normal
 
 K = 2  # number of components
@@ -167,13 +167,22 @@ x = Mixture(cat=cat, components=components)</code></pre>
 <p>We will use the joint version in this analysis.</p>
 <h3 id="inference">Inference</h3>
 <p>Each distribution in the model is written with conjugate priors, so we can use Gibbs sampling. It performs Markov chain Monte Carlo by iterating over draws from the complete conditionals of each distribution, i.e., each distribution conditional on a previously drawn value. First we set up Empirical random variables which will approximate the posteriors using the collection of samples.</p>
-<pre class="python" language="Python"><code>T = 500  # number of MCMC samples
-qpi = Empirical(tf.Variable(tf.ones([T, K]) / K))
-qmu = Empirical(tf.Variable(tf.zeros([T, K, D])))
-qsigmasq = Empirical(tf.Variable(tf.ones([T, K, D])))
-qz = Empirical(tf.Variable(tf.zeros([T, N], dtype=tf.int32)))</code></pre>
+<pre class="python" data-language="Python"><code>T = 500  # number of MCMC samples
+qpi = Empirical(tf.get_variable(
+    &quot;qpi/params&quot;, [T, K],
+    initializer=tf.constant_initializer(1.0 / K)))
+qmu = Empirical(tf.get_variable(
+    &quot;qmu/params&quot;, [T, K, D],
+    initializer=tf.zeros_initializer()))
+qsigmasq = Empirical(tf.get_variable(
+    &quot;qsigmasq/params&quot;, [T, K, D],
+    initializer=tf.ones_initializer()))
+qz = Empirical(tf.get_variable(
+    &quot;qz/params&quot;, [T, N],
+    initializer=tf.zeros_initializer(),
+    dtype=tf.int32))</code></pre>
 <p>Run Gibbs sampling. We write the training loop explicitly, so that we can track the cluster means as the sampler progresses.</p>
-<pre class="python" language="Python"><code>inference = ed.Gibbs({pi: qpi, mu: qmu, sigmasq: qsigmasq, z: qz},
+<pre class="python" data-language="Python"><code>inference = ed.Gibbs({pi: qpi, mu: qmu, sigmasq: qsigmasq, z: qz},
                      data={x: x_train})
 inference.initialize()
 
@@ -194,7 +203,7 @@ for _ in range(inference.n_iter):
 <h3 id="criticism">Criticism</h3>
 <p>We visualize the predicted memberships of each data point. We pick the cluster assignment which produces the highest posterior predictive density for each data point.</p>
 <p>To do this, we first draw a sample from the posterior and calculate a a <span class="math inline">\(N\times K\)</span> matrix of log-likelihoods, one for each data point <span class="math inline">\(\mathbf{x}_n\)</span> and cluster assignment <span class="math inline">\(k\)</span>. We perform this averaged over 100 posterior samples.</p>
-<pre class="python" language="Python"><code># Calculate likelihood for each data point and cluster assignment,
+<pre class="python" data-language="Python"><code># Calculate likelihood for each data point and cluster assignment,
 # averaged over many posterior samples. ``x_post`` has shape (N, 100, K, D).
 mu_sample = qmu.sample(100)
 sigmasq_sample = qsigmasq.sample(100)
@@ -208,9 +217,9 @@ log_liks = x_post.log_prob(x_broadcasted)
 log_liks = tf.reduce_sum(log_liks, 3)
 log_liks = tf.reduce_mean(log_liks, 1)</code></pre>
 <p>We then take the <span class="math inline">\(\arg\max\)</span> along the columns (cluster assignments).</p>
-<pre class="python" language="Python"><code>clusters = tf.argmax(log_liks, 1).eval()</code></pre>
+<pre class="python" data-language="Python"><code>clusters = tf.argmax(log_liks, 1).eval()</code></pre>
 <p>Plot the data points, colored by their predicted membership.</p>
-<pre class="python" language="Python"><code>plt.scatter(x_train[:, 0], x_train[:, 1], c=clusters, cmap=cm.bwr)
+<pre class="python" data-language="Python"><code>plt.scatter(x_train[:, 0], x_train[:, 1], c=clusters, cmap=cm.bwr)
 plt.axis([-3, 3, -3, 3])
 plt.title(&quot;Predicted cluster assignments&quot;)
 plt.show()</code></pre>

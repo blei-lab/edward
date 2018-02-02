@@ -106,18 +106,18 @@
     </div>
     <div class="nine columns">
 
-<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<div itemscope itemtype="http://developers.google.com/ReferenceObject">
 <meta itemprop="name" content="observations.snli" />
 </div>
 <h1 id="observations.snli">observations.snli</h1>
 <pre class="python"><code>snli(path)</code></pre>
-<p>Load the Stanford Natural Language Inference (SNLI) corpus <span class="citation">(Bowman, Angeli, Potts, &amp; Manning, 2015)</span>. It is a collection of 570,000 human-written English sentence pairs manually labeled for balanced classification with the labels entailment, contradiction, and neutral.</p>
+<p>Load the Stanford Natural Language Inference (SNLI) corpus <span class="citation" data-cites="bowman2015large">(Bowman, Angeli, Potts, &amp; Manning, 2015)</span>. It is a collection of 570,000 human-written English sentence pairs manually labeled for balanced classification with the labels entailment, contradiction, and neutral.</p>
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>path</code></b>: str. Path to directory which either stores file or otherwise file will be downloaded and extracted there. Filename is <code>snli_1.0/</code>.</li>
 </ul>
 <h4 id="returns">Returns:</h4>
-<p>Tuple of dict <code>x_train, x_test, x_valid</code>. Each dict has keys 'sentence1', 'sentence2', 'label'. The kth value in each key, e.g., <code>x_train['sentence1'][k], x_train['sentence2'][k],   x_train['label'][k]</code> comprises of a sentence pair and its label.</p>
+<p>Tuple of dict <code>x_train, x_test, x_valid</code>. Each dict has keys ‘sentence1’, ‘sentence2’, ‘label’. The kth value in each key, e.g., <code>x_train['sentence1'][k], x_train['sentence2'][k],   x_train['label'][k]</code> comprises of a sentence pair and its label.</p>
 <div id="refs" class="references">
 <div id="ref-bowman2015large">
 <p>Bowman, S. R., Angeli, G., Potts, C., &amp; Manning, C. D. (2015). A large annotated corpus for learning natural language inference. In <em>Empirical methods on natural language processing</em>.</p>

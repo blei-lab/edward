@@ -106,7 +106,7 @@
     </div>
     <div class="nine columns">
 
-<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<div itemscope itemtype="http://developers.google.com/ReferenceObject">
 <meta itemprop="name" content="observations.maybe_download_and_extract" />
 </div>
 <h1 id="observations.maybe_download_and_extract">observations.maybe_download_and_extract</h1>
@@ -123,8 +123,8 @@
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>path</code></b>: str. Path to directory which either stores file or otherwise file will be downloaded and extracted there.</li>
-<li><b><code>url</code></b>: str. URL to download from if file doesn't exist.</li>
-<li><b><code>extract</code></b>: bool, optional. If True, tries to extract the file if it has format 'gz', 'tar' (including 'tar.gz' and 'tar.bz'), or 'zip'.</li>
+<li><b><code>url</code></b>: str. URL to download from if file doesn’t exist.</li>
+<li><b><code>extract</code></b>: bool, optional. If True, tries to extract the file if it has format ‘gz’, ‘tar’ (including ‘tar.gz’ and ‘tar.bz’), or ‘zip’.</li>
 <li><b><code>hash_true</code></b>: str, optional. Hash (md5 or otherwise) string of the remote file to be downloaded.</li>
 <li><b><code>resume</code></b>: bool, optional. If True, tries to resume partial downloads (if supported by server).</li>
 <li><b><code>save_file_name</code></b>: str, optional. Save to specified file name, else derives from URL path.</li>

@@ -131,7 +131,7 @@
 = p(\beta) \prod_{n=1}^N p(z_n \mid \beta) p(x_n \mid z_n, \beta),\]</span> where there are latent variables <span class="math inline">\(z_n\)</span> for each data point <span class="math inline">\(x_n\)</span> (local variables) and latent variables <span class="math inline">\(\beta\)</span> which are shared across data points (global variables).</p>
 <p>To avoid memory issues, we work on only a subgraph of the model, <span class="math display">\[p(\mathbf{x}, \mathbf{z}, \beta)
 = p(\beta) \prod_{m=1}^M p(z_m \mid \beta) p(x_m \mid z_m, \beta).\]</span> More concretely, we might define a mixture of Gaussians over <span class="math inline">\(D\)</span>-dimensional data <span class="math inline">\(\{x_n\}\in\mathbb{R}^{N\times D}\)</span>. There are <span class="math inline">\(K\)</span> latent cluster means <span class="math inline">\(\{\beta_k\}\in\mathbb{R}^{K\times D}\)</span> and a membership assignment <span class="math inline">\(z_n\in\{0,\ldots,K-1\}\)</span> for each data point <span class="math inline">\(x_n\)</span>.</p>
-<pre class="python" language="Python"><code>from edward.models import Categorical, Normal
+<pre class="python" data-language="Python"><code>from edward.models import Categorical, Normal
 
 N = 10000000  # data set size
 M = 128  # minibatch size
@@ -144,21 +144,21 @@ x = Normal(loc=tf.gather(beta, z), scale=tf.ones([M, D]))</code></pre>
 <p>For inference, the variational model follows the same factorization as the posterior, <span class="math display">\[q(\mathbf{z}, \beta) =
 q(\beta; \lambda) \prod_{n=1}^N q(z_n \mid \beta; \gamma_n),\]</span> parameterized by <span class="math inline">\(\{\lambda, \{\gamma_n\}\}\)</span>. Again, we work on only a subgraph of the model, <span class="math display">\[q(\mathbf{z}, \beta) =
 q(\beta; \lambda) \prod_{m=1}^M q(z_m \mid \beta; \gamma_m).\]</span> parameterized by <span class="math inline">\(\{\lambda, \{\gamma_m\}\}\)</span>. Importantly, only <span class="math inline">\(M\)</span> parameters are stored in memory for <span class="math inline">\(\{\gamma_m\}\)</span> rather than <span class="math inline">\(N\)</span>.</p>
-<pre class="python" language="Python"><code>qbeta = Normal(loc=tf.Variable(tf.zeros([K, D])),
+<pre class="python" data-language="Python"><code>qbeta = Normal(loc=tf.Variable(tf.zeros([K, D])),
                scale=tf.nn.softplus(tf.Variable(tf.zeros[K, D])))
 qz_variables = tf.Variable(tf.zeros([M, K]))
 qz = Categorical(logits=qz_variables)</code></pre>
 <p>For illustration, we perform inference with <code>KLqp</code>, a variational method that minimizes the divergence measure <span class="math inline">\(\text{KL}(q\| p)\)</span>.</p>
 <p>We instantiate two algorithms: a global inference over <span class="math inline">\(\beta\)</span> given the subset of <span class="math inline">\(\mathbf{z}\)</span> and a local inference over the subset of <span class="math inline">\(\mathbf{z}\)</span> given <span class="math inline">\(\beta\)</span>. We also pass in a TensorFlow placeholder <code>x_ph</code> for the data, so we can change the data at each step. (Alternatively, <a href="/api/data">batch tensors</a> can be used.)</p>
-<pre class="python" language="Python"><code>x_ph = tf.placeholder(tf.float32, [M])
+<pre class="python" data-language="Python"><code>x_ph = tf.placeholder(tf.float32, [M])
 inference_global = ed.KLqp({beta: qbeta}, data={x: x_ph, z: qz})
 inference_local = ed.KLqp({z: qz}, data={x: x_ph, beta: qbeta})</code></pre>
 <p>We initialize the algorithms with the <code>scale</code> argument, so that computation on <code>z</code> and <code>x</code> will be scaled appropriately. This enables unbiased estimates for stochastic gradients.</p>
-<pre class="python" language="Python"><code>inference_global.initialize(scale={x: float(N) / M, z: float(N) / M})
+<pre class="python" data-language="Python"><code>inference_global.initialize(scale={x: float(N) / M, z: float(N) / M})
 inference_local.initialize(scale={x: float(N) / M, z: float(N) / M})</code></pre>
 <p>Conceptually, the scale argument represents scaling for each random variable’s plate, as if we had seen that random variable <span class="math inline">\(N/M\)</span> as many times.</p>
 <p>We now run inference, assuming there is a <code>next_batch</code> function which provides the next batch of data.</p>
-<pre class="python" language="Python"><code>qz_init = tf.initialize_variables([qz_variables])
+<pre class="python" data-language="Python"><code>qz_init = tf.initialize_variables([qz_variables])
 for _ in range(1000):
   x_batch = next_batch(size=M)
   for _ in range(10):  # make local inferences
@@ -172,13 +172,13 @@ for _ in range(1000):
 <p>This demo readily applies to other inference algorithms such as <code>SGLD</code> (stochastic gradient Langevin dynamics): simply replace <code>qbeta</code> and <code>qz</code> with <code>Empirical</code> random variables; then call <code>ed.SGLD</code> instead of <code>ed.KLqp</code>.</p>
 <h3 id="advanced-settings">Advanced settings</h3>
 <p>If the parameters fit in memory, one can avoid having to reinitialize local parameters or read/write from disk. To do this, define the full set of parameters and index them into the local posterior factors.</p>
-<pre class="python" language="Python"><code>qz_variables = tf.Variable(tf.zeros([N, K]))
+<pre class="python" data-language="Python"><code>qz_variables = tf.Variable(tf.zeros([N, K]))
 idx_ph = tf.placeholder(tf.int32, [M])
 qz = Categorical(logits=tf.gather(qz_variables, idx_ph))</code></pre>
 <p>We define an index placeholder <code>idx_ph</code>. It will be fed index values at runtime to determine which parameters correspond to a given data subsample. As an example, see the script for <a href="https://github.com/blei-lab/edward/blob/master/examples/probabilistic_pca_subsampling.py">probabilistic principal components analysis</a> with stochastic variational inference.</p>
-<p>An alternative approach to reduce memory complexity is to use an inference network <span class="citation">(Dayan, Hinton, Neal, &amp; Zemel, 1995)</span>, also known as amortized inference <span class="citation">(Stuhlmüller, Taylor, &amp; Goodman, 2013)</span>. This can be applied using a global parameterization of <span class="math inline">\(q(\mathbf{z}, \beta)\)</span>. For more details, see the <a href="/tutorials/inference-networks">inference networks tutorial</a>.</p>
-<p>In streaming data, or online inference, the size of the data <span class="math inline">\(N\)</span> may be unknown, or conceptually the size of the data may be infinite and at any time in which we query parameters from the online algorithm, the outputted parameters are from having processed as many data points up to that time. The approach of Bayesian filtering <span class="citation">(Broderick, Boyd, Wibisono, Wilson, &amp; Jordan, 2013; Doucet, Godsill, &amp; Andrieu, 2000)</span> can be applied in Edward using recursive posterior inferences; the approach of population posteriors <span class="citation">(McInerney, Ranganath, &amp; Blei, 2015)</span> is readily applicable from the subgraph setting.</p>
-<p>In other settings, working on a subgraph of the model does not apply, such as in time series models when we want to preserve dependencies across time steps in our variational model. Approaches in the literature can be applied in Edward <span class="citation">(Binder, Murphy, &amp; Russell, 1997; Foti, Xu, Laird, &amp; Fox, 2014; Johnson &amp; Willsky, 2014)</span>.</p>
+<p>An alternative approach to reduce memory complexity is to use an inference network <span class="citation" data-cites="dayan1995helmholtz">(Dayan, Hinton, Neal, &amp; Zemel, 1995)</span>, also known as amortized inference <span class="citation" data-cites="stuhlmuller2013learning">(Stuhlmüller, Taylor, &amp; Goodman, 2013)</span>. This can be applied using a global parameterization of <span class="math inline">\(q(\mathbf{z}, \beta)\)</span>. For more details, see the <a href="/tutorials/inference-networks">inference networks tutorial</a>.</p>
+<p>In streaming data, or online inference, the size of the data <span class="math inline">\(N\)</span> may be unknown, or conceptually the size of the data may be infinite and at any time in which we query parameters from the online algorithm, the outputted parameters are from having processed as many data points up to that time. The approach of Bayesian filtering <span class="citation" data-cites="doucet2000on broderick2013streaming">(Broderick, Boyd, Wibisono, Wilson, &amp; Jordan, 2013; Doucet, Godsill, &amp; Andrieu, 2000)</span> can be applied in Edward using recursive posterior inferences; the approach of population posteriors <span class="citation" data-cites="mcinerney2015population">(McInerney, Ranganath, &amp; Blei, 2015)</span> is readily applicable from the subgraph setting.</p>
+<p>In other settings, working on a subgraph of the model does not apply, such as in time series models when we want to preserve dependencies across time steps in our variational model. Approaches in the literature can be applied in Edward <span class="citation" data-cites="binder1997space johnson2014stochastic foti2014stochastic">(Binder, Murphy, &amp; Russell, 1997; Foti, Xu, Laird, &amp; Fox, 2014; Johnson &amp; Willsky, 2014)</span>.</p>
 <h3 id="references" class="unnumbered">References</h3>
 <div id="refs" class="references">
 <div id="ref-binder1997space">

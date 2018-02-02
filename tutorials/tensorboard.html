@@ -93,15 +93,15 @@
 <p>A Jupyter notebook version of this tutorial is available <a href="http://nbviewer.jupyter.org/github/blei-lab/edward/blob/master/notebooks/tensorboard.ipynb">here</a>.</p>
 <p><img src="/images/tensorboard-scalars.png" alt="image" width="750" /></p>
 <p>To use TensorBoard, we first need to specify a directory for storing logs during inference. For example, if manually controlling inference, call</p>
-<pre class="python" language="Python"><code>inference.initialize(logdir=&#39;log&#39;)</code></pre>
+<pre class="python" data-language="Python"><code>inference.initialize(logdir=&#39;log&#39;)</code></pre>
 <p>If you’re using the catch-all <code>inference.run()</code>, include <code>logdir</code> as an argument. As inference runs, files are outputted to <code>log/</code> within the working directory. In commandline, we run TensorBoard and point to that directory.</p>
-<pre language="JSON"><code>tensorboard --logdir=log/</code></pre>
+<pre data-language="JSON"><code>tensorboard --logdir=log/</code></pre>
 <p>The command will provide a web address to access TensorBoard. By default, it is <a href="http://localhost:6006" class="uri">http://localhost:6006</a>. If working correctly, you should see something like the above picture.</p>
 <p>You’re set up!</p>
 <p>Additional steps need to be taken in order to clean up TensorBoard’s naming. Specifically, we might configure names for random variables and tensors in the computational graph. To provide a concrete example, we extend the <a href="http://edwardlib.org/tutorials/supervised-regression">supervised learning tutorial</a>, where the task is to infer hidden structure from labeled examples <span class="math inline">\(\{(x_n, y_n)\}\)</span>.</p>
 <h3 id="data">Data</h3>
 <p>Simulate training and test sets of <span class="math inline">\(40\)</span> data points. They comprise of pairs of inputs <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^{5}\)</span> and outputs <span class="math inline">\(y_n\in\mathbb{R}\)</span>. They have a linear dependence with normally distributed noise.</p>
-<pre class="python" language="Python"><code>def build_toy_dataset(N, w):
+<pre class="python" data-language="Python"><code>def build_toy_dataset(N, w):
   D = len(w)
   x = np.random.normal(0.0, 2.0, size=(N, D))
   y = np.dot(x, w) + np.random.normal(0.0, 0.01, size=N)
@@ -116,7 +116,7 @@ w_true = np.random.randn(D) * 0.5
 X_train, y_train = build_toy_dataset(N, w_true)
 X_test, y_test = build_toy_dataset(N, w_true)</code></pre>
 <h3 id="model">Model</h3>
-<p>Posit the model as Bayesian linear regression <span class="citation">(Murphy, 2012)</span>. For a set of <span class="math inline">\(N\)</span> data points <span class="math inline">\((\mathbf{X},\mathbf{y})=\{(\mathbf{x}_n, y_n)\}\)</span>, the model posits the following distributions:</p>
+<p>Posit the model as Bayesian linear regression <span class="citation" data-cites="murphy2012machine">(Murphy, 2012)</span>. For a set of <span class="math inline">\(N\)</span> data points <span class="math inline">\((\mathbf{X},\mathbf{y})=\{(\mathbf{x}_n, y_n)\}\)</span>, the model posits the following distributions:</p>
 <p><span class="math display">\[\begin{aligned}
   p(\mathbf{w})
   &amp;=
@@ -132,7 +132,7 @@ X_test, y_test = build_toy_dataset(N, w_true)</code></pre>
   \text{Normal}(y_n \mid \mathbf{x}_n^\top\mathbf{w} + b, \sigma_y^2).\end{aligned}\]</span></p>
 <p>The latent variables are the linear model’s weights <span class="math inline">\(\mathbf{w}\)</span> and intercept <span class="math inline">\(b\)</span>, also known as the bias. Assume <span class="math inline">\(\sigma_w^2,\sigma_b^2\)</span> are known prior variances and <span class="math inline">\(\sigma_y^2\)</span> is a known likelihood variance. The mean of the likelihood is given by a linear transformation of the inputs <span class="math inline">\(\mathbf{x}_n\)</span>.</p>
 <p>Let’s build the model in Edward, fixing <span class="math inline">\(\sigma_w,\sigma_b,\sigma_y=1\)</span>.</p>
-<pre class="python" language="Python"><code>with tf.name_scope(&quot;model&quot;):
+<pre class="python" data-language="Python"><code>with tf.name_scope(&quot;model&quot;):
   X = tf.placeholder(tf.float32, [N, D], name=&quot;X&quot;)
   w = Normal(loc=tf.zeros(D, name=&quot;weights/loc&quot;),
              scale=tf.ones(D, name=&quot;weights/scale&quot;),
@@ -143,26 +143,24 @@ X_test, y_test = build_toy_dataset(N, w_true)</code></pre>
   y = Normal(loc=ed.dot(X, w) + b,
              scale=tf.ones(N, name=&quot;y/scale&quot;),
              name=&quot;y&quot;)</code></pre>
-<p>Here, we define a placeholder <code>X</code>. During inference, we pass in the value for this placeholder according to batches of data. We also use a name scope. This adds the scope’s name as a prefix (<code>model/</code>) to all tensors in the <code>with</code> context. Similarly, we name the parameters in each random variable under a grouped naming system.</p>
+<p>Here, we define a placeholder <code>X</code>. During inference, we pass in the value for this placeholder according to batches of data. We also use a name scope. This adds the scope’s name as a prefix (<code>&quot;model/&quot;</code>) to all tensors in the <code>with</code> context. Similarly, we name the parameters in each random variable under a grouped naming system.</p>
 <h3 id="inference">Inference</h3>
 <p>We now turn to inferring the posterior using variational inference. Define the variational model to be a fully factorized normal across the weights. We add another scope to group naming in the variational family.</p>
-<pre class="python" language="Python"><code>with tf.name_scope(&quot;posterior&quot;):
-  qw = Normal(loc=tf.Variable(tf.random_normal([D]), name=&quot;qw/loc&quot;),
-              scale=tf.nn.softplus(tf.Variable(tf.random_normal([D]),
-                                               name=&quot;qw/unconstrained_scale&quot;)),
-              name=&quot;qw&quot;)
-  qb = Normal(loc=tf.Variable(tf.random_normal([1]), name=&quot;qb/loc&quot;),
-              scale=tf.nn.softplus(tf.Variable(tf.random_normal([1]),
-                                               name=&quot;qb/unconstrained_scale&quot;)),
-              name=&quot;qb&quot;)</code></pre>
+<pre class="python" data-language="Python"><code>with tf.name_scope(&quot;posterior&quot;):
+  qw_loc = tf.get_variable(&quot;qw/loc&quot;, [D])
+  qw_scale = tf.nn.softplus(tf.get_variable(&quot;qw/unconstrained_scale&quot;, [D]))
+  qw = Normal(loc=qw_loc, scale=qw_scale, name=&quot;qw&quot;)
+  qb_loc = tf.get_variable(&quot;qb/loc&quot;, [1])
+  qb_scale = tf.nn.softplus(tf.get_variable(&quot;qb/unconstrained_scale&quot;, [1]))
+  qb = Normal(loc=qb_loc, scale=qb_scale, name=&quot;qb&quot;)</code></pre>
 <p>Run variational inference with the Kullback-Leibler divergence. We use <span class="math inline">\(5\)</span> latent variable samples for computing black box stochastic gradients in the algorithm. (For more details, see the <a href="/tutorials/klqp"><span class="math inline">\(\text{KL}(q\|p)\)</span> tutorial</a>.)</p>
-<pre class="python" language="Python"><code>inference = ed.KLqp({w: qw, b: qb}, data={X: X_train, y: y_train})
+<pre class="python" data-language="Python"><code>inference = ed.KLqp({w: qw, b: qb}, data={X: X_train, y: y_train})
 inference.run(n_samples=5, n_iter=250, logdir=&#39;log/n_samples_5&#39;)</code></pre>
 <pre><code>250/250 [100%] ██████████████████████████████ Elapsed: 5s | Loss: 50.865</code></pre>
-<p>Optionally, we might include an <code>inference</code> name scope. If it is absent, the charts are partitioned naturally and not automatically grouped under the monolithic <code>inference</code>. If it is added, the computational graph is slightly more organized.</p>
+<p>Optionally, we might include an <code>&quot;inference&quot;</code> name scope. If it is absent, the charts are partitioned naturally and not automatically grouped under the monolithic <code>&quot;inference&quot;</code>. If it is added, the computational graph is slightly more organized.</p>
 <h3 id="criticism">Criticism</h3>
 <p>We can use TensorBoard to explore learning and diagnose any problems. After running TensorBoard with the command above, we can navigate the tabs.</p>
-<p>Below we assume the above code is run twice with different configurations of the <code>n_samples</code> hyperparameter. We specified the log directory to be <code>log/n_samples_*</code>. By default, Edward also includes a timestamped subdirectory so that multiple runs of the same experiment have properly organized logs for TensorBoard. You can turn it off by specifying <code>log_timestamp=False</code> during inference.</p>
+<p>Below we assume the above code is run twice with different configurations of the <code>n_samples</code> hyperparameter. We specified the log directory to be <code>log/n_samples_</code>. By default, Edward also includes a timestamped subdirectory so that multiple runs of the same experiment have properly organized logs for TensorBoard. You can turn it off by specifying <code>log_timestamp=False</code> during inference.</p>
 <p><strong>TensorBoard Scalars.</strong></p>
 <p><img src="/images/tensorboard-scalars.png" alt="image" width="750" /></p>
 <p>Scalars provides scalar-valued information across iterations of the algorithm, wall time, and relative wall time. In Edward, the tab includes the value of scalar TensorFlow variables (free parameters) in the model or approximating family.</p>

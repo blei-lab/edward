@@ -106,7 +106,7 @@
     </div>
     <div class="nine columns">
 
-<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<div itemscope itemtype="http://developers.google.com/ReferenceObject">
 <meta itemprop="name" content="observations.svhn" />
 </div>
 <h1 id="observations.svhn">observations.svhn</h1>
@@ -114,14 +114,14 @@
     path,
     load_extra=False
 )</code></pre>
-<p>Load the Street View House Numbers data set in cropped digits format <span class="citation">(Netzer et al., 2011)</span>. It consists of 32x32 RGB images in 10 classes. There are 73257 training images, 26032 test images, and 531131 extra images.</p>
+<p>Load the Street View House Numbers data set in cropped digits format <span class="citation" data-cites="netzer2011reading">(Netzer et al., 2011)</span>. It consists of 32x32 RGB images in 10 classes. There are 73257 training images, 26032 test images, and 531131 extra images.</p>
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>path</code></b>: str. Path to directory which either stores file or otherwise file will be downloaded and extracted there. Filenames are <code>train_32x32.mat</code>, <code>test_32x32.mat</code>, <code>extra_32x32.mat</code>.</li>
 <li><b><code>load_extra</code></b>: bool, optional. Whether to load the extra images. Default is False.</li>
 </ul>
 <h4 id="returns">Returns:</h4>
-<p>Tuple of np.ndarray's <code>(x_train, y_train), (x_test, y_test)</code>, and a third tuple of <code>(x_extra, y_extra)</code> if <code>load_extra</code> is True.</p>
+<p>Tuple of np.ndarray’s <code>(x_train, y_train), (x_test, y_test)</code>, and a third tuple of <code>(x_extra, y_extra)</code> if <code>load_extra</code> is True.</p>
 <div id="refs" class="references">
 <div id="ref-netzer2011reading">
 <p>Netzer, Y., Wang, T., Coates, A., Bissacco, A., Wu, B., &amp; Ng, A. Y. (2011). Reading digits in natural images with unsupervised feature learning. In <em>NIPS workshop on deep learning and unsupervised feature learning</em> (Vol. 2011, p. 5).</p>

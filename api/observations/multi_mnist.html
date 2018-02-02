@@ -106,7 +106,7 @@
     </div>
     <div class="nine columns">
 
-<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<div itemscope itemtype="http://developers.google.com/ReferenceObject">
 <meta itemprop="name" content="observations.multi_mnist" />
 </div>
 <h1 id="observations.multi_mnist">observations.multi_mnist</h1>
@@ -116,7 +116,7 @@
     canvas_size=50,
     seed=42
 )</code></pre>
-<p>Load the multiple MNIST data set <span class="citation">(Eslami et al., 2016)</span>. It modifies the original MNIST such that each image contains a number of non-overlapping random MNIST digits with equal probability.</p>
+<p>Load the multiple MNIST data set <span class="citation" data-cites="eslami2016attend">(Eslami et al., 2016)</span>. It modifies the original MNIST such that each image contains a number of non-overlapping random MNIST digits with equal probability.</p>
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>path</code></b>: str. Path to directory which either stores file or otherwise file will be downloaded and extracted there. Filename is <code>'multi_mnist_{}_{}_{}.npz'.format(max_digits, canvas_size, seed)</code>.</li>
@@ -125,7 +125,7 @@
 <li><b><code>seed</code></b>: int, optional. Random seed to generate the data set from MNIST if not cached.</li>
 </ul>
 <h4 id="returns">Returns:</h4>
-<p>Tuple of (np.ndarray of dtype uint8, list) <code>(x_train, y_train), (x_test, y_test)</code>. Each element in the y's is a np.ndarray of labels, one label for each digit in the image.</p>
+<p>Tuple of (np.ndarray of dtype uint8, list) <code>(x_train, y_train), (x_test, y_test)</code>. Each element in the y’s is a np.ndarray of labels, one label for each digit in the image.</p>
 <div id="refs" class="references">
 <div id="ref-eslami2016attend">
 <p>Eslami, S. A., Heess, N., Weber, T., Tassa, Y., Szepesvari, D., Hinton, G. E., &amp; others. (2016). Attend, infer, repeat: Fast scene understanding with generative models. In <em>Neural information processing systems</em>.</p>

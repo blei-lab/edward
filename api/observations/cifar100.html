@@ -106,7 +106,7 @@
     </div>
     <div class="nine columns">
 
-<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<div itemscope itemtype="http://developers.google.com/ReferenceObject">
 <meta itemprop="name" content="observations.cifar100" />
 </div>
 <h1 id="observations.cifar100">observations.cifar100</h1>
@@ -114,14 +114,14 @@
     path,
     label_mode=&#39;fine&#39;
 )</code></pre>
-<p>Load the CIFAR-100 data set <span class="citation">(Krizhevsky &amp; Hinton, 2009)</span>. It consists of 32x32 RGB images in 100 classes, with 600 images per class. There are 500 training images and 100 testing images per class.</p>
+<p>Load the CIFAR-100 data set <span class="citation" data-cites="krizhevsky2009learning">(Krizhevsky &amp; Hinton, 2009)</span>. It consists of 32x32 RGB images in 100 classes, with 600 images per class. There are 500 training images and 100 testing images per class.</p>
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>path</code></b>: str. Path to directory which either stores file or otherwise file will be downloaded and extracted there. Filename is <code>cifar-100-python/</code>.</li>
-<li><b><code>label_mode</code></b>: str. 'fine' (class to which image belongs) or 'coarse' (superclass to which image belongs).</li>
+<li><b><code>label_mode</code></b>: str. ‘fine’ (class to which image belongs) or ‘coarse’ (superclass to which image belongs).</li>
 </ul>
 <h4 id="returns">Returns:</h4>
-<p>Tuple of np.ndarray's <code>(x_train, y_train), (x_test, y_test)</code>.</p>
+<p>Tuple of np.ndarray’s <code>(x_train, y_train), (x_test, y_test)</code>.</p>
 <div id="refs" class="references">
 <div id="ref-krizhevsky2009learning">
 <p>Krizhevsky, A., &amp; Hinton, G. (2009). Learning multiple layers of features from tiny images.</p>

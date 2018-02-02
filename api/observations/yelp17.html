@@ -106,7 +106,7 @@
     </div>
     <div class="nine columns">
 
-<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<div itemscope itemtype="http://developers.google.com/ReferenceObject">
 <meta itemprop="name" content="observations.yelp17" />
 </div>
 <h1 id="observations.yelp17">observations.yelp17</h1>
@@ -114,11 +114,11 @@
     path,
     categories=None
 )</code></pre>
-<p>Load Yelp reviews from the Yelp Dataset Challenge in 2017. It contains ~4.1 million reviews, ~1 million users, and ~144,000 businesses from cities in the UK, Germany, Canada, and the US. We only load the review's text and its rating.</p>
+<p>Load Yelp reviews from the Yelp Dataset Challenge in 2017. It contains ~4.1 million reviews, ~1 million users, and ~144,000 businesses from cities in the UK, Germany, Canada, and the US. We only load the review’s text and its rating.</p>
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>path</code></b>: str. Path to directory which stores file. Filename is <code>yelp_dataset_challenge_round9/</code>.</li>
-<li><b><code>categories</code></b>: str or list of str, optional. Business categories to include reviews from. It is case-sensitive, e.g., &quot;Restaurants&quot;. Default is to include all categories.</li>
+<li><b><code>categories</code></b>: str or list of str, optional. Business categories to include reviews from. It is case-sensitive, e.g., “Restaurants”. Default is to include all categories.</li>
 </ul>
 <h4 id="returns">Returns:</h4>
 <p>Tuple of list x_train and np.ndarray y_train. Each pair of elements corresponds to the review text and its rating.</p>

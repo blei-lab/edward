@@ -106,7 +106,7 @@
     </div>
     <div class="nine columns">
 
-<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<div itemscope itemtype="http://developers.google.com/ReferenceObject">
 <meta itemprop="name" content="ed.complete_conditional" />
 </div>
 <h1 id="ed.complete_conditional">ed.complete_conditional</h1>
@@ -122,7 +122,7 @@
 <p>Defined in <a href="https://github.com/blei-lab/edward/tree/master/edward/inferences/conjugacy/conjugacy.py"><code>edward/inferences/conjugacy/conjugacy.py</code></a>.</p>
 <p>Returns the conditional distribution <code>RandomVariable</code> <span class="math inline">\(p(\text{rv}\mid \cdot)\)</span>.</p>
 <p>This function tries to infer the conditional distribution of <code>rv</code> given <code>cond_set</code>, a set of other <code>RandomVariable</code>s in the graph. It will only be able to do this if</p>
-<ol style="list-style-type: decimal">
+<ol type="1">
 <li><span class="math inline">\(p(\text{rv}\mid \text{cond\_set})\)</span> is in a tractable exponential family; and</li>
 <li>the truth of assumption 1 is not obscured in the TensorFlow graph.</li>
 </ol>
@@ -130,7 +130,7 @@
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>rv</code></b>: RandomVariable. The random variable whose conditional distribution we are interested in.</li>
-<li><b><code>cond_set</code></b>: iterable of RandomVariable, optional. The set of random variables we want to condition on. Default is all random variables in the graph. (It makes no difference if <code>cond_set</code> does or does not include <code>rv</code>.)</li>
+<li><b><code>cond_set</code></b>: iterable of RandomVariable. The set of random variables we want to condition on. Default is all random variables in the graph. (It makes no difference if <code>cond_set</code> does or does not include <code>rv</code>.)</li>
 </ul>
 <h4 id="notes">Notes</h4>
 <p>When calling <code>complete_conditional()</code> multiple times, one should usually pass an explicit <code>cond_set</code>. Otherwise <code>complete_conditional()</code> will try to condition on the <code>RandomVariable</code>s returned by previous calls to itself. This may result in unpredictable behavior.</p>

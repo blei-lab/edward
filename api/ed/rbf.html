@@ -106,7 +106,7 @@
     </div>
     <div class="nine columns">
 
-<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<div itemscope itemtype="http://developers.google.com/ReferenceObject">
 <meta itemprop="name" content="ed.rbf" />
 </div>
 <h1 id="ed.rbf">ed.rbf</h1>
@@ -129,9 +129,9 @@
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>X</code></b>: tf.Tensor. N x D matrix of N data points each with D features.</li>
-<li><b><code>X2</code></b>: tf.Tensor, optional. N x D matrix of N data points each with D features.</li>
-<li><b><code>lengthscale</code></b>: tf.Tensor, optional. Lengthscale parameter, a positive scalar or D-dimensional vector.</li>
-<li><b><code>variance</code></b>: tf.Tensor, optional. Output variance parameter, a positive scalar.</li>
+<li><b><code>X2</code></b>: tf.Tensor. N x D matrix of N data points each with D features.</li>
+<li><b><code>lengthscale</code></b>: tf.Tensor. Lengthscale parameter, a positive scalar or D-dimensional vector.</li>
+<li><b><code>variance</code></b>: tf.Tensor. Output variance parameter, a positive scalar.</li>
 </ul>
 <h4 id="examples">Examples</h4>
 <pre class="python"><code>X = tf.random_normal([100, 5])

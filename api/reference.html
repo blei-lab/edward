@@ -154,7 +154,7 @@
 <li><a href="./ed/complete_conditional"><code>ed.inferences.complete_conditional</code></a></li>
 </ul>
 <h3 id="models">Models</h3>
-<p><code>ed.models</code> is comprised of random variables. The list of available random variables depends on the TensorFlow version installed. For TensorFlow 1.3.0, the following are available:</p>
+<p><code>ed.models</code> is comprised of random variables. The list of available random variables depends on the TensorFlow version installed. For TensorFlow 1.5.0-dev20171226, the following are available:</p>
 <ul>
 <li><a href="./ed/RandomVariable"><code>ed.models.RandomVariable</code></a></li>
 <li><a href="./ed/models/Bernoulli"><code>ed.models.Bernoulli</code></a></li>
@@ -163,6 +163,7 @@
 <li><a href="./ed/models/BetaWithSoftplusConcentration"><code>ed.models.BetaWithSoftplusConcentration</code></a></li>
 <li><a href="./ed/models/Binomial"><code>ed.models.Binomial</code></a></li>
 <li><a href="./ed/models/Categorical"><code>ed.models.Categorical</code></a></li>
+<li><a href="./ed/models/Cauchy"><code>ed.models.Cauchy</code></a></li>
 <li><a href="./ed/models/Chi2"><code>ed.models.Chi2</code></a></li>
 <li><a href="./ed/models/Chi2WithAbsDf"><code>ed.models.Chi2WithAbsDf</code></a></li>
 <li><a href="./ed/models/ConditionalDistribution"><code>ed.models.ConditionalDistribution</code></a></li>
@@ -178,12 +179,15 @@
 <li><a href="./ed/models/Gamma"><code>ed.models.Gamma</code></a></li>
 <li><a href="./ed/models/GammaWithSoftplusConcentrationRate"><code>ed.models.GammaWithSoftplusConcentrationRate</code></a></li>
 <li><a href="./ed/models/Geometric"><code>ed.models.Geometric</code></a></li>
+<li><a href="./ed/models/HalfNormal"><code>ed.models.HalfNormal</code></a></li>
+<li><a href="./ed/models/Independent"><code>ed.models.Independent</code></a></li>
 <li><a href="./ed/models/InverseGamma"><code>ed.models.InverseGamma</code></a></li>
 <li><a href="./ed/models/InverseGammaWithSoftplusConcentrationRate"><code>ed.models.InverseGammaWithSoftplusConcentrationRate</code></a></li>
 <li><a href="./ed/models/Laplace"><code>ed.models.Laplace</code></a></li>
 <li><a href="./ed/models/LaplaceWithSoftplusScale"><code>ed.models.LaplaceWithSoftplusScale</code></a></li>
 <li><a href="./ed/models/Logistic"><code>ed.models.Logistic</code></a></li>
 <li><a href="./ed/models/Mixture"><code>ed.models.Mixture</code></a></li>
+<li><a href="./ed/models/MixtureSameFamily"><code>ed.models.MixtureSameFamily</code></a></li>
 <li><a href="./ed/models/Multinomial"><code>ed.models.Multinomial</code></a></li>
 <li><a href="./ed/models/MultivariateNormalDiag"><code>ed.models.MultivariateNormalDiag</code></a></li>
 <li><a href="./ed/models/MultivariateNormalDiagPlusLowRank"><code>ed.models.MultivariateNormalDiagPlusLowRank</code></a></li>
@@ -197,16 +201,20 @@
 <li><a href="./ed/models/ParamMixture"><code>ed.models.ParamMixture</code></a></li>
 <li><a href="./ed/models/PointMass"><code>ed.models.PointMass</code></a></li>
 <li><a href="./ed/models/Poisson"><code>ed.models.Poisson</code></a></li>
+<li><a href="./ed/models/PoissonLogNormalQuadratureCompound"><code>ed.models.PoissonLogNormalQuadratureCompound</code></a></li>
 <li><a href="./ed/models/QuantizedDistribution"><code>ed.models.QuantizedDistribution</code></a></li>
 <li><a href="./ed/models/RelaxedBernoulli"><code>ed.models.RelaxedBernoulli</code></a></li>
 <li><a href="./ed/models/RelaxedOneHotCategorical"><code>ed.models.RelaxedOneHotCategorical</code></a></li>
+<li><a href="./ed/models/SinhArcsinh"><code>ed.models.SinhArcsinh</code></a></li>
 <li><a href="./ed/models/StudentT"><code>ed.models.StudentT</code></a></li>
 <li><a href="./ed/models/StudentTWithAbsDfSoftplusScale"><code>ed.models.StudentTWithAbsDfSoftplusScale</code></a></li>
 <li><a href="./ed/models/TransformedDistribution"><code>ed.models.TransformedDistribution</code></a></li>
 <li><a href="./ed/models/Uniform"><code>ed.models.Uniform</code></a></li>
 <li><a href="./ed/models/VectorDeterministic"><code>ed.models.VectorDeterministic</code></a></li>
+<li><a href="./ed/models/VectorDiffeomixture"><code>ed.models.VectorDiffeomixture</code></a></li>
 <li><a href="./ed/models/VectorExponentialDiag"><code>ed.models.VectorExponentialDiag</code></a></li>
 <li><a href="./ed/models/VectorLaplaceDiag"><code>ed.models.VectorLaplaceDiag</code></a></li>
+<li><a href="./ed/models/VectorSinhArcsinhDiag"><code>ed.models.VectorSinhArcsinhDiag</code></a></li>
 <li><a href="./ed/models/WishartCholesky"><code>ed.models.WishartCholesky</code></a></li>
 <li><a href="./ed/models/WishartFull"><code>ed.models.WishartFull</code></a></li>
 </ul>
@@ -228,6 +236,7 @@
 <li><a href="./ed/get_session"><code>ed.util.get_session</code></a></li>
 <li><a href="./ed/get_siblings"><code>ed.util.get_siblings</code></a></li>
 <li><a href="./ed/get_variables"><code>ed.util.get_variables</code></a></li>
+<li><a href="./ed/is_independent"><code>ed.util.is_independent</code></a></li>
 <li><a href="./ed/random_variables"><code>ed.util.random_variables</code></a></li>
 <li><a href="./ed/rbf"><code>ed.util.rbf</code></a></li>
 <li><a href="./ed/set_seed"><code>ed.util.set_seed</code></a></li>

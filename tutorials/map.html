@@ -96,7 +96,7 @@
   p(\mathbf{z} \mid \mathbf{x})\\
   &amp;=
   \arg \max_\mathbf{z}
-  \log p(\mathbf{z} \mid \mathbf{x}).\end{aligned}\]</span> In practice, we work with logarithms of densities to avoid numerical underflow issues <span class="citation">(Murphy, 2012)</span>.</p>
+  \log p(\mathbf{z} \mid \mathbf{x}).\end{aligned}\]</span> In practice, we work with logarithms of densities to avoid numerical underflow issues <span class="citation" data-cites="murphy2012machine">(Murphy, 2012)</span>.</p>
 <p>The MAP estimate is the most likely configuration of the hidden patterns <span class="math inline">\(\mathbf{z}\)</span> under the model. However, we cannot directly solve this optimization problem because the posterior is typically intractable. To circumvent this, we use Bayes’ rule to optimize over the joint density, <span class="math display">\[\begin{aligned}
   \mathbf{z}_\text{MAP}
   &amp;=

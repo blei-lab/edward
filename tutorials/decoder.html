@@ -89,7 +89,7 @@
     <div class="nine columns">
 
 <h2 id="probabilistic-decoder">Probabilistic Decoder</h2>
-<p>A probabilistic decoder is a reinterpretation of model likelihoods based on coding theory. It is a distribution <span class="math inline">\(p(\mathbf{x}_n\mid \mathbf{z}_n)\)</span> over each value <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^D\)</span> given a code <span class="math inline">\(\mathbf{z}_n\)</span>. The latent variables <span class="math inline">\(\mathbf{z}_n\)</span> are interpreted as the hidden representation, or code, of the value <span class="math inline">\(\mathbf{x}_n\)</span>. The decoder is probabilistic because its generated values (decoding) for any given code is random <span class="citation">(Dayan, Hinton, Neal, &amp; Zemel, 1995)</span>.</p>
+<p>A probabilistic decoder is a reinterpretation of model likelihoods based on coding theory. It is a distribution <span class="math inline">\(p(\mathbf{x}_n\mid \mathbf{z}_n)\)</span> over each value <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^D\)</span> given a code <span class="math inline">\(\mathbf{z}_n\)</span>. The latent variables <span class="math inline">\(\mathbf{z}_n\)</span> are interpreted as the hidden representation, or code, of the value <span class="math inline">\(\mathbf{x}_n\)</span>. The decoder is probabilistic because its generated values (decoding) for any given code is random <span class="citation" data-cites="dayan1995helmholtz">(Dayan, Hinton, Neal, &amp; Zemel, 1995)</span>.</p>
 <p><img src="/images/decoder.png" alt="image" width="250" /></p>
 <p><span><em>Graphical model of a probabilistic decoder, with model parameters <span class="math inline">\(\theta\)</span>.</em></span></p>
 <p>For real-valued data, the randomness in the decoder is given by a multivariate Gaussian <span class="math display">\[\begin{aligned}
@@ -104,7 +104,7 @@
   &amp;=
   \text{Normal}(\mathbf{z} \mid \mathbf{0}, \mathbf{I}).\end{aligned}\]</span></p>
 <p>Let’s build the model in Edward using Keras as an easy way to build neural networks. Here we use a probabilistic decoder to model binarized 28 x 28 pixel images from MNIST.</p>
-<pre class="python" language="Python"><code>from edward.models import Bernoulli, Normal
+<pre class="python" data-language="Python"><code>from edward.models import Bernoulli, Normal
 from keras.layers import Dense
 
 z = Normal(loc=tf.zeros([N, d]), scale=tf.ones([N, d]))
@@ -114,7 +114,7 @@ x = Bernoulli(logits=Dense(28 * 28)(hidden))</code></pre>
 <p>An example script using this model can be found at <a href="https://github.com/blei-lab/edward/blob/master/examples/vae.py"><code>examples/vae.py</code></a> in the Github repository. An example with a convolutional architecture can be found at <a href="https://github.com/blei-lab/edward/blob/master/examples/vae_convolutional_prettytensor.py"><code>examples/vae_convolutional_prettytensor.py</code></a> in the Github repository.</p>
 <h3 id="footnotes">Footnotes</h3>
 <p>The neural network which parameterizes the probabilistic decoder is also known as a generative network. It is in analogy to an <a href="/tutorials/inference-networks">inference network</a>, which can parameterize a variational model used for inference, interpreted as a probabilistic encoder.</p>
-<p>Traditionally, a probabilistic encoder is the most common choice of inference. This lead to the coinage of the model-inference combination known as the variational auto-encoder <span class="citation">(Kingma &amp; Welling, 2014)</span>, which is a probabilistic extension of auto-encoders. We recommend against this terminology, in favor of making explicit the separation of model and inference. That is, probabilistic decoders are a general class of models that can be used without an encoder. Variational inference is not necessary to infer probabilistic decoders, and variational inference can also be done without an inference network.</p>
+<p>Traditionally, a probabilistic encoder is the most common choice of inference. This lead to the coinage of the model-inference combination known as the variational auto-encoder <span class="citation" data-cites="kingma2014auto">(Kingma &amp; Welling, 2014)</span>, which is a probabilistic extension of auto-encoders. We recommend against this terminology, in favor of making explicit the separation of model and inference. That is, probabilistic decoders are a general class of models that can be used without an encoder. Variational inference is not necessary to infer probabilistic decoders, and variational inference can also be done without an inference network.</p>
 <h3 id="references" class="unnumbered">References</h3>
 <div id="refs" class="references">
 <div id="ref-dayan1995helmholtz">

@@ -120,7 +120,7 @@
 </div>
 <h3 id="developing-custom-random-variables">Developing Custom Random Variables</h3>
 <p>Oftentimes we’d like to implement our own random variables. To do so, write a class that inherits the <code>RandomVariable</code> class in <code>edward.models</code> and the <code>Distribution</code> class in <code>tf.contrib.distributions</code> (in that order). A template is provided below.</p>
-<pre class="python" language="Python"><code>from edward.models import RandomVariable
+<pre class="python" data-language="Python"><code>from edward.models import RandomVariable
 from tensorflow.contrib.distributions import Distribution
 
 class CustomRandomVariable(RandomVariable, Distribution):
@@ -136,7 +136,7 @@ class CustomRandomVariable(RandomVariable, Distribution):
 <p>For examples of custom random variables developed in Edward, see <a href="https://github.com/blei-lab/edward/blob/master/edward/models/empirical.py"><code>empirical.py</code></a> and <a href="https://github.com/blei-lab/edward/blob/master/edward/models/point_mass.py"><code>point_mass.py</code></a> in the Github repository. For more details and more methods one can implement, see the API documentation in TensorFlow’s <a href="https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Distribution"><code>Distribution</code> class</a>.</p>
 <h3 id="advanced-settings">Advanced settings</h3>
 <p>Sometimes the random variable you’d like to work with already exists in Edward, but it is missing a particular feature. One hack is to implement and overwrite the missing method. For example, to implement your own sampling for <code>Poisson</code>:</p>
-<pre class="python" language="Python"><code>from edward.models import Poisson
+<pre class="python" data-language="Python"><code>from edward.models import Poisson
 from scipy.stats import poisson
 
 def _sample_n(self, n=1, seed=None):
@@ -163,7 +163,7 @@ sess.run(x)
 &lt;h2 id=&quot;4_0&quot;&gt;4.0&lt;/h2&gt;</code></pre>
 <p>(Note the function <code>np_sample</code> should broadcast correctly if you’d like to work with non-scalar parameters; it is not correct in this toy implementation.)</p>
 <p>Sometimes the random variable you’d like to work with does not even admit (easy) sampling, and you’re only using it as a likelihood “node” rather than as some prior to parameters of another random variable. You can avoid having to implement <code>_sample_n</code> altogether: after creating <code>CustomRandomVariable</code>, instantiate it with the <code>value</code> argument:</p>
-<pre class="python" language="Python"><code>x = CustomRandomVariable(custom_params=params, value=tf.zeros_like(params))</code></pre>
+<pre class="python" data-language="Python"><code>x = CustomRandomVariable(custom_params=params, value=tf.zeros_like(params))</code></pre>
 <p>This fixes the associated value of the random variable to a bunch of zeros and avoids the <code>_sample_n</code> error that appears otherwise. Make sure that the value matches the desired shape of the random variable.</p>
     </div>
   </div>

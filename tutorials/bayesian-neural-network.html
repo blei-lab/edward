@@ -89,7 +89,7 @@
     <div class="nine columns">
 
 <h2 id="bayesian-neural-network">Bayesian Neural Network</h2>
-<p>A Bayesian neural network is a neural network with a prior distribution on its weights <span class="citation">(Neal, 2012)</span>.</p>
+<p>A Bayesian neural network is a neural network with a prior distribution on its weights <span class="citation" data-cites="neal2012bayesian">(Neal, 2012)</span>.</p>
 <p>Consider a data set <span class="math inline">\(\{(\mathbf{x}_n, y_n)\}\)</span>, where each data point comprises of features <span class="math inline">\(\mathbf{x}_n\in\mathbb{R}^D\)</span> and output <span class="math inline">\(y_n\in\mathbb{R}\)</span>. Define the likelihood for each data point as <span class="math display">\[\begin{aligned}
   p(y_n \mid \mathbf{w}, \mathbf{x}_n, \sigma^2)
   &amp;=
@@ -99,7 +99,7 @@
   &amp;=
   \text{Normal}(\mathbf{w} \mid \mathbf{0}, \mathbf{I}).\end{aligned}\]</span></p>
 <p>Let’s build the model in Edward. We define a 3-layer Bayesian neural network with <span class="math inline">\(\tanh\)</span> nonlinearities.</p>
-<pre class="python" language="Python"><code>from edward.models import Normal
+<pre class="python" data-language="Python"><code>from edward.models import Normal
 
 def neural_network(x):
     h = tf.tanh(tf.matmul(x, W_0) + b_0)

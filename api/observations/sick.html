@@ -106,18 +106,18 @@
     </div>
     <div class="nine columns">
 
-<div itemscope="" itemtype="http://developers.google.com/ReferenceObject">
+<div itemscope itemtype="http://developers.google.com/ReferenceObject">
 <meta itemprop="name" content="observations.sick" />
 </div>
 <h1 id="observations.sick">observations.sick</h1>
 <pre class="python"><code>sick(path)</code></pre>
-<p>Load the Sentences Involving Compositional Knowledge (SICK) data set <span class="citation">(Marelli et al., 2014)</span>. It consists of ~10,000 English sentence pairs, where each pair is annotated for relatedness and entailment. There are 923 pairs within the [1,2) range, 1373 pairs within the [2,3) range, 3872 pairs within the [3,4) range, and 3672 pairs within the [4,5] range; the entailment annotation led to 5595 neutral pairs, 1424 contradiction pairs, and 2821 entailment pairs.</p>
+<p>Load the Sentences Involving Compositional Knowledge (SICK) data set <span class="citation" data-cites="marelli2014sick">(Marelli et al., 2014)</span>. It consists of ~10,000 English sentence pairs, where each pair is annotated for relatedness and entailment. There are 923 pairs within the [1,2) range, 1373 pairs within the [2,3) range, 3872 pairs within the [3,4) range, and 3672 pairs within the [4,5] range; the entailment annotation led to 5595 neutral pairs, 1424 contradiction pairs, and 2821 entailment pairs.</p>
 <h4 id="args">Args:</h4>
 <ul>
 <li><b><code>path</code></b>: str. Path to directory which either stores file or otherwise file will be downloaded and extracted there. Filenames are <code>SICK_train.txt</code>, <code>SICK_test_annotated.txt</code>, <code>SICK_trial.txt</code>.</li>
 </ul>
 <h4 id="returns">Returns:</h4>
-<p>Tuple of dict <code>x_train, x_test, x_valid</code>. Each dict has keys 'relatedness_score', 'pair_ID', 'sentence_A', 'sentence_B', 'entailment_judgment'. The kth value in each key comprises of the kth sentence pair and its annotations.</p>
+<p>Tuple of dict <code>x_train, x_test, x_valid</code>. Each dict has keys ‘relatedness_score’, ‘pair_ID’, ‘sentence_A’, ‘sentence_B’, ‘entailment_judgment’. The kth value in each key comprises of the kth sentence pair and its annotations.</p>
 <div id="refs" class="references">
 <div id="ref-marelli2014sick">
 <p>Marelli, M., Menini, S., Baroni, M., Bentivogli, L., Bernardi, R., &amp; Zamparelli, R. (2014). A SICK cure for the evaluation of compositional distributional semantic models. In <em>LREC</em> (pp. 216–223).</p>
