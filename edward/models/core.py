@@ -9,87 +9,11 @@ from edward.models.random_variable import RandomVariable as _RandomVariable
 from tensorflow.contrib import distributions as _distributions
 
 
-class Trace(object):
-  """Context manager with two objects:
-
-  + The trace stack stores executions from each primitive fn.
-  + (Optional) The intercept callable intercepts the continuation of a function.
-
-  Optionally, the trace stack stores the function call, its inputs, and
-  its parent primitives. This lets us trace the continuation
-  structure. Storing inputs can be memory-intensive as it prevents
-  garbage collection; hence it's optional.
-  """
-  def __init__(self, intercept=None, trace_continuation=False):
-    self._intercept = intercept
-    self._trace_continuation = trace_continuation
-    # We use OrderedDict. It is essentially a stack where each element is a node
-    # (value) and its name (key); the name is a pointer to the node.
-    self._trace_stack = _collections.OrderedDict({})
-
-  def __enter__(self):
-    # Note if Trace's are nested, global vars are set
-    # to the innermost context's variables.
-    if self._intercept is not None:
-      global _INTERCEPT
-      _INTERCEPT = self._intercept
-    global _TRACE_CONTINUATION, _TRACE_STACK
-    _TRACE_CONTINUATION = self._trace_continuation
-    _TRACE_STACK = self._trace_stack
-    return self
-
-  def __exit__(self, t, v, tb):
-    global _INTERCEPT, _TRACE_CONTINUATION, _TRACE_STACK
-    try:
-      del _INTERCEPT
-    except:
-      pass
-    del _TRACE_CONTINUATION
-    del _TRACE_STACK
-
-  # operator-overloading for convenience
-  def __repr__(self):
-    return self._trace_stack.__repr__()
-
-  def __str__(self):
-    return self._trace_stack.__str__()
-
-  def __delitem__(self, key):
-    del self._trace_stack[key]
-
-  def __getitem__(self, key):
-    return self._trace_stack[key]
-
-  def __setitem__(self, key, value):
-    self._trace_stack[key] = value
-
-  def get(self, key, value=None):
-    return self._trace_stack.get(key, value)
-
-  def iteritems(self):
-    return self._trace_stack.items()
-
-  def iterkeys(self):
-    return self._trace_stack.keys()
-
-  def itervalues(self):
-    return self._trace_stack.values()
-
-  def items(self):
-    return self._trace_stack.items()
-
-  def keys(self):
-    return self._trace_stack.keys()
-
-  def values(self):
-    return self._trace_stack.values()
-
-
 class Node(object):
-  """Node in trace stack. Collection of nodes forms a directed acyclic graph."""
+  """Node in execution trace. A trace's nodes form a directed acyclic graph."""
   __slots__ = ['value', 'f', 'args', 'kwargs', 'parents']
 
-  def __init__(self, value, f=None, args=None, kwargs=None, parents=None):
+  def __init__(self, value, f, args, kwargs, parents):
     self.value = value
     self.f = f
     self.args = args
@@ -97,52 +21,71 @@ class Node(object):
     self.parents = parents
 
 
-def primitive(fn):
-  """Wraps function so its continuation can be intercepted
-  and its execution can be written to a stack.
-
-  Apply this to decorate primitive functions.
-  """
-  def wrapped_fn(*args, **kwargs):
-    global _INTERCEPT, _TRACE_CONTINUATION, _TRACE_STACK
-    if '_INTERCEPT' in globals():
-      out = _INTERCEPT(fn, *args, **kwargs)
+def primitive(cls_init):
+  """Wraps class __init__ for recording and intercepting."""
+  def __init__(self, *args, **kwargs):
+    global _INTERCEPT, _STORE_ARGS, _TRACE_STACK
+    if '_INTERCEPT' in globals() and callable(_INTERCEPT):
+      _INTERCEPT(cls_init, self, *args, **kwargs)
     else:
-      out = fn(*args, **kwargs)
-    if '_TRACE_CONTINUATION' in globals() and '_TRACE_STACK' in globals():
-      if _TRACE_CONTINUATION:
+      cls_init(self, *args, **kwargs)
+    if '_STORE_ARGS' in globals() and '_TRACE_STACK' in globals():
+      if _STORE_ARGS:
         parents = [v for v in list(args) + kwargs.values()
                    if hasattr(v, "name") and v.name in _TRACE_STACK]
-        _TRACE_STACK[out.name] = Node(out, fn, args, kwargs, parents)
+        _TRACE_STACK[self.name] = Node(self, cls_init, args, kwargs, parents)
       else:
-        _TRACE_STACK[out.name] = Node(out)
-    return out
-  return wrapped_fn
+        _TRACE_STACK[self.name] = Node(self, None, None, None, None)
+  return __init__
 
 
-# TODO(trandustin): wrapping via init, not primitive() so wrapped
-# class still belongs in RandomVariable. Is this distinction
-# necessary?
-def _primitive_cls(__init__):
-  """Wraps class' __init__ so its continuation can be intercepted
-  and its execution can be written to a stack.
+def trace(f, *args, **kwargs):
+  """Traces the function `f(*args, **kwargs)`.
 
-  Apply this to decorate primitive classes.
+  Args:
+    f: Function to trace.
+    intercept: Function to intercept primitives. It takes a primitive
+      function `f`, inputs `args, kwargs`, and may return any value and/or
+      add side-effects. Default is `None`, equivalent to `f(*args, **kwargs)`.
+    store_args: Boolean for whether `Node`s store their inputs and parent
+      primitives. Default is `False`.
+    args, kwargs: (Possible) inputs to function.
+
+  Returns:
+    The execution trace of `f`, collecting any `primitive` operations that the
+    function executed. It is reified as a stack (`OrderedDict`), and each
+    executed primitive is a `Node` on the stack indexed by its string name.
+
+  #### Examples
+
+  ```python
+  def f(x):
+    y = Poisson(rate=x, name="y")
+
+  def intercept(f, *args, **kwargs):
+    if kwargs.get("name") == "y":
+      kwargs["value"] = 42
+    return f(*args, **kwargs)
+
+  trace_stack = ed.trace(f, 1.5, intercept=intercept)
+  print(trace_stack)
+  ## OrderedDict([('y', <edward.models.core.Node object at 0x118c1ce10>)])
+
+  rv = trace_stack["y"].value
+  with tf.Session() as sess:
+    assert sess.run(rv.value) == 42
+  ```
   """
-  def wrapped_fn(self, *args, **kwargs):
-    global _INTERCEPT, _TRACE_CONTINUATION, _TRACE_STACK
-    if '_INTERCEPT' in globals():
-      _INTERCEPT(__init__, self, *args, **kwargs)
-    else:
-      __init__(self, *args, **kwargs)
-    if '_TRACE_CONTINUATION' in globals() and '_TRACE_STACK' in globals():
-      if _TRACE_CONTINUATION:
-        parents = [v for v in list(args) + kwargs.values()
-                   if hasattr(v, "name") and v.name in _TRACE_STACK]
-        _TRACE_STACK[self.name] = Node(self, __init__, args, kwargs, parents)
-      else:
-        _TRACE_STACK[self.name] = Node(self)
-  return wrapped_fn
+  # TODO move call_function_up_to_args
+  from edward.inferences.util import call_function_up_to_args
+  global _INTERCEPT, _STORE_ARGS, _TRACE_STACK
+  _INTERCEPT = kwargs.pop("intercept", None)
+  _STORE_ARGS = kwargs.pop("store_args", False)
+  _TRACE_STACK = _collections.OrderedDict({})
+  call_function_up_to_args(f, *args, **kwargs)
+  output = _TRACE_STACK
+  del _INTERCEPT, _STORE_ARGS, _TRACE_STACK
+  return output
 
 
 # Automatically generate random variable classes from classes in
@@ -156,7 +99,7 @@ for _name in sorted(dir(_distributions)):
 
     # write a new __init__ method in order to decorate class as primitive
     # and share _candidate's docstring
-    @_primitive_cls
+    @primitive
     def __init__(self, *args, **kwargs):
       _RandomVariable.__init__(self, *args, **kwargs)
     __init__.__doc__ = _candidate.__init__.__doc__

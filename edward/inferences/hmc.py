@@ -6,8 +6,8 @@ import six
 import tensorflow as tf
 
 from edward.inferences import docstrings as doc
-from edward.inferences.util import call_function_up_to_args, make_intercept
-from edward.models.core import Node, Trace
+from edward.inferences.util import make_intercept
+from edward.models.core import Node, trace
 
 tfp = tf.contrib.bayesflow
 
@@ -109,8 +109,7 @@ def hmc(model,
                        for state, arg in zip(states, fargs)}
     intercept = make_intercept(
         posterior_trace, align_data, align_latent, args, kwargs)
-    with Trace(intercept=intercept) as model_trace:
-      call_function_up_to_args(model, *args, **kwargs)
+    model_trace = trace(model, intercept=intercept, *args, **kwargs)
 
     p_log_prob = 0.0
     for name, node in six.iteritems(model_trace):

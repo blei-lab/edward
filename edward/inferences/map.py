@@ -6,8 +6,8 @@ import six
 import tensorflow as tf
 
 from edward.inferences import docstrings as doc
-from edward.inferences.util import call_function_up_to_args, make_intercept
-from edward.models.core import Trace
+from edward.inferences.util import make_intercept
+from edward.models.core import trace
 
 try:
   from tensorflow.contrib.distributions import bijectors
@@ -98,12 +98,10 @@ def map(model, variational, align_latent, align_data,
   performing MAP on the unconstrained space: in general, the MAP of
   the transform is not the transform of the MAP.
   """
-  with Trace() as posterior_trace:
-    call_function_up_to_args(variational, *args, **kwargs)
+  posterior_trace = trace(variational, *args, **kwargs)
   intercept = make_intercept(
       posterior_trace, align_data, align_latent, args, kwargs)
-  with Trace(intercept=intercept) as model_trace:
-    call_function_up_to_args(model, *args, **kwargs)
+  model_trace = trace(model, intercept=intercept, *args, **kwargs)
 
   p_log_prob = 0.0
   for name, node in six.iteritems(model_trace):

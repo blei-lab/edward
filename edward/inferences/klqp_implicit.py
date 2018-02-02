@@ -6,8 +6,8 @@ import six
 import tensorflow as tf
 
 from edward.inferences import docstrings as doc
-from edward.inferences.util import call_function_up_to_args, make_intercept
-from edward.models.core import Trace
+from edward.inferences.util import make_intercept
+from edward.models.core import trace
 
 
 @doc.set_doc(
@@ -163,14 +163,12 @@ def klqp_implicit(model, variational, discriminator, align_latent,
   else:
     raise ValueError('Ratio loss not found:', ratio_loss)
 
-  with Trace() as posterior_trace:
-    call_function_up_to_args(variational, *args, **kwargs)
+  posterior_trace = trace(variational, *args, **kwargs)
+  # Intercept model's global latent variables and set to posterior
+  # samples (but not its locals).
   global_intercept = make_intercept(
       posterior_trace, align_data, align_latent_global, args, kwargs)
-  with Trace(intercept=global_intercept) as model_trace:
-    # Intercept model's global latent variables and set to posterior
-    # samples (but not its locals).
-    call_function_up_to_args(model, *args, **kwargs)
+  model_trace = trace(model, intercept=global_intercept, *args, **kwargs)
 
   # Collect tensors used in calculation of losses.
   pbeta_log_prob = 0.0

@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from edward.inferences import docstrings as doc
 from edward.inferences.util import call_function_up_to_args
-from edward.models.core import Trace
+from edward.models.core import trace
 
 
 @doc.set_doc(
@@ -77,8 +77,8 @@ def bigan_inference(model, variational, discriminator, align_latent,
       x_data=x_data)
   ```
   """
-  with Trace() as posterior_trace:
-    call_function_up_to_args(variational, *args, **kwargs)
+  posterior_trace = trace(variational, *args, **kwargs)
+  # TODO
   with Trace() as model_trace:
     x_fake = call_function_up_to_args(model, *args, **kwargs)
 

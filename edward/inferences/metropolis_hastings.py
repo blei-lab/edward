@@ -6,8 +6,8 @@ import six
 import tensorflow as tf
 
 from edward.inferences import docstrings as doc
-from edward.inferences.util import call_function_up_to_args, make_intercept
-from edward.models.core import Node, Trace
+from edward.inferences.util import make_intercept
+from edward.models.core import Node, trace
 
 tfp = tf.contrib.bayesflow
 
@@ -109,8 +109,7 @@ def metropolis_hastings(model,
                        for state, arg in zip(states, fargs)}
     intercept = make_intercept(
         posterior_trace, align_data, align_latent, args, kwargs)
-    with Trace(intercept=intercept) as model_trace:
-      call_function_up_to_args(model, *args, **kwargs)
+    model_trace = trace(model, intercept=intercept, *args, **kwargs)
 
     global inverse_align_latent
     inverse_align_latent = {}
@@ -131,9 +130,8 @@ def metropolis_hastings(model,
     returns same size and order as inputted states.
     """
     global inverse_align_latent
-    with Trace() as new_trace:
-      # Build g(new | old): new states are drawn given old states as input.
-      call_function_up_to_args(proposal, *fargs)
+    # Build g(new | old): new states are drawn given old states as input.
+    new_trace = trace(proposal, *fargs)
     new_states = []
     old_proposal_trace = {}
     for state, farg in zip(states, fargs):
@@ -145,9 +143,8 @@ def metropolis_hastings(model,
     align_latent = lambda name: name if name in old_proposal_trace else None
     intercept = make_intercept(
         old_proposal_trace, align_data, align_latent, args, kwargs)
-    with Trace(intercept=intercept) as old_trace:
-      # Build g(old | new): `value`s set to old states; new states are input.
-      call_function_up_to_args(proposal, *new_states)
+    # Build g(old | new): `value`s set to old states; new states are input.
+    old_trace = trace(proposal, intercept=intercept, *new_states)
     old_states = [old_trace[align_proposal(
                     inverse_align_latent[state.name.split(':')[0]])].value
                   for state in states]

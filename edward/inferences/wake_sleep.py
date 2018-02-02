@@ -6,8 +6,8 @@ import six
 import tensorflow as tf
 
 from edward.inferences import docstrings as doc
-from edward.inferences.util import call_function_up_to_args, make_intercept
-from edward.models.core import Trace
+from edward.inferences.util import make_intercept
+from edward.models.core import trace
 
 
 @doc.set_doc(
@@ -98,12 +98,10 @@ def wake_sleep(model, variational, align_latent, align_data,
   p_log_prob = [0.0] * n_samples
   q_log_prob = [0.0] * n_samples
   for s in range(n_samples):
-    with Trace() as posterior_trace:
-      call_function_up_to_args(variational, *args, **kwargs)
+    posterior_trace = trace(variational, *args, **kwargs)
     intercept = make_intercept(
         posterior_trace, align_data, align_latent, args, kwargs)
-    with Trace(intercept=intercept) as model_trace:
-      call_function_up_to_args(model, *args, **kwargs)
+    model_trace = trace(model, intercept=intercept, *args, **kwargs)
 
     for name, node in six.iteritems(model_trace):
       rv = node.value
@@ -117,12 +115,10 @@ def wake_sleep(model, variational, align_latent, align_data,
             scale_factor * qz.log_prob(tf.stop_gradient(qz.value)))
 
     if phase_q == 'sleep':
-      with Trace() as model_trace:
-        call_function_up_to_args(model, *args, **kwargs)
+      model_trace = trace(model, *args, **kwargs)
       intercept = _make_sleep_intercept(
           model_trace, align_data, align_latent, args, kwargs)
-      with Trace(intercept=intercept) as posterior_trace:
-        call_function_up_to_args(variational, *args, **kwargs)
+      posterior_trace = trace(variational, intercept=intercept, *args, **kwargs)
 
       # Build dictionary to return scale factor for a posterior
       # variable via its corresponding prior. The implementation is

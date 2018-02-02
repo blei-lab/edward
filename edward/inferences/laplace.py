@@ -7,8 +7,7 @@ import tensorflow as tf
 
 from edward.inferences import docstrings as doc
 from edward.inferences.map import map
-from edward.inferences.util import call_function_up_to_args
-from edward.models.core import Trace
+from edward.models.core import trace
 from edward.models.queries import get_variables
 
 try:
@@ -96,12 +95,11 @@ def _finalize(loss, variational):
 
   Computes the Hessian at the mode.
   """
-  with Trace() as trace:
-    call_function_up_to_args(variational, *args, **kwargs)
+  posterior_trace = trace(variational, *args, **kwargs)
   hessians = tf.hessians(
-      loss, [node.value.loc for node in six.itervalues(trace)])
+      loss, [node.value.loc for node in six.itervalues(posterior_trace)])
   finalize_ops = []
-  for qz, hessian in zip(six.itervalues(trace), hessians):
+  for qz, hessian in zip(six.itervalues(posterior_trace), hessians):
     if isinstance(qz, (MultivariateNormalDiag, Normal)):
       scale_var = get_variables(qz.variance())[0]
       scale = 1.0 / tf.diag_part(hessian)
@@ -119,11 +117,9 @@ def _make_variational_pointmass(variational, *args, **kwargs):
 
   We assume all latent variables are traceable in one execution.
   """
-  with Trace() as trace:
-    call_function_up_to_args(variational, *args, **kwargs)
-
+  posterior_trace = trace(variational, *args, **kwargs)
   def variational_pointmass(*args, **kwargs):
-    for name, node in six.iteritems(trace):
+    for name, node in six.iteritems(posterior_trace):
       qz = node.value
       qz_pointmass = PointMass(params=qz.loc,
                                name=qz.name + "_pointmass",

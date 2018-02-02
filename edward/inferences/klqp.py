@@ -6,8 +6,8 @@ import six
 import tensorflow as tf
 
 from edward.inferences import docstrings as doc
-from edward.inferences.util import call_function_up_to_args, make_intercept
-from edward.models.core import Trace
+from edward.inferences.util import make_intercept
+from edward.models.core import trace
 
 try:
   from edward.models import Normal
@@ -114,12 +114,10 @@ def klqp(model, variational, align_latent, align_data,
   surrogate_loss = [None] * n_samples
   kl_penalty = 0.0
   for s in range(n_samples):
-    with Trace() as posterior_trace:
-      call_function_up_to_args(variational, *args, **kwargs)
+    posterior_trace = trace(variational, *args, **kwargs)
     intercept = make_intercept(
         posterior_trace, align_data, align_latent, args, kwargs)
-    with Trace(intercept=intercept) as model_trace:
-      call_function_up_to_args(model, *args, **kwargs)
+    model_trace = trace(model, intercept=intercept, *args, **kwargs)
 
     # Collect key-value pairs of (rv, rv's (scaled) log prob).
     p_dict = {}
@@ -252,13 +250,10 @@ def klqp_reparameterization(model, variational, align_latent, align_data,
   p_log_prob = [0.0] * n_samples
   q_log_prob = [0.0] * n_samples
   for s in range(n_samples):
-    with Trace() as posterior_trace:
-      call_function_up_to_args(variational, *args, **kwargs)
+    posterior_trace = trace(variational, *args, **kwargs)
     intercept = make_intercept(
         posterior_trace, align_data, align_latent, args, kwargs)
-    with Trace(intercept=intercept) as model_trace:
-      call_function_up_to_args(model, *args, **kwargs)
-
+    model_trace = trace(model, intercept=intercept, *args, **kwargs)
     for name, node in six.iteritems(model_trace):
       rv = node.value
       scale_factor = scale(name)
@@ -358,12 +353,10 @@ def klqp_reparameterization_kl(model, variational, align_latent, align_data,
   """
   p_log_lik = [0.0] * n_samples
   for s in range(n_samples):
-    with Trace() as posterior_trace:
-      call_function_up_to_args(variational, *args, **kwargs)
+    posterior_trace = trace(variational, *args, **kwargs)
     intercept = make_intercept(
         posterior_trace, align_data, align_latent, args, kwargs)
-    with Trace(intercept=intercept) as model_trace:
-      call_function_up_to_args(model, *args, **kwargs)
+    model_trace = trace(model, intercept=intercept, *args, **kwargs)
 
     for name, node in six.iteritems(model_trace):
       if align_data(name) is not None:
@@ -465,12 +458,10 @@ def klqp_score(model, variational, align_latent, align_data,
   p_log_prob = [0.0] * n_samples
   q_log_prob = [0.0] * n_samples
   for s in range(n_samples):
-    with Trace() as posterior_trace:
-      call_function_up_to_args(variational, *args, **kwargs)
+    posterior_trace = trace(variational, *args, **kwargs)
     intercept = make_intercept(
         posterior_trace, align_data, align_latent, args, kwargs)
-    with Trace(intercept=intercept) as model_trace:
-      call_function_up_to_args(model, *args, **kwargs)
+    model_trace = trace(model, intercept=intercept, *args, **kwargs)
 
     for name, node in six.iteritems(model_trace):
       rv = node.value
