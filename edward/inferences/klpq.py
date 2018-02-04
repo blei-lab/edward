@@ -92,7 +92,7 @@ class KLpq(VariationalInference):
         stochastic gradients.
     """
     if n_samples <= 0:
-	raise ValueError("n_samples should be greater than zero: {}".format(n_samples))
+        raise ValueError("n_samples should be greater than zero: {}".format(n_samples))
     self.n_samples = n_samples
     return super(KLpq, self).initialize(*args, **kwargs)
 
