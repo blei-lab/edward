@@ -4,7 +4,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from edward.util.tensorflow import get_control_variate_coef
+from edward.inferences.util import get_control_variate_coef
 
 
 class test_get_control_variate_coef(tf.test.TestCase):
