@@ -6,8 +6,7 @@ import six
 import tensorflow as tf
 
 from edward.inferences import docstrings as doc
-from edward.inferences.util import make_intercept
-from edward.models.core import Node, trace
+from edward.inferences.util import make_log_joint
 
 tfp = tf.contrib.bayesflow
 
@@ -77,13 +76,14 @@ def sgld(model,
   def model():
     mu = Normal(loc=0.0, scale=1.0, name="mu")
     x = Normal(loc=mu, scale=1.0, sample_shape=10, name="x")
+    return x
   ```
   In graph mode, build `tf.Variable`s which are updated via the Markov
   chain. The update op is fetched at runtime over many iterations.
   ```python
   qmu = tf.get_variable("qmu", initializer=1.)
   qmu_mom = tf.get_variable("qmu_mom", initializer=0.)
-  new_state, new_momentum = ed.sgld(
+  next_state, next_momentum = ed.sgld(
       model,
       ...,
       current_state=qmu,
@@ -91,16 +91,16 @@ def sgld(model,
       align_latent=lambda name: "qmu" if name == "mu" else None,
       align_data=lambda name: "x_data" if name == "x" else None,
       x_data=x_data)
-  qmu_update = qmu.assign(new_state)
-  qmu_mom_update = qmu_mom.assign(new_momentum)
+  qmu_update = qmu.assign(next_state)
+  qmu_mom_update = qmu_mom.assign(next_momentum)
   ```
   In eager mode, call the function at runtime, updating its inputs
-  such as `state`.
+  such as `current_state`.
   ```python
   qmu = 1.
   qmu_mom = None
   for _ in range(1000):
-    new_state, momentum = ed.sgld(
+    next_state, momentum = ed.sgld(
         model,
         ...,
         current_state=qmu,
@@ -108,32 +108,13 @@ def sgld(model,
         align_latent=lambda name: "qmu" if name == "mu" else None,
         align_data=lambda name: "x_data" if name == "x" else None,
         x_data=x_data)
-    qmu = new_state
-    qmu_mom = new_momentum
+    qmu = next_state
+    qmu_mom = next_momentum
   ```
   """
-  def _target_log_prob_fn(*fargs):
-    """Target's unnormalized log-joint density as a function of states."""
-    posterior_trace = {state.name.split(':')[0]: Node(arg)
-                       for state, arg in zip(states, fargs)}
-    intercept = make_intercept(
-        posterior_trace, align_data, align_latent, args, kwargs)
-    model_trace = trace(model, intercept=intercept, *args, **kwargs)
-
-    p_log_prob = 0.0
-    for name, node in six.iteritems(model_trace):
-      if align_latent(name) is not None or align_data(name) is not None:
-        rv = node.value
-        p_log_prob += tf.reduce_sum(rv.log_prob(rv.value))
-    return p_log_prob
-
-  is_list_like = lambda x: isinstance(x, (tuple, list))
-  maybe_list = lambda x: list(x) if is_list_like(x) else [x]
-  states = maybe_list(state)
-
   out = tfp.sgld.kernel(
-      target_log_prob_fn=_target_log_prob_fn,
-      current_state=state,
+      target_log_prob_fn=make_log_joint(model, current_state),
+      current_state=current_state,
       momentum=momentum,
       learning_rate=learning_rate,
       preconditioner_decay_rate=preconditioner_decay_rate,

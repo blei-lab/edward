@@ -216,13 +216,22 @@ def get_parents(x, collection=None):
     list of RandomVariable.
     Parent random variables of x.
 
+  #### Notes
+
+  We implement this using `tf.gradients`. This is potentially inefficient vs
+  to traverse and stop after reaching all ancestors which are root nodes
+  and/or rvs. Note user can also use `tf.stop_gradient` to stop graph traversal
+  of a node.
+
+  TODO how to extend to eager with its gradients function?
+
   #### Examples
 
   ```python
-  a = Normal(0.0, 1.0)
-  b = Normal(a, 1.0)
-  c = Normal(0.0, 1.0)
-  d = Normal(b * c, 1.0)
+  a = Normal(0.0, 1.0, name="a")
+  b = Normal(a, 1.0, name="b")
+  c = Normal(0.0, 1.0, name="c")
+  d = Normal(b * c, 1.0, name="d")
   assert set(ed.get_parents(d)) == set([b, c])
   ```
   """
@@ -252,6 +261,17 @@ def get_parents(x, collection=None):
       nodes.update(node.op.inputs)
 
   return list(output)
+  # TODO this gets ancestors
+  parents = []
+  if collection is None:
+    collection = random_variables()
+  if isinstance(x,
+                (tf.Variable, tf.SparseTensor, tf.Tensor, RandomVariable)):
+    for g, v in zip(tf.gradients(node, collection), collection):
+      if g is not None:
+        parents.append(v)
+  parents.remove(node)
+  return set(parents)
 
 
 def get_siblings(x, collection=None):
@@ -416,6 +436,3 @@ def is_independent(a, b, condition=None):
           schedule.append((child, "parent"))
 
   return True
-
-
-del random_variables

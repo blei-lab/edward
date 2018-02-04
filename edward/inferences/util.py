@@ -2,36 +2,34 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import collections
 import inspect
+import operator
 import six
 import tensorflow as tf
 
-from edward.models.random_variable import RandomVariable
+from edward.models.core import call_with_manipulate
 from edward.models.core import TransformedDistribution
+from edward.models.random_variable import RandomVariable
 
 tfb = tf.contrib.distributions.bijectors
 
 
-def call_function_up_to_args(f, *args, **kwargs):
-  """Call f, removing any args/kwargs it doesn't take as input."""
-  if hasattr(f, "_func"):  # tf.make_template()
-    argspec = inspect.getargspec(f._func)
-  else:
-    argspec = inspect.getargspec(f)
-  fkwargs = {}
-  for k, v in six.iteritems(kwargs):
-    if k in argspec.args:
-      fkwargs[k] = v
-  num_args = len(argspec.args) - len(fkwargs)
-  if num_args > 0:
-    return f(*args[:num_args], **fkwargs)
-  elif len(fkwargs) > 0:
-    return f(**fkwargs)
-  return f()
+def call_with_trace(f, *args, **kwargs):
+  """Calls function and writes to a stack to expose its execution trace."""
+  def manipulate(cls_init, self, *fargs, **fkwargs):
+    cls_init(self, *fargs, **fkwargs)
+    stack[self.name] = self
+  stack = collections.OrderedDict({})
+  f = make_optional_inputs(f)
+  call_with_manipulate(f, manipulate, *args, **kwargs)
+  return stack
 
 
-def make_intercept(trace, align_data, align_latent, args, kwargs):
-  def _intercept(f, *fargs, **fkwargs):
+def call_with_intercept(f, trace, align_data, align_latent,
+                        *args, **kwargs):
+  """Calls function and intercepts its primitive ops' sample values."""
+  def manipulate(f, *fargs, **fkwargs):
     """Set model's sample values to variational distribution's and data."""
     name = fkwargs.get('name', None)
     key = align_data(name)
@@ -40,19 +38,91 @@ def make_intercept(trace, align_data, align_latent, args, kwargs):
     elif kwargs.get(key, None) is not None:
       fkwargs['value'] = kwargs.get(key)
     elif align_latent(name) is not None:
-      qz = trace[align_latent(name)].value
-      if isinstance(qz, RandomVariable):
-        value = qz.value
-      else:  # e.g. replacement is Tensor
-        value = tf.convert_to_tensor(qz)
-      fkwargs['value'] = value
+      fkwargs['value'] = tf.convert_to_tensor(trace[align_latent(name)])
     # if auto_transform and 'qz' in locals():
     #   # TODO for generation to work, must output original dist. to
     #   keep around TD? must maintain another stack to write to as a
     #   side-effect (or augment the original stack).
     #   return transform(f, qz, *fargs, **fkwargs)
     return f(*fargs, **fkwargs)
-  return _intercept
+  f = make_optional_inputs(f)
+  return call_with_manipulate(f, manipulate, *args, **kwargs)
+
+
+def make_log_joint(model, states):
+  """Factory to make a log-joint probability function.
+
+  It takes a model and transition states as input. It returns its log-joint
+  probability as a function of the states. (This is applied in Markov chain
+  Carlo algorithms.)
+  """
+  maybe_list = lambda x: list(x) if isinstance(x, (tuple, list)) else [x]
+  states = maybe_list(states)
+  def log_joint(*fargs):
+    """Target's unnormalized log-joint density as a function of states."""
+    q_trace = {state.name.split(':')[0]: arg
+               for state, arg in zip(states, fargs)}
+    x = call_with_intercept(model, q_trace, align_data, align_latent,
+                            *args, **kwargs)
+    p_log_prob = 0.0
+    for rv in toposort(x):
+      if align_latent(rv.name) is not None or align_data(rv.name) is not None:
+        p_log_prob += tf.reduce_sum(rv.log_prob(rv.value))
+    return p_log_prob
+  return log_joint
+
+
+def make_optional_inputs(f):
+  """Wraps function to take in optional, unused args/kwargs."""
+  def f_wrapped(*args, **kwargs):
+    if hasattr(f, "_func"):  # tf.make_template()
+      argspec = inspect.getargspec(f._func)
+    else:
+      argspec = inspect.getargspec(f)
+    fkwargs = {}
+    for k, v in six.iteritems(kwargs):
+      if k in argspec.args:
+        fkwargs[k] = v
+    num_args = len(argspec.args) - len(fkwargs)
+    if num_args > 0:
+      return f(*args[:num_args], **fkwargs)
+    elif len(fkwargs) > 0:
+      return f(**fkwargs)
+    return f()
+  f_wrapped.__name__ = getattr(f, '__name__', '[unknown name]')
+  f_wrapped.__doc__ = getattr(f, '__doc__' , '')
+  return f_wrapped
+
+
+def toposort(end_node, parents=operator.methodcaller('get_parents')):
+  """Generate nodes in DAG's reverse topological order.
+
+  For any edge U -> V, the function visits V before visiting U. It traces
+  using a backward pass, i.e., the "pull" dataflow model.
+
+  Args:
+    end_node: Input or list of inputs.
+  """
+  child_counts = {}
+  maybe_list = lambda x: list(x) if isinstance(x, (list, tuple)) else [x]
+  stack = maybe_list(end_node)
+  while stack:
+    node = stack.pop()
+    if node in child_counts:
+      child_counts[node] += 1
+    else:
+      child_counts[node] = 1
+      stack.extend(parents(node))
+
+  childless_nodes = maybe_list(end_node)
+  while childless_nodes:
+    node = childless_nodes.pop()
+    yield node
+    for parent in parents(node):
+      if child_counts[parent] == 1:
+        childless_nodes.append(parent)
+      else:
+        child_counts[parent] -= 1
 
 
 def transform(f, qz, *args, **kwargs):

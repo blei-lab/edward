@@ -25,6 +25,7 @@ from edward.inferences import (
     wake_sleep,
     wgan_inference)
 from edward.models import (
+    call_with_manipulate,
     get_ancestors,
     get_blanket,
     get_children,
@@ -33,8 +34,7 @@ from edward.models import (
     get_siblings,
     get_variables,
     is_independent,
-    random_variables,
-    trace)
+    random_variables)
 from edward.version import __version__, VERSION
 
 from tensorflow.python.util.all_util import remove_undocumented
@@ -44,6 +44,7 @@ _allowed_symbols = [
     'inferences',
     'models',
     'bigan_inference',
+    'call_with_manipulate',
     'complete_conditional',
     'gan_inference',
     'hmc',
@@ -69,7 +70,6 @@ _allowed_symbols = [
     'get_variables',
     'is_independent',
     'random_variables',
-    'trace',
     '__version__',
     'VERSION',
 ]

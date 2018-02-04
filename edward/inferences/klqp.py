@@ -6,8 +6,8 @@ import six
 import tensorflow as tf
 
 from edward.inferences import docstrings as doc
-from edward.inferences.util import make_intercept
-from edward.models.core import trace
+from edward.inferences.util import (
+    call_with_intercept, call_with_trace, toposort)
 
 try:
   from edward.models import Normal
@@ -89,11 +89,13 @@ def klqp(model, variational, align_latent, align_data,
   def model():
     mu = Normal(loc=0.0, scale=1.0, name="mu")
     x = Normal(loc=mu, scale=1.0, sample_shape=10, name="x")
+    return x
 
   def variational():
     qmu = Normal(loc=tf.get_variable("loc", []),
                  scale=tf.nn.softplus(tf.get_variable("shape", [])),
                  name="qmu")
+    return qmu
 
   loss, surrogate_loss = ed.klqp(
       model, variational,
@@ -114,28 +116,26 @@ def klqp(model, variational, align_latent, align_data,
   surrogate_loss = [None] * n_samples
   kl_penalty = 0.0
   for s in range(n_samples):
-    posterior_trace = trace(variational, *args, **kwargs)
-    intercept = make_intercept(
-        posterior_trace, align_data, align_latent, args, kwargs)
-    model_trace = trace(model, intercept=intercept, *args, **kwargs)
+    q_trace = call_with_trace(variational, *args, **kwargs)
+    x = call_with_intercept(model, q_trace, align_data, align_latent,
+                            *args, **kwargs)
 
     # Collect key-value pairs of (rv, rv's (scaled) log prob).
     p_dict = {}
     q_dict = {}
     inverse_align_latent = {}
-    for name, node in six.iteritems(model_trace):
-      rv = node.value
-      scale_factor = scale(name)
-      if align_data(name) is not None:
+    for rv in toposort(x):
+      scale_factor = scale(rv.name)
+      if align_data(rv.name) is not None:
         p_dict[rv] = tf.reduce_sum(scale_factor * rv.log_prob(rv.value))
-      if align_latent(name) is not None:
-        qz = posterior_trace[align_latent(name)].value
+      if align_latent(rv.name) is not None:
+        qz = q_trace[align_latent(rv.name)]
         # For pairs with analytic KL, accumulate KL divergences for
         # first iteration in loop.
         if isinstance(rv, Normal) and isinstance(qz, Normal):
           if s == 0:
             kl_penalty += tf.reduce_sum(
-                kl_scaling(name) * kl_divergence(qz, rv))
+                kl_scaling(rv.name) * kl_divergence(qz, rv))
         else:
           p_dict[rv] = tf.reduce_sum(scale_factor * rv.log_prob(rv.value))
           q_dict[qz] = tf.reduce_sum(scale_factor * qz.log_prob(qz.value))
@@ -234,11 +234,13 @@ def klqp_reparameterization(model, variational, align_latent, align_data,
   def model():
     mu = Normal(loc=0.0, scale=1.0, name="mu")
     x = Normal(loc=mu, scale=1.0, sample_shape=10, name="x")
+    return x
 
   def variational():
     qmu = Normal(loc=tf.get_variable("loc", []),
                  scale=tf.nn.softplus(tf.get_variable("shape", [])),
                  name="qmu")
+    return qmu
 
   loss = ed.klqp_reparameterization(
       model, variational,
@@ -250,17 +252,15 @@ def klqp_reparameterization(model, variational, align_latent, align_data,
   p_log_prob = [0.0] * n_samples
   q_log_prob = [0.0] * n_samples
   for s in range(n_samples):
-    posterior_trace = trace(variational, *args, **kwargs)
-    intercept = make_intercept(
-        posterior_trace, align_data, align_latent, args, kwargs)
-    model_trace = trace(model, intercept=intercept, *args, **kwargs)
-    for name, node in six.iteritems(model_trace):
-      rv = node.value
-      scale_factor = scale(name)
-      if align_latent(name) is not None or align_data(name) is not None:
+    q_trace = call_with_trace(variational, *args, **kwargs)
+    x = call_with_intercept(model, q_trace, align_data, align_latent,
+                            *args, **kwargs)
+    for rv in toposort(x):
+      scale_factor = scale(rv.name)
+      if align_latent(rv.name) is not None or align_data(rv.name) is not None:
         p_log_prob[s] += tf.reduce_sum(scale_factor * rv.log_prob(rv.value))
-      if align_latent(name) is not None:
-        qz = posterior_trace[align_latent(name)].value
+      if align_latent(rv.name) is not None:
+        qz = q_trace[align_latent(rv.name)]
         q_log_prob[s] += tf.reduce_sum(scale_factor * qz.log_prob(qz.value))
 
   p_log_prob = tf.reduce_mean(p_log_prob)
@@ -338,11 +338,13 @@ def klqp_reparameterization_kl(model, variational, align_latent, align_data,
   def model():
     mu = Normal(loc=0.0, scale=1.0, name="mu")
     x = Normal(loc=mu, scale=1.0, sample_shape=10, name="x")
+    return x
 
   def variational():
     qmu = Normal(loc=tf.get_variable("loc", []),
                  scale=tf.nn.softplus(tf.get_variable("shape", [])),
                  name="qmu")
+    return qmu
 
   loss = ed.klqp_reparameterization_kl(
       model, variational,
@@ -353,15 +355,12 @@ def klqp_reparameterization_kl(model, variational, align_latent, align_data,
   """
   p_log_lik = [0.0] * n_samples
   for s in range(n_samples):
-    posterior_trace = trace(variational, *args, **kwargs)
-    intercept = make_intercept(
-        posterior_trace, align_data, align_latent, args, kwargs)
-    model_trace = trace(model, intercept=intercept, *args, **kwargs)
-
-    for name, node in six.iteritems(model_trace):
-      if align_data(name) is not None:
-        rv = node.value
-        scale_factor = scale(name)
+    q_trace = call_with_trace(variational, *args, **kwargs)
+    x = call_with_intercept(model, q_trace, align_data, align_latent,
+                            *args, **kwargs)
+    for rv in toposort(x):
+      if align_data(rv.name) is not None:
+        scale_factor = scale(rv.name)
         p_log_lik[s] += tf.reduce_sum(scale_factor * rv.log_prob(rv.value))
 
   p_log_lik = tf.reduce_mean(p_log_lik)
@@ -442,11 +441,13 @@ def klqp_score(model, variational, align_latent, align_data,
   def model():
     mu = Normal(loc=0.0, scale=1.0, name="mu")
     x = Normal(loc=mu, scale=1.0, sample_shape=10, name="x")
+    return x
 
   def variational():
     qmu = Normal(loc=tf.get_variable("loc", []),
                  scale=tf.nn.softplus(tf.get_variable("shape", [])),
                  name="qmu")
+    return qmu
 
   loss, surrogate_loss = ed.klqp_score(
       model, variational,
@@ -458,18 +459,15 @@ def klqp_score(model, variational, align_latent, align_data,
   p_log_prob = [0.0] * n_samples
   q_log_prob = [0.0] * n_samples
   for s in range(n_samples):
-    posterior_trace = trace(variational, *args, **kwargs)
-    intercept = make_intercept(
-        posterior_trace, align_data, align_latent, args, kwargs)
-    model_trace = trace(model, intercept=intercept, *args, **kwargs)
-
-    for name, node in six.iteritems(model_trace):
-      rv = node.value
-      scale_factor = scale(name)
-      if align_latent(name) is not None or align_data(name) is not None:
+    q_trace = call_with_trace(variational, *args, **kwargs)
+    x = call_with_intercept(model, q_trace, align_data, align_latent,
+                            *args, **kwargs)
+    for rv in toposort(x):
+      scale_factor = scale(rv.name)
+      if align_latent(rv.name) is not None or align_data(rv.name) is not None:
         p_log_prob[s] += tf.reduce_sum(scale_factor * rv.log_prob(rv.value))
-      if align_latent(name) is not None:
-        qz = posterior_trace[align_latent(name)].value
+      if align_latent(rv.name) is not None:
+        qz = q_trace[align_latent(rv.name)]
         q_log_prob[s] += tf.reduce_sum(
             scale_factor * qz.log_prob(tf.stop_gradient(qz.value)))
 

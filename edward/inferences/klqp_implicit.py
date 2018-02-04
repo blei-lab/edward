@@ -6,8 +6,8 @@ import six
 import tensorflow as tf
 
 from edward.inferences import docstrings as doc
-from edward.inferences.util import make_intercept
-from edward.models.core import trace
+from edward.inferences.util import (
+    call_with_intercept, call_with_trace, toposort)
 
 
 @doc.set_doc(
@@ -140,6 +140,7 @@ def klqp_implicit(model, variational, discriminator, align_latent,
     qz = Normal(loc=net[:, :25],
                 scale=tf.nn.softplus(net[:, 25:]),
                 name="qz")
+    return qz
 
   def ratio_estimator(data, local_vars, global_vars):
     # concatenated input has shape (batch_size, 28*28 + 25)
@@ -163,12 +164,11 @@ def klqp_implicit(model, variational, discriminator, align_latent,
   else:
     raise ValueError('Ratio loss not found:', ratio_loss)
 
-  posterior_trace = trace(variational, *args, **kwargs)
+  q_trace = call_with_trace(variational, *args, **kwargs)
   # Intercept model's global latent variables and set to posterior
   # samples (but not its locals).
-  global_intercept = make_intercept(
-      posterior_trace, align_data, align_latent_global, args, kwargs)
-  model_trace = trace(model, intercept=global_intercept, *args, **kwargs)
+  x = call_with_intercept(model, q_trace, align_data, align_latent_global,
+                          *args, **kwargs)
 
   # Collect tensors used in calculation of losses.
   pbeta_log_prob = 0.0
@@ -178,35 +178,35 @@ def klqp_implicit(model, variational, discriminator, align_latent,
   qz_sample = {}
   x_psample = {}
   x_qsample = {}
-  for name, node in six.iteritems(model_trace):
+  for rv in toposort(x):
     # Calculate log p(beta') and log q(beta').
-    if align_latent_global(name) is not None:
-      pbeta = node.value
-      qbeta = posterior_trace[align_latent_global(name)].value
-      scale_factor = scale(name)
+    if align_latent_global(rv.name) is not None:
+      pbeta = rv
+      qbeta = q_trace[align_latent_global(rv.name)]
+      scale_factor = scale(rv.name)
       pbeta_log_prob += tf.reduce_sum(
           scale_factor * pbeta.log_prob(pbeta.value))
       qbeta_log_prob += tf.reduce_sum(
           scale_factor * qbeta.log_prob(qbeta.value))
-      qbeta_sample[name] = qbeta.value
+      qbeta_sample[rv.name] = qbeta.value
     else:
       # TODO This assumes implicit variables are tf.Tensors existing
       # on the Trace stack.
-      if align_latent(name) is not None:
-        pz = node.value
-        qz = posterior_trace[align_latent(Name)].value
-        pz_sample[name] = pz
-        qz_sample[name] = qz
+      if align_latent(rv.name) is not None:
+        pz = rv
+        qz = q_trace[align_latent(rv.name)]
+        pz_sample[rv.name] = pz
+        qz_sample[rv.name] = qz
       else:
-        key = align_data(name)
+        key = align_data(rv.name)
         if isinstance(key, int):
           data_node = args[key]
         elif kwargs.get(key, None) is not None:
           data_node = kwargs.get(key)
-        px = node.value
-        qx = data_node.value
-        x_psample[name] = px
-        x_qsample[name] = qx
+        px = rv
+        qx = data_node
+        x_psample[rv.name] = px
+        x_qsample[rv.name] = qx
 
   # Collect x' ~ p(x | z', beta') and x' ~ q(x).
   with tf.variable_scope("Disc"):

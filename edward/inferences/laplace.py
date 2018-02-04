@@ -7,7 +7,7 @@ import tensorflow as tf
 
 from edward.inferences import docstrings as doc
 from edward.inferences.map import map
-from edward.models.core import trace
+from edward.inferences.util import call_with_trace
 from edward.models.queries import get_variables
 
 try:
@@ -67,12 +67,14 @@ def laplace(model, variational, align_latent, align_data,
   def model(X):
     w = Normal(loc=tf.zeros(D), scale=tf.ones(D), name="w")
     y = Normal(loc=tf.tensordot(X, w, [[1], [0]]), scale=tf.ones(N), name="y")
+    return y
 
   def variational():
     qw = MultivariateNormalTriL(
         loc=tf.Variable(tf.random_normal([D])),
         scale_tril=tf.Variable(tf.random_normal([D, D])),
         name="qw")
+    return qw
 
   loss = ed.laplace(
       model, variational,
@@ -95,11 +97,11 @@ def _finalize(loss, variational):
 
   Computes the Hessian at the mode.
   """
-  posterior_trace = trace(variational, *args, **kwargs)
+  q_trace = call_with_trace(variational, *args, **kwargs)
   hessians = tf.hessians(
-      loss, [node.value.loc for node in six.itervalues(posterior_trace)])
+      loss, [node.value.loc for node in six.itervalues(q_trace)])
   finalize_ops = []
-  for qz, hessian in zip(six.itervalues(posterior_trace), hessians):
+  for qz, hessian in zip(six.itervalues(q_trace), hessians):
     if isinstance(qz, (MultivariateNormalDiag, Normal)):
       scale_var = get_variables(qz.variance())[0]
       scale = 1.0 / tf.diag_part(hessian)
@@ -117,9 +119,9 @@ def _make_variational_pointmass(variational, *args, **kwargs):
 
   We assume all latent variables are traceable in one execution.
   """
-  posterior_trace = trace(variational, *args, **kwargs)
+  q_trace = call_with_trace(variational, *args, **kwargs)
   def variational_pointmass(*args, **kwargs):
-    for name, node in six.iteritems(posterior_trace):
+    for name, node in six.iteritems(q_trace):
       qz = node.value
       qz_pointmass = PointMass(params=qz.loc,
                                name=qz.name + "_pointmass",

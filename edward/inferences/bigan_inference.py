@@ -6,8 +6,8 @@ import six
 import tensorflow as tf
 
 from edward.inferences import docstrings as doc
-from edward.inferences.util import call_function_up_to_args
-from edward.models.core import trace
+from edward.inferences.util import (
+    call_with_trace, make_optional_inputs, toposort)
 
 
 @doc.set_doc(
@@ -65,6 +65,7 @@ def bigan_inference(model, variational, discriminator, align_latent,
                 scale=tf.nn.softplus(net[:, 25:]),
                 sample_shape=[256,],
                 name="qz")
+    return qz
 
   def discriminator(x):
     net = tf.layers.dense(x, 256, activation=tf.nn.relu)
@@ -77,10 +78,9 @@ def bigan_inference(model, variational, discriminator, align_latent,
       x_data=x_data)
   ```
   """
-  posterior_trace = trace(variational, *args, **kwargs)
-  # TODO
-  with Trace() as model_trace:
-    x_fake = call_function_up_to_args(model, *args, **kwargs)
+  q_trace = call_with_trace(variational, *args, **kwargs)
+  model = make_optional_inputs(model)
+  x_fake = model(*args, **kwargs)
 
   key = align_data(x_fake.name.split(':')[0])
   if isinstance(key, int):
@@ -88,11 +88,11 @@ def bigan_inference(model, variational, discriminator, align_latent,
   elif kwargs.get(key, None) is not None:
     x_true = kwargs.get(key)
 
-  for name, node in six.iteritems(model_trace):
-    aligned = align_latent(name)
+  for rv in toposort(x_fake):
+    aligned = align_latent(rv.name)
     if aligned is not None:
-      z_true = node.value
-      z_fake = posterior_trace[aligned].value
+      z_true = rv
+      z_fake = q_trace[aligned]
       break
 
   with tf.variable_scope("Disc"):

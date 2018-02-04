@@ -6,7 +6,7 @@ import six
 import tensorflow as tf
 
 from edward.inferences import docstrings as doc
-from edward.inferences.util import call_function_up_to_args
+from edward.inferences.util import make_optional_inputs
 
 
 @doc.set_doc(
@@ -77,7 +77,8 @@ def wgan_inference(model, discriminator, align_data,
       x_data=x_data)
   ```
   """
-  x_fake = call_function_up_to_args(model, *args, **kwargs)
+  model = make_optional_inputs(model)
+  x_fake = model(*args, **kwargs)
   key = align_data(x_fake.name.split(':')[0])
   if isinstance(key, int):
     x_true = args[key]

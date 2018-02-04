@@ -5,6 +5,7 @@ from __future__ import print_function
 import tensorflow as tf
 
 from collections import defaultdict
+import six
 
 try:
   from tensorflow.python.client.session import \
@@ -237,7 +238,17 @@ class RandomVariable(object):
   def get_parents(self, collection=None):
     """Get parent random variables."""
     from edward.models.queries import get_parents
-    return get_parents(self, collection)
+    # The backward pass requires TF graph traversal. In general, consider
+    # primitive -> black box function (TF ops) -> primitive. To go to parent
+    # primitive, we traverse black box function.
+    parents = []
+    for node in six.itervalues(self.parameters):
+      if isinstance(node,
+                    (tf.Variable, tf.SparseTensor, tf.Tensor, RandomVariable)):
+        parents.extend(get_parents(node))
+      if isinstance(node, RandomVariable):
+        parents.append(node)
+    return parents
 
   def get_siblings(self, collection=None):
     """Get sibling random variables."""

@@ -6,8 +6,8 @@ import six
 import tensorflow as tf
 
 from edward.inferences import docstrings as doc
-from edward.inferences.util import make_intercept
-from edward.models.core import trace
+from edward.inferences.util import (
+    call_with_intercept, call_with_trace, toposort)
 
 try:
   from edward.models import Normal
@@ -82,11 +82,13 @@ def klpq(model, variational, align_latent, align_data,
   def model():
     mu = Normal(loc=0.0, scale=1.0, name="mu")
     x = Normal(loc=mu, scale=1.0, sample_shape=10, name="x")
+    return x
 
   def variational():
     qmu = Normal(loc=tf.get_variable("loc", []),
                  scale=tf.nn.softplus(tf.get_variable("shape", [])),
                  name="qmu")
+    return qmu
 
   loss, surrogate_loss = ed.klpq(
       model, variational,
@@ -98,19 +100,16 @@ def klpq(model, variational, align_latent, align_data,
   p_log_prob = [0.0] * n_samples
   q_log_prob = [0.0] * n_samples
   for s in range(n_samples):
-    posterior_trace = trace(variational, *args, **kwargs)
-    intercept = make_intercept(
-        posterior_trace, align_data, align_latent, args, kwargs)
-    model_trace = trace(model, intercept=intercept, *args, **kwargs)
-
-    for name, node in six.iteritems(model_trace):
-      rv = node.value
-      scale_factor = scale(name)
-      if align_latent(name) is not None or align_data(name) is not None:
+    q_trace = call_with_trace(variational, *args, **kwargs)
+    x = call_with_intercept(model, q_trace, align_data, align_latent,
+                            *args, **kwargs)
+    for rv in toposort(x):
+      scale_factor = scale(rv.name)
+      if align_latent(rv.name) is not None or align_data(rv.name) is not None:
         p_log_prob[s] += tf.reduce_sum(
             scale_factor * rv.log_prob(tf.stop_gradient(rv.value)))
-      if align_latent(name) is not None:
-        qz = posterior_trace[align_latent(name)].value
+      if align_latent(rv.name) is not None:
+        qz = posterior_trace[align_latent(rv.name)]
         q_log_prob[s] += tf.reduce_sum(
             scale_factor * qz.log_prob(tf.stop_gradient(qz.value)))
 
