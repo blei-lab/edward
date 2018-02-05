@@ -26,7 +26,6 @@ from edward.inferences import (
     wake_sleep,
     wgan_inference)
 # from edward.inferences import MonteCarlo, HMC, MetropolisHastings, SGLD, SGHMC, Gibbs
-from edward.models import RandomVariable
 from edward.util import (
     copy, dot,
     get_ancestors, get_blanket, get_children, get_control_variate_coef,
@@ -65,7 +64,6 @@ _allowed_symbols = [
     'wake_sleep',
     'wgan_inference',
     'Gibbs',
-    'RandomVariable',
     'copy',
     'dot',
     'get_ancestors',
