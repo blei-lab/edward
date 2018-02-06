@@ -24,7 +24,7 @@ class distributions_Empirical(Distribution):
   assert x.shape == ()
 
   # 5 samples of a 2 x 3 matrix
-  dp = Empirical(params=tf.zeros([5, 2, 3]))
+  x = Empirical(params=tf.zeros([5, 2, 3]))
   assert x.shape == (2, 3)
   ```
   """
