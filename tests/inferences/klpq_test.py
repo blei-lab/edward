@@ -64,6 +64,11 @@ class test_klpq_class(tf.test.TestCase):
     self._test_normal_normal(ed.KLpq, default=True, n_samples=25, n_iter=100)
     self._test_model_parameter(ed.KLpq, n_iter=50)
 
+  def test_klpq_nsamples_check(self):
+    with self.assertRaisesRegexp(ValueError,
+                                 "n_samples should be greater than zero: 0"):
+      self._test_normal_normal(ed.KLpq, default=True, n_samples=0, n_iter=10)
+
 if __name__ == '__main__':
   ed.set_seed(42)
   tf.test.main()

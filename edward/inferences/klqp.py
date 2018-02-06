@@ -104,6 +104,9 @@ class KLqp(VariationalInference):
     """
     if kl_scaling is None:
       kl_scaling = {}
+    if n_samples <= 0:
+      raise ValueError(
+          "n_samples should be greater than zero: {}".format(n_samples))
 
     self.n_samples = n_samples
     self.kl_scaling = kl_scaling
@@ -213,6 +216,9 @@ class ReparameterizationKLqp(VariationalInference):
         Number of samples from variational model for calculating
         stochastic gradients.
     """
+    if n_samples <= 0:
+      raise ValueError(
+          "n_samples should be greater than zero: {}".format(n_samples))
     self.n_samples = n_samples
     return super(ReparameterizationKLqp, self).initialize(*args, **kwargs)
 
@@ -285,6 +291,9 @@ class ReparameterizationKLKLqp(VariationalInference):
     """
     if kl_scaling is None:
       kl_scaling = {}
+    if n_samples <= 0:
+      raise ValueError(
+          "n_samples should be greater than zero: {}".format(n_samples))
 
     self.n_samples = n_samples
     self.kl_scaling = kl_scaling
@@ -347,6 +356,9 @@ class ReparameterizationEntropyKLqp(VariationalInference):
         Number of samples from variational model for calculating
         stochastic gradients.
     """
+    if n_samples <= 0:
+      raise ValueError(
+          "n_samples should be greater than zero: {}".format(n_samples))
     self.n_samples = n_samples
     return super(ReparameterizationEntropyKLqp, self).initialize(
         *args, **kwargs)
@@ -408,6 +420,9 @@ class ScoreKLqp(VariationalInference):
         Number of samples from variational model for calculating
         stochastic gradients.
     """
+    if n_samples <= 0:
+      raise ValueError(
+          "n_samples should be greater than zero: {}".format(n_samples))
     self.n_samples = n_samples
     return super(ScoreKLqp, self).initialize(*args, **kwargs)
 
@@ -480,7 +495,9 @@ class ScoreKLKLqp(VariationalInference):
     """
     if kl_scaling is None:
       kl_scaling = {}
-
+    if n_samples <= 0:
+      raise ValueError(
+          "n_samples should be greater than zero: {}".format(n_samples))
     self.n_samples = n_samples
     self.kl_scaling = kl_scaling
     return super(ScoreKLKLqp, self).initialize(*args, **kwargs)
@@ -542,6 +559,9 @@ class ScoreEntropyKLqp(VariationalInference):
         Number of samples from variational model for calculating
         stochastic gradients.
     """
+    if n_samples <= 0:
+      raise ValueError(
+          "n_samples should be greater than zero: {}".format(n_samples))
     self.n_samples = n_samples
     return super(ScoreEntropyKLqp, self).initialize(*args, **kwargs)
 
@@ -609,6 +629,9 @@ class ScoreRBKLqp(VariationalInference):
         Number of samples from variational model for calculating
         stochastic gradients.
     """
+    if n_samples <= 0:
+      raise ValueError(
+          "n_samples should be greater than zero: {}".format(n_samples))
     self.n_samples = n_samples
     return super(ScoreRBKLqp, self).initialize(*args, **kwargs)
 
