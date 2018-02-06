@@ -64,20 +64,20 @@ class test_klqp_class(tf.test.TestCase):
     with self.assertRaisesRegexp(ValueError,
                                  "n_samples should be greater than zero: 0"):
       self._test_normal_normal(ed.KLqp, default=True, n_samples=0, n_iter=10)
-      self._test_normal_normal(
-          ed.ReparameterizationEntropyKLqp, default=True, n_samples=0, n_iter=10)
-      self._test_normal_normal(
-          ed.ReparameterizationKLqp, default=True, n_samples=0, n_iter=10)
-      self._test_normal_normal(
-          ed.ReparameterizationKLKLqp, default=True, n_samples=0, n_iter=10)
-      self._test_normal_normal(
-          ed.ScoreEntropyKLqp, default=True, n_samples=0, n_iter=10)
-      self._test_normal_normal(
-          ed.ScoreKLqp, default=True, n_samples=0, n_iter=10)
-      self._test_normal_normal(
-          ed.ScoreKLKLqp, default=True, n_samples=0, n_iter=10)
-      self._test_normal_normal(
-          ed.ScoreRBKLqp, default=True, n_samples=0, n_iter=10)
+      self._test_normal_normal(ed.ReparameterizationEntropyKLqp,
+          default=True, n_samples=0, n_iter=10)
+      self._test_normal_normal(ed.ReparameterizationKLqp,
+          default=True, n_samples=0, n_iter=10)
+      self._test_normal_normal(ed.ReparameterizationKLKLqp,
+          default=True, n_samples=0, n_iter=10)
+      self._test_normal_normal(ed.ScoreEntropyKLqp,
+          default=True, n_samples=0, n_iter=10)
+      self._test_normal_normal(ed.ScoreKLqp,
+          default=True, n_samples=0, n_iter=10)
+      self._test_normal_normal(ed.ScoreKLKLqp,
+          default=True, n_samples=0, n_iter=10)
+      self._test_normal_normal(ed.ScoreRBKLqp,
+          default=True, n_samples=0, n_iter=10)
 
   def test_reparameterization_entropy_klqp(self):
     self._test_normal_normal(
