@@ -15,8 +15,8 @@ setup(
     install_requires=['numpy>=1.7',
                       'six>=1.10.0'],
     extras_require={
-        'tensorflow': ['tensorflow>=1.2.0rc0'],
-        'tensorflow with gpu': ['tensorflow-gpu>=1.2.0rc0'],
+        'tensorflow': ['tensorflow>=1.6.0'],
+        'tensorflow with gpu': ['tensorflow-gpu>=1.6.0'],
         'datasets': ['observations>=0.1.2'],
         'notebooks': ['jupyter>=1.0.0'],
         'visualization': ['matplotlib>=1.3',
