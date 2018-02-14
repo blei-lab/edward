@@ -24,11 +24,11 @@ data_sigma = np.array([15, 10, 16, 11, 9, 11, 10, 18])
 # end data
 
 # model definition
-mu = Normal(0. * tf.ones([1]), 10. * tf.ones([1]))
-logtau = Normal(0. * tf.ones([1]), 1. * tf.ones([1]))
+mu = Normal(tf.zeros([1]), tf.fill([1], 10.))
+logtau = Normal(tf.fill([1], 5.), tf.fill([1], 1.))
 theta_tilde = Normal(tf.zeros([J]), tf.ones([J]))
 sigma = tf.placeholder(tf.float32, J)
-y = Normal(mu + tf.exp(logtau) * theta_tilde, sigma * tf.ones(J))
+y = Normal(mu + tf.exp(logtau) * theta_tilde, sigma * tf.ones([J]))
 # end model definition
 
 thedata = {y: data_y, sigma: data_sigma}
