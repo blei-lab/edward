@@ -11,6 +11,9 @@
 #
 # This model has a hierachy and an inferred variance - yet the example is
 # very simple - only the Normal distribution is used
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
 
 import edward as ed
 import tensorflow as tf
