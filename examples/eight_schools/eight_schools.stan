@@ -18,4 +18,3 @@ model {
       y[j] ~ normal(mu + exp(logtau) * theta_tilde[j], sigma[j]);
   }
 }
-
