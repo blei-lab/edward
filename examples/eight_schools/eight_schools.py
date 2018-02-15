@@ -1,6 +1,9 @@
-"""Implement the stan 8 schools example using the recommended non-centred parameterization.
+"""Implement the stan 8 schools example using the recommended non-centred
+parameterization.
 
-The Stan example is slightly modified to avoid improper priors and avoid half-Cauchy priors.  Inference is with Edward using both HMC and KLQP.
+The Stan example is slightly modified to avoid improper priors and
+avoid half-Cauchy priors.  Inference is with Edward using both HMC
+and KLQP.
 
 This model has a hierachy and an inferred variance - yet the example is
 very simple - only the Normal distribution is used.
@@ -25,7 +28,7 @@ def main(_):
     J = 8
     data_y = np.array([28, 8, -3, 7, -1, 1, 18, 12])
     data_sigma = np.array([15, 10, 16, 11, 9, 11, 10, 18])
-    
+
     # model definition
     mu = Normal([0.], [1.])
     logtau = Normal([5.], [1.])
@@ -35,21 +38,21 @@ def main(_):
 
     data = {y: data_y, sigma: data_sigma}
 
-    
     # ed.KLqp inference
     with tf.variable_scope('q_logtau'):
         q_logtau = Normal(tf.get_variable('loc', [1]),
-                              tf.nn.softplus(tf.get_variable('scale', [1])))
+                          tf.nn.softplus(tf.get_variable('scale', [1])))
 
-    with tf.variable_scope('q_mu'):        
+    with tf.variable_scope('q_mu'):
         q_mu = Normal(tf.get_variable('loc', [1]),
-                              tf.nn.softplus(tf.get_variable('scale', [1])))
+                      tf.nn.softplus(tf.get_variable('scale', [1])))
 
-    with tf.variable_scope('q_theta_tilde'):        
+    with tf.variable_scope('q_theta_tilde'):
         q_theta_tilde = Normal(tf.get_variable('loc', [J]),
-                              tf.nn.softplus(tf.get_variable('scale', [J])))
-        
-    inference = ed.KLqp({logtau: q_logtau, mu: q_mu, theta_tilde: q_theta_tilde}, data=data)
+                               tf.nn.softplus(tf.get_variable('scale', [J])))
+
+    inference = ed.KLqp({logtau: q_logtau, mu: q_mu,
+                        theta_tilde: q_theta_tilde}, data=data)
     inference.run(n_samples=15, n_iter=60000)
     print("====    ed.KLqp inference ====")
     print("E[mu] = %f" % (q_mu.mean().eval()))
@@ -60,8 +63,6 @@ def main(_):
     print("")
     print("")
 
-
-    
     # HMC inference
     S = 400000
     burn = S // 2
@@ -69,7 +70,8 @@ def main(_):
     hq_mu = Empirical(tf.Variable(tf.zeros([S, 1])))
     hq_theta_tilde = Empirical(tf.Variable(tf.zeros([S, J])))
 
-    inference = ed.HMC({logtau: hq_logtau, mu: hq_mu, theta_tilde: hq_theta_tilde}, data=data)
+    inference = ed.HMC({logtau: hq_logtau, mu: hq_mu,
+                        theta_tilde: hq_theta_tilde}, data=data)
     inference.run()
 
     print("====    ed.HMC inference ====")
@@ -82,6 +84,5 @@ def main(_):
     print("")
 
 
-    
 if __name__ == "__main__":
   tf.app.run()
