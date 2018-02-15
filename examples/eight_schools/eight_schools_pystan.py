@@ -1,15 +1,14 @@
-"""implement the stan 8 schools example
-using the recommended non-centred parameterisation
+"""Implement the stan 8 schools example using the recommended non-centred parameterization.
 
-https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started
-http://mc-stan.org/users/documentation/case-studies/divergences_and_bias.html
-we slightly modify the stan example to:
-                                         avoid improper priors
-                                         avoid half-cauchy priors
-make the statement of the model directly comparable
+The Stan example is slightly modified to avoid improper priors and avoid half-Cauchy priors.  Inference is with Stan using NUTS, pystan is required.
 
 This model has a hierachy and an inferred variance - yet the example is
-very simple - only the Normal distribution is used"""
+very simple - only the Normal distribution is used.
+
+#### References
+https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started
+http://mc-stan.org/users/documentation/case-studies/divergences_and_bias.html
+"""
 
 from __future__ import absolute_import
 from __future__ import division

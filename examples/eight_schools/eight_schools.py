@@ -1,6 +1,6 @@
 """Implement the stan 8 schools example using the recommended non-centred parameterization.
 
-The Stan example is slightly modified to avoid improper priors and avoid half-Cauchy priors.  The Stan model is included to allow for easy comparisons.
+The Stan example is slightly modified to avoid improper priors and avoid half-Cauchy priors.  Inference is with Edward using both HMC and KLQP.
 
 This model has a hierachy and an inferred variance - yet the example is
 very simple - only the Normal distribution is used.
