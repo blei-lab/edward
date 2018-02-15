@@ -35,7 +35,7 @@ def main(_):
     theta_tilde = Normal(tf.zeros(J), tf.ones(J))
     sigma = tf.placeholder(tf.float32, J)
     y = Normal(mu + tf.exp(logtau) * theta_tilde, sigma * tf.ones([J]))
-    
+
     data = {y: data_y, sigma: data_sigma}
 
     # ed.KLqp inference
