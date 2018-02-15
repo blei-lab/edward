@@ -1,15 +1,14 @@
-"""implement the stan 8 schools example
-using the recommended non-centred parameterisation
+"""Implement the stan 8 schools example using the recommended non-centred parameterization.
 
-https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started
-http://mc-stan.org/users/documentation/case-studies/divergences_and_bias.html
-we slightly modify the stan example to:
-                                         avoid improper priors
-                                         avoid half-cauchy priors
-make the statement of the model directly comparable
+The Stan example is slightly modified to avoid improper priors and avoid half-Cauchy priors.  The Stan model is included to allow for easy comparisons.
 
 This model has a hierachy and an inferred variance - yet the example is
-very simple - only the Normal distribution is used"""
+very simple - only the Normal distribution is used.
+
+#### References
+https://github.com/stan-dev/rstan/wiki/RStan-Getting-Started
+http://mc-stan.org/users/documentation/case-studies/divergences_and_bias.html
+"""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -25,18 +24,18 @@ def main(_):
     J = 8
     data_y = np.array([28, 8, -3, 7, -1, 1, 18, 12])
     data_sigma = np.array([15, 10, 16, 11, 9, 11, 10, 18])
-    # end data
 
+    data = {y: data_y, sigma: data_sigma}
+
+    
     # model definition
-    mu = Normal(tf.zeros([1]), tf.fill([1], 10.))
-    logtau = Normal(tf.fill([1], 5.), tf.fill([1], 1.))
-    theta_tilde = Normal(tf.zeros([J]), tf.ones([J]))
+    mu = Normal(0., 1.)
+    logtau = Normal(5., 1.)
+    theta_tilde = Normal(tf.zeros(J), tf.ones(J))
     sigma = tf.placeholder(tf.float32, J)
     y = Normal(mu + tf.exp(logtau) * theta_tilde, sigma * tf.ones([J]))
-    # end model definition
     
-    thedata = {y: data_y, sigma: data_sigma}
-
+    
     # ed.KLqp inference
     q_logtau = Normal(tf.Variable(tf.random_normal([1])),
                           tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
@@ -44,10 +43,8 @@ def main(_):
                       tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
     q_theta_tilde = Normal(tf.Variable(tf.random_normal([J])),
                                tf.nn.softplus(tf.Variable(tf.random_normal([J]))))
-    par2q = {logtau: q_logtau, mu: q_mu, theta_tilde: q_theta_tilde}
-    inference = ed.KLqp(par2q, data=thedata)
+    inference = ed.KLqp({logtau: q_logtau, mu: q_mu, theta_tilde: q_theta_tilde}, data=data)
     inference.run(n_samples=15, n_iter=60000)
-    # end ed.KLqp inference
     print("====    ed.KLqp inference ====")
     print("E[mu] = %f" % (q_mu.mean().eval()))
     print("E[logtau] = %f" % (q_logtau.mean().eval()))
@@ -57,6 +54,8 @@ def main(_):
     print("")
     print("")
 
+
+    
     # HMC inference
     S = 400000
     burn = S // 2
@@ -64,10 +63,8 @@ def main(_):
     hq_mu = Empirical(tf.Variable(tf.zeros([S, 1])))
     hq_theta_tilde = Empirical(tf.Variable(tf.zeros([S, J])))
 
-    par2hq = {logtau: hq_logtau, mu: hq_mu, theta_tilde: hq_theta_tilde}
-    inference = ed.HMC(par2hq, data=thedata)
+    inference = ed.HMC({logtau: hq_logtau, mu: hq_mu, theta_tilde: hq_theta_tilde}, data=data)
     inference.run()
-    # end HMC inference
 
     print("====    ed.HMC inference ====")
     print("E[mu] = %f" % (hq_mu.params.eval()[burn:].mean()))
@@ -78,17 +75,7 @@ def main(_):
     print("")
     print("")
 
-    # Stan if Pystan is installed
-    try:
-        import pystan
-        standata = dict(J=J, y=data_y, sigma=data_sigma)
-        fit = pystan.stan('eight_schools.stan', data=standata, iter=100000)
-        print(fit)
-    except ImportError:
-        print("pystan not detected")
-        print("if you have Rstan try: Rscript eight_schools.R")
-        print("or try pip install pystan")
-    # end Stan
 
+    
 if __name__ == "__main__":
   tf.app.run()
