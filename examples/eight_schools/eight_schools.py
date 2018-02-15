@@ -16,33 +16,39 @@ from __future__ import print_function
 
 import edward as ed
 import tensorflow as tf
-from edward.models import Normal, Empirical
 import numpy as np
+from edward.models import Normal, Empirical
+
 
 def main(_):
     # data
     J = 8
     data_y = np.array([28, 8, -3, 7, -1, 1, 18, 12])
     data_sigma = np.array([15, 10, 16, 11, 9, 11, 10, 18])
+    
+    # model definition
+    mu = Normal([0.], [1.])
+    logtau = Normal([5.], [1.])
+    theta_tilde = Normal(tf.zeros(J), tf.ones(J))
+    sigma = tf.placeholder(tf.float32, J)
+    y = Normal(mu + tf.exp(logtau) * theta_tilde, sigma * tf.ones([J]))
 
     data = {y: data_y, sigma: data_sigma}
 
     
-    # model definition
-    mu = Normal(0., 1.)
-    logtau = Normal(5., 1.)
-    theta_tilde = Normal(tf.zeros(J), tf.ones(J))
-    sigma = tf.placeholder(tf.float32, J)
-    y = Normal(mu + tf.exp(logtau) * theta_tilde, sigma * tf.ones([J]))
-    
-    
     # ed.KLqp inference
-    q_logtau = Normal(tf.Variable(tf.random_normal([1])),
-                          tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
-    q_mu = Normal(tf.Variable(tf.random_normal([1])),
-                      tf.nn.softplus(tf.Variable(tf.random_normal([1]))))
-    q_theta_tilde = Normal(tf.Variable(tf.random_normal([J])),
-                               tf.nn.softplus(tf.Variable(tf.random_normal([J]))))
+    with tf.variable_scope('q_logtau'):
+        q_logtau = Normal(tf.get_variable('loc', [1]),
+                              tf.nn.softplus(tf.get_variable('scale', [1])))
+
+    with tf.variable_scope('q_mu'):        
+        q_mu = Normal(tf.get_variable('loc', [1]),
+                              tf.nn.softplus(tf.get_variable('scale', [1])))
+
+    with tf.variable_scope('q_theta_tilde'):        
+        q_theta_tilde = Normal(tf.get_variable('loc', [J]),
+                              tf.nn.softplus(tf.get_variable('scale', [J])))
+        
     inference = ed.KLqp({logtau: q_logtau, mu: q_mu, theta_tilde: q_theta_tilde}, data=data)
     inference.run(n_samples=15, n_iter=60000)
     print("====    ed.KLqp inference ====")
