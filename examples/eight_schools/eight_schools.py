@@ -30,12 +30,12 @@ def main(_):
     data_sigma = np.array([15, 10, 16, 11, 9, 11, 10, 18])
 
     # model definition
-    mu = Normal([0.], [1.])
+    mu = Normal([0.], [10.])
     logtau = Normal([5.], [1.])
     theta_tilde = Normal(tf.zeros(J), tf.ones(J))
     sigma = tf.placeholder(tf.float32, J)
     y = Normal(mu + tf.exp(logtau) * theta_tilde, sigma * tf.ones([J]))
-
+    
     data = {y: data_y, sigma: data_sigma}
 
     # ed.KLqp inference
