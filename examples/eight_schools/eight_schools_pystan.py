@@ -21,14 +21,14 @@ import pystan
 
 
 def main():
-    # data
-    J = 8
-    data_y = np.array([28, 8, -3, 7, -1, 1, 18, 12])
-    data_sigma = np.array([15, 10, 16, 11, 9, 11, 10, 18])
+  # data
+  J = 8
+  data_y = np.array([28, 8, -3, 7, -1, 1, 18, 12])
+  data_sigma = np.array([15, 10, 16, 11, 9, 11, 10, 18])
 
-    standata = dict(J=J, y=data_y, sigma=data_sigma)
-    fit = pystan.stan('eight_schools.stan', data=standata, iter=100000)
-    print(fit)
+  standata = dict(J=J, y=data_y, sigma=data_sigma)
+  fit = pystan.stan('eight_schools.stan', data=standata, iter=100000)
+  print(fit)
 
 if __name__ == "__main__":
   main()
