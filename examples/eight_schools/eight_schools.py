@@ -30,8 +30,8 @@ def main(_):
   data_sigma = np.array([15, 10, 16, 11, 9, 11, 10, 18])
 
   # model definition
-  mu = Normal([0.], [10.])
-  logtau = Normal([5.], [1.])
+  mu = Normal(0., 10.)
+  logtau = Normal(5., 1.)
   theta_prime = Normal(tf.zeros(J), tf.ones(J))
   sigma = tf.placeholder(tf.float32, J)
   y = Normal(mu + tf.exp(logtau) * theta_prime, sigma * tf.ones([J]))
@@ -40,12 +40,12 @@ def main(_):
 
   # ed.KLqp inference
   with tf.variable_scope('q_logtau'):
-    q_logtau = Normal(tf.get_variable('loc', [1]),
-                      tf.nn.softplus(tf.get_variable('scale', [1])))
+    q_logtau = Normal(tf.get_variable('loc', []),
+                      tf.nn.softplus(tf.get_variable('scale', [])))
 
   with tf.variable_scope('q_mu'):
-    q_mu = Normal(tf.get_variable('loc', [1]),
-                  tf.nn.softplus(tf.get_variable('scale', [1])))
+    q_mu = Normal(tf.get_variable('loc', []),
+                  tf.nn.softplus(tf.get_variable('scale', [])))
 
   with tf.variable_scope('q_theta_prime'):
     q_theta_prime = Normal(tf.get_variable('loc', [J]),
@@ -67,9 +67,9 @@ def main(_):
   S = 400000
   burn = S // 2
 
-  hq_logtau = Empirical(tf.get_variable('hq_logtau', [S, 1]))
-  hq_mu = Empirical(tf.get_variable('hq_mu', [S, 1]))
-  hq_theta_prime = Empirical(tf.get_variable('hq_thetaprime', [S, 1]))
+  hq_logtau = Empirical(tf.get_variable('hq_logtau', [S]))
+  hq_mu = Empirical(tf.get_variable('hq_mu', [S]))
+  hq_theta_prime = Empirical(tf.get_variable('hq_thetaprime', [S, J]))
 
   inference = ed.HMC({logtau: hq_logtau, mu: hq_mu,
                      theta_prime: hq_theta_prime}, data=data)
