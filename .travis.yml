@@ -38,6 +38,7 @@ install:
   - pip install matplotlib seaborn scipy
   - pip install networkx==1.9.1 observations sklearn
   - pip install tensorflow==1.5.0
+  - pip install pystan
   - pip install nbformat nbconvert jupyter_client jupyter
   - python setup.py install
 script:
