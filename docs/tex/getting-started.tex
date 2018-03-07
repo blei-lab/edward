@@ -64,8 +64,8 @@ Next, make inferences about the model from data. We will use variational
 inference. Specify a normal approximation over the weights and biases.
 
 \begin{lstlisting}[language=Python]
-qW_0 = Normal(loc=tf.get_variable("qW_0/loc", [D, 2]),
-              scale=tf.nn.softplus(tf.get_variable("qW_0/scale", [D, 2])))
+qW_0 = Normal(loc=tf.get_variable("qW_0/loc", [1, 2]),
+              scale=tf.nn.softplus(tf.get_variable("qW_0/scale", [1, 2])))
 qW_1 = Normal(loc=tf.get_variable("qW_1/loc", [2, 1]),
               scale=tf.nn.softplus(tf.get_variable("qW_1/scale", [2, 1])))
 qb_0 = Normal(loc=tf.get_variable("qb_0/loc", [2]),
