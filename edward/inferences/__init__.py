@@ -22,6 +22,7 @@ from edward.inferences.sghmc import *
 from edward.inferences.variational_inference import *
 from edward.inferences.wake_sleep import *
 from edward.inferences.wgan_inference import *
+from edward.inferences.replica_exchange_mc import *
 
 from tensorflow.python.util.all_util import remove_undocumented
 
@@ -38,6 +39,7 @@ _allowed_symbols = [
     'ReparameterizationKLqp',
     'ReparameterizationKLKLqp',
     'ReparameterizationEntropyKLqp',
+    'ReplicaExchangeMC',
     'ScoreKLqp',
     'ScoreKLKLqp',
     'ScoreEntropyKLqp',
