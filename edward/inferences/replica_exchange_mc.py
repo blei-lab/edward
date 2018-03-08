@@ -13,10 +13,15 @@ from edward.util import check_latent_vars, copy
 
 
 class memory_lambda:
-    def __init__(self, x):
-        self.x = x
-    def __call__(self):
-        return self.x
+  """
+  Class to use instead of lambda.
+  lambda is affected by the change of x,
+  so memory_lambdda output x at the time of definition.
+  """
+  def __init__(self, x):
+    self.x = x
+  def __call__(self):
+    return self.x
     
 class ReplicaExchangeMC(MonteCarlo):
   """
@@ -34,13 +39,15 @@ class ReplicaExchangeMC(MonteCarlo):
                                  proposal_vars={x: proposal_x})
   ```
   """
-  def __init__(self, latent_vars, proposal_vars, data=None, betas=np.logspace(0,-1, 10)):
+  def __init__(self, latent_vars, proposal_vars, data=None,
+               betas=np.logspace(0,-2, 5), exchange_freq=0.1):
     """Create an inference algorithm.
     Args:
       proposal_vars: dict of RandomVariable to RandomVariable.
         Collection of random variables to perform inference on; each is
         binded to a proposal distribution $g(z' \mid z)$.
       betas: list of inverse temperature.
+      exchange_freq: frequency of exchanging replica
     """
     check_latent_vars(proposal_vars)
     self.proposal_vars = proposal_vars
@@ -49,10 +56,14 @@ class ReplicaExchangeMC(MonteCarlo):
     if self.betas[0] != 1:
       raise ValueError("betas[0] must be 1.")
 
+    #Make replica.
     self.replica_vars = []
     for beta in self.betas:
-        self.replica_vars.append({z: Empirical(params=tf.Variable(tf.zeros(
-                qz.params.shape))) for z, qz in six.iteritems(latent_vars)})
+      self.replica_vars.append({z: Empirical(params=tf.Variable(tf.zeros(
+              qz.params.shape))) for z, qz in six.iteritems(latent_vars)})
+    
+    self.exchange_freq = exchange_freq
+    
     super(ReplicaExchangeMC, self).__init__(latent_vars, data)
   def initialize(self, *args, **kwargs):
     kwargs['auto_transform'] = False
@@ -61,45 +72,55 @@ class ReplicaExchangeMC(MonteCarlo):
     """
     Perform sampling and exchange.
     """
+    #Sample by Metropolis-Hastings for each replica.
     replica_sample = []
     replica_accept = []
     for i, beta in enumerate(self.betas):
-        sample_, accept_ = self.mh_sample(self.replica_vars[i], beta)
-        replica_sample.append(sample_)
-        replica_accept.append(accept_)
+      sample_, accept_ = self.mh_sample(self.replica_vars[i], beta)
+      replica_sample.append(sample_)
+      replica_accept.append(accept_)
     accept = replica_accept[0]
     
-    new_replica_idx = tf.Variable(tf.range(len(self.replica_vars)), name='new_replica_idx')
-    new_replica_idx = tf.scatter_update(new_replica_idx, tf.range(len(self.replica_vars)), tf.range(len(self.replica_vars)))
+    #Variable to store order of replicas after exchange
+    new_replica_idx = tf.Variable(tf.range(len(self.replica_vars)))
+    new_replica_idx = tf.assign(new_replica_idx, tf.range(len(self.betas)))
     
-    cand = tf.gather(tf.random_shuffle(tf.range(len(self.replica_vars))),[0,1])
-    exchange = self.replica_exchange(cand, replica_sample)
+    #Exchange adjacent replicas at frequency of exchange_freq
+    i = tf.random_uniform((), maxval=2, dtype=tf.int32)
+    c = lambda i, new_replica_idx: tf.less(i, len(self.betas)-1)
+    b = lambda i, new_replica_idx: [tf.add(i, 2), self.replica_exchange(i, i+1,
+                                    replica_sample, new_replica_idx)]
+    u = tf.random_uniform([])
+    exchange = u < self.exchange_freq
+    i,new_replica_idx = tf.cond(exchange,
+                                lambda: tf.while_loop(c, b,
+                                               loop_vars=[i, new_replica_idx]),
+                                lambda: [i,new_replica_idx])
     
-    new_replica_idx = tf.cond(exchange, 
-                              lambda: tf.scatter_update(new_replica_idx, cand, cand[::-1]),
-                              lambda: new_replica_idx)
-    
-    accept = tf.logical_or(accept,tf.not_equal(new_replica_idx[0],0))
+    #New replica sorted by new_replica_idx
     new_replica_sample = []
     for i in range(len(self.betas)):
-        new_replica_sample.append(tf.case({tf.equal(tf.gather(new_replica_idx,i),j):
-            memory_lambda(replica_sample[j]) for j in range(len(self.betas))},
-             exclusive=True))
+      new_replica_sample.append(tf.case(
+              {tf.equal(tf.gather(new_replica_idx,i),j):
+                  memory_lambda(replica_sample[j])
+                  for j in range(len(self.betas))},exclusive=True))
+    
+    assign_ops = []
     
     # Update Empirical random variables.
-    assign_ops = []
     for z, qz in six.iteritems(self.latent_vars):
       variable = qz.get_variables()[0]
-      assign_ops.append(tf.scatter_update(variable, self.t, new_replica_sample[0][z]))
+      assign_ops.append(tf.scatter_update(variable, self.t,
+                                          new_replica_sample[0][z]))
+    
+    for i, beta in enumerate(self.betas):
+      for z, qz in six.iteritems(self.replica_vars[i]):
+        variable = qz.get_variables()[0]
+        assign_ops.append(tf.scatter_update(variable, self.t,
+                                            new_replica_sample[i][z]))
         
     # Increment n_accept (if accepted).
     assign_ops.append(self.n_accept.assign_add(tf.where(accept, 1, 0)))
-    
-    for i, beta in enumerate(self.betas):
-        for z, qz in six.iteritems(self.replica_vars[i]):
-            variable = qz.get_variables()[0]
-            #assign_ops.append(tf.scatter_update(variable, self.t, replica_sample[i][z]))
-            assign_ops.append(tf.scatter_update(variable, self.t, new_replica_sample[i][z]))
 
 
     return tf.group(*assign_ops)
@@ -183,24 +204,20 @@ class ReplicaExchangeMC(MonteCarlo):
     sample = {z: sample_value for z, sample_value in
               zip(six.iterkeys(new_sample), sample_values)}
     return sample, accept
-  def replica_exchange(self, candidate, replica_sample):
+  def replica_exchange(self, candi, candj, replica_sample, new_replica_idx):
     """
     Exchange replica according to the Metropolis-Hastings criterion.
-    Args:
-        candidate: indices of replica that may be exchanged
-        replica_sample: list of replica
+    $\\text{ratio} =
+          (\log p(x, z_i) - \log p(x, x_j))(\beta_j - \beta_i)
     """
-    sample_i = tf.case({tf.equal(candidate[0],i):memory_lambda(replica_sample[i])for i
-                        in range(len(self.betas))}, exclusive=True)
-    beta_i = tf.case({tf.equal(candidate[0],i):memory_lambda(beta)for i, beta
-                        in enumerate(self.betas)}, exclusive=True)
-    sample_j = tf.case({tf.equal(candidate[1],i):memory_lambda(replica_sample[i])for i
-                        in range(len(self.betas))}, exclusive=True)
-    beta_j = tf.case({tf.equal(candidate[1],i):memory_lambda(beta)for i, beta
-                        in enumerate(self.betas)}, exclusive=True)
-    
-    self.sample_i = sample_i
-    self.sample_j = sample_j
+    sample_i = tf.case({tf.equal(new_replica_idx[candi],i):memory_lambda(
+            replica_sample[i])for i in range(len(self.betas))}, exclusive=True)
+    beta_i = tf.case({tf.equal(candi,i):memory_lambda(beta)for i, beta in
+                      enumerate(self.betas)}, exclusive=True)
+    sample_j = tf.case({tf.equal(new_replica_idx[candj],i):memory_lambda(
+            replica_sample[i])for i in range(len(self.betas))}, exclusive=True)
+    beta_j = tf.case({tf.equal(candj,i):memory_lambda(beta)for i, beta in
+                      enumerate(self.betas)}, exclusive=True)
     
     ratio = 0.0
     
@@ -222,16 +239,18 @@ class ReplicaExchangeMC(MonteCarlo):
     scope_j = base_scope + '_j'
     
     for z in six.iterkeys(self.latent_vars):
+      # Build priors p(z_i) and p(z_j).
       z_i = copy(z, dict_swap_i, scope=scope_i)
       z_j = copy(z, dict_swap_j, scope=scope_j)
+      # Increment ratio.
       ratio += tf.reduce_sum(z_i.log_prob(dict_swap_i[z]))
       ratio -= tf.reduce_sum(z_j.log_prob(dict_swap_j[z]))
 
     for x in six.iterkeys(self.data):
       if isinstance(x, RandomVariable):
+        # Build likelihoods p(x | z_i) and p(x | z_j).
         x_z_i = copy(x, dict_swap_i, scope=scope_i)
         x_z_j = copy(x, dict_swap_j, scope=scope_j)
-        
         # Increment ratio.
         ratio += tf.reduce_sum(x_z_i.log_prob(dict_swap[x]))
         ratio -= tf.reduce_sum(x_z_j.log_prob(dict_swap[x]))
@@ -239,5 +258,10 @@ class ReplicaExchangeMC(MonteCarlo):
     ratio *= beta_j - beta_i
     
     u = tf.random_uniform([], dtype=ratio.dtype)
-    exchange_accept = tf.log(u) < ratio    
-    return exchange_accept
+    exchange = tf.log(u) < ratio    
+    
+    # exchange new_replica_idx
+    return tf.cond(exchange, 
+                  lambda: tf.scatter_update(new_replica_idx, [candi,candj],
+                                            [candj,candi]),
+                  lambda: new_replica_idx)
