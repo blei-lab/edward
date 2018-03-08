@@ -39,7 +39,7 @@ class test_metropolishastings_class(tf.test.TestCase):
       self.assertEqual(new_t, 0)
       self.assertEqual(new_n_accept, 0)
 
-  def test_normalnormal_float32(self):
+  def test_normalnormal_float64(self):
     with self.test_session() as sess:
       x_data = np.array([0.0] * 50, dtype=np.float32)
 
