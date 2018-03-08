@@ -37,7 +37,7 @@ class ReplicaExchangeMC(MonteCarlo):
                 [MultivariateNormalDiag([0.0,0.0], [1.0,1.0]),
                  MultivariateNormalDiag([10.0,10.0], [1.0,1.0])])
   proposal_x = MultivariateNormalDiag(x, [1.0,1.0])
-  qx = Empirical(tf.Variable(tf.zeros([10000, 2]))) #初期値
+  qx = Empirical(tf.Variable(tf.zeros([10000, 2])))
   inference = ed.ReplicaExchangeMC(latent_vars={x: qx},
                                  proposal_vars={x: proposal_x})
   ```
