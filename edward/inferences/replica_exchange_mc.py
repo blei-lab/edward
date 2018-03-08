@@ -56,15 +56,18 @@ class ReplicaExchangeMC(MonteCarlo):
     check_latent_vars(proposal_vars)
     self.proposal_vars = proposal_vars
 
-    self.betas = betas.astype(np.float32)
-    if self.betas[0] != 1:
+    self.n_replica = len(betas)
+    if betas[0] != 1:
       raise ValueError("betas[0] must be 1.")
+    self.betas = [tf.constant(beta, dtype=list(latent_vars.values())[0].dtype)
+                    for beta in betas]
 
     # Make replica.
     self.replica_vars = []
     for beta in self.betas:
       self.replica_vars.append({z: Empirical(params=tf.Variable(tf.zeros(
-          qz.params.shape))) for z, qz in six.iteritems(latent_vars)})
+          qz.params.shape, dtype=latent_vars[z].dtype))) for z, qz in
+          six.iteritems(latent_vars)})
 
     self.exchange_freq = exchange_freq
 
@@ -88,14 +91,14 @@ class ReplicaExchangeMC(MonteCarlo):
     accept = replica_accept[0]
 
     # Variable to store order of replicas after exchange
-    new_replica_idx = tf.Variable(tf.range(len(self.replica_vars)))
-    new_replica_idx = tf.assign(new_replica_idx, tf.range(len(self.betas)))
+    new_replica_idx = tf.Variable(tf.range(self.n_replica))
+    new_replica_idx = tf.assign(new_replica_idx, tf.range(self.n_replica))
 
     # Exchange adjacent replicas at frequency of exchange_freq
     i = tf.random_uniform((), maxval=2, dtype=tf.int32)
 
     def c(i, new_replica_idx):
-        return tf.less(i, len(self.betas) - 1)
+        return tf.less(i, self.n_replica - 1)
 
     def b(i, new_replica_idx):
         return [tf.add(i, 2), self.replica_exchange(i, i + 1, replica_sample,
@@ -112,11 +115,11 @@ class ReplicaExchangeMC(MonteCarlo):
 
     # New replica sorted by new_replica_idx
     new_replica_sample = []
-    for i in range(len(self.betas)):
+    for i in range(self.n_replica):
       new_replica_sample.append(tf.case(
           {tf.equal(tf.gather(new_replica_idx, i), j):
            memory_lambda(replica_sample[j])
-           for j in range(len(self.betas))}, exclusive=True))
+           for j in range(self.n_replica)}, exclusive=True))
 
     assign_ops = []
 
@@ -225,11 +228,11 @@ class ReplicaExchangeMC(MonteCarlo):
           (\log p(x, z_i) - \log p(x, x_j))(\beta_j - \beta_i)
     """
     sample_i = tf.case({tf.equal(new_replica_idx[candi], i): memory_lambda(
-        replica_sample[i])for i in range(len(self.betas))}, exclusive=True)
+        replica_sample[i])for i in range(self.n_replica)}, exclusive=True)
     beta_i = tf.case({tf.equal(candi, i): memory_lambda(beta)for i, beta in
                       enumerate(self.betas)}, exclusive=True)
     sample_j = tf.case({tf.equal(new_replica_idx[candj], i): memory_lambda(
-        replica_sample[i])for i in range(len(self.betas))}, exclusive=True)
+        replica_sample[i])for i in range(self.n_replica)}, exclusive=True)
     beta_j = tf.case({tf.equal(candj, i): memory_lambda(beta)for i, beta in
                       enumerate(self.betas)}, exclusive=True)
 
