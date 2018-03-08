@@ -94,16 +94,17 @@ class ReplicaExchangeMC(MonteCarlo):
     # Exchange adjacent replicas at frequency of exchange_freq
     i = tf.random_uniform((), maxval=2, dtype=tf.int32)
 
-    def c(i, new_replica_idx): return tf.less(i, len(self.betas) - 1)
+    def c(i, new_replica_idx):
+        return tf.less(i, len(self.betas) - 1)
 
-    def b(i, new_replica_idx): return [tf.add(i, 2),
-                                       self.replica_exchange(i, i + 1, replica_sample, new_replica_idx)]
+    def b(i, new_replica_idx):
+        return [tf.add(i, 2), self.replica_exchange(i, i + 1, replica_sample,
+                                                    new_replica_idx)]
     u = tf.random_uniform([])
     exchange = u < self.exchange_freq
     i, new_replica_idx = tf.cond(exchange,
-                                 lambda: tf.while_loop(c, b,
-                                                       loop_vars=[i, new_replica_idx]),
-                                 lambda: [i, new_replica_idx])
+                    lambda: tf.while_loop(c, b, loop_vars=[i, new_replica_idx]),
+                    lambda: [i, new_replica_idx])
 
     # New replica sorted by new_replica_idx
     new_replica_sample = []
