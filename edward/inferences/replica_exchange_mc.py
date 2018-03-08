@@ -18,15 +18,18 @@ class memory_lambda:
   lambda is affected by the change of x,
   so memory_lambdda output x at the time of definition.
   """
+
   def __init__(self, x):
     self.x = x
+
   def __call__(self):
     return self.x
-    
+
+
 class ReplicaExchangeMC(MonteCarlo):
   """
   Replica Exchange MCMC(https://en.wikipedia.org/wiki/Parallel_tempering)
-  
+
   #### Examples
   ```python
   cat = Categorical(probs=[0.5,0.5])
@@ -39,8 +42,9 @@ class ReplicaExchangeMC(MonteCarlo):
                                  proposal_vars={x: proposal_x})
   ```
   """
+
   def __init__(self, latent_vars, proposal_vars, data=None,
-               betas=np.logspace(0,-2, 5), exchange_freq=0.1):
+               betas=np.logspace(0, -2, 5), exchange_freq=0.1):
     """Create an inference algorithm.
     Args:
       proposal_vars: dict of RandomVariable to RandomVariable.
@@ -51,28 +55,30 @@ class ReplicaExchangeMC(MonteCarlo):
     """
     check_latent_vars(proposal_vars)
     self.proposal_vars = proposal_vars
-    
+
     self.betas = betas.astype(np.float32)
     if self.betas[0] != 1:
       raise ValueError("betas[0] must be 1.")
 
-    #Make replica.
+    # Make replica.
     self.replica_vars = []
     for beta in self.betas:
       self.replica_vars.append({z: Empirical(params=tf.Variable(tf.zeros(
-              qz.params.shape))) for z, qz in six.iteritems(latent_vars)})
-    
+          qz.params.shape))) for z, qz in six.iteritems(latent_vars)})
+
     self.exchange_freq = exchange_freq
-    
+
     super(ReplicaExchangeMC, self).__init__(latent_vars, data)
+
   def initialize(self, *args, **kwargs):
     kwargs['auto_transform'] = False
     return super(ReplicaExchangeMC, self).initialize(*args, **kwargs)
+
   def build_update(self):
     """
     Perform sampling and exchange.
     """
-    #Sample by Metropolis-Hastings for each replica.
+    # Sample by Metropolis-Hastings for each replica.
     replica_sample = []
     replica_accept = []
     for i, beta in enumerate(self.betas):
@@ -80,50 +86,52 @@ class ReplicaExchangeMC(MonteCarlo):
       replica_sample.append(sample_)
       replica_accept.append(accept_)
     accept = replica_accept[0]
-    
-    #Variable to store order of replicas after exchange
+
+    # Variable to store order of replicas after exchange
     new_replica_idx = tf.Variable(tf.range(len(self.replica_vars)))
     new_replica_idx = tf.assign(new_replica_idx, tf.range(len(self.betas)))
-    
-    #Exchange adjacent replicas at frequency of exchange_freq
+
+    # Exchange adjacent replicas at frequency of exchange_freq
     i = tf.random_uniform((), maxval=2, dtype=tf.int32)
-    c = lambda i, new_replica_idx: tf.less(i, len(self.betas)-1)
-    b = lambda i, new_replica_idx: [tf.add(i, 2), self.replica_exchange(i, i+1,
-                                    replica_sample, new_replica_idx)]
+
+    def c(i, new_replica_idx): return tf.less(i, len(self.betas) - 1)
+
+    def b(i, new_replica_idx): return [tf.add(i, 2),
+                                       self.replica_exchange(i, i + 1, replica_sample, new_replica_idx)]
     u = tf.random_uniform([])
     exchange = u < self.exchange_freq
-    i,new_replica_idx = tf.cond(exchange,
-                                lambda: tf.while_loop(c, b,
-                                               loop_vars=[i, new_replica_idx]),
-                                lambda: [i,new_replica_idx])
-    
-    #New replica sorted by new_replica_idx
+    i, new_replica_idx = tf.cond(exchange,
+                                 lambda: tf.while_loop(c, b,
+                                                       loop_vars=[i, new_replica_idx]),
+                                 lambda: [i, new_replica_idx])
+
+    # New replica sorted by new_replica_idx
     new_replica_sample = []
     for i in range(len(self.betas)):
       new_replica_sample.append(tf.case(
-              {tf.equal(tf.gather(new_replica_idx,i),j):
-                  memory_lambda(replica_sample[j])
-                  for j in range(len(self.betas))},exclusive=True))
-    
+          {tf.equal(tf.gather(new_replica_idx, i), j):
+           memory_lambda(replica_sample[j])
+           for j in range(len(self.betas))}, exclusive=True))
+
     assign_ops = []
-    
+
     # Update Empirical random variables.
     for z, qz in six.iteritems(self.latent_vars):
       variable = qz.get_variables()[0]
       assign_ops.append(tf.scatter_update(variable, self.t,
                                           new_replica_sample[0][z]))
-    
+
     for i, beta in enumerate(self.betas):
       for z, qz in six.iteritems(self.replica_vars[i]):
         variable = qz.get_variables()[0]
         assign_ops.append(tf.scatter_update(variable, self.t,
                                             new_replica_sample[i][z]))
-        
+
     # Increment n_accept (if accepted).
     assign_ops.append(self.n_accept.assign_add(tf.where(accept, 1, 0)))
 
-
     return tf.group(*assign_ops)
+
   def mh_sample(self, latent_vars, beta):
     """Draw sample by Metropolis-Hastings. Then
     accept or reject the sample based on the ratio,
@@ -191,7 +199,7 @@ class ReplicaExchangeMC(MonteCarlo):
         ratio -= tf.reduce_sum(x_zold.log_prob(dict_swap[x]))
 
     ratio *= beta
-    
+
     # Accept or reject sample.
     u = tf.random_uniform([], dtype=ratio.dtype)
     accept = tf.log(u) < ratio
@@ -204,23 +212,24 @@ class ReplicaExchangeMC(MonteCarlo):
     sample = {z: sample_value for z, sample_value in
               zip(six.iterkeys(new_sample), sample_values)}
     return sample, accept
+
   def replica_exchange(self, candi, candj, replica_sample, new_replica_idx):
     """
     Exchange replica according to the Metropolis-Hastings criterion.
     $\\text{ratio} =
           (\log p(x, z_i) - \log p(x, x_j))(\beta_j - \beta_i)
     """
-    sample_i = tf.case({tf.equal(new_replica_idx[candi],i):memory_lambda(
-            replica_sample[i])for i in range(len(self.betas))}, exclusive=True)
-    beta_i = tf.case({tf.equal(candi,i):memory_lambda(beta)for i, beta in
+    sample_i = tf.case({tf.equal(new_replica_idx[candi], i): memory_lambda(
+        replica_sample[i])for i in range(len(self.betas))}, exclusive=True)
+    beta_i = tf.case({tf.equal(candi, i): memory_lambda(beta)for i, beta in
                       enumerate(self.betas)}, exclusive=True)
-    sample_j = tf.case({tf.equal(new_replica_idx[candj],i):memory_lambda(
-            replica_sample[i])for i in range(len(self.betas))}, exclusive=True)
-    beta_j = tf.case({tf.equal(candj,i):memory_lambda(beta)for i, beta in
+    sample_j = tf.case({tf.equal(new_replica_idx[candj], i): memory_lambda(
+        replica_sample[i])for i in range(len(self.betas))}, exclusive=True)
+    beta_j = tf.case({tf.equal(candj, i): memory_lambda(beta)for i, beta in
                       enumerate(self.betas)}, exclusive=True)
-    
+
     ratio = 0.0
-    
+
     dict_swap = {}
     for x, qx in six.iteritems(self.data):
       if isinstance(x, RandomVariable):
@@ -233,11 +242,11 @@ class ReplicaExchangeMC(MonteCarlo):
     dict_swap_i.update(sample_i)
     dict_swap_j = dict_swap.copy()
     dict_swap_j.update(sample_j)
-          
+
     base_scope = tf.get_default_graph().unique_name("inference") + '/'
     scope_i = base_scope + '_i'
     scope_j = base_scope + '_j'
-    
+
     for z in six.iterkeys(self.latent_vars):
       # Build priors p(z_i) and p(z_j).
       z_i = copy(z, dict_swap_i, scope=scope_i)
@@ -254,14 +263,14 @@ class ReplicaExchangeMC(MonteCarlo):
         # Increment ratio.
         ratio += tf.reduce_sum(x_z_i.log_prob(dict_swap[x]))
         ratio -= tf.reduce_sum(x_z_j.log_prob(dict_swap[x]))
-    
+
     ratio *= beta_j - beta_i
-    
+
     u = tf.random_uniform([], dtype=ratio.dtype)
-    exchange = tf.log(u) < ratio    
-    
+    exchange = tf.log(u) < ratio
+
     # exchange new_replica_idx
-    return tf.cond(exchange, 
-                  lambda: tf.scatter_update(new_replica_idx, [candi,candj],
-                                            [candj,candi]),
-                  lambda: new_replica_idx)
+    return tf.cond(exchange,
+                   lambda: tf.scatter_update(new_replica_idx, [candi, candj],
+                                             [candj, candi]),
+                   lambda: new_replica_idx)
