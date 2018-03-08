@@ -100,11 +100,15 @@ class ReplicaExchangeMC(MonteCarlo):
     def b(i, new_replica_idx):
         return [tf.add(i, 2), self.replica_exchange(i, i + 1, replica_sample,
                                                     new_replica_idx)]
+
+    def exchange_all():
+        return tf.while_loop(c, b, loop_vars=[i, new_replica_idx])
+
     u = tf.random_uniform([])
     exchange = u < self.exchange_freq
     i, new_replica_idx = tf.cond(exchange,
-                    lambda: tf.while_loop(c, b, loop_vars=[i, new_replica_idx]),
-                    lambda: [i, new_replica_idx])
+                                 exchange_all,
+                                 lambda: [i, new_replica_idx])
 
     # New replica sorted by new_replica_idx
     new_replica_sample = []
