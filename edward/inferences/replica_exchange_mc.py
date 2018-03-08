@@ -60,7 +60,7 @@ class ReplicaExchangeMC(MonteCarlo):
     if betas[0] != 1:
       raise ValueError("betas[0] must be 1.")
     self.betas = [tf.constant(beta, dtype=list(latent_vars.values())[0].dtype)
-                    for beta in betas]
+                  for beta in betas]
 
     # Make replica.
     self.replica_vars = []

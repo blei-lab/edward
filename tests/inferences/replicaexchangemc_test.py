@@ -23,8 +23,8 @@ class test_metropolishastings_class(tf.test.TestCase):
 
       # analytic solution: N(loc=0.0, scale=\sqrt{1/51}=0.140)
       inference = ed.ReplicaExchangeMC({mu: qmu},
-                                        {mu: mu},
-                                        data={x: x_data})
+                                       {mu: mu},
+                                       data={x: x_data})
       inference.run()
 
       self.assertAllClose(qmu.mean().eval(), 0, rtol=1e-1, atol=1e-1)
@@ -54,8 +54,8 @@ class test_metropolishastings_class(tf.test.TestCase):
 
       # analytic solution: N(loc=0.0, scale=\sqrt{1/51}=0.140)
       inference = ed.ReplicaExchangeMC({mu: qmu},
-                                        {mu: mu},
-                                        data={x: x_data})
+                                       {mu: mu},
+                                       data={x: x_data})
       inference.run()
 
       self.assertAllClose(qmu.mean().eval(), 0, rtol=1e-1, atol=1e-1)
