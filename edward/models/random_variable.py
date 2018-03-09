@@ -5,6 +5,7 @@ from __future__ import print_function
 import tensorflow as tf
 
 from collections import defaultdict
+import six
 
 try:
   from tensorflow.python.client.session import \
@@ -86,28 +87,10 @@ class RandomVariable(object):
         Optional list of graph collections (lists). The random variable is
         added to these collections. Defaults to `[ed.random_variables()]`.
     """
-    # Force the Distribution class to always use the same name scope
-    # when scoping its parameter names and also when calling any
-    # methods such as sample.
-    name = kwargs.get('name', type(self).__name__)
-    with tf.name_scope(name) as ns:
-      kwargs['name'] = ns
-
-    # pop and store RandomVariable-specific parameters in _kwargs
+    # pop and store RandomVariable-specific parameters
     sample_shape = kwargs.pop('sample_shape', ())
     value = kwargs.pop('value', None)
     collections = kwargs.pop('collections', ["random_variables"])
-
-    # store args, kwargs for easy graph copying
-    self._args = args
-    self._kwargs = kwargs.copy()
-
-    if sample_shape != ():
-      self._kwargs['sample_shape'] = sample_shape
-    if value is not None:
-      self._kwargs['value'] = value
-    if collections != ["random_variables"]:
-      self._kwargs['collections'] = collections
 
     super(RandomVariable, self).__init__(*args, **kwargs)
 
@@ -145,19 +128,32 @@ class RandomVariable(object):
   @property
   def shape(self):
     """Shape of random variable."""
-    return self._value.shape
+    return self.value.shape
+
+  @property
+  def value(self):
+    """Get tensor that the random variable corresponds to."""
+    return self._value
 
   def __str__(self):
+    if not hasattr(self.value, "numpy"):
+      name = self.name
+    else:
+      name = numpy_text(self.value)
     return "RandomVariable(\"%s\"%s%s%s)" % (
-        self.name,
+        name,
         (", shape=%s" % self.shape)
         if self.shape.ndims is not None else "",
         (", dtype=%s" % self.dtype.name) if self.dtype else "",
-        (", device=%s" % self.value().device) if self.value().device else "")
+        (", device=%s" % self.value.device) if self.value.device else "")
 
   def __repr__(self):
-    return "<ed.RandomVariable '%s' shape=%s dtype=%s>" % (
+    string = "<ed.RandomVariable '%s' shape=%s dtype=%s>" % (
         self.name, self.shape, self.dtype.name)
+    if hasattr(self.value, "numpy"):
+      string = string[:-1] + " numpy=%s>" % (
+          numpy_text(self.value, is_repr=True))
+    return string
 
   def __hash__(self):
     return id(self)
@@ -213,45 +209,55 @@ class RandomVariable(object):
       print(x.eval())
     ```
     """
-    return self.value().eval(session=session, feed_dict=feed_dict)
+    return self.value.eval(session=session, feed_dict=feed_dict)
 
-  def value(self):
-    """Get tensor that the random variable corresponds to."""
-    return self._value
+  def numpy(self):
+    """Value as NumPy array, only available for TF Eager."""
+    return self.value.numpy()
 
   def get_ancestors(self, collection=None):
     """Get ancestor random variables."""
-    from edward.util.random_variables import get_ancestors
+    from edward.models.queries import get_ancestors
     return get_ancestors(self, collection)
 
   def get_blanket(self, collection=None):
     """Get the random variable's Markov blanket."""
-    from edward.util.random_variables import get_blanket
+    from edward.models.queries import get_blanket
     return get_blanket(self, collection)
 
   def get_children(self, collection=None):
     """Get child random variables."""
-    from edward.util.random_variables import get_children
+    from edward.models.queries import get_children
     return get_children(self, collection)
 
   def get_descendants(self, collection=None):
     """Get descendant random variables."""
-    from edward.util.random_variables import get_descendants
+    from edward.models.queries import get_descendants
     return get_descendants(self, collection)
 
   def get_parents(self, collection=None):
     """Get parent random variables."""
-    from edward.util.random_variables import get_parents
-    return get_parents(self, collection)
+    from edward.models.queries import get_parents
+    # The backward pass requires TF graph traversal. In general, consider
+    # primitive -> black box function (TF ops) -> primitive. To go to parent
+    # primitive, we traverse black box function.
+    parents = []
+    for node in six.itervalues(self.parameters):
+      if isinstance(node,
+                    (tf.Variable, tf.SparseTensor, tf.Tensor, RandomVariable)):
+        parents.extend(get_parents(node))
+      if isinstance(node, RandomVariable):
+        parents.append(node)
+    return parents
 
   def get_siblings(self, collection=None):
     """Get sibling random variables."""
-    from edward.util.random_variables import get_siblings
+    from edward.models.queries import get_siblings
     return get_siblings(self, collection)
 
   def get_variables(self, collection=None):
     """Get TensorFlow variables that the random variable depends on."""
-    from edward.util.random_variables import get_variables
+    from edward.models.queries import get_variables
     return get_variables(self, collection)
 
   def get_shape(self):
@@ -274,7 +280,7 @@ class RandomVariable(object):
       operator: string. The operator name.
     """
     def _run_op(a, *args):
-      return getattr(tf.Tensor, operator)(a.value(), *args)
+      return getattr(tf.Tensor, operator)(a.value, *args)
     # Propagate __doc__ to wrapper
     try:
       _run_op.__doc__ = getattr(tf.Tensor, operator).__doc__
@@ -291,15 +297,15 @@ class RandomVariable(object):
 
   @staticmethod
   def _session_run_conversion_fetch_function(tensor):
-    return ([tensor.value()], lambda val: val[0])
+    return ([tensor.value], lambda val: val[0])
 
   @staticmethod
   def _session_run_conversion_feed_function(feed, feed_val):
-    return [(feed.value(), feed_val)]
+    return [(feed.value, feed_val)]
 
   @staticmethod
   def _session_run_conversion_feed_function_for_partial_run(feed):
-    return [feed.value()]
+    return [feed.value]
 
   @staticmethod
   def _tensor_conversion_function(v, dtype=None, name=None, as_ref=False):
@@ -308,7 +314,33 @@ class RandomVariable(object):
       raise ValueError(
           "Incompatible type conversion requested to type '%s' for variable "
           "of type '%s'" % (dtype.name, v.dtype.name))
-    return v.value()
+    return v.value
+
+
+def numpy_text(tensor, is_repr=False):  # utility fn from TF Eager codebase
+  """Human readable representation of a tensor's numpy value."""
+  if tensor.dtype.is_numpy_compatible:
+    text = repr(tensor.numpy()) if is_repr else str(tensor.numpy())
+  else:
+    text = "<unprintable>"
+  if "\n" in text:
+    text = "\n" + text
+  return text
+
+
+def random_variables(graph=None):
+  """Return all random variables in the TensorFlow graph.
+
+  Args:
+    graph: TensorFlow graph.
+
+  Returns:
+    list of RandomVariable.
+  """
+  if graph is None:
+    graph = tf.get_default_graph()
+
+  return _RANDOM_VARIABLE_COLLECTION[graph]
 
 
 RandomVariable._overload_all_operators()

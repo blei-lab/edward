@@ -4,8 +4,7 @@ from __future__ import print_function
 
 import tensorflow as tf
 
-from edward.models import Normal
-from edward.util import is_independent
+from edward.models import Normal, is_independent
 
 
 class test_is_independent_class(tf.test.TestCase):

@@ -86,7 +86,7 @@ def main(_):
   X = tf.placeholder(tf.float32, [FLAGS.M, FLAGS.D])
   y_ph = tf.placeholder(tf.float32, [FLAGS.M])
   w = Normal(loc=tf.zeros(FLAGS.D), scale=tf.ones(FLAGS.D))
-  y = Normal(loc=ed.dot(X, w), scale=tf.ones(FLAGS.M))
+  y = Normal(loc=tf.tensordot(X, w, [[1], [0]]), scale=tf.ones(M))
 
   # INFERENCE
   qw = Normal(loc=tf.get_variable("qw/loc", [FLAGS.D]) + 1.0,

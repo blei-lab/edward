@@ -5,9 +5,9 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
-from edward.inferences.variational_inference import VariationalInference
-from edward.models import RandomVariable, PointMass
-from edward.util import copy, transform
+from edward.inferences import docstrings as doc
+from edward.inferences.util import (
+    call_with_intercept, call_with_trace, toposort)
 
 try:
   from tensorflow.contrib.distributions import bijectors
@@ -15,10 +15,23 @@ except Exception as e:
   raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
 
-class MAP(VariationalInference):
+@doc.set_doc(
+    args=(doc.arg_model +
+          doc.arg_variational +
+          doc.arg_align_latent +
+          doc.arg_align_data +
+          doc.arg_scale +
+          doc.arg_auto_transform +
+          doc.arg_collections +
+          doc.arg_args_kwargs)[:-1],
+    returns=doc.return_loss,
+    notes_regularization_losses=doc.notes_regularization_losses)
+def map(model, variational, align_latent, align_data,
+        scale=lambda name: 1.0, auto_transform=True, collections=None,
+        *args, **kwargs):
   """Maximum a posteriori.
 
-  This class implements gradient-based optimization to solve the
+  This function implements gradient-based optimization to solve the
   optimization problem,
 
   $\min_{z} - p(z \mid x).$
@@ -28,13 +41,23 @@ class MAP(VariationalInference):
 
   $- \mathbb{E}_{q(z; \lambda)} [ \log p(x, z) ].$
 
+  Args:
+  @{args}
+
+  Returns:
+  @{returns}
+
   #### Notes
 
-  This class is currently restricted to optimization over
+  This function is currently restricted to optimization over
   differentiable latent variables. For example, it does not solve
   discrete optimization.
 
-  This class also minimizes the loss with respect to any model
+  Probabilistic programs may have random variables which vary across
+  executions. The algorithm returns calculations following one
+  execution of the model and variational programs.
+
+  This function also minimizes the loss with respect to any model
   parameters $p(z \mid x; \\theta)$.
 
   In conditional inference, we infer $z$ in $p(z, \\beta
@@ -46,108 +69,51 @@ class MAP(VariationalInference):
   marginal density $\log p(x, z)$, and it is exact if
   $q(\\beta) = p(\\beta \mid x)$ (up to stochasticity).
 
+  @{notes_regularization_losses}
+
   #### Examples
 
-  Most explicitly, `MAP` is specified via a dictionary:
+  Most explicitly, this function is specified via a variational
+  program over pointmasses.
 
   ```python
-  qpi = PointMass(params=ed.to_simplex(tf.Variable(tf.zeros(K-1))))
-  qmu = PointMass(params=tf.Variable(tf.zeros(K*D)))
-  qsigma = PointMass(params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))))
-  ed.MAP({pi: qpi, mu: qmu, sigma: qsigma}, data)
+  def variational():
+    qpi = PointMass(params=to_simplex(tf.Variable(tf.zeros(K-1))),
+                    name="qpi")
+    qmu = PointMass(params=tf.Variable(tf.zeros(K*D)),
+                    name="qmu")
+    qsigma = PointMass(params=tf.nn.softplus(tf.Variable(tf.zeros(K*D))),
+                       name="qsigma")
+    return qpi, qmu, qsigma
+
+  loss = ed.map(..., variational, ...)
   ```
 
-  We also automate the specification of `PointMass` distributions,
-  so one can pass in a list of latent variables instead:
+  We also automate the specification of `PointMass` distributions
+  so you don't pass in `variational`. (TODO not implemented yet.)
 
-  ```python
-  ed.MAP([beta], data)
-  ed.MAP([pi, mu, sigma], data)
-  ```
-
-  Note that for `MAP` to optimize over latent variables with
+  Note that for this function to optimize over latent variables with
   constrained continuous support, the point mass must be constrained
   to have the same support while its free parameters are
   unconstrained; see, e.g., `qsigma` above. This is different than
   performing MAP on the unconstrained space: in general, the MAP of
   the transform is not the transform of the MAP.
-
-  The objective function also adds to itself a summation over all
-  tensors in the `REGULARIZATION_LOSSES` collection.
   """
-  def __init__(self, latent_vars=None, data=None):
-    """Create an inference algorithm.
+  q_trace = call_with_trace(variational, *args, **kwargs)
+  x = call_with_intercept(model, q_trace, align_data, align_latent,
+                          *args, **kwargs)
+  p_log_prob = 0.0
+  for rv in toposort(x):
+    if align_latent(rv.name) is not None or align_data(rv.name) is not None:
+      scale_factor = scale(rv.name)
+      p_log_prob += tf.reduce_sum(scale_factor * rv.log_prob(rv.value))
 
-    Args:
-      latent_vars: list of RandomVariable or
-                   dict of RandomVariable to RandomVariable.
-        Collection of random variables to perform inference on. If
-        list, each random variable will be implictly optimized using a
-        `PointMass` random variable that is defined internally with
-        constrained support, has unconstrained free parameters, and is
-        initialized using standard normal draws. If dictionary, each
-        value in the dictionary must be a `PointMass` random variable
-        with the same support as the key.
-    """
-    if isinstance(latent_vars, list):
-      with tf.variable_scope(None, default_name="posterior"):
-        latent_vars_dict = {}
-        for z in latent_vars:
-          # Define point masses to have constrained support and
-          # unconstrained free parameters.
-          batch_event_shape = z.batch_shape.concatenate(z.event_shape)
-          params = tf.Variable(tf.random_normal(batch_event_shape))
-          if hasattr(z, 'support'):
-            z_transform = transform(z)
-            if hasattr(z_transform, 'bijector'):
-              params = z_transform.bijector.inverse(params)
-          latent_vars_dict[z] = PointMass(params=params)
-        latent_vars = latent_vars_dict
-        del latent_vars_dict
-    elif isinstance(latent_vars, dict):
-      for qz in six.itervalues(latent_vars):
-        if not isinstance(qz, PointMass):
-          raise TypeError("Posterior approximation must consist of only "
-                          "PointMass random variables.")
+  reg_penalty = tf.reduce_sum(tf.losses.get_regularization_losses())
+  if collections is not None:
+    tf.summary.scalar("loss/p_log_prob", p_log_prob,
+                      collections=collections)
+    tf.summary.scalar("loss/reg_penalty", reg_penalty,
+                      collections=collections)
 
-    super(MAP, self).__init__(latent_vars, data)
-
-  def build_loss_and_gradients(self, var_list):
-    """Build loss function. Its automatic differentiation
-    is the gradient of
-
-    $- \log p(x,z).$
-    """
-    # Form dictionary in order to replace conditioning on prior or
-    # observed variable with conditioning on a specific value.
-    scope = tf.get_default_graph().unique_name("inference")
-    dict_swap = {z: qz.value()
-                 for z, qz in six.iteritems(self.latent_vars)}
-    for x, qx in six.iteritems(self.data):
-      if isinstance(x, RandomVariable):
-        if isinstance(qx, RandomVariable):
-          dict_swap[x] = qx.value()
-        else:
-          dict_swap[x] = qx
-
-    p_log_prob = 0.0
-    for z in six.iterkeys(self.latent_vars):
-      z_copy = copy(z, dict_swap, scope=scope)
-      p_log_prob += tf.reduce_sum(
-          self.scale.get(z, 1.0) * z_copy.log_prob(dict_swap[z]))
-
-    for x in six.iterkeys(self.data):
-      if isinstance(x, RandomVariable):
-        if dict_swap:
-          x_copy = copy(x, dict_swap, scope=scope)
-        else:
-          x_copy = x
-        p_log_prob += tf.reduce_sum(
-            self.scale.get(x, 1.0) * x_copy.log_prob(dict_swap[x]))
-
-    reg_penalty = tf.reduce_sum(tf.losses.get_regularization_losses())
-    loss = -p_log_prob + reg_penalty
-
-    grads = tf.gradients(loss, var_list)
-    grads_and_vars = list(zip(grads, var_list))
-    return loss, grads_and_vars
+  loss = -p_log_prob + reg_penalty
+  return loss

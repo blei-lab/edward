@@ -5,12 +5,26 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
-from edward.inferences.variational_inference import VariationalInference
-from edward.models import RandomVariable
-from edward.util import copy, get_descendants
+from edward.inferences import docstrings as doc
+from edward.inferences.util import (
+    call_with_intercept, call_with_trace, toposort)
 
 
-class WakeSleep(VariationalInference):
+@doc.set_doc(
+    args_part_one=(doc.arg_model +
+                   doc.arg_variational +
+                   doc.arg_align_latent +
+                   doc.arg_align_data +
+                   doc.arg_scale +
+                   doc.arg_n_samples)[:-1],
+    args_part_two=(doc.arg_auto_transform +
+                   doc.arg_collections +
+                   doc.arg_args_kwargs)[:-1],
+    notes_conditional_inference=doc.notes_conditional_inference_samples,
+    notes_regularization_losses=doc.notes_regularization_losses)
+def wake_sleep(model, variational, align_latent, align_data,
+               scale=lambda name: 1.0, n_samples=1, phase_q='sleep',
+               auto_transform=True, collections=None, *args, **kwargs):
   """Wake-Sleep algorithm [@hinton1995wake].
 
   Given a probability model $p(x, z; \\theta)$ and variational
@@ -36,120 +50,100 @@ class WakeSleep(VariationalInference):
   corresponds to minimizing the reverse KL $\\text{KL}(p\|q)$ in
   expectation over the data distribution.
 
+  Args:
+  @{args_part_one}
+    phase_q: str.
+      Phase for updating parameters of q. If 'sleep', update using
+      a sample from p. If 'wake', update using a sample from q.
+      (Unlike reparameterization gradients, the sample is held
+      fixed.)
+  @{args_part_two}
+
+  Returns:
+    Pair of scalar tf.Tensors, representing losses for training p
+    and q respectively.
+
   #### Notes
 
-  In conditional inference, we infer $z$ in $p(z, \\beta
-  \mid x)$ while fixing inference over $\\beta$ using another
-  distribution $q(\\beta)$. During gradient calculation, instead
-  of using the model's density
+  Probabilistic programs may have random variables which vary across
+  executions. The algorithm returns calculations following `n_samples`
+  executions of the model and variational programs.
 
-  $\log p(x, z^{(s)}), z^{(s)} \sim q(z; \lambda),$
+  @{notes_conditional_inference}
 
-  for each sample $s=1,\ldots,S$, `WakeSleep` uses
+  @{notes_regularization_losses}
 
-  $\log p(x, z^{(s)}, \\beta^{(s)}),$
+  #### Examples
 
-  where $z^{(s)} \sim q(z; \lambda)$ and $\\beta^{(s)}
-  \sim q(\\beta)$.
+  ```python
+  def model():
+    z = Normal(loc=0.0, scale=1.0, sample_shape=[256, 25], name="z")
+    net = tf.layers.dense(z, 512, activation=tf.nn.relu)
+    net = tf.layers.dense(net, 28 * 28, activation=None)
+    x = Normal(loc=net, scale=1.0, name="x")
+    return x
 
-  The objective function also adds to itself a summation over all
-  tensors in the `REGULARIZATION_LOSSES` collection.
+  def variational(x):
+    net = tf.layers.dense(x, 25 * 2)
+    qz = Normal(loc=net[:, :25],
+                scale=tf.nn.softplus(net[:, 25:]),
+                name="qz")
+    return qz
+
+  loss_p, loss_q = ed.wake_sleep(
+      model, variational,
+      align_latent=lambda name: "qz" if name == "z" else None,
+      align_data=lambda name: "x" if name == "x" else None,
+      x=x_data)
+  ```
   """
-  def __init__(self, *args, **kwargs):
-    super(WakeSleep, self).__init__(*args, **kwargs)
+  p_log_prob = [0.0] * n_samples
+  q_log_prob = [0.0] * n_samples
+  for s in range(n_samples):
+    q_trace = call_with_trace(variational, *args, **kwargs)
+    x = call_with_intercept(model, q_trace, align_data, align_latent,
+                            *args, **kwargs)
+    for rv in toposort(x):
+      scale_factor = scale(rv.name)
+      if align_data(rv.name) is not None or align_latent(rv.name) is not None:
+        p_log_prob[s] += tf.reduce_sum(scale_factor * rv.log_prob(rv.value))
+      if phase_q != 'sleep' and align_latent(rv.name) is not None:
+        # If not sleep phase, compute log q(z).
+        qz = q_trace[align_latent(rv.name)]
+        q_log_prob[s] += tf.reduce_sum(
+            scale_factor * qz.log_prob(tf.stop_gradient(qz.value)))
 
-  def initialize(self, n_samples=1, phase_q='sleep', *args, **kwargs):
-    """Initialize inference algorithm. It initializes hyperparameters
-    and builds ops for the algorithm's computation graph.
+    if phase_q == 'sleep':
+      p_trace = call_with_trace(model, *args, **kwargs)
+      qz = call_with_intercept(variational, p_trace,
+                               align_data=lambda name: None,
+                               align_latent=align_latent,
+                               *args, **kwargs)
+      # Build dictionary to return scale factor for a posterior
+      # variable via its corresponding prior. The implementation is
+      # naive.
+      scale_posterior = {}
+      for name, rv in six.iteritems(p_trace):
+        if align_latent(name) is not None:
+          qz = q_trace[align_latent(name)]
+          scale_posterior[qz] = rv
 
-    Args:
-      n_samples: int.
-        Number of samples for calculating stochastic gradients during
-        wake and sleep phases.
-      phase_q: str.
-        Phase for updating parameters of q. If 'sleep', update using
-        a sample from p. If 'wake', update using a sample from q.
-        (Unlike reparameterization gradients, the sample is held
-        fixed.)
-    """
-    self.n_samples = n_samples
-    self.phase_q = phase_q
-    return super(WakeSleep, self).initialize(*args, **kwargs)
+      for rv in toposort(qz):
+        scale_factor = scale_posterior[rv]
+        q_log_prob[s] += tf.reduce_sum(
+            scale_factor * rv.log_prob(tf.stop_gradient(rv.value)))
 
-  def build_loss_and_gradients(self, var_list):
-    p_log_prob = [0.0] * self.n_samples
-    q_log_prob = [0.0] * self.n_samples
-    base_scope = tf.get_default_graph().unique_name("inference") + '/'
-    for s in range(self.n_samples):
-      # Form dictionary in order to replace conditioning on prior or
-      # observed variable with conditioning on a specific value.
-      scope = base_scope + tf.get_default_graph().unique_name("q_sample")
-      dict_swap = {}
-      for x, qx in six.iteritems(self.data):
-        if isinstance(x, RandomVariable):
-          if isinstance(qx, RandomVariable):
-            qx_copy = copy(qx, scope=scope)
-            dict_swap[x] = qx_copy.value()
-          else:
-            dict_swap[x] = qx
+  p_log_prob = tf.reduce_mean(p_log_prob)
+  q_log_prob = tf.reduce_mean(q_log_prob)
+  reg_penalty = tf.reduce_sum(tf.losses.get_regularization_losses())
+  if collections is not None:
+    tf.summary.scalar("loss/p_log_prob", p_log_prob,
+                      collections=collections)
+    tf.summary.scalar("loss/q_log_prob", q_log_prob,
+                      collections=collections)
+    tf.summary.scalar("loss/reg_penalty", reg_penalty,
+                      collections=collections)
 
-      # Sample z ~ q(z), then compute log p(x, z).
-      q_dict_swap = dict_swap.copy()
-      for z, qz in six.iteritems(self.latent_vars):
-        # Copy q(z) to obtain new set of posterior samples.
-        qz_copy = copy(qz, scope=scope)
-        q_dict_swap[z] = qz_copy.value()
-        if self.phase_q != 'sleep':
-          # If not sleep phase, compute log q(z).
-          q_log_prob[s] += tf.reduce_sum(
-              self.scale.get(z, 1.0) *
-              qz_copy.log_prob(tf.stop_gradient(q_dict_swap[z])))
-
-      for z in six.iterkeys(self.latent_vars):
-        z_copy = copy(z, q_dict_swap, scope=scope)
-        p_log_prob[s] += tf.reduce_sum(
-            self.scale.get(z, 1.0) * z_copy.log_prob(q_dict_swap[z]))
-
-      for x in six.iterkeys(self.data):
-        if isinstance(x, RandomVariable):
-          x_copy = copy(x, q_dict_swap, scope=scope)
-          p_log_prob[s] += tf.reduce_sum(
-              self.scale.get(x, 1.0) * x_copy.log_prob(q_dict_swap[x]))
-
-      if self.phase_q == 'sleep':
-        # Sample z ~ p(z), then compute log q(z).
-        scope = base_scope + tf.get_default_graph().unique_name("p_sample")
-        p_dict_swap = dict_swap.copy()
-        for z, qz in six.iteritems(self.latent_vars):
-          # Copy p(z) to obtain new set of prior samples.
-          z_copy = copy(z, scope=scope)
-          p_dict_swap[qz] = z_copy.value()
-        for qz in six.itervalues(self.latent_vars):
-          qz_copy = copy(qz, p_dict_swap, scope=scope)
-          q_log_prob[s] += tf.reduce_sum(
-              self.scale.get(z, 1.0) *
-              qz_copy.log_prob(tf.stop_gradient(p_dict_swap[qz])))
-
-    p_log_prob = tf.reduce_mean(p_log_prob)
-    q_log_prob = tf.reduce_mean(q_log_prob)
-    reg_penalty = tf.reduce_sum(tf.losses.get_regularization_losses())
-
-    if self.logging:
-      tf.summary.scalar("loss/p_log_prob", p_log_prob,
-                        collections=[self._summary_key])
-      tf.summary.scalar("loss/q_log_prob", q_log_prob,
-                        collections=[self._summary_key])
-      tf.summary.scalar("loss/reg_penalty", reg_penalty,
-                        collections=[self._summary_key])
-
-    loss_p = -p_log_prob + reg_penalty
-    loss_q = -q_log_prob + reg_penalty
-
-    q_rvs = list(six.itervalues(self.latent_vars))
-    q_vars = [v for v in var_list
-              if len(get_descendants(tf.convert_to_tensor(v), q_rvs)) != 0]
-    q_grads = tf.gradients(loss_q, q_vars)
-    p_vars = [v for v in var_list if v not in q_vars]
-    p_grads = tf.gradients(loss_p, p_vars)
-    grads_and_vars = list(zip(q_grads, q_vars)) + list(zip(p_grads, p_vars))
-    return loss_p, grads_and_vars
+  loss_p = -p_log_prob + reg_penalty
+  loss_q = -q_log_prob + reg_penalty
+  return loss_p, loss_q

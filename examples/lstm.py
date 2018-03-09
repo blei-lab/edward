@@ -131,7 +131,7 @@ def language_model_gen(batch_size, vocab_size):
     x = tf.one_hot(x, depth=vocab_size, dtype=tf.float32)
     h, c = lstm_cell(x, h, c, name="lstm")
     logits = tf.layers.dense(h, vocab_size, name="dense")
-    x = Categorical(logits=logits).value()
+    x = Categorical(logits=logits).value
     xs.append(x)
 
   xs = tf.cast(tf.stack(xs, 1), tf.int32)

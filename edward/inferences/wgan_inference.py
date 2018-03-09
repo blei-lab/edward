@@ -5,11 +5,21 @@ from __future__ import print_function
 import six
 import tensorflow as tf
 
-from edward.inferences.gan_inference import GANInference
-from edward.util import get_session
+from edward.inferences import docstrings as doc
+from edward.inferences.util import make_optional_inputs
 
 
-class WGANInference(GANInference):
+@doc.set_doc(
+    args_part_one=(doc.arg_model +
+                   doc.arg_discriminator +
+                   doc.arg_align_data)[:-1],
+    args_part_twoe=(doc.arg_collections +
+                    doc.arg_args_kwargs)[:-1],
+    returns=doc.return_loss_loss_d,
+    notes_discriminator_scope=doc.notes_discriminator_scope,
+    notes_regularization_losses=doc.notes_regularization_losses)
+def wgan_inference(model, discriminator, align_data,
+                   penalty=10.0, collections=None, *args, **kwargs):
   """Parameter estimation with GAN-style training
   [@goodfellow2014generative], using the Wasserstein distance
   [@arjovsky2017wasserstein].
@@ -18,99 +28,87 @@ class WGANInference(GANInference):
   models. These models do not require a tractable density and assume
   only a program that generates samples.
 
+  Args:
+  @{args_part_one}
+    penalty: float.
+      Scalar value to enforce gradient penalty that ensures the
+      gradients have norm equal to 1 [@gulrajani2017improved]. Set to
+      None (or 0.0) if using no penalty.
+  @{args_part_two}
+
+  `model` must return the generated data.
+
+  Returns:
+  @{returns}
+
   #### Notes
 
-  Argument-wise, the only difference from `GANInference` is
-  conceptual: the `discriminator` is better described as a test
-  function or critic. `WGANInference` continues to use
-  `discriminator` only to share methods and attributes with
-  `GANInference`.
+  The original WGAN clips weight parameters of the discriminator as an
+  approximation to the 1-Lipschitz constraint. To clip weights, one
+  must manually add a clipping op and then call it after each gradient
+  update during training. For example:
 
-  The objective function also adds to itself a summation over all
-  tensors in the `REGULARIZATION_LOSSES` collection.
+  ```python
+  ... = wgan_inference(..., penalty=None)
+  var_list = tf.get_collection(
+      tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
+  clip_op = [w.assign(tf.clip_by_value(w, -0.1, 0.1)) for w in var_list]
+  ```
+
+  @{notes_discriminator_scope}
+
+  @{notes_regularization_losses}
 
   #### Examples
 
   ```python
-  z = Normal(loc=tf.zeros([100, 10]), scale=tf.ones([100, 10]))
-  x = generative_network(z)
+  def model():
+    z = Normal(loc=0.0, scale=1.0, sample_shape=[256, 25])
+    x = generative_network(z, name="x")
+    return x
 
-  inference = ed.WGANInference({x: x_data}, discriminator)
+  def discriminator(x):
+    net = tf.layers.dense(x, 256, activation=tf.nn.relu)
+    return tf.layers.dense(net, 1, activation=tf.sigmoid)
+
+  loss, loss_d = ed.wgan_inference(
+      model, discriminator,
+      align_data=lambda name: "x_data" if name == "x" else None,
+      x_data=x_data)
   ```
   """
-  def __init__(self, *args, **kwargs):
-    super(WGANInference, self).__init__(*args, **kwargs)
+  model = make_optional_inputs(model)
+  x_fake = model(*args, **kwargs)
+  key = align_data(x_fake.name.split(':')[0])
+  if isinstance(key, int):
+    x_true = args[key]
+  elif kwargs.get(key, None) is not None:
+    x_true = kwargs.get(key)
+  with tf.variable_scope("Disc"):
+    d_true = discriminator(x_true)
 
-  def initialize(self, penalty=10.0, clip=None, *args, **kwargs):
-    """Initialize inference algorithm. It initializes hyperparameters
-    and builds ops for the algorithm's computation graph.
+  with tf.variable_scope("Disc", reuse=True):
+    d_fake = discriminator(x_fake)
 
-    Args:
-      penalty: float.
-        Scalar value to enforce gradient penalty that ensures the
-        gradients have norm equal to 1 [@gulrajani2017improved]. Set to
-        None (or 0.0) if using no penalty.
-      clip: float.
-        Value to clip weights by. Default is no clipping.
-    """
-    self.penalty = penalty
-
-    super(WGANInference, self).initialize(*args, **kwargs)
-
-    self.clip_op = None
-    if clip is not None:
-      var_list = tf.get_collection(
-          tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
-      self.clip_op = [w.assign(tf.clip_by_value(w, -clip, clip))
-                      for w in var_list]
-
-  def build_loss_and_gradients(self, var_list):
-    x_true = list(six.itervalues(self.data))[0]
-    x_fake = list(six.iterkeys(self.data))[0]
-    with tf.variable_scope("Disc"):
-      d_true = self.discriminator(x_true)
-
+  if penalty is None or penalty == 0:
+    penalty = 0.0
+  else:
+    eps = tf.random_uniform(tf.shape(x_true))
+    x_interpolated = eps * x_true + (1.0 - eps) * x_fake
     with tf.variable_scope("Disc", reuse=True):
-      d_fake = self.discriminator(x_fake)
+      d_interpolated = discriminator(x_interpolated)
 
-    if self.penalty is None or self.penalty == 0:
-      penalty = 0.0
-    else:
-      eps = tf.random_uniform(tf.shape(x_true))
-      x_interpolated = eps * x_true + (1.0 - eps) * x_fake
-      with tf.variable_scope("Disc", reuse=True):
-        d_interpolated = self.discriminator(x_interpolated)
+    gradients = tf.gradients(d_interpolated, [x_interpolated])[0]
+    slopes = tf.sqrt(tf.reduce_sum(tf.square(gradients),
+                                   list(range(1, gradients.shape.ndims))))
+    penalty = penalty * tf.reduce_mean(tf.square(slopes - 1.0))
 
-      gradients = tf.gradients(d_interpolated, [x_interpolated])[0]
-      slopes = tf.sqrt(tf.reduce_sum(tf.square(gradients),
-                                     list(range(1, gradients.shape.ndims))))
-      penalty = self.penalty * tf.reduce_mean(tf.square(slopes - 1.0))
+  reg_terms_d = tf.losses.get_regularization_losses(scope="Disc")
+  reg_terms_all = tf.losses.get_regularization_losses()
+  reg_terms = [r for r in reg_terms_all if r not in reg_terms_d]
 
-    reg_terms_d = tf.losses.get_regularization_losses(scope="Disc")
-    reg_terms_all = tf.losses.get_regularization_losses()
-    reg_terms = [r for r in reg_terms_all if r not in reg_terms_d]
-
-    mean_true = tf.reduce_mean(d_true)
-    mean_fake = tf.reduce_mean(d_fake)
-    loss_d = mean_fake - mean_true + penalty + tf.reduce_sum(reg_terms_d)
-    loss = -mean_fake + tf.reduce_sum(reg_terms)
-
-    var_list_d = tf.get_collection(
-        tf.GraphKeys.TRAINABLE_VARIABLES, scope="Disc")
-    if var_list is None:
-      var_list = [v for v in tf.trainable_variables() if v not in var_list_d]
-
-    grads_d = tf.gradients(loss_d, var_list_d)
-    grads = tf.gradients(loss, var_list)
-    grads_and_vars_d = list(zip(grads_d, var_list_d))
-    grads_and_vars = list(zip(grads, var_list))
-    return loss, grads_and_vars, loss_d, grads_and_vars_d
-
-  def update(self, feed_dict=None, variables=None):
-    info_dict = super(WGANInference, self).update(feed_dict, variables)
-
-    sess = get_session()
-    if self.clip_op is not None and variables in (None, "Disc"):
-      sess.run(self.clip_op)
-
-    return info_dict
+  mean_true = tf.reduce_mean(d_true)
+  mean_fake = tf.reduce_mean(d_fake)
+  loss_d = mean_fake - mean_true + penalty + tf.reduce_sum(reg_terms_d)
+  loss = -mean_fake + tf.reduce_sum(reg_terms)
+  return loss, loss_d
