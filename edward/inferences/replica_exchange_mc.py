@@ -236,8 +236,8 @@ class ReplicaExchangeMC(MonteCarlo):
                                      _stateful_lambda(inverse_temperature)
                                      for i, inverse_temperature in
                                      enumerate(self.inverse_temperatures)},
-                                     default=lambda:
-                                     self.inverse_temperatures[0],
+                                    default=lambda:
+                                    self.inverse_temperatures[0],
                                     exclusive=True)
     sample_j = tf.case({tf.equal(new_replica_idx[candj], i): _stateful_lambda(
                         replica_sample[i])for i in range(self.n_replica)},
@@ -246,8 +246,8 @@ class ReplicaExchangeMC(MonteCarlo):
                                      _stateful_lambda(inverse_temperature)
                                      for i, inverse_temperature in
                                      enumerate(self.inverse_temperatures)},
-                                     default=lambda:
-                                     self.inverse_temperatures[0],
+                                    default=lambda:
+                                    self.inverse_temperatures[0],
                                     exclusive=True)
 
     ratio = 0.0
