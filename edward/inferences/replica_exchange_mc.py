@@ -58,8 +58,8 @@ class ReplicaExchangeMC(MonteCarlo):
     self.n_replica = len(betas)
     if betas[0] != 1:
       raise ValueError("betas[0] must be 1.")
-    self.betas = [tf.constant(beta, dtype=list(latent_vars.values())[0].dtype)
-                  for beta in betas]
+    self.betas = [tf.convert_to_tensor(beta,
+                  dtype=list(latent_vars.values())[0].dtype) for beta in betas]
 
     # Make replica.
     self.replica_vars = []
@@ -100,7 +100,7 @@ class ReplicaExchangeMC(MonteCarlo):
 
     def body(i, new_replica_idx):
         return [i + 2, self._replica_exchange(i, i + 1, replica_sample,
-                                                    new_replica_idx)]
+                                              new_replica_idx)]
 
     def exchange_all():
         return tf.while_loop(cond, body, loop_vars=[i, new_replica_idx])
@@ -117,8 +117,8 @@ class ReplicaExchangeMC(MonteCarlo):
       new_replica_sample.append(tf.case(
           {tf.equal(tf.gather(new_replica_idx, i), j):
            _stateful_lambda(replica_sample[j])
-           for j in range(self.n_replica)}, default=lambda:replica_sample[0],
-           exclusive=True))
+           for j in range(self.n_replica)}, default=lambda: replica_sample[0],
+          exclusive=True))
 
     assign_ops = []
 
@@ -227,15 +227,15 @@ class ReplicaExchangeMC(MonteCarlo):
     """
     sample_i = tf.case({tf.equal(new_replica_idx[candi], i): _stateful_lambda(
                         replica_sample[i])for i in range(self.n_replica)},
-                       default=lambda:replica_sample[0], exclusive=True)
+                       default=lambda: replica_sample[0], exclusive=True)
     beta_i = tf.case({tf.equal(candi, i): _stateful_lambda(beta) for i, beta in
-                      enumerate(self.betas)}, default=lambda:self.betas[0],
+                      enumerate(self.betas)}, default=lambda: self.betas[0],
                      exclusive=True)
     sample_j = tf.case({tf.equal(new_replica_idx[candj], i): _stateful_lambda(
                         replica_sample[i])for i in range(self.n_replica)},
-                       default=lambda:replica_sample[0], exclusive=True)
+                       default=lambda: replica_sample[0], exclusive=True)
     beta_j = tf.case({tf.equal(candj, i): _stateful_lambda(beta) for i, beta in
-                      enumerate(self.betas)}, default=lambda:self.betas[0],
+                      enumerate(self.betas)}, default=lambda: self.betas[0],
                      exclusive=True)
 
     ratio = 0.0
