@@ -12,9 +12,8 @@ from edward.models import Empirical, RandomVariable
 from edward.util import check_latent_vars, copy
 
 
-class memory_lambda:
-  """
-  Class to use instead of lambda.
+class _stateful_lambda:
+  """Class to use instead of lambda.
   lambda is affected by the change of x,
   so memory_lambdda output x at the time of definition.
   """
@@ -27,15 +26,14 @@ class memory_lambda:
 
 
 class ReplicaExchangeMC(MonteCarlo):
-  """
-  Replica Exchange MCMC(https://en.wikipedia.org/wiki/Parallel_tempering)
+  """Replica Exchange MCMC [@swendsen1986replica; @hukushima1996exchange].
 
   #### Examples
   ```python
   cat = Categorical(probs=[0.5,0.5])
-  x = Mixture(cat=cat, components=
-                [MultivariateNormalDiag([0.0,0.0], [1.0,1.0]),
-                 MultivariateNormalDiag([10.0,10.0], [1.0,1.0])])
+  x = Mixture(cat=cat, components=[
+      MultivariateNormalDiag([0.0,0.0], [1.0,1.0]),
+      MultivariateNormalDiag([10.0,10.0], [1.0,1.0])])
   proposal_x = MultivariateNormalDiag(x, [1.0,1.0])
   qx = Empirical(tf.Variable(tf.zeros([10000, 2])))
   inference = ed.ReplicaExchangeMC(latent_vars={x: qx},
@@ -46,6 +44,7 @@ class ReplicaExchangeMC(MonteCarlo):
   def __init__(self, latent_vars, proposal_vars, data=None,
                betas=np.logspace(0, -2, 5), exchange_freq=0.1):
     """Create an inference algorithm.
+
     Args:
       proposal_vars: dict of RandomVariable to RandomVariable.
         Collection of random variables to perform inference on; each is
@@ -78,14 +77,13 @@ class ReplicaExchangeMC(MonteCarlo):
     return super(ReplicaExchangeMC, self).initialize(*args, **kwargs)
 
   def build_update(self):
-    """
-    Perform sampling and exchange.
+    """Perform sampling and exchange.
     """
     # Sample by Metropolis-Hastings for each replica.
     replica_sample = []
     replica_accept = []
     for i, beta in enumerate(self.betas):
-      sample_, accept_ = self.mh_sample(self.replica_vars[i], beta)
+      sample_, accept_ = self._mh_sample(self.replica_vars[i], beta)
       replica_sample.append(sample_)
       replica_accept.append(accept_)
     accept = replica_accept[0]
@@ -97,15 +95,15 @@ class ReplicaExchangeMC(MonteCarlo):
     # Exchange adjacent replicas at frequency of exchange_freq
     i = tf.random_uniform((), maxval=2, dtype=tf.int32)
 
-    def c(i, new_replica_idx):
+    def cond(i, new_replica_idx):
         return tf.less(i, self.n_replica - 1)
 
-    def b(i, new_replica_idx):
-        return [tf.add(i, 2), self.replica_exchange(i, i + 1, replica_sample,
+    def body(i, new_replica_idx):
+        return [i + 2, self._replica_exchange(i, i + 1, replica_sample,
                                                     new_replica_idx)]
 
     def exchange_all():
-        return tf.while_loop(c, b, loop_vars=[i, new_replica_idx])
+        return tf.while_loop(cond, body, loop_vars=[i, new_replica_idx])
 
     u = tf.random_uniform([])
     exchange = u < self.exchange_freq
@@ -118,8 +116,9 @@ class ReplicaExchangeMC(MonteCarlo):
     for i in range(self.n_replica):
       new_replica_sample.append(tf.case(
           {tf.equal(tf.gather(new_replica_idx, i), j):
-           memory_lambda(replica_sample[j])
-           for j in range(self.n_replica)}, exclusive=True))
+           _stateful_lambda(replica_sample[j])
+           for j in range(self.n_replica)}, default=lambda:replica_sample[0],
+           exclusive=True))
 
     assign_ops = []
 
@@ -140,7 +139,7 @@ class ReplicaExchangeMC(MonteCarlo):
 
     return tf.group(*assign_ops)
 
-  def mh_sample(self, latent_vars, beta):
+  def _mh_sample(self, latent_vars, beta):
     """Draw sample by Metropolis-Hastings. Then
     accept or reject the sample based on the ratio,
     $\\text{ratio} =
@@ -221,20 +220,23 @@ class ReplicaExchangeMC(MonteCarlo):
               zip(six.iterkeys(new_sample), sample_values)}
     return sample, accept
 
-  def replica_exchange(self, candi, candj, replica_sample, new_replica_idx):
-    """
-    Exchange replica according to the Metropolis-Hastings criterion.
+  def _replica_exchange(self, candi, candj, replica_sample, new_replica_idx):
+    """Exchange replica according to the Metropolis-Hastings criterion.
     $\\text{ratio} =
           (\log p(x, z_i) - \log p(x, x_j))(\beta_j - \beta_i)
     """
-    sample_i = tf.case({tf.equal(new_replica_idx[candi], i): memory_lambda(
-        replica_sample[i])for i in range(self.n_replica)}, exclusive=True)
-    beta_i = tf.case({tf.equal(candi, i): memory_lambda(beta)for i, beta in
-                      enumerate(self.betas)}, exclusive=True)
-    sample_j = tf.case({tf.equal(new_replica_idx[candj], i): memory_lambda(
-        replica_sample[i])for i in range(self.n_replica)}, exclusive=True)
-    beta_j = tf.case({tf.equal(candj, i): memory_lambda(beta)for i, beta in
-                      enumerate(self.betas)}, exclusive=True)
+    sample_i = tf.case({tf.equal(new_replica_idx[candi], i): _stateful_lambda(
+                        replica_sample[i])for i in range(self.n_replica)},
+                       default=lambda:replica_sample[0], exclusive=True)
+    beta_i = tf.case({tf.equal(candi, i): _stateful_lambda(beta) for i, beta in
+                      enumerate(self.betas)}, default=lambda:self.betas[0],
+                     exclusive=True)
+    sample_j = tf.case({tf.equal(new_replica_idx[candj], i): _stateful_lambda(
+                        replica_sample[i])for i in range(self.n_replica)},
+                       default=lambda:replica_sample[0], exclusive=True)
+    beta_j = tf.case({tf.equal(candj, i): _stateful_lambda(beta) for i, beta in
+                      enumerate(self.betas)}, default=lambda:self.betas[0],
+                     exclusive=True)
 
     ratio = 0.0
 

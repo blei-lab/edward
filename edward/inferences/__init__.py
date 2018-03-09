@@ -17,12 +17,12 @@ from edward.inferences.laplace import *
 from edward.inferences.map import *
 from edward.inferences.metropolis_hastings import *
 from edward.inferences.monte_carlo import *
+from edward.inferences.replica_exchange_mc import *
 from edward.inferences.sgld import *
 from edward.inferences.sghmc import *
 from edward.inferences.variational_inference import *
 from edward.inferences.wake_sleep import *
 from edward.inferences.wgan_inference import *
-from edward.inferences.replica_exchange_mc import *
 
 from tensorflow.python.util.all_util import remove_undocumented
 
