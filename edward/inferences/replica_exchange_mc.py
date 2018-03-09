@@ -37,7 +37,7 @@ class ReplicaExchangeMC(MonteCarlo):
   proposal_x = MultivariateNormalDiag(x, [1.0,1.0])
   qx = Empirical(tf.Variable(tf.zeros([10000, 2])))
   inference = ed.ReplicaExchangeMC(latent_vars={x: qx},
-                                 proposal_vars={x: proposal_x})
+                                   proposal_vars={x: proposal_x})
   ```
   """
 
@@ -50,7 +50,7 @@ class ReplicaExchangeMC(MonteCarlo):
         Collection of random variables to perform inference on; each is
         binded to a proposal distribution $g(z' \mid z)$.
       inverse_temperatures: list of inverse temperature.
-      exchange_freq: frequency of exchanging replica
+      exchange_freq: frequency of exchanging replica.
     """
     check_latent_vars(proposal_vars)
     self.proposal_vars = proposal_vars
