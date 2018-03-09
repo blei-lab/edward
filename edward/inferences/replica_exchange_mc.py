@@ -42,28 +42,29 @@ class ReplicaExchangeMC(MonteCarlo):
   """
 
   def __init__(self, latent_vars, proposal_vars, data=None,
-               betas=np.logspace(0, -2, 5), exchange_freq=0.1):
+               inverse_temperatures=np.logspace(0, -2, 5), exchange_freq=0.1):
     """Create an inference algorithm.
 
     Args:
       proposal_vars: dict of RandomVariable to RandomVariable.
         Collection of random variables to perform inference on; each is
         binded to a proposal distribution $g(z' \mid z)$.
-      betas: list of inverse temperature.
+      inverse_temperatures: list of inverse temperature.
       exchange_freq: frequency of exchanging replica
     """
     check_latent_vars(proposal_vars)
     self.proposal_vars = proposal_vars
 
-    self.n_replica = len(betas)
-    if betas[0] != 1:
-      raise ValueError("betas[0] must be 1.")
-    self.betas = [tf.convert_to_tensor(beta,
-                  dtype=list(latent_vars.values())[0].dtype) for beta in betas]
+    self.n_replica = len(inverse_temperatures)
+    if inverse_temperatures[0] != 1:
+      raise ValueError("inverse_temperatures[0] must be 1.")
+    self.inverse_temperatures = [tf.convert_to_tensor(inverse_temperature,
+                  dtype=list(latent_vars.values())[0].dtype)
+                  for inverse_temperature in inverse_temperatures]
 
     # Make replica.
     self.replica_vars = []
-    for beta in self.betas:
+    for inverse_temperature in self.inverse_temperatures:
       self.replica_vars.append({z: Empirical(params=tf.Variable(tf.zeros(
           qz.params.shape, dtype=latent_vars[z].dtype))) for z, qz in
           six.iteritems(latent_vars)})
@@ -82,8 +83,9 @@ class ReplicaExchangeMC(MonteCarlo):
     # Sample by Metropolis-Hastings for each replica.
     replica_sample = []
     replica_accept = []
-    for i, beta in enumerate(self.betas):
-      sample_, accept_ = self._mh_sample(self.replica_vars[i], beta)
+    for i, inverse_temperature in enumerate(self.inverse_temperatures):
+      sample_, accept_ = self._mh_sample(self.replica_vars[i],
+                                         inverse_temperature)
       replica_sample.append(sample_)
       replica_accept.append(accept_)
     accept = replica_accept[0]
@@ -128,7 +130,7 @@ class ReplicaExchangeMC(MonteCarlo):
       assign_ops.append(tf.scatter_update(variable, self.t,
                                           new_replica_sample[0][z]))
 
-    for i, beta in enumerate(self.betas):
+    for i, inverse_temperature in enumerate(self.inverse_temperatures):
       for z, qz in six.iteritems(self.replica_vars[i]):
         variable = qz.get_variables()[0]
         assign_ops.append(tf.scatter_update(variable, self.t,
@@ -139,13 +141,13 @@ class ReplicaExchangeMC(MonteCarlo):
 
     return tf.group(*assign_ops)
 
-  def _mh_sample(self, latent_vars, beta):
+  def _mh_sample(self, latent_vars, inverse_temperature):
     """Draw sample by Metropolis-Hastings. Then
     accept or reject the sample based on the ratio,
-    $\\text{ratio} =
-          \beta\log p(x, z^{\\text{new}}) - \beta\log p(x, z^{\\text{old}}) -
-          \beta\log g(z^{\\text{new}} \mid z^{\\text{old}}) +
-          \beta\log g(z^{\\text{old}} \mid z^{\\text{new}})$
+    $\\text{ratio} = \\text{inverse_temperature}(
+          \log p(x, z^{\\text{new}}) - \log p(x, z^{\\text{old}}) -
+          \log g(z^{\\text{new}} \mid z^{\\text{old}}) +
+          \log g(z^{\\text{old}} \mid z^{\\text{new}}))$
     """
     old_sample = {z: tf.gather(qz.params, tf.maximum(self.t - 1, 0))
                   for z, qz in six.iteritems(latent_vars)}
@@ -205,7 +207,7 @@ class ReplicaExchangeMC(MonteCarlo):
         ratio += tf.reduce_sum(x_znew.log_prob(dict_swap[x]))
         ratio -= tf.reduce_sum(x_zold.log_prob(dict_swap[x]))
 
-    ratio *= beta
+    ratio *= inverse_temperature
 
     # Accept or reject sample.
     u = tf.random_uniform([], dtype=ratio.dtype)
@@ -223,19 +225,23 @@ class ReplicaExchangeMC(MonteCarlo):
   def _replica_exchange(self, candi, candj, replica_sample, new_replica_idx):
     """Exchange replica according to the Metropolis-Hastings criterion.
     $\\text{ratio} =
-          (\log p(x, z_i) - \log p(x, x_j))(\beta_j - \beta_i)
+          (\log p(x, z_i) - \log p(x, x_j))(\\text{inverse_temperature}_j - \\text{inverse_temperature}_i)
     """
     sample_i = tf.case({tf.equal(new_replica_idx[candi], i): _stateful_lambda(
                         replica_sample[i])for i in range(self.n_replica)},
                        default=lambda: replica_sample[0], exclusive=True)
-    beta_i = tf.case({tf.equal(candi, i): _stateful_lambda(beta) for i, beta in
-                      enumerate(self.betas)}, default=lambda: self.betas[0],
+    inverse_temperature_i = tf.case({tf.equal(candi, i):
+                      _stateful_lambda(inverse_temperature)
+                      for i, inverse_temperature in
+                      enumerate(self.inverse_temperatures)}, default=lambda: self.inverse_temperatures[0],
                      exclusive=True)
     sample_j = tf.case({tf.equal(new_replica_idx[candj], i): _stateful_lambda(
                         replica_sample[i])for i in range(self.n_replica)},
                        default=lambda: replica_sample[0], exclusive=True)
-    beta_j = tf.case({tf.equal(candj, i): _stateful_lambda(beta) for i, beta in
-                      enumerate(self.betas)}, default=lambda: self.betas[0],
+    inverse_temperature_j = tf.case({tf.equal(candj, i):
+                      _stateful_lambda(inverse_temperature)
+                      for i, inverse_temperature in
+                      enumerate(self.inverse_temperatures)}, default=lambda: self.inverse_temperatures[0],
                      exclusive=True)
 
     ratio = 0.0
@@ -274,7 +280,7 @@ class ReplicaExchangeMC(MonteCarlo):
         ratio += tf.reduce_sum(x_z_i.log_prob(dict_swap[x]))
         ratio -= tf.reduce_sum(x_z_j.log_prob(dict_swap[x]))
 
-    ratio *= beta_j - beta_i
+    ratio *= inverse_temperature_j - inverse_temperature_i
 
     u = tf.random_uniform([], dtype=ratio.dtype)
     exchange = tf.log(u) < ratio
