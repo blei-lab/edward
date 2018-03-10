@@ -14,9 +14,9 @@ from edward.inferences import (
     Inference, MonteCarlo, VariationalInference,
     HMC, MetropolisHastings, SGLD, SGHMC,
     KLpq, KLqp, ReparameterizationKLqp, ReparameterizationKLKLqp,
-    ReparameterizationEntropyKLqp, ScoreKLqp, ScoreKLKLqp, ScoreEntropyKLqp,
-    ScoreRBKLqp, WakeSleep, GANInference, BiGANInference, WGANInference,
-    ImplicitKLqp, MAP, Laplace, complete_conditional, Gibbs)
+    ReparameterizationEntropyKLqp, ReplicaExchangeMC, ScoreKLqp, ScoreKLKLqp,
+    ScoreEntropyKLqp, ScoreRBKLqp, WakeSleep, GANInference, BiGANInference,
+    WGANInference, ImplicitKLqp, MAP, Laplace, complete_conditional, Gibbs)
 from edward.models import RandomVariable
 from edward.util import (
     check_data, check_latent_vars, copy, dot,
@@ -80,6 +80,7 @@ _allowed_symbols = [
     'is_independent',
     'Progbar',
     'random_variables',
+    'ReplicaExchangeMC',
     'rbf',
     'set_seed',
     'to_simplex',
