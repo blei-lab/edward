@@ -81,7 +81,6 @@ class ReplicaExchangeMC(MonteCarlo):
     # Sample by Metropolis-Hastings for each replica.
     replica_sample = []
     replica_accept = []
-
     for i in range(self.n_replica):
       sample_, accept_ = self._mh_sample(self.replica_vars[i],
                                          self.inverse_temperatures[i])
