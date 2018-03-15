@@ -15,7 +15,7 @@ from edward.util import check_latent_vars, copy
 class _stateful_lambda:
   """Class to use instead of lambda.
   lambda is affected by the change of x,
-  so memory_lambdda output x at the time of definition.
+  so _stateful_lambda(x)() output x at the time of definition.
   """
 
   def __init__(self, x):
@@ -54,25 +54,22 @@ class ReplicaExchangeMC(MonteCarlo):
     """
     check_latent_vars(proposal_vars)
     self.proposal_vars = proposal_vars
+    super(ReplicaExchangeMC, self).__init__(latent_vars, data)
 
     self.n_replica = len(inverse_temperatures)
     if inverse_temperatures[0] != 1:
       raise ValueError("inverse_temperatures[0] must be 1.")
-    self.inverse_temperatures = [tf.convert_to_tensor(inverse_temperature,
-                                 dtype=list(latent_vars.values())[0].dtype)
-                                 for inverse_temperature in
-                                 inverse_temperatures]
+    self.inverse_temperatures = tf.constant(
+        inverse_temperatures, dtype=list(self.latent_vars)[0].dtype)
 
     # Make replica.
     self.replica_vars = []
-    for inverse_temperature in self.inverse_temperatures:
+    for i in range(self.n_replica):
       self.replica_vars.append({z: Empirical(params=tf.Variable(tf.zeros(
-          qz.params.shape, dtype=latent_vars[z].dtype))) for z, qz in
-          six.iteritems(latent_vars)})
+          qz.params.shape, dtype=self.latent_vars[z].dtype))) for z, qz in
+          six.iteritems(self.latent_vars)})
 
     self.exchange_freq = exchange_freq
-
-    super(ReplicaExchangeMC, self).__init__(latent_vars, data)
 
   def initialize(self, *args, **kwargs):
     kwargs['auto_transform'] = False
@@ -84,9 +81,10 @@ class ReplicaExchangeMC(MonteCarlo):
     # Sample by Metropolis-Hastings for each replica.
     replica_sample = []
     replica_accept = []
-    for i, inverse_temperature in enumerate(self.inverse_temperatures):
+
+    for i in range(self.n_replica):
       sample_, accept_ = self._mh_sample(self.replica_vars[i],
-                                         inverse_temperature)
+                                         self.inverse_temperatures[i])
       replica_sample.append(sample_)
       replica_accept.append(accept_)
     accept = replica_accept[0]
@@ -95,33 +93,27 @@ class ReplicaExchangeMC(MonteCarlo):
     new_replica_idx = tf.Variable(tf.range(self.n_replica))
     new_replica_idx = tf.assign(new_replica_idx, tf.range(self.n_replica))
 
+    # Variable to store ratio of current samples
+    replica_ratio = tf.Variable(tf.zeros(
+        self.n_replica, dtype=list(self.latent_vars)[0].dtype))
+    replica_ratio = self._replica_ratio(replica_ratio, replica_sample)
+
     # Exchange adjacent replicas at frequency of exchange_freq
-    i = tf.random_uniform((), maxval=2, dtype=tf.int32)
-
-    def cond(i, new_replica_idx):
-        return tf.less(i, self.n_replica - 1)
-
-    def body(i, new_replica_idx):
-        return [i + 2, self._replica_exchange(i, i + 1, replica_sample,
-                                              new_replica_idx)]
-
-    def exchange_all():
-        return tf.while_loop(cond, body, loop_vars=[i, new_replica_idx])
-
     u = tf.random_uniform([])
     exchange = u < self.exchange_freq
-    i, new_replica_idx = tf.cond(exchange,
-                                 exchange_all,
-                                 lambda: [i, new_replica_idx])
+    new_replica_idx = tf.cond(
+        exchange, lambda: self._replica_exchange(
+            new_replica_idx, replica_ratio), lambda: new_replica_idx)
 
     # New replica sorted by new_replica_idx
     new_replica_sample = []
     for i in range(self.n_replica):
-      new_replica_sample.append(tf.case(
-          {tf.equal(tf.gather(new_replica_idx, i), j):
-           _stateful_lambda(replica_sample[j])
-           for j in range(self.n_replica)}, default=lambda: replica_sample[0],
-          exclusive=True))
+      new_replica_sample.append(
+          {z: tf.case({tf.equal(tf.gather(new_replica_idx, i), j):
+                      _stateful_lambda(replica_sample[j][z])
+                      for j in range(self.n_replica)},
+           default=lambda: replica_sample[0][z], exclusive=True) for z, qz in
+           six.iteritems(self.latent_vars)})
 
     assign_ops = []
 
@@ -131,7 +123,7 @@ class ReplicaExchangeMC(MonteCarlo):
       assign_ops.append(tf.scatter_update(variable, self.t,
                                           new_replica_sample[0][z]))
 
-    for i, inverse_temperature in enumerate(self.inverse_temperatures):
+    for i in range(self.n_replica):
       for z, qz in six.iteritems(self.replica_vars[i]):
         variable = qz.get_variables()[0]
         assign_ops.append(tf.scatter_update(variable, self.t,
@@ -164,7 +156,6 @@ class ReplicaExchangeMC(MonteCarlo):
           dict_swap[x] = qx_copy.value()
         else:
           dict_swap[x] = qx
-
     dict_swap_old = dict_swap.copy()
     dict_swap_old.update(old_sample)
     base_scope = tf.get_default_graph().unique_name("inference") + '/'
@@ -223,34 +214,33 @@ class ReplicaExchangeMC(MonteCarlo):
               zip(six.iterkeys(new_sample), sample_values)}
     return sample, accept
 
-  def _replica_exchange(self, candi, candj, replica_sample, new_replica_idx):
+  def _replica_exchange(self, new_replica_idx, replica_ratio):
     """Exchange replica according to the Metropolis-Hastings criterion.
     $\\text{ratio} =
           (\log p(x, z_i) - \log p(x, x_j))(\\text{inverse_temperature}_j -
           \\text{inverse_temperature}_i)
     """
-    sample_i = tf.case({tf.equal(new_replica_idx[candi], i): _stateful_lambda(
-                        replica_sample[i])for i in range(self.n_replica)},
-                       default=lambda: replica_sample[0], exclusive=True)
-    inverse_temperature_i = tf.case({tf.equal(candi, i):
-                                     _stateful_lambda(inverse_temperature)
-                                     for i, inverse_temperature in
-                                     enumerate(self.inverse_temperatures)},
-                                    default=lambda:
-                                    self.inverse_temperatures[0],
-                                    exclusive=True)
-    sample_j = tf.case({tf.equal(new_replica_idx[candj], i): _stateful_lambda(
-                        replica_sample[i])for i in range(self.n_replica)},
-                       default=lambda: replica_sample[0], exclusive=True)
-    inverse_temperature_j = tf.case({tf.equal(candj, i):
-                                     _stateful_lambda(inverse_temperature)
-                                     for i, inverse_temperature in
-                                     enumerate(self.inverse_temperatures)},
-                                    default=lambda:
-                                    self.inverse_temperatures[0],
-                                    exclusive=True)
+    i = tf.random_uniform((), maxval=2, dtype=tf.int32)
 
-    ratio = 0.0
+    def cond(i, new_replica_idx):
+      return tf.less(i, self.n_replica - 1)
+
+    def body(i, new_replica_idx):
+      ratio = replica_ratio[i] - replica_ratio[i + 1]
+      ratio *= (self.inverse_temperatures[i + 1] - self.inverse_temperatures[i])
+      u = tf.random_uniform([], dtype=ratio.dtype)
+      exchange = tf.log(u) < ratio
+      new_replica_idx = tf.cond(
+          exchange,
+          lambda: tf.scatter_update(new_replica_idx, [i, i + 1], [i + 1, i]),
+          lambda: new_replica_idx)
+      return [i + 2, new_replica_idx]
+
+    return tf.while_loop(cond, body, loop_vars=[i, new_replica_idx])[1]
+
+  def _replica_ratio(self, replica_ratio, replica_sample):
+    replica_ratio = tf.assign(replica_ratio, tf.zeros(
+        self.n_replica, dtype=list(self.latent_vars)[0].dtype))
 
     dict_swap = {}
     for x, qx in six.iteritems(self.data):
@@ -260,39 +250,28 @@ class ReplicaExchangeMC(MonteCarlo):
           dict_swap[x] = qx_copy.value()
         else:
           dict_swap[x] = qx
-    dict_swap_i = dict_swap.copy()
-    dict_swap_i.update(sample_i)
-    dict_swap_j = dict_swap.copy()
-    dict_swap_j.update(sample_j)
 
-    base_scope = tf.get_default_graph().unique_name("inference") + '/'
-    scope_i = base_scope + '_i'
-    scope_j = base_scope + '_j'
+    for i in range(self.n_replica):
+      dict_swap_i = dict_swap.copy()
+      dict_swap_i.update(replica_sample[i])
 
-    for z in six.iterkeys(self.latent_vars):
-      # Build priors p(z_i) and p(z_j).
-      z_i = copy(z, dict_swap_i, scope=scope_i)
-      z_j = copy(z, dict_swap_j, scope=scope_j)
-      # Increment ratio.
-      ratio += tf.reduce_sum(z_i.log_prob(dict_swap_i[z]))
-      ratio -= tf.reduce_sum(z_j.log_prob(dict_swap_j[z]))
+      base_scope = tf.get_default_graph().unique_name("inference") + '/'
+      scope_i = base_scope + '_%d' % i
 
-    for x in six.iterkeys(self.data):
-      if isinstance(x, RandomVariable):
-        # Build likelihoods p(x | z_i) and p(x | z_j).
-        x_z_i = copy(x, dict_swap_i, scope=scope_i)
-        x_z_j = copy(x, dict_swap_j, scope=scope_j)
+      for z in six.iterkeys(self.latent_vars):
+        # Build priors p(z_i) and p(z_j).
+        z_i = copy(z, dict_swap_i, scope=scope_i)
         # Increment ratio.
-        ratio += tf.reduce_sum(x_z_i.log_prob(dict_swap[x]))
-        ratio -= tf.reduce_sum(x_z_j.log_prob(dict_swap[x]))
+        replica_ratio = tf.scatter_update(
+            replica_ratio, i,
+            replica_ratio[i] + tf.reduce_sum(z_i.log_prob(dict_swap_i[z])))
 
-    ratio *= inverse_temperature_j - inverse_temperature_i
-
-    u = tf.random_uniform([], dtype=ratio.dtype)
-    exchange = tf.log(u) < ratio
-
-    # exchange new_replica_idx
-    return tf.cond(exchange,
-                   lambda: tf.scatter_update(new_replica_idx, [candi, candj],
-                                             [candj, candi]),
-                   lambda: new_replica_idx)
+      for x in six.iterkeys(self.data):
+        if isinstance(x, RandomVariable):
+          # Build likelihoods p(x | z_i) and p(x | z_j).
+          x_z_i = copy(x, dict_swap_i, scope=scope_i)
+          # Increment ratio.
+          replica_ratio = tf.scatter_update(
+              replica_ratio, i,
+              replica_ratio[i] + tf.reduce_sum(x_z_i.log_prob(dict_swap[x])))
+    return replica_ratio
