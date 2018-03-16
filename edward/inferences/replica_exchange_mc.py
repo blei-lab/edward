@@ -59,8 +59,8 @@ class ReplicaExchangeMC(MonteCarlo):
     self.n_replica = len(inverse_temperatures)
     if inverse_temperatures[0] != 1:
       raise ValueError("inverse_temperatures[0] must be 1.")
-    self.inverse_temperatures = tf.constant(
-        inverse_temperatures, dtype=list(self.latent_vars)[0].dtype)
+    self.inverse_temperatures = tf.cast(inverse_temperatures,
+                                        dtype=list(self.latent_vars)[0].dtype)
 
     # Make replica.
     self.replica_vars = []
