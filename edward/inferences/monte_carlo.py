@@ -78,7 +78,8 @@ class MonteCarlo(Inference):
     if isinstance(latent_vars, list):
       with tf.variable_scope(None, default_name="posterior"):
         latent_vars = {z: Empirical(params=tf.Variable(tf.zeros(
-            [1e4] + z.batch_shape.concatenate(z.event_shape).as_list())))
+            [1e4] + z.batch_shape.concatenate(z.event_shape).as_list(),
+            dtype=z.dtype)))
             for z in latent_vars}
     elif isinstance(latent_vars, dict):
       for qz in six.itervalues(latent_vars):
