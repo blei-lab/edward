@@ -42,7 +42,7 @@ class Gibbs(MonteCarlo):
         If not specified, default is to use `ed.complete_conditional`.
     """
     super(Gibbs, self).__init__(latent_vars, data)
-    
+
     if proposal_vars is None:
       proposal_vars = {z: complete_conditional(z)
                        for z in six.iterkeys(self.latent_vars)}
