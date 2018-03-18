@@ -9,7 +9,7 @@ import tensorflow as tf
 from edward.models import Normal, Empirical
 
 
-class test_metropolishastings_class(tf.test.TestCase):
+class test_replicaexchangemc_class(tf.test.TestCase):
 
   def _test_normal_normal(self, default, dtype):
     with self.test_session() as sess:
@@ -21,17 +21,12 @@ class test_metropolishastings_class(tf.test.TestCase):
                  sample_shape=50)
 
       n_samples = 2000
+      # analytic solution: N(loc=0.0, scale=\sqrt{1/51}=0.140)
       if not default:
         qmu = Empirical(params=tf.Variable(tf.ones(n_samples, dtype=dtype)))
-
-        # analytic solution: N(loc=0.0, scale=\sqrt{1/51}=0.140)
-        inference = ed.ReplicaExchangeMC({mu: qmu},
-                                         {mu: mu},
-                                         data={x: x_data})
+        inference = ed.ReplicaExchangeMC({mu: qmu}, {mu: mu}, data={x: x_data})
       else:
-        inference = ed.ReplicaExchangeMC([mu],
-                                         {mu: mu},
-                                         data={x: x_data})
+        inference = ed.ReplicaExchangeMC([mu], {mu: mu}, data={x: x_data})
         qmu = inference.latent_vars[mu]
       inference.run()
 
@@ -77,7 +72,6 @@ class test_metropolishastings_class(tf.test.TestCase):
       if not default:
         qw = Empirical(tf.Variable(tf.zeros([n_samples, D], dtype=dtype)))
         qb = Empirical(tf.Variable(tf.zeros([n_samples, 1], dtype=dtype)))
-
         inference = ed.ReplicaExchangeMC(
             {w: qw, b: qb}, {w: proposal_w, b: proposal_b},
             data={X: X_train, y: y_train})
@@ -103,13 +97,13 @@ class test_metropolishastings_class(tf.test.TestCase):
       self.assertEqual(new_t, 0)
       self.assertEqual(new_n_accept, 0)
 
-  def test_normalnormal(self):
+  def test_normal_normal(self):
     self._test_normal_normal(True, tf.float32)
     self._test_normal_normal(False, tf.float32)
     self._test_normal_normal(True, tf.float64)
     self._test_normal_normal(False, tf.float64)
 
-  def test_linearregression(self):
+  def test_linear_regression(self):
     self._test_linear_regression(True, tf.float32)
     self._test_linear_regression(False, tf.float32)
     self._test_linear_regression(True, tf.float64)
