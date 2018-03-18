@@ -137,7 +137,7 @@ def normal_log_prob(self, val):
   prec = tf.reciprocal(tf.square(scale))
   result = prec * (-0.5 * tf.square(val) - 0.5 * tf.square(loc) +
                    val * loc)
-  result -= tf.log(scale) + 0.5 * tf.log(2 * np.pi)
+  result -= tf.log(scale) + 0.5 * tf.cast(tf.log(2 * np.pi), dtype=result.dtype)
   return result
 
 

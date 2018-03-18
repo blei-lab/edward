@@ -41,14 +41,15 @@ class Gibbs(MonteCarlo):
         binded to its complete conditionals which Gibbs cycles draws on.
         If not specified, default is to use `ed.complete_conditional`.
     """
+    super(Gibbs, self).__init__(latent_vars, data)
+
     if proposal_vars is None:
       proposal_vars = {z: complete_conditional(z)
-                       for z in six.iterkeys(latent_vars)}
+                       for z in six.iterkeys(self.latent_vars)}
     else:
       check_latent_vars(proposal_vars)
 
     self.proposal_vars = proposal_vars
-    super(Gibbs, self).__init__(latent_vars, data)
 
   def initialize(self, scan_order='random', *args, **kwargs):
     """Initialize inference algorithm. It initializes hyperparameters
