@@ -199,60 +199,36 @@
 <h2 id="class-vectordiffeomixture">Class <code>VectorDiffeomixture</code></h2>
 <p>Inherits From: <a href="../../ed/RandomVariable"><code>RandomVariable</code></a></p>
 <p>VectorDiffeomixture distribution.</p>
-<p>The VectorDiffeomixture is an approximation to a <a href="https://en.wikipedia.org/wiki/Compound_probability_distribution">compound distribution</a>, i.e.,</p>
-<pre class="none"><code>p(x) = int_{X} q(x | v) p(v) dv
-     = lim_{Q-&gt;infty} sum{ prob[i] q(x | loc=sum_k^K lambda[k;i] loc[k],
-                                          scale=sum_k^K lambda[k;i] scale[k])
-                          : i=0, ..., Q-1 }</code></pre>
-<p>where <code>q(x | v)</code> is a vector version of the <code>distribution</code> argument and <code>p(v)</code> is a SoftmaxNormal parameterized by <code>mix_loc</code> and <code>mix_scale</code>. The vector-ization of <code>distribution</code> entails an affine transformation of iid samples from <code>distribution</code>. The <code>prob</code> term is from quadrature and <code>lambda[k] = sigmoid(mix_loc[k] + sqrt(2) mix_scale[k] grid[k])</code> where the <code>grid</code> points correspond to the <code>prob</code>s.</p>
-<p>In the non-approximation case, a draw from the mixture distribution (the “prior”) represents the convex weights for different affine transformations. I.e., draw a mixing vector <code>v</code> (from the <code>K-1</code>-simplex) and let the final sample be: <code>y = (sum_k^K v[k] scale[k]) @ x + (sum_k^K v[k] loc[k])</code> where <code>@</code> denotes matrix multiplication. However, the non-approximate distribution does not have an analytical probability density function (pdf). Therefore the <code>VectorDiffeomixture</code> class implements an approximation based on <a href="https://en.wikipedia.org/wiki/Numerical_integration">numerical quadrature</a> (default: <a href="https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature">Gauss–Hermite quadrature</a>). I.e., in Note: although the <code>VectorDiffeomixture</code> is approximately the <code>SoftmaxNormal-Distribution</code> compound distribution, it is itself a valid distribution. It possesses a <code>sample</code>, <code>log_prob</code>, <code>mean</code>, <code>covariance</code> which are all mutually consistent.</p>
-<h4 id="intended-use">Intended Use</h4>
-<p>This distribution is noteworthy because it implements a mixture of <code>Vector</code>-ized distributions yet has samples differentiable in the distribution’s parameters (aka “reparameterized”). It has an analytical density function with <code>O(dKQ)</code> complexity. <code>d</code> is the vector dimensionality, <code>K</code> is the number of components, and <code>Q</code> is the number of quadrature points. These properties make it well-suited for Bayesian Variational Inference, i.e., as a surrogate family for the posterior.</p>
-<p>For large values of <code>mix_scale</code>, the <code>VectorDistribution</code> behaves increasingly like a discrete mixture. (In most cases this limit is only achievable by also increasing the quadrature polynomial degree, <code>Q</code>.)</p>
-<p>The term <code>Vector</code> is consistent with similar named Tensorflow <code>Distribution</code>s. For more details, see the “About <code>Vector</code> distributions in Tensorflow.” section.</p>
-<p>The term <code>Diffeomixture</code> is a portmanteau of <a href="https://en.wikipedia.org/wiki/Diffeomorphism">diffeomorphism</a> and <a href="https://en.wikipedia.org/wiki/Compound_probability_distribution">compound mixture</a>. For more details, see the “About <code>Diffeomixture</code>s and reparametrization.`” section.</p>
-<h4 id="mathematical-details">Mathematical Details</h4>
-<p>The <code>VectorDiffeomixture</code> approximates a SoftmaxNormal-mixed (“prior”) <a href="https://en.wikipedia.org/wiki/Compound_probability_distribution">compound distribution</a>. Using variable-substitution and <a href="https://en.wikipedia.org/wiki/Numerical_integration">numerical quadrature</a> (default: <a href="https://en.wikipedia.org/wiki/Gauss%E2%80%93Hermite_quadrature">Gauss–Hermite quadrature</a>) we can redefine the distribution to be a parameter-less convex combination of <code>K</code> different affine combinations of a <code>d</code> iid samples from <code>distribution</code>.</p>
-<p>That is, defined over <code>R**d</code> this distribution is parameterized by a (batch of) length-<code>K</code> <code>mix_loc</code> and <code>mix_scale</code> vectors, a length-<code>K</code> list of (a batch of) length-<code>d</code> <code>loc</code> vectors, and a length-<code>K</code> list of <code>scale</code> <code>LinearOperator</code>s each operating on a (batch of) length-<code>d</code> vector space. Finally, a <code>distribution</code> parameter specifies the underlying base distribution which is “lifted” to become multivariate (“lifting” is the same concept as in <code>TransformedDistribution</code>).</p>
-<p>The probability density function (pdf) is,</p>
-<pre class="none"><code>pdf(y; mix_loc, mix_scale, loc, scale, phi)
-  = sum{ prob[i] phi(f_inverse(x; i)) / abs(det(interp_scale[i]))
-        : i=0, ..., Q-1 }</code></pre>
-<p>where, <code>phi</code> is the base distribution pdf, and,</p>
-<pre class="none"><code>f_inverse(x; i) = inv(interp_scale[i]) @ (x - interp_loc[i])
-interp_loc[i]   = sum{ lambda[k; i] loc[k]   : k=0, ..., K-1 }
-interp_scale[i] = sum{ lambda[k; i] scale[k] : k=0, ..., K-1 }</code></pre>
-<p>and,</p>
-<pre class="none"><code>grid, weight = np.polynomial.hermite.hermgauss(quadrature_size)
-prob[k]   = weight[k] / sqrt(pi)
-lambda[k; i] = sigmoid(mix_loc[k] + sqrt(2) mix_scale[k] grid[i])</code></pre>
-<p>The distribution corresponding to <code>phi</code> must be a scalar-batch, scalar-event distribution. Typically it is reparameterized. If not, it must be a function of non-trainable parameters.</p>
-<p>WARNING: If you backprop through a VectorDiffeomixture sample and the “base” distribution is both: not <code>FULLY_REPARAMETERIZED</code> and a function of trainable variables, then the gradient is not guaranteed correct!</p>
+<p>A vector diffeomixture (VDM) is a distribution parameterized by a convex combination of <code>K</code> component <code>loc</code> vectors, <code>loc[k], k = 0,...,K-1</code>, and <code>K</code> <code>scale</code> matrices <code>scale[k], k = 0,..., K-1</code>. It approximates the following [compound distribution] (https://en.wikipedia.org/wiki/Compound_probability_distribution)</p>
+<pre class="none"><code>p(x) = int p(x | z) p(z) dz,
+where z is in the K-simplex, and
+p(x | z) := p(x | loc=sum_k z[k] loc[k], scale=sum_k z[k] scale[k])</code></pre>
+<p>The integral <code>int p(x | z) p(z) dz</code> is approximated with a quadrature scheme adapted to the mixture density <code>p(z)</code>. The <code>N</code> quadrature points <code>z_{N, n}</code> and weights <code>w_{N, n}</code> (which are non-negative and sum to 1) are chosen such that</p>
+<p><code>q_N(x) := sum_{n=1}^N w_{n, N} p(x | z_{N, n}) --&gt; p(x)</code></p>
+<p>as <code>N --&gt; infinity</code>.</p>
+<p>Since <code>q_N(x)</code> is in fact a mixture (of <code>N</code> points), we may sample from <code>q_N</code> exactly. It is important to note that the VDM is <em>defined</em> as <code>q_N</code> above, and <em>not</em> <code>p(x)</code>. Therefore, sampling and pdf may be implemented as exact (up to floating point error) methods.</p>
+<p>A common choice for the conditional <code>p(x | z)</code> is a multivariate Normal.</p>
+<p>The implemented marginal <code>p(z)</code> is the <code>SoftmaxNormal</code>, which is a <code>K-1</code> dimensional Normal transformed by a <code>SoftmaxCentered</code> bijector, making it a density on the <code>K</code>-simplex. That is,</p>
+<pre><code>Z = SoftmaxCentered(X),
+X = Normal(mix_loc / temperature, 1 / temperature)</code></pre>
+<p>The default quadrature scheme chooses <code>z_{N, n}</code> as <code>N</code> midpoints of the quantiles of <code>p(z)</code> (generalized quantiles if <code>K &gt; 2</code>).</p>
+<p>See [1] for more details.</p>
+<p>[1]. “Quadrature Compound: An approximating family of distributions” Joshua Dillon, Ian Langmore, arXiv preprints https://arxiv.org/abs/1801.03080</p>
 <h4 id="about-vector-distributions-in-tensorflow.">About <code>Vector</code> distributions in TensorFlow.</h4>
 <p>The <code>VectorDiffeomixture</code> is a non-standard distribution that has properties particularly useful in <a href="https://en.wikipedia.org/wiki/Variational_Bayesian_methods">variational Bayesian methods</a>.</p>
-<p>Conditioned on a draw from the SoftmaxNormal, <code>Y|v</code> is a vector whose components are linear combinations of affine transformations, thus is itself an affine transformation. Therefore <code>Y|v</code> lives in the vector space generated by vectors of affine-transformed distributions.</p>
-<p>Note: The marginals <code>Y_1|v, ..., Y_d|v</code> are <em>not</em> generally identical to some parameterization of <code>distribution</code>. This is due to the fact that the sum of draws from <code>distribution</code> are not generally itself the same <code>distribution</code>.</p>
+<p>Conditioned on a draw from the SoftmaxNormal, <code>X|z</code> is a vector whose components are linear combinations of affine transformations, thus is itself an affine transformation.</p>
+<p>Note: The marginals <code>X_1|v, ..., X_d|v</code> are <em>not</em> generally identical to some parameterization of <code>distribution</code>. This is due to the fact that the sum of draws from <code>distribution</code> are not generally itself the same <code>distribution</code>.</p>
 <h4 id="about-diffeomixtures-and-reparameterization.">About <code>Diffeomixture</code>s and reparameterization.</h4>
 <p>The <code>VectorDiffeomixture</code> is designed to be reparameterized, i.e., its parameters are only used to transform samples from a distribution which has no trainable parameters. This property is important because backprop stops at sources of stochasticity. That is, as long as the parameters are used <em>after</em> the underlying source of stochasticity, the computed gradient is accurate.</p>
 <p>Reparametrization means that we can use gradient-descent (via backprop) to optimize Monte-Carlo objectives. Such objectives are a finite-sample approximation of an expectation and arise throughout scientific computing.</p>
+<p>WARNING: If you backprop through a VectorDiffeomixture sample and the “base” distribution is both: not <code>FULLY_REPARAMETERIZED</code> and a function of trainable variables, then the gradient is not guaranteed correct!</p>
 <h4 id="examples">Examples</h4>
 <p>```python tfd = tf.contrib.distributions</p>
-<h1 id="create-two-batches-of-vectordiffeomixtures-one-with-mix_loc0.-and">Create two batches of VectorDiffeomixtures, one with mix_loc=[0.] and</h1>
+<h1 id="create-two-batches-of-vectordiffeomixtures-one-with-mix_loc0.">Create two batches of VectorDiffeomixtures, one with mix_loc=[0.],</h1>
 <h1 id="another-with-mix_loc1.-in-both-cases-k2-and-the-affine">another with mix_loc=[1]. In both cases, <code>K=2</code> and the affine</h1>
 <h1 id="transformations-involve">transformations involve:</h1>
 <h1 id="k0-loczerosdims-scalelinearoperatorscaledidentity">k=0: loc=zeros(dims) scale=LinearOperatorScaledIdentity</h1>
-<h1 id="k1-loc2.dims-scalelinopdiag-dims-5-vdm-tfd.vectordiffeomixture-mix_loc0.-1-mix_scale1.-distributiontfd.normalloc0.-scale1.-loc-none-equivalent-to-np.zerosdims-dtypenp.float32.-np.float322.dims">k=1: loc=[2.]<em>dims scale=LinOpDiag dims = 5 vdm = tfd.VectorDiffeomixture( mix_loc=[[0.], [1]], mix_scale=[1.], distribution=tfd.Normal(loc=0., scale=1.), loc=[ None, # Equivalent to <code>np.zeros(dims, dtype=np.float32)</code>. np.float32([2.]</em>dims),</h1>
-<pre><code>],
-scale=[
-    tf.linalg.LinearOperatorScaledIdentity(
-      num_rows=dims,
-      multiplier=np.float32(1.1),
-      is_positive_definite=True),
-    tf.linalg.LinearOperatorDiag(
-      diag=np.linspace(2.5, 3.5, dims, dtype=np.float32),
-      is_positive_definite=True),
-],
-validate_args=True)</code></pre>
+<h1 id="k1-loc2.dims-scalelinopdiag-dims-5-vdm-tfd.vectordiffeomixture-mix_loc0.-1-temperature1.-distributiontfd.normalloc0.-scale1.-loc-none-equivalent-to-np.zerosdims-dtypenp.float32.-np.float322.dims-scale-tf.linalg.linearoperatorscaledidentity-num_rowsdims-multipliernp.float321.1-is_positive_definitetrue-tf.linalg.linearoperatordiag-diagnp.linspace2.5-3.5-dims-dtypenp.float32-is_positive_definitetrue-validate_argstrue">k=1: loc=[2.]*dims scale=LinOpDiag dims = 5 vdm = tfd.VectorDiffeomixture( mix_loc=[[0.], [1]], temperature=[1.], distribution=tfd.Normal(loc=0., scale=1.), loc=[ None, # Equivalent to <code>np.zeros(dims, dtype=np.float32)</code>. np.float32([2.]*dims), ], scale=[ tf.linalg.LinearOperatorScaledIdentity( num_rows=dims, multiplier=np.float32(1.1), is_positive_definite=True), tf.linalg.LinearOperatorDiag( diag=np.linspace(2.5, 3.5, dims, dtype=np.float32), is_positive_definite=True), ], validate_args=True)</h1>
 <h2 id="properties">Properties</h2>
 <h3 id="allow_nan_stats">
 <code>allow_nan_stats</code>
@@ -341,16 +317,20 @@ validate_args=True)</code></pre>
     *args,
     **kwargs
 )</code></pre>
-<p>Constructs the VectorDiffeomixture on <code>R**d</code>.</p>
+<p>Constructs the VectorDiffeomixture on <code>R^d</code>.</p>
+<p>The vector diffeomixture (VDM) approximates the compound distribution</p>
+<pre class="none"><code>p(x) = int p(x | z) p(z) dz,
+where z is in the K-simplex, and
+p(x | z) := p(x | loc=sum_k z[k] loc[k], scale=sum_k z[k] scale[k])</code></pre>
 <h4 id="args">Args:</h4>
 <ul>
-<li><b><code>mix_loc</code></b>: <code>float</code>-like <code>Tensor</code> with shape <code>[b1, ..., bB, K-1]</code>. Represents the <code>location</code> parameter of the SoftmaxNormal used for selecting one of the <code>K</code> affine transformations.</li>
-<li><b><code>mix_scale</code></b>: <code>float</code>-like <code>Tensor</code> with shape <code>[b1, ..., bB, K-1]</code>. Represents the <code>scale</code> parameter of the SoftmaxNormal used for selecting one of the <code>K</code> affine transformations.</li>
+<li><b><code>mix_loc</code></b>: <code>float</code>-like <code>Tensor</code> with shape <code>[b1, ..., bB, K-1]</code>. In terms of samples, larger <code>mix_loc[..., k]</code> ==&gt; <code>Z</code> is more likely to put more weight on its <code>kth</code> component.</li>
+<li><b><code>temperature</code></b>: <code>float</code>-like <code>Tensor</code>. Broadcastable with <code>mix_loc</code>. In terms of samples, smaller <code>temperature</code> means one component is more likely to dominate. I.e., smaller <code>temperature</code> makes the VDM look more like a standard mixture of <code>K</code> components.</li>
 <li><b><code>distribution</code></b>: <code>tf.Distribution</code>-like instance. Distribution from which <code>d</code> iid samples are used as input to the selected affine transformation. Must be a scalar-batch, scalar-event distribution. Typically <code>distribution.reparameterization_type = FULLY_REPARAMETERIZED</code> or it is a function of non-trainable parameters. WARNING: If you backprop through a VectorDiffeomixture sample and the <code>distribution</code> is not <code>FULLY_REPARAMETERIZED</code> yet is a function of trainable variables, then the gradient will be incorrect!</li>
 <li><b><code>loc</code></b>: Length-<code>K</code> list of <code>float</code>-type <code>Tensor</code>s. The <code>k</code>-th element represents the <code>shift</code> used for the <code>k</code>-th affine transformation. If the <code>k</code>-th item is <code>None</code>, <code>loc</code> is implicitly <code>0</code>. When specified, must have shape <code>[B1, ..., Bb, d]</code> where <code>b &gt;= 0</code> and <code>d</code> is the event size.</li>
 <li><b><code>scale</code></b>: Length-<code>K</code> list of <code>LinearOperator</code>s. Each should be positive-definite and operate on a <code>d</code>-dimensional vector space. The <code>k</code>-th element represents the <code>scale</code> used for the <code>k</code>-th affine transformation. <code>LinearOperator</code>s must have shape <code>[B1, ..., Bb, d, d]</code>, <code>b &gt;= 0</code>, i.e., characterizes <code>b</code>-batches of <code>d x d</code> matrices</li>
-<li><b><code>quadrature_size</code></b>: Python <code>int</code> scalar representing number of quadrature points.</li>
-<li><b><code>quadrature_fn</code></b>: Python callable taking <code>mix_loc</code>, <code>mix_scale</code>, <code>quadrature_size</code>, <code>validate_args</code> and returning <code>tuple(grid, probs)</code> representing the SoftmaxNormal grid and corresponding normalized weight. normalized) weight. Default value: <code>quadrature_scheme_softmaxnormal_quantiles</code>.</li>
+<li><b><code>quadrature_size</code></b>: Python <code>int</code> scalar representing number of quadrature points. Larger <code>quadrature_size</code> means <code>q_N(x)</code> better approximates <code>p(x)</code>.</li>
+<li><b><code>quadrature_fn</code></b>: Python callable taking <code>normal_loc</code>, <code>normal_scale</code>, <code>quadrature_size</code>, <code>validate_args</code> and returning <code>tuple(grid, probs)</code> representing the SoftmaxNormal grid and corresponding normalized weight. normalized) weight. Default value: <code>quadrature_scheme_softmaxnormal_quantiles</code>.</li>
 <li><b><code>validate_args</code></b>: Python <code>bool</code>, default <code>False</code>. When <code>True</code> distribution parameters are checked for validity despite possibly degrading runtime performance. When <code>False</code> invalid inputs may silently render incorrect outputs.</li>
 <li><b><code>allow_nan_stats</code></b>: Python <code>bool</code>, default <code>True</code>. When <code>True</code>, statistics (e.g., mean, mode, variance) use the value “<code>NaN</code>” to indicate the result is undefined. When <code>False</code>, an exception is raised if one or more of the statistic’s batch members are undefined.</li>
 <li><b><code>name</code></b>: Python <code>str</code> name prefixed to Ops created by this class.</li>
@@ -477,7 +457,7 @@ tf.abs(x)  # [5.25594902, 6.60492229]</code></pre>
 <p><em>NOTE</em>: <code>GreaterEqual</code> supports broadcasting. More about broadcasting <a href="http://docs.scipy.org/doc/numpy/user/basics.broadcasting.html">here</a></p>
 <h4 id="args-6">Args:</h4>
 <ul>
-<li><b><code>x</code></b>: A <code>Tensor</code>. Must be one of the following types: <code>float32</code>, <code>float64</code>, <code>int32</code>, <code>int64</code>, <code>uint8</code>, <code>int16</code>, <code>int8</code>, <code>uint16</code>, <code>half</code>, <code>uint32</code>, <code>uint64</code>, <code>bfloat16</code>.</li>
+<li><b><code>x</code></b>: A <code>Tensor</code>. Must be one of the following types: <code>float32</code>, <code>float64</code>, <code>int32</code>, <code>uint8</code>, <code>int16</code>, <code>int8</code>, <code>int64</code>, <code>bfloat16</code>, <code>uint16</code>, <code>half</code>, <code>uint32</code>, <code>uint64</code>.</li>
 <li><b><code>y</code></b>: A <code>Tensor</code>. Must have the same type as <code>x</code>.</li>
 <li><b><code>name</code></b>: A name for the operation (optional).</li>
 </ul>
@@ -491,15 +471,18 @@ tf.abs(x)  # [5.25594902, 6.60492229]</code></pre>
     *args
 )</code></pre>
 <p>Overload for Tensor.__getitem__.</p>
-<p>This operation extracts the specified region from the tensor. The notation is similar to NumPy with the restriction that currently only support basic indexing. That means that using a tensor as input is not currently allowed</p>
+<p>This operation extracts the specified region from the tensor. The notation is similar to NumPy with the restriction that currently only support basic indexing. That means that using a non-scalar tensor as input is not currently allowed.</p>
 <p>Some useful examples:</p>
 <pre class="python"><code># strip leading and trailing 2 elements
 foo = tf.constant([1,2,3,4,5,6])
-print(foo[2:-2].eval())  # [3,4]
+print(foo[2:-2].eval())  # =&gt; [3,4]
 
 # skip every row and reverse every column
 foo = tf.constant([[1,2,3], [4,5,6], [7,8,9]])
-print(foo[::2,::-1].eval())  # [[3,2,1], [9,8,7]]
+print(foo[::2,::-1].eval())  # =&gt; [[3,2,1], [9,8,7]]
+
+# Use scalar tensors as indices on both dimensions
+print(foo[tf.constant(0), tf.constant(2)].eval())  # =&gt; 3
 
 # Insert another dimension
 foo = tf.constant([[1,2,3], [4,5,6], [7,8,9]])
@@ -510,9 +493,9 @@ print(foo[:, :, tf.newaxis].eval()) # =&gt; [[[1],[2],[3]], [[4],[5],[6]],
 
 # Ellipses (3 equivalent operations)
 foo = tf.constant([[1,2,3], [4,5,6], [7,8,9]])
-print(foo[tf.newaxis, :, :].eval())  # [[[1,2,3], [4,5,6], [7,8,9]]]
-print(foo[tf.newaxis, ...].eval())  # [[[1,2,3], [4,5,6], [7,8,9]]]
-print(foo[tf.newaxis].eval())  # [[[1,2,3], [4,5,6], [7,8,9]]]</code></pre>
+print(foo[tf.newaxis, :, :].eval())  # =&gt; [[[1,2,3], [4,5,6], [7,8,9]]]
+print(foo[tf.newaxis, ...].eval())  # =&gt; [[[1,2,3], [4,5,6], [7,8,9]]]
+print(foo[tf.newaxis].eval())  # =&gt; [[[1,2,3], [4,5,6], [7,8,9]]]</code></pre>
 <p>Notes: - <code>tf.newaxis</code> is <code>None</code> as in NumPy. - An implicit ellipsis is placed at the end of the <code>slice_spec</code> - NumPy advanced indexing is currently not supported.</p>
 <h4 id="args-7">Args:</h4>
 <ul>
@@ -538,7 +521,7 @@ print(foo[tf.newaxis].eval())  # [[[1,2,3], [4,5,6], [7,8,9]]]</code></pre>
 <p><em>NOTE</em>: <code>Greater</code> supports broadcasting. More about broadcasting <a href="http://docs.scipy.org/doc/numpy/user/basics.broadcasting.html">here</a></p>
 <h4 id="args-8">Args:</h4>
 <ul>
-<li><b><code>x</code></b>: A <code>Tensor</code>. Must be one of the following types: <code>float32</code>, <code>float64</code>, <code>int32</code>, <code>int64</code>, <code>uint8</code>, <code>int16</code>, <code>int8</code>, <code>uint16</code>, <code>half</code>, <code>uint32</code>, <code>uint64</code>, <code>bfloat16</code>.</li>
+<li><b><code>x</code></b>: A <code>Tensor</code>. Must be one of the following types: <code>float32</code>, <code>float64</code>, <code>int32</code>, <code>uint8</code>, <code>int16</code>, <code>int8</code>, <code>int64</code>, <code>bfloat16</code>, <code>uint16</code>, <code>half</code>, <code>uint32</code>, <code>uint64</code>.</li>
 <li><b><code>y</code></b>: A <code>Tensor</code>. Must have the same type as <code>x</code>.</li>
 <li><b><code>name</code></b>: A name for the operation (optional).</li>
 </ul>
@@ -574,7 +557,7 @@ print(foo[tf.newaxis].eval())  # [[[1,2,3], [4,5,6], [7,8,9]]]</code></pre>
 <p><em>NOTE</em>: <code>LessEqual</code> supports broadcasting. More about broadcasting <a href="http://docs.scipy.org/doc/numpy/user/basics.broadcasting.html">here</a></p>
 <h4 id="args-10">Args:</h4>
 <ul>
-<li><b><code>x</code></b>: A <code>Tensor</code>. Must be one of the following types: <code>float32</code>, <code>float64</code>, <code>int32</code>, <code>int64</code>, <code>uint8</code>, <code>int16</code>, <code>int8</code>, <code>uint16</code>, <code>half</code>, <code>uint32</code>, <code>uint64</code>, <code>bfloat16</code>.</li>
+<li><b><code>x</code></b>: A <code>Tensor</code>. Must be one of the following types: <code>float32</code>, <code>float64</code>, <code>int32</code>, <code>uint8</code>, <code>int16</code>, <code>int8</code>, <code>int64</code>, <code>bfloat16</code>, <code>uint16</code>, <code>half</code>, <code>uint32</code>, <code>uint64</code>.</li>
 <li><b><code>y</code></b>: A <code>Tensor</code>. Must have the same type as <code>x</code>.</li>
 <li><b><code>name</code></b>: A name for the operation (optional).</li>
 </ul>
@@ -591,7 +574,7 @@ print(foo[tf.newaxis].eval())  # [[[1,2,3], [4,5,6], [7,8,9]]]</code></pre>
 <p><em>NOTE</em>: <code>Less</code> supports broadcasting. More about broadcasting <a href="http://docs.scipy.org/doc/numpy/user/basics.broadcasting.html">here</a></p>
 <h4 id="args-11">Args:</h4>
 <ul>
-<li><b><code>x</code></b>: A <code>Tensor</code>. Must be one of the following types: <code>float32</code>, <code>float64</code>, <code>int32</code>, <code>int64</code>, <code>uint8</code>, <code>int16</code>, <code>int8</code>, <code>uint16</code>, <code>half</code>, <code>uint32</code>, <code>uint64</code>, <code>bfloat16</code>.</li>
+<li><b><code>x</code></b>: A <code>Tensor</code>. Must be one of the following types: <code>float32</code>, <code>float64</code>, <code>int32</code>, <code>uint8</code>, <code>int16</code>, <code>int8</code>, <code>int64</code>, <code>bfloat16</code>, <code>uint16</code>, <code>half</code>, <code>uint32</code>, <code>uint64</code>.</li>
 <li><b><code>y</code></b>: A <code>Tensor</code>. Must have the same type as <code>x</code>.</li>
 <li><b><code>name</code></b>: A name for the operation (optional).</li>
 </ul>
@@ -1244,7 +1227,7 @@ with tf.Session() as sess:
     name=&#39;kl_divergence&#39;
 )</code></pre>
 <p>Computes the Kullback–Leibler divergence.</p>
-<p>Denote this distribution (<code>self</code>) by <code>p</code> and the <code>other</code> distribution by <code>q</code>. Assuming <code>p, q</code> are absolutely continuous with respect to reference measure <code>r</code>, (Shanon) cross entropy is defined as:</p>
+<p>Denote this distribution (<code>self</code>) by <code>p</code> and the <code>other</code> distribution by <code>q</code>. Assuming <code>p, q</code> are absolutely continuous with respect to reference measure <code>r</code>, the KL divergence is defined as:</p>
 <pre class="none"><code>KL[p, q] = E_p[log(p(X)/q(X))]
          = -int_F p(x) log q(x) dr(x) + int_F p(x) log p(x) dr(x)
          = H[p, q] - H[p]</code></pre>

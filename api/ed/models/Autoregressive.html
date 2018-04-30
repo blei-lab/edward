@@ -4,7 +4,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta http-equiv="Content-Style-Type" content="text/css" />
   <meta name="generator" content="pandoc" />
-  <title>Edward – ed.models.QuantizedDistribution</title>
+  <title>Edward – ed.models.Autoregressive</title>
   <!-- Mobile Specific Metas -->
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -107,15 +107,18 @@
     <div class="nine columns">
 
 <div itemscope itemtype="http://developers.google.com/ReferenceObject">
-<meta itemprop="name" content="ed.models.QuantizedDistribution" />
+<meta itemprop="name" content="ed.models.Autoregressive" />
 <meta itemprop="property" content="allow_nan_stats"/>
 <meta itemprop="property" content="batch_shape"/>
-<meta itemprop="property" content="distribution"/>
+<meta itemprop="property" content="distribution0"/>
+<meta itemprop="property" content="distribution_fn"/>
 <meta itemprop="property" content="dtype"/>
 <meta itemprop="property" content="event_shape"/>
 <meta itemprop="property" content="name"/>
+<meta itemprop="property" content="num_steps"/>
 <meta itemprop="property" content="parameters"/>
 <meta itemprop="property" content="reparameterization_type"/>
+<meta itemprop="property" content="sample0"/>
 <meta itemprop="property" content="sample_shape"/>
 <meta itemprop="property" content="shape"/>
 <meta itemprop="property" content="validate_args"/>
@@ -191,31 +194,49 @@
 <meta itemprop="property" content="variance"/>
 <meta itemprop="property" content="__array_priority__"/>
 </div>
-<h1 id="ed.models.quantizeddistribution">ed.models.QuantizedDistribution</h1>
-<h2 id="class-quantizeddistribution">Class <code>QuantizedDistribution</code></h2>
+<h1 id="ed.models.autoregressive">ed.models.Autoregressive</h1>
+<h2 id="class-autoregressive">Class <code>Autoregressive</code></h2>
 <p>Inherits From: <a href="../../ed/RandomVariable"><code>RandomVariable</code></a></p>
-<p>Distribution representing the quantization <code>Y = ceiling(X)</code>.</p>
-<h4 id="definition-in-terms-of-sampling.">Definition in terms of sampling.</h4>
-<pre><code>1. Draw X
-2. Set Y &lt;-- ceiling(X)
-3. If Y &lt; low, reset Y &lt;-- low
-4. If Y &gt; high, reset Y &lt;-- high
-5. Return Y</code></pre>
-<h4 id="definition-in-terms-of-the-probability-mass-function.">Definition in terms of the probability mass function.</h4>
-<p>Given scalar random variable <code>X</code>, we define a discrete random variable <code>Y</code> supported on the integers as follows:</p>
-<pre><code>P[Y = j] := P[X &lt;= low],  if j == low,
-         := P[X &gt; high - 1],  j == high,
-         := 0, if j &lt; low or j &gt; high,
-         := P[j - 1 &lt; X &lt;= j],  all other j.</code></pre>
-<p>Conceptually, without cutoffs, the quantization process partitions the real line <code>R</code> into half open intervals, and identifies an integer <code>j</code> with the right endpoints:</p>
-<pre><code>R = ... (-2, -1](-1, 0](0, 1](1, 2](2, 3](3, 4] ...
-j = ...      -1      0     1     2     3     4  ...</code></pre>
-<p><code>P[Y = j]</code> is the mass of <code>X</code> within the <code>jth</code> interval. If <code>low = 0</code>, and <code>high = 2</code>, then the intervals are redrawn and <code>j</code> is re-assigned:</p>
-<pre><code>R = (-infty, 0](0, 1](1, infty)
-j =          0     1     2</code></pre>
-<p><code>P[Y = j]</code> is still the mass of <code>X</code> within the <code>jth</code> interval.</p>
-<h4 id="caveats">Caveats</h4>
-<p>Since evaluation of each <code>P[Y = j]</code> involves a cdf evaluation (rather than a closed form function such as for a Poisson), computations such as mean and entropy are better done with samples or approximations, and are not implemented by this class.</p>
+<p>Autoregressive distributions.</p>
+<p>The Autoregressive distribution enables learning (often) richer multivariate distributions by repeatedly applying a <a href="https://en.wikipedia.org/wiki/Diffeomorphism">diffeomorphic</a> transformation (such as implemented by <code>Bijector</code>s). Regarding terminology,</p>
+<p>“Autoregressive models decompose the joint density as a product of conditionals, and model each conditional in turn. Normalizing flows transform a base density (e.g. a standard Gaussian) into the target density by an invertible transformation with tractable Jacobian.” <a href="" title="Masked Autoregressive Flow for Density Estimation.">1</a></p>
+<p>In other words, the “autoregressive property” is equivalent to the decomposition, <code>p(x) = prod{ p(x[i] | x[0:i]) : i=0, ..., d }</code>. The provided <code>shift_and_log_scale_fn</code>, <code>masked_autoregressive_default_template</code>, achieves this property by zeroing out weights in its <code>masked_dense</code> layers.</p>
+<p>Practically speaking the autoregressive property means that there exists a permutation of the event coordinates such that each coordinate is a diffeomorphic function of only preceding coordinates. <a href="" title="Conditional Image Generation with PixelCNN Decoders.">2</a></p>
+<h4 id="mathematical-details">Mathematical Details</h4>
+<p>The probability function is,</p>
+<pre class="none"><code>prob(x; fn, n) = fn(x).prob(x)</code></pre>
+<p>And a sample is generated by,</p>
+<pre class="none"><code>x = fn(...fn(fn(x0).sample()).sample()).sample()</code></pre>
+<p>where the ellipses (<code>...</code>) represent <code>n-2</code> composed calls to <code>fn</code>, <code>fn</code> constructs a <code>tf.distributions.Distribution</code>-like instance, and <code>x0</code> is a fixed initializing <code>Tensor</code>.</p>
+<h4 id="examples">Examples</h4>
+<pre class="python"><code>tfd = tf.contrib.distributions
+
+def normal_fn(self, event_size):
+  n = event_size * (event_size + 1) / 2
+  p = tf.Variable(tfd.Normal(loc=0., scale=1.).sample(n))
+  affine = tfd.bijectors.Affine(
+      scale_tril=tfd.fill_triangular(0.25 * p))
+  def _fn(samples):
+    scale = math_ops.exp(affine.forward(samples)).eval()
+    return independent_lib.Independent(
+        normal_lib.Normal(loc=0., scale=scale, validate_args=True),
+        reinterpreted_batch_ndims=1)
+  return _fn
+
+batch_and_event_shape = [3, 2, 4]
+sample0 = array_ops.zeros(batch_and_event_shape)
+ar = autoregressive_lib.Autoregressive(
+    self._normal_fn(batch_and_event_shape[-1]), sample0)
+x = ar.sample([6, 5])
+# ==&gt; x.shape = [6, 5, 3, 2, 4]
+prob_x = ar.prob(x)
+# ==&gt; x.shape = [6, 5, 3, 2]
+</code></pre>
+<pre><code> George Papamakarios, Theo Pavlakou, Iain Murray. Arxiv. 2017.
+ https://arxiv.org/abs/1705.07057</code></pre>
+<pre><code> Aaron van den Oord, Nal Kalchbrenner, Oriol Vinyals, Lasse Espeholt, Alex
+ Graves, Koray Kavukcuoglu. Arxiv, 2016.
+ https://arxiv.org/abs/1606.05328</code></pre>
 <h2 id="properties">Properties</h2>
 <h3 id="allow_nan_stats">
 <code>allow_nan_stats</code>
@@ -236,10 +257,12 @@ j =          0     1     2</code></pre>
 <ul>
 <li><b><code>batch_shape</code></b>: <code>TensorShape</code>, possibly unknown.</li>
 </ul>
-<h3 id="distribution">
-<code>distribution</code>
+<h3 id="distribution0">
+<code>distribution0</code>
 </h3>
-<p>Base distribution, p(x).</p>
+<h3 id="distribution_fn">
+<code>distribution_fn</code>
+</h3>
 <h3 id="dtype">
 <code>dtype</code>
 </h3>
@@ -257,6 +280,9 @@ j =          0     1     2</code></pre>
 <code>name</code>
 </h3>
 <p>Name prepended to all ops created by this <code>Distribution</code>.</p>
+<h3 id="num_steps">
+<code>num_steps</code>
+</h3>
 <h3 id="parameters">
 <code>parameters</code>
 </h3>
@@ -268,6 +294,9 @@ j =          0     1     2</code></pre>
 <p>Currently this is one of the static instances <code>distributions.FULLY_REPARAMETERIZED</code> or <code>distributions.NOT_REPARAMETERIZED</code>.</p>
 <h4 id="returns-3">Returns:</h4>
 <p>An instance of <code>ReparameterizationType</code>.</p>
+<h3 id="sample0">
+<code>sample0</code>
+</h3>
 <h3 id="sample_shape">
 <code>sample_shape</code>
 </h3>
@@ -288,20 +317,20 @@ j =          0     1     2</code></pre>
     *args,
     **kwargs
 )</code></pre>
-<p>Construct a Quantized Distribution representing <code>Y = ceiling(X)</code>.</p>
-<p>Some properties are inherited from the distribution defining <code>X</code>. Example: <code>allow_nan_stats</code> is determined for this <code>QuantizedDistribution</code> by reading the <code>distribution</code>.</p>
+<p>Construct an <code>Autoregressive</code> distribution.</p>
 <h4 id="args">Args:</h4>
 <ul>
-<li><b><code>distribution</code></b>: The base distribution class to transform. Typically an instance of <code>Distribution</code>.</li>
-<li><b><code>low</code></b>: <code>Tensor</code> with same <code>dtype</code> as this distribution and shape able to be added to samples. Should be a whole number. Default <code>None</code>. If provided, base distribution’s <code>prob</code> should be defined at <code>low</code>.</li>
-<li><b><code>high</code></b>: <code>Tensor</code> with same <code>dtype</code> as this distribution and shape able to be added to samples. Should be a whole number. Default <code>None</code>. If provided, base distribution’s <code>prob</code> should be defined at <code>high - 1</code>. <code>high</code> must be strictly greater than <code>low</code>.</li>
-<li><b><code>validate_args</code></b>: Python <code>bool</code>, default <code>False</code>. When <code>True</code> distribution parameters are checked for validity despite possibly degrading runtime performance. When <code>False</code> invalid inputs may silently render incorrect outputs.</li>
-<li><b><code>name</code></b>: Python <code>str</code> name prefixed to Ops created by this class.</li>
+<li><b><code>distribution_fn</code></b>: Python <code>callable</code> which constructs a <code>tf.distributions.Distribution</code>-like instance from a <code>Tensor</code> (e.g., <code>sample0</code>). The function must respect the “autoregressive property”, i.e., there exists a permutation of event such that each coordinate is a diffeomorphic function of on preceding coordinates.</li>
+<li><b><code>sample0</code></b>: Initial input to <code>distribution_fn</code>; used to build the distribution in <code>__init__</code> which in turn specifies this distribution’s properties, e.g., <code>event_shape</code>, <code>batch_shape</code>, <code>dtype</code>. If unspecified, then <code>distribution_fn</code> should be default constructable.</li>
+<li><b><code>num_steps</code></b>: Number of times <code>distribution_fn</code> is composed from samples, e.g., <code>num_steps=2</code> implies <code>distribution_fn(distribution_fn(sample0).sample(n)).sample()</code>.</li>
+<li><b><code>validate_args</code></b>: Python <code>bool</code>. Whether to validate input with asserts. If <code>validate_args</code> is <code>False</code>, and the inputs are invalid, correct behavior is not guaranteed.</li>
+<li><b><code>allow_nan_stats</code></b>: Python <code>bool</code>, default <code>True</code>. When <code>True</code>, statistics (e.g., mean, mode, variance) use the value “<code>NaN</code>” to indicate the result is undefined. When <code>False</code>, an exception is raised if one or more of the statistic’s batch members are undefined.</li>
+<li><b><code>name</code></b>: Python <code>str</code> name prefixed to Ops created by this class. Default value: “Autoregressive”.</li>
 </ul>
 <h4 id="raises">Raises:</h4>
 <ul>
-<li><b><code>TypeError</code></b>: If <code>dist_cls</code> is not a subclass of <code>Distribution</code> or continuous.</li>
-<li><b><code>NotImplementedError</code></b>: If the base distribution does not implement <code>cdf</code>.</li>
+<li><b><code>ValueError</code></b>: if <code>num_steps</code> and <code>distribution_fn(sample0).event_shape.num_elements()</code> are both <code>None</code>.</li>
+<li><b><code>ValueError</code></b>: if <code>num_steps &lt; 1</code>.</li>
 </ul>
 <h3 id="__abs__">
 <code><strong>abs</strong></code>
@@ -1007,14 +1036,6 @@ tf.pow(x, y)  # [[256, 65536], [9, 27]]</code></pre>
 <p>Cumulative distribution function.</p>
 <p>Given random variable <code>X</code>, the cumulative distribution function <code>cdf</code> is:</p>
 <pre class="none"><code>cdf(x) := P[X &lt;= x]</code></pre>
-<p>Additional documentation from <code>QuantizedDistribution</code>:</p>
-<p>For whole numbers <code>y</code>,</p>
-<pre><code>cdf(y) := P[Y &lt;= y]
-        = 1, if y &gt;= high,
-        = 0, if y &lt; low,
-        = P[X &lt;= y], otherwise.</code></pre>
-<p>Since <code>Y</code> only has mass at whole numbers, <code>P[Y &lt;= y] = P[Y &lt;= floor(y)]</code>. This dictates that fractional <code>y</code> are first floored to a whole number, and then above definition applies.</p>
-<p>The base distribution’s <code>cdf</code> method must be defined on <code>y - 1</code>.</p>
 <h4 id="args-28">Args:</h4>
 <ul>
 <li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
@@ -1096,7 +1117,7 @@ tf.pow(x, y)  # [[256, 65536], [9, 27]]</code></pre>
 <li><b><code>session</code></b>: tf.BaseSession. The <code>tf.Session</code> to use to evaluate this random variable. If none, the default session is used.</li>
 <li><b><code>feed_dict</code></b>: dict. A dictionary that maps <code>tf.Tensor</code> objects to feed values. See <code>tf.Session.run()</code> for a description of the valid feed values.</li>
 </ul>
-<h4 id="examples">Examples</h4>
+<h4 id="examples-1">Examples</h4>
 <pre class="python"><code>x = Normal(0.0, 1.0)
 with tf.Session() as sess:
   # Usage passing the session explicitly.
@@ -1216,14 +1237,6 @@ with tf.Session() as sess:
 <p>Given random variable <code>X</code>, the cumulative distribution function <code>cdf</code> is:</p>
 <pre class="none"><code>log_cdf(x) := Log[ P[X &lt;= x] ]</code></pre>
 <p>Often, a numerical approximation can be used for <code>log_cdf(x)</code> that yields a more accurate answer than simply taking the logarithm of the <code>cdf</code> when <code>x &lt;&lt; -1</code>.</p>
-<p>Additional documentation from <code>QuantizedDistribution</code>:</p>
-<p>For whole numbers <code>y</code>,</p>
-<pre><code>cdf(y) := P[Y &lt;= y]
-        = 1, if y &gt;= high,
-        = 0, if y &lt; low,
-        = P[X &lt;= y], otherwise.</code></pre>
-<p>Since <code>Y</code> only has mass at whole numbers, <code>P[Y &lt;= y] = P[Y &lt;= floor(y)]</code>. This dictates that fractional <code>y</code> are first floored to a whole number, and then above definition applies.</p>
-<p>The base distribution’s <code>log_cdf</code> method must be defined on <code>y - 1</code>.</p>
 <h4 id="args-37">Args:</h4>
 <ul>
 <li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
@@ -1241,13 +1254,6 @@ with tf.Session() as sess:
     name=&#39;log_prob&#39;
 )</code></pre>
 <p>Log probability density/mass function.</p>
-<p>Additional documentation from <code>QuantizedDistribution</code>:</p>
-<p>For whole numbers <code>y</code>,</p>
-<pre><code>P[Y = y] := P[X &lt;= low],  if y == low,
-         := P[X &gt; high - 1],  y == high,
-         := 0, if j &lt; low or y &gt; high,
-         := P[y - 1 &lt; X &lt;= y],  all other y.</code></pre>
-<p>The base distribution’s <code>log_cdf</code> method must be defined on <code>y - 1</code>. If the base distribution has a <code>log_survival_function</code> method results will be more accurate for large values of <code>y</code>, and in this case the <code>log_survival_function</code> must also be defined on <code>y - 1</code>.</p>
 <h4 id="args-38">Args:</h4>
 <ul>
 <li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
@@ -1270,14 +1276,6 @@ with tf.Session() as sess:
                          = Log[ 1 - P[X &lt;= x] ]
                          = Log[ 1 - cdf(x) ]</code></pre>
 <p>Typically, different numerical approximations can be used for the log survival function, which are more accurate than <code>1 - cdf(x)</code> when <code>x &gt;&gt; 1</code>.</p>
-<p>Additional documentation from <code>QuantizedDistribution</code>:</p>
-<p>For whole numbers <code>y</code>,</p>
-<pre><code>survival_function(y) := P[Y &gt; y]
-                      = 0, if y &gt;= high,
-                      = 1, if y &lt; low,
-                      = P[X &lt;= y], otherwise.</code></pre>
-<p>Since <code>Y</code> only has mass at whole numbers, <code>P[Y &lt;= y] = P[Y &lt;= floor(y)]</code>. This dictates that fractional <code>y</code> are first floored to a whole number, and then above definition applies.</p>
-<p>The base distribution’s <code>log_cdf</code> method must be defined on <code>y - 1</code>.</p>
 <h4 id="args-39">Args:</h4>
 <ul>
 <li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
@@ -1341,13 +1339,6 @@ with tf.Session() as sess:
     name=&#39;prob&#39;
 )</code></pre>
 <p>Probability density/mass function.</p>
-<p>Additional documentation from <code>QuantizedDistribution</code>:</p>
-<p>For whole numbers <code>y</code>,</p>
-<pre><code>P[Y = y] := P[X &lt;= low],  if y == low,
-         := P[X &gt; high - 1],  y == high,
-         := 0, if j &lt; low or y &gt; high,
-         := P[y - 1 &lt; X &lt;= y],  all other y.</code></pre>
-<p>The base distribution’s <code>cdf</code> method must be defined on <code>y - 1</code>. If the base distribution has a <code>survival_function</code> method, results will be more accurate for large values of <code>y</code>, and in this case the <code>survival_function</code> must also be defined on <code>y - 1</code>.</p>
 <h4 id="args-42">Args:</h4>
 <ul>
 <li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>
@@ -1424,14 +1415,6 @@ with tf.Session() as sess:
 <pre class="none"><code>survival_function(x) = P[X &gt; x]
                      = 1 - P[X &lt;= x]
                      = 1 - cdf(x).</code></pre>
-<p>Additional documentation from <code>QuantizedDistribution</code>:</p>
-<p>For whole numbers <code>y</code>,</p>
-<pre><code>survival_function(y) := P[Y &gt; y]
-                      = 0, if y &gt;= high,
-                      = 1, if y &lt; low,
-                      = P[X &lt;= y], otherwise.</code></pre>
-<p>Since <code>Y</code> only has mass at whole numbers, <code>P[Y &lt;= y] = P[Y &lt;= floor(y)]</code>. This dictates that fractional <code>y</code> are first floored to a whole number, and then above definition applies.</p>
-<p>The base distribution’s <code>cdf</code> method must be defined on <code>y - 1</code>.</p>
 <h4 id="args-46">Args:</h4>
 <ul>
 <li><b><code>value</code></b>: <code>float</code> or <code>double</code> <code>Tensor</code>.</li>

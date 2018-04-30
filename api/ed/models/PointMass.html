@@ -203,7 +203,7 @@ x = PointMass(params=28.3)
 assert x.shape == ()
 
 # 5 x 2 x 3 tensor
-dp = PointMass(params=tf.zeros([5, 2, 3]))
+x = PointMass(params=tf.zeros([5, 2, 3]))
 assert x.shape == (5, 2, 3)</code></pre>
 <h2 id="properties">Properties</h2>
 <h3 id="allow_nan_stats">
@@ -392,7 +392,7 @@ tf.abs(x)  # [5.25594902, 6.60492229]</code></pre>
 <p><em>NOTE</em>: <code>GreaterEqual</code> supports broadcasting. More about broadcasting <a href="http://docs.scipy.org/doc/numpy/user/basics.broadcasting.html">here</a></p>
 <h4 id="args-6">Args:</h4>
 <ul>
-<li><b><code>x</code></b>: A <code>Tensor</code>. Must be one of the following types: <code>float32</code>, <code>float64</code>, <code>int32</code>, <code>int64</code>, <code>uint8</code>, <code>int16</code>, <code>int8</code>, <code>uint16</code>, <code>half</code>, <code>uint32</code>, <code>uint64</code>, <code>bfloat16</code>.</li>
+<li><b><code>x</code></b>: A <code>Tensor</code>. Must be one of the following types: <code>float32</code>, <code>float64</code>, <code>int32</code>, <code>uint8</code>, <code>int16</code>, <code>int8</code>, <code>int64</code>, <code>bfloat16</code>, <code>uint16</code>, <code>half</code>, <code>uint32</code>, <code>uint64</code>.</li>
 <li><b><code>y</code></b>: A <code>Tensor</code>. Must have the same type as <code>x</code>.</li>
 <li><b><code>name</code></b>: A name for the operation (optional).</li>
 </ul>
@@ -406,15 +406,18 @@ tf.abs(x)  # [5.25594902, 6.60492229]</code></pre>
     *args
 )</code></pre>
 <p>Overload for Tensor.__getitem__.</p>
-<p>This operation extracts the specified region from the tensor. The notation is similar to NumPy with the restriction that currently only support basic indexing. That means that using a tensor as input is not currently allowed</p>
+<p>This operation extracts the specified region from the tensor. The notation is similar to NumPy with the restriction that currently only support basic indexing. That means that using a non-scalar tensor as input is not currently allowed.</p>
 <p>Some useful examples:</p>
 <pre class="python"><code># strip leading and trailing 2 elements
 foo = tf.constant([1,2,3,4,5,6])
-print(foo[2:-2].eval())  # [3,4]
+print(foo[2:-2].eval())  # =&gt; [3,4]
 
 # skip every row and reverse every column
 foo = tf.constant([[1,2,3], [4,5,6], [7,8,9]])
-print(foo[::2,::-1].eval())  # [[3,2,1], [9,8,7]]
+print(foo[::2,::-1].eval())  # =&gt; [[3,2,1], [9,8,7]]
+
+# Use scalar tensors as indices on both dimensions
+print(foo[tf.constant(0), tf.constant(2)].eval())  # =&gt; 3
 
 # Insert another dimension
 foo = tf.constant([[1,2,3], [4,5,6], [7,8,9]])
@@ -425,9 +428,9 @@ print(foo[:, :, tf.newaxis].eval()) # =&gt; [[[1],[2],[3]], [[4],[5],[6]],
 
 # Ellipses (3 equivalent operations)
 foo = tf.constant([[1,2,3], [4,5,6], [7,8,9]])
-print(foo[tf.newaxis, :, :].eval())  # [[[1,2,3], [4,5,6], [7,8,9]]]
-print(foo[tf.newaxis, ...].eval())  # [[[1,2,3], [4,5,6], [7,8,9]]]
-print(foo[tf.newaxis].eval())  # [[[1,2,3], [4,5,6], [7,8,9]]]</code></pre>
+print(foo[tf.newaxis, :, :].eval())  # =&gt; [[[1,2,3], [4,5,6], [7,8,9]]]
+print(foo[tf.newaxis, ...].eval())  # =&gt; [[[1,2,3], [4,5,6], [7,8,9]]]
+print(foo[tf.newaxis].eval())  # =&gt; [[[1,2,3], [4,5,6], [7,8,9]]]</code></pre>
 <p>Notes: - <code>tf.newaxis</code> is <code>None</code> as in NumPy. - An implicit ellipsis is placed at the end of the <code>slice_spec</code> - NumPy advanced indexing is currently not supported.</p>
 <h4 id="args-7">Args:</h4>
 <ul>
@@ -453,7 +456,7 @@ print(foo[tf.newaxis].eval())  # [[[1,2,3], [4,5,6], [7,8,9]]]</code></pre>
 <p><em>NOTE</em>: <code>Greater</code> supports broadcasting. More about broadcasting <a href="http://docs.scipy.org/doc/numpy/user/basics.broadcasting.html">here</a></p>
 <h4 id="args-8">Args:</h4>
 <ul>
-<li><b><code>x</code></b>: A <code>Tensor</code>. Must be one of the following types: <code>float32</code>, <code>float64</code>, <code>int32</code>, <code>int64</code>, <code>uint8</code>, <code>int16</code>, <code>int8</code>, <code>uint16</code>, <code>half</code>, <code>uint32</code>, <code>uint64</code>, <code>bfloat16</code>.</li>
+<li><b><code>x</code></b>: A <code>Tensor</code>. Must be one of the following types: <code>float32</code>, <code>float64</code>, <code>int32</code>, <code>uint8</code>, <code>int16</code>, <code>int8</code>, <code>int64</code>, <code>bfloat16</code>, <code>uint16</code>, <code>half</code>, <code>uint32</code>, <code>uint64</code>.</li>
 <li><b><code>y</code></b>: A <code>Tensor</code>. Must have the same type as <code>x</code>.</li>
 <li><b><code>name</code></b>: A name for the operation (optional).</li>
 </ul>
@@ -489,7 +492,7 @@ print(foo[tf.newaxis].eval())  # [[[1,2,3], [4,5,6], [7,8,9]]]</code></pre>
 <p><em>NOTE</em>: <code>LessEqual</code> supports broadcasting. More about broadcasting <a href="http://docs.scipy.org/doc/numpy/user/basics.broadcasting.html">here</a></p>
 <h4 id="args-10">Args:</h4>
 <ul>
-<li><b><code>x</code></b>: A <code>Tensor</code>. Must be one of the following types: <code>float32</code>, <code>float64</code>, <code>int32</code>, <code>int64</code>, <code>uint8</code>, <code>int16</code>, <code>int8</code>, <code>uint16</code>, <code>half</code>, <code>uint32</code>, <code>uint64</code>, <code>bfloat16</code>.</li>
+<li><b><code>x</code></b>: A <code>Tensor</code>. Must be one of the following types: <code>float32</code>, <code>float64</code>, <code>int32</code>, <code>uint8</code>, <code>int16</code>, <code>int8</code>, <code>int64</code>, <code>bfloat16</code>, <code>uint16</code>, <code>half</code>, <code>uint32</code>, <code>uint64</code>.</li>
 <li><b><code>y</code></b>: A <code>Tensor</code>. Must have the same type as <code>x</code>.</li>
 <li><b><code>name</code></b>: A name for the operation (optional).</li>
 </ul>
@@ -506,7 +509,7 @@ print(foo[tf.newaxis].eval())  # [[[1,2,3], [4,5,6], [7,8,9]]]</code></pre>
 <p><em>NOTE</em>: <code>Less</code> supports broadcasting. More about broadcasting <a href="http://docs.scipy.org/doc/numpy/user/basics.broadcasting.html">here</a></p>
 <h4 id="args-11">Args:</h4>
 <ul>
-<li><b><code>x</code></b>: A <code>Tensor</code>. Must be one of the following types: <code>float32</code>, <code>float64</code>, <code>int32</code>, <code>int64</code>, <code>uint8</code>, <code>int16</code>, <code>int8</code>, <code>uint16</code>, <code>half</code>, <code>uint32</code>, <code>uint64</code>, <code>bfloat16</code>.</li>
+<li><b><code>x</code></b>: A <code>Tensor</code>. Must be one of the following types: <code>float32</code>, <code>float64</code>, <code>int32</code>, <code>uint8</code>, <code>int16</code>, <code>int8</code>, <code>int64</code>, <code>bfloat16</code>, <code>uint16</code>, <code>half</code>, <code>uint32</code>, <code>uint64</code>.</li>
 <li><b><code>y</code></b>: A <code>Tensor</code>. Must have the same type as <code>x</code>.</li>
 <li><b><code>name</code></b>: A name for the operation (optional).</li>
 </ul>
@@ -1159,7 +1162,7 @@ with tf.Session() as sess:
     name=&#39;kl_divergence&#39;
 )</code></pre>
 <p>Computes the Kullback–Leibler divergence.</p>
-<p>Denote this distribution (<code>self</code>) by <code>p</code> and the <code>other</code> distribution by <code>q</code>. Assuming <code>p, q</code> are absolutely continuous with respect to reference measure <code>r</code>, (Shanon) cross entropy is defined as:</p>
+<p>Denote this distribution (<code>self</code>) by <code>p</code> and the <code>other</code> distribution by <code>q</code>. Assuming <code>p, q</code> are absolutely continuous with respect to reference measure <code>r</code>, the KL divergence is defined as:</p>
 <pre class="none"><code>KL[p, q] = E_p[log(p(X)/q(X))]
          = -int_F p(x) log q(x) dr(x) + int_F p(x) log p(x) dr(x)
          = H[p, q] - H[p]</code></pre>
