@@ -13,9 +13,9 @@ setup(
     packages=['edward', 'edward.criticisms', 'edward.inferences',
               'edward.models', 'edward.util', 'edward.inferences.conjugacy'],
     install_requires=['numpy>=1.7',
-                      'six>=1.10.0'],
+                      'six>=1.10.0',
+                      'tensorflow>=1.8.0'],
     extras_require={
-        'tensorflow': ['tensorflow>=1.8.0'],
         'tensorflow with gpu': ['tensorflow-gpu>=1.8.0'],
         'neural networks': ['keras>=2.0.0', 'prettytensor>=0.7.4'],
         'datasets': ['observations>=0.1.2'],
