@@ -75,10 +75,10 @@ network's input, which is a batch of data points.
 x_ph = tf.placeholder(tf.float32, [M, 28 * 28])
 \end{lstlisting}
 
-We build a neural network using Keras.
-It takes a 28 by 28 pixel image and outputs a $10$-dimensional
-output, one for the mean (\texttt{mu}) and one for the standard
-deviation (\texttt{sigma}).
+We build a neural network using Keras consisting of two dense layers, one for the mean (\texttt{loc}) and one for the standard
+deviation (\texttt{scale}).
+Each dense layer takes a 28 by 28 pixel image and outputs $10$ values, one for each digit class.
+
 \begin{lstlisting}[language=Python]
 from edward.models import Normal
 from keras.layers import Dense
