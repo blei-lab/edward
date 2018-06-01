@@ -64,7 +64,6 @@ thus offload part of the computational work to shared precomputation
 and adaptation over time" \citep{stuhlmuller2013learning}.
 
 \subsubsection{Implementation}
-
 Inference networks are easy to build in Edward.
 In the example below, a data point \texttt{x} is a 28 by 28 pixel
 image (from MNIST).
@@ -75,10 +74,14 @@ network's input, which is a batch of data points.
 x_ph = tf.placeholder(tf.float32, [M, 28 * 28])
 \end{lstlisting}
 
-We build a neural network using Keras.
-It takes a 28 by 28 pixel image and outputs a $10$-dimensional
-output, one for the mean (\texttt{mu}) and one for the standard
-deviation (\texttt{sigma}).
+We model $q(\mathbf{z}\mid \mathbf{x}; \theta)$ with $10$ Gaussian
+distributions, one for each of the $10$ MNIST digit classes.
+
+We build a neural network using Keras consisting of a hidden layer with 256
+dimensions, followed by two dense layers, one for the means (\texttt{loc}) 
+and one for the standard deviations (\texttt{scale}) of the Gaussian 
+distributions. 	
+
 \begin{lstlisting}[language=Python]
 from edward.models import Normal
 from keras.layers import Dense
@@ -87,8 +90,10 @@ hidden = Dense(256, activation='relu')(x_ph)
 qz = Normal(loc=Dense(10)(hidden),
             scale=Dense(10, activation='softplus')(hidden))
 \end{lstlisting}
-The variational model is parameterized by the neural network's
-output.
+
+The variational model, $qz$, is parameterized by the neural network's output. 
+That is, the network takes a 28 by 28 pixel image and outputs $20$ local 
+variational parameters: $10$ means and $10$ standard deviations.
 
 During each step of inference, we pass in a batch of data points to feed the
 placeholder. Then we train the variational parameters (inference
