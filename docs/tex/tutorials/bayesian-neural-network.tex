@@ -35,7 +35,7 @@ def neural_network(x):
     h = tf.matmul(h, W_2) + b_2
     return tf.reshape(h, [-1])
 
-N = 40  # number of data ponts
+N = 40  # number of data points
 D = 1   # number of features
 
 W_0 = Normal(loc=tf.zeros([D, 10]), scale=tf.ones([D, 10]))
