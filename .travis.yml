@@ -1,15 +1,14 @@
 sudo: required
 dist: trusty
 language: python
-matrix:
-    include:
-        - python: 2.7
-        - python: 3.4
-        - python: 3.7
-    env:
-        - TF=1.5.0
-        - TF=1.7.0
-        - TF=1.9.0
+python:
+  - 2.7
+  - 3.4
+  - 3.6
+env:
+  - TF=1.5.0
+  - TF=1.7.0
+  - TF=1.9.0
 notifications:
     email: false
 before_install:
