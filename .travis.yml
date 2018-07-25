@@ -5,6 +5,11 @@ matrix:
     include:
         - python: 2.7
         - python: 3.4
+        - python: 3.7
+    env:
+        - TF=1.5.0
+        - TF=1.7.0
+        - TF=1.9.0
 notifications:
     email: false
 before_install:
@@ -37,7 +42,7 @@ install:
   - pip install keras
   - pip install matplotlib seaborn scipy
   - pip install networkx==1.9.1 observations sklearn
-  - pip install tensorflow==1.5.0
+  - pip install tensorflow==$TF
   - pip install pystan
   - pip install nbformat nbconvert jupyter_client jupyter
   - python setup.py install
