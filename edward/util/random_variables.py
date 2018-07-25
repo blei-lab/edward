@@ -12,9 +12,14 @@ from edward.models.random_variables import TransformedDistribution
 from edward.models import PointMass
 from edward.util.graphs import random_variables
 from tensorflow.core.framework import attr_value_pb2
-from tensorflow.python.framework.ops import set_shapes_for_outputs
+import sys
+try:
+  from tensorflow.python.framework.ops import set_shapes_for_outputs
+except ImportError as e:
+  print('Using newer version of Tensorflow where set_shapes_for_outputs has been deprecated')
 from tensorflow.python.util import compat
 
+set_shapes_module_ = 'set_shapes_for_outputs'
 tfb = tf.contrib.distributions.bijectors
 
 
@@ -401,7 +406,7 @@ def copy(org_instance, dict_swap=None, scope="copied",
     compute_device = True
     op_type = new_name
 
-    if compute_shapes:
+    if compute_shapes and set_shapes_module_ in sys.modules:
       set_shapes_for_outputs(new_op)
     graph._record_op_seen_by_control_dependencies(new_op)
 
