@@ -12,13 +12,12 @@ from edward.models.random_variables import TransformedDistribution
 from edward.models import PointMass
 from edward.util.graphs import random_variables
 from tensorflow.core.framework import attr_value_pb2
-from tensorflow import __version__ as tf_version
 from tensorflow.python.util import compat
-if tuple(int(v) for v in tf_version.split('.')) >= (1, 7, 0):
-    from tensorflow.python.framework.ops import \
-        set_shape_and_handle_data_for_outputs as set_shapes_for_outputs
-else:
-    from tensorflow.python.framework.ops import set_shapes_for_outputs
+try:
+  from tensorflow.python.framework.ops import set_shapes_for_outputs
+except ImportError:
+  from tensorflow.python.framework.ops import \
+      set_shape_and_handle_data_for_outputs as set_shapes_for_outputs
 
 tfb = tf.contrib.distributions.bijectors
 
