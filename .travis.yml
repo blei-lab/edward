@@ -6,8 +6,10 @@ python:
   - 3.4
   - 3.6
 env:
+  - TF=1.2.0rc0
   - TF=1.5.0
   - TF=1.7.0
+  - TF=1.8.0
   - TF=1.9.0
 notifications:
     email: false
