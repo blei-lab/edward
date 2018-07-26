@@ -359,17 +359,23 @@ def copy(org_instance, dict_swap=None, scope="copied",
     # It is unique to every Operation type.
     op_def = deepcopy(op.op_def)
 
+    # If it has inputs, copy them.
+    inputs = []
+    for x in op.inputs:
+      elem = copy(x, dict_swap, scope, True, copy_q, False)
+      if not isinstance(elem, tf.Operation):
+        elem = tf.convert_to_tensor(elem)
+
+      inputs.append(elem)
+    
     new_op = tf.Operation(node_def,
                           graph,
-                          [],  # inputs; will add them afterwards
+                          inputs,
                           output_types,
                           [],  # control inputs; will add them afterwards
                           [],  # input types; will add them afterwards
                           original_op,
                           op_def)
-
-    # advertise op early to break recursions
-    graph._add_op(new_op)
 
     # If it has control inputs, copy them.
     control_inputs = []
@@ -381,14 +387,6 @@ def copy(org_instance, dict_swap=None, scope="copied",
       control_inputs.append(elem)
 
     new_op._add_control_inputs(control_inputs)
-
-    # If it has inputs, copy them.
-    for x in op.inputs:
-      elem = copy(x, dict_swap, scope, True, copy_q, False)
-      if not isinstance(elem, tf.Operation):
-        elem = tf.convert_to_tensor(elem)
-
-      new_op._add_input(elem)
 
     # Copy the control flow context.
     control_flow_context = _copy_context(op._get_control_flow_context(), {},
