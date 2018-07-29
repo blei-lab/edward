@@ -216,10 +216,8 @@ def evaluate(metrics, data, n_samples=500, output_key=None, seed=None):
       evaluations += [cosine_proximity(y_true, y_pred, **params)]
     elif metric == 'log_lik' or metric == 'log_likelihood':
       # Monte Carlo estimate the log-density of the posterior predictive.
-      tensor = tf.reduce_mean(output_key.log_prob(y_true))
-      log_pred = [sess.run(tensor, feed_dict) for _ in range(n_samples)]
-      log_pred = tf.add_n(log_pred) / tf.cast(n_samples, tensor.dtype)
-      evaluations += [log_pred]
+      evaluations += [log_likelihood(y_true, n_samples, output_key,
+                                     feed_dict, sess)]
     elif callable(metric):
       evaluations += [metric(y_true, y_pred, **params)]
     else:
@@ -474,3 +472,10 @@ def cosine_proximity(y_true, y_pred):
   y_true = tf.nn.l2_normalize(y_true, len(y_true.shape) - 1)
   y_pred = tf.nn.l2_normalize(y_pred, len(y_pred.shape) - 1)
   return tf.reduce_sum(y_true * y_pred)
+
+
+def log_likelihood(y_true, n_samples, output_key, feed_dict, sess):
+  y_true = tf.cast(y_true, tf.float32)
+  tensor = tf.reduce_mean(output_key.log_prob(y_true))
+  log_pred = [sess.run(tensor, feed_dict) for _ in range(n_samples)]
+  return tf.add_n(log_pred) / tf.cast(n_samples, tensor.dtype)
