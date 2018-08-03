@@ -1,0 +1,92 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{tikz}
+\usetikzlibrary{bayesnet}
+
+% Define the subtitle of the page
+\title{Variational Autoencoders}
+
+
+\begin{document}
+% Begin the content of the page
+\subsection*{Variational Autoencoders}
+
+Variational autoencoders maximize the likelihood of unlabelled data $\bf{X}$ in the presence of latent variables $\bf{z}$. More formally consider the graphical model below where for each datapoint $\bf{x}_n$ there is a corresponding latent variable $\bf{z}_n$ describing how to generate it using $\bf{\theta}$, a global vector of parameters of the generative model. \\
+
+\begin{figure}[ht]
+      \centering
+      \tikz{ %
+        \node[latent] (zn) {$z_n$} ; %
+        \node[obs, below=of zn] (xn) {$x_n$} ; %
+        \node[right=of zn] (theta) {$\theta$} ; %
+        \plate[inner sep=0.5cm, xshift=-0.12cm, yshift=0.12cm] {plate1} {(zn) (xn)} {N}; %
+        \edge {zn} {xn} ; %
+        \edge {theta} {zn, xn} ; %
+      }
+    \end{figure}
+    
+\noindent The likelihood of the data is
+\begin{align*}
+	p(X) = \int_{}^{} p(X | z; \theta) p(z) dz
+\end{align*}
+
+\noindent Maximizing $p(X)$ is intractable. VAEs instead use the variational inference approach that maximizes the ELBO, a lower bound on the model evidence $p(X)$. A detailed tutorial on variational inference and the optimization of the $\mathrm{ELBO}$ using different gradients can be found 
+\href{http://edwardlib.org/tut_variational_inference}{\bf{here}}, \href{http://edwardlib.org/tut_KLqp_score}{\bf{here}} and \href{http://edwardlib.org/tut_KLqp_reparam}{\bf{here}}.\\
+
+\noindent For the VAE we write the $\mathrm{ELBO}$ as
+\begin{align*}
+\mathrm{ELBO} = 
+	\mathrm{E}_{q(z | X; \phi)} [\log p(X | z; \theta)] - \mathrm{KL}(q(z | X; \phi) || p(z))
+\end{align*}
+
+\noindent This objective is a function of the variational parameters $\phi$ and the global parameters $\theta$ of the generative model. Maximizing this objective is equivalent to choosing the variational model (also called the encoder) $q(z | X; \phi)$ that will allow to better reconstruct the data via $p(z | X; \theta)$ (also called the decoder). A thorough tutorial specifically focused on the decoder can be found \href{http://edwardlib.org/tut_decoder}
+{\textbf{here}}.\\
+
+\noindent In general the prior over the latent variables $p(z)$ is chosen as standard Gaussian while $q(z | X; \phi)$ is chosen to also be Gaussian whose mean and covariance are the output of a neural network that takes the data as input. This choice makes the second term of the $\mathrm{ELBO}$ analytic. \\
+
+\noindent In Edward, the encoder is implemented as follow:
+
+\begin{lstlisting}[language=Python]
+def neural_network(x):
+    """
+    Inference network to parameterize variational family. It takes
+    data as input and outputs the variational parameters.
+    loc, scale = neural_network(x)
+    """
+    n_vars = 10
+    with pt.defaults_scope(activation_fn=tf.nn.elu,
+                           batch_normalize=True,
+                           learned_moments_update_rate=0.0003,
+                           variance_epsilon=0.001,
+                           scale_after_normalization=True):
+        params = (pt.wrap(x).
+                reshape([N_MINIBATCH, 28, 28, 1]).
+                conv2d(5, 32, stride=2).
+                conv2d(5, 64, stride=2).
+                conv2d(5, 128, edges='VALID').
+                dropout(0.9).
+                flatten().
+                fully_connected(n_vars * 2, activation_fn=None)).tensor
+
+    loc = tf.reshape(params[:, :n_vars], [-1])
+    scale = tf.reshape(tf.sqrt(tf.exp(params[:, n_vars:])), [-1])
+    
+    return [loc, scale]
+\end{lstlisting}
+
+\noindent An end to end example script illustrating what was discussed in this tutorial can be found
+\href{https://github.com/blei-lab/edward/blob/master/examples/convolutional_vae.py}
+{\textbf{here}}.
+
+\subsubsection*{References}\label{references}
+
+\begin{itemize}
+\item
+  Kingma, D. P.  and Welling, M. (2014). Auto-Encoding Variational Bayes. arXiv.
+ \item 
+  Doersch, C. (2016). Tutorial on Variational Autoencoders. arXiv.
+\end{itemize}
+
+\end{document}
