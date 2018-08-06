@@ -11,7 +11,7 @@ from edward.util import copy, get_descendants
 
 try:
   from edward.models import Normal
-  from tensorflow.contrib.distributions import kl_divergence
+  from tensorflow.contrib.distributions import kl_divergence, RegisterKL
 except Exception as e:
   raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
 
@@ -131,16 +131,24 @@ class KLqp(VariationalInference):
     $-\mathbb{E}_{q(z; \lambda)}[\log p(x \mid z)] +
         \\text{KL}( q(z; \lambda) \| p(z) ),$
 
-    where the KL term is computed analytically [@kingma2014auto]. We
-    compute this automatically when $p(z)$ and $q(z; \lambda)$ are
-    Normal.
+    where the KL term is computed analytically [@kingma2014auto].
     """
     is_reparameterizable = all([
         rv.reparameterization_type ==
         tf.contrib.distributions.FULLY_REPARAMETERIZED
         for rv in six.itervalues(self.latent_vars)])
-    is_analytic_kl = all([isinstance(z, Normal) and isinstance(qz, Normal)
-                          for z, qz in six.iteritems(self.latent_vars)])
+    is_analytic_kl = True
+    for z, qz in six.iteritems(self.latent_vars):
+      try:
+        # This can produce false successes if inference is called
+        # multiple times, which can cause RegisterKL to succeed the
+        # next time because KL was in fact registered to this dummy
+        # function; here we force that KL to return an error.
+        RegisterKL(type(qz), type(z))(
+            lambda: raise NotImplementedError("kl_fn is not available"))
+        is_analytic_kl = False
+      except ValueError:  # check that kl is registered for each pair
+        pass
     if not is_analytic_kl and self.kl_scaling:
       raise TypeError("kl_scaling must be None when using non-analytic KL term")
     if is_reparameterizable:
