@@ -46,6 +46,7 @@ def evaluate(metrics, data, n_samples=500, output_key=None, seed=None):
       `'msle'` or `'MSLE'` or `'mean_squared_logarithmic_error'`,
       `'poisson'`,
       `'cosine'` or `'cosine_proximity'`,
+      `'crps'` or `'continuous_ranked_probability_score'`,
       `'log_lik'` or `'log_likelihood'`.
       In lieu of a metric string, this method also accepts (str, params: dict)
       tuples; the first element of this tuple is the metric string, and
@@ -214,6 +215,8 @@ def evaluate(metrics, data, n_samples=500, output_key=None, seed=None):
       evaluations += [poisson(y_true, y_pred, **params)]
     elif metric == 'cosine' or metric == 'cosine_proximity':
       evaluations += [cosine_proximity(y_true, y_pred, **params)]
+    elif metric == 'crps' or metric == 'continuous_ranked_probability_score':
+      evaluations += [continuous_ranked_probability_score(y_true, y_pred, **params)]
     elif metric == 'log_lik' or metric == 'log_likelihood':
       # Monte Carlo estimate the log-density of the posterior predictive.
       tensor = tf.reduce_mean(output_key.log_prob(y_true))
@@ -474,3 +477,38 @@ def cosine_proximity(y_true, y_pred):
   y_true = tf.nn.l2_normalize(y_true, len(y_true.shape) - 1)
   y_pred = tf.nn.l2_normalize(y_pred, len(y_pred.shape) - 1)
   return tf.reduce_sum(y_true * y_pred)
+
+
+def continuous_ranked_probability_score(y_true, y_pred):
+  """Continuous Ranked Probability Score.
+  
+  This implementation is based on the identity:
+
+    .. math::
+        CRPS(F, x) = E_F|X - x| - 1/2 * E_F|X - X'|
+  
+  where X and X' denote independent random variables drawn from the forecast
+  distribution F, and E_F denotes the expectation value under F.
+
+  We've closly followed the aproach of 
+  https://github.com/TheClimateCorporation/properscoring for
+  for the actual implementation.
+  
+  Reference
+    ---------
+    Tilmann Gneiting and Adrian E. Raftery. Strictly proper scoring rules,
+        prediction, and estimation, 2005. University of Washington Department of
+        Statistics Technical Report no. 463R.
+        https://www.stat.washington.edu/research/reports/2004/tr463R.pdf
+
+  Args:
+    y_true: tf.Tensor.
+    y_pred: tf.Tensor.
+      Tensors of same shape and type.
+  """
+  score = tf.reduce_mean(tf.abs(tf.subtract(y_pred, y_true)), axis=-1)
+  diff = tf.subtract(tf.expand_dims(y_pred, -1), tf.expand_dims(y_pred, -2))
+  score = tf.add(score, tf.multiply(tf.constant(-0.5, dtype=diff.dtype),tf.reduce_mean(tf.abs(diff),axis=(-2, -1))))
+
+  return tf.reduce_mean(score)
+
