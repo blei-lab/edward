@@ -26,6 +26,8 @@ all_regression_metrics = [
     mean_squared_logarithmic_error,
     poisson,
     cosine_proximity,
+    continuous_ranked_probability_score
+  
 ]
 
 all_specialized_input_output_metrics = [
