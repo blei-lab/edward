@@ -41,7 +41,7 @@ class RandomVariable(object):
 
   `RandomVariable` assumes use in a multiple inheritance setting. The
   child class must first inherit `RandomVariable`, then second inherit a
-  class in `tf.contrib.distributions`. With Python's method resolution
+  class in `tfp.distributions`. With Python's method resolution
   order, this implies the following during initialization (using
   `distributions.Bernoulli` as an example):
 

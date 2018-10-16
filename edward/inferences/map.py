@@ -10,9 +10,17 @@ from edward.models import RandomVariable, PointMass
 from edward.util import copy, transform
 
 try:
-  from tensorflow.contrib.distributions import bijectors
+  import tensorflow_probability as tfp
+  bijectors = tfp.bijectors
 except Exception as e:
-  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
+  print("{0}. Can not import TensorFlow Probability, "
+        "defaulting to TensorFlow.".format(e))
+  try:
+    from tensorflow.contrib.distributions import bijectors
+  except Exception as e2:
+    raise ImportError(
+        "{0}. Your TensorFlow version is not supported.".format(e2))
+
 
 
 class MAP(VariationalInference):

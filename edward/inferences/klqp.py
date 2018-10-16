@@ -11,9 +11,19 @@ from edward.util import copy, get_descendants
 
 try:
   from edward.models import Normal
-  from tensorflow.contrib.distributions import kl_divergence
+  import tensorflow_probability as tfp
+  kl_divergence = tfp.distributions.kl_divergence
+  FULLY_REPARAMETERIZED = tfp.distributions.FULLY_REPARAMETERIZED
 except Exception as e:
-  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
+  print("{0}. Can not import TensorFlow Probability, "
+        "defaulting to TensorFlow.".format(e))
+  try:
+    from edward.models import Normal
+    from tensorflow.contrib.distributions import kl_divergence
+    FULLY_REPARAMETERIZED = tf.contrib.distributions.FULLY_REPARAMETERIZED
+  except Exception as e2:
+    raise ImportError(
+        "{0}. Your TensorFlow version is not supported.".format(e2))
 
 
 class KLqp(VariationalInference):
@@ -136,8 +146,7 @@ class KLqp(VariationalInference):
     Normal.
     """
     is_reparameterizable = all([
-        rv.reparameterization_type ==
-        tf.contrib.distributions.FULLY_REPARAMETERIZED
+        rv.reparameterization_type == FULLY_REPARAMETERIZED
         for rv in six.itervalues(self.latent_vars)])
     is_analytic_kl = all([isinstance(z, Normal) and isinstance(qz, Normal)
                           for z, qz in six.iteritems(self.latent_vars)])

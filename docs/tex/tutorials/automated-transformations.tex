@@ -99,18 +99,18 @@ build it by first obtaining the target distribution's transformation
 and then inverting the transformation:
 
 \begin{lstlisting}[language=Python]
-from tensorflow.contrib.distributions import bijectors
+import tensorflow_probability as tfp
 
 x_unconstrained = inference.transformations[x]  # transformed prior
 x_transform = x_unconstrained.bijector  # transformed prior's transformation
-qx_constrained = ed.transform(qx, bijectors.Invert(x_transform))
+qx_constrained = ed.transform(qx, tfp.bijectors.Invert(x_transform))
 \end{lstlisting}
 
 The set of transformations is given by
 \texttt{inference.transformations}, which is a dictionary with keys
 given by any constrained latent variables and values given by their
 transformed distribution. We use the
-\href{https://www.tensorflow.org/api_docs/python/tf/distributions/bijectors}{\texttt{bijectors}}
+\href{https://www.tensorflow.org/probability/api_docs/python/tfp/bijectors}{\texttt{bijectors}}
 module in \texttt{tf.distributions} in order to handle invertible
 transformations.
 
@@ -158,7 +158,7 @@ support, we again take the inverse of the target distribution's
 transformation.
 
 \begin{lstlisting}[language=Python]
-from tensorflow.contrib.distributions import bijectors
+import tensorflow_probability as tfp
 
 x_unconstrained = inference.transformations[x]  # transformed prior
 x_transform = x_unconstrained.bijector  # transformed prior's transformation

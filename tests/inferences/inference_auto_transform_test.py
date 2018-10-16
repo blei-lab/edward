@@ -5,11 +5,11 @@ from __future__ import print_function
 import edward as ed
 import numpy as np
 import tensorflow as tf
+import tensorflow_probability as tfp
 
 from edward.models import (Empirical, Gamma, Normal, PointMass,
                            TransformedDistribution, Beta, Bernoulli)
 from edward.util import transform
-from tensorflow.contrib.distributions import bijectors
 
 
 class test_inference_auto_transform_class(tf.test.TestCase):
@@ -20,7 +20,7 @@ class test_inference_auto_transform_class(tf.test.TestCase):
       # automated transformation on latter (assuming it is softplus).
       x = TransformedDistribution(
           distribution=Normal(0.0, 0.5),
-          bijector=tf.contrib.distributions.bijectors.Softplus())
+          bijector=tfp.bijectors.Softplus())
       x.support = 'nonnegative'
       qx = Normal(loc=tf.Variable(tf.random_normal([])),
                   scale=tf.nn.softplus(tf.Variable(tf.random_normal([]))))
@@ -36,7 +36,8 @@ class test_inference_auto_transform_class(tf.test.TestCase):
       n_samples = 10000
       x_mean, x_var = tf.nn.moments(x.sample(n_samples), 0)
       x_unconstrained = inference.transformations[x]
-      qx_constrained = transform(qx, bijectors.Invert(x_unconstrained.bijector))
+      qx_constrained = transform(
+          qx, tfp.bijectors.Invert(x_unconstrained.bijector))
       qx_mean, qx_var = tf.nn.moments(qx_constrained.sample(n_samples), 0)
       stats = sess.run([x_mean, qx_mean, x_var, qx_var])
       self.assertAllClose(info_dict['loss'], 0.0, rtol=0.2, atol=0.2)
@@ -49,7 +50,7 @@ class test_inference_auto_transform_class(tf.test.TestCase):
       # automated transformation; it should fail.
       x = TransformedDistribution(
           distribution=Normal(0.0, 0.5),
-          bijector=tf.contrib.distributions.bijectors.Softplus())
+          bijector=tfp.bijectors.Softplus())
       x.support = 'nonnegative'
       qx = Normal(loc=tf.Variable(tf.random_normal([])),
                   scale=tf.nn.softplus(tf.Variable(tf.random_normal([]))))
@@ -115,7 +116,7 @@ class test_inference_auto_transform_class(tf.test.TestCase):
     with self.test_session() as sess:
       x = TransformedDistribution(
           distribution=Normal(1.0, 1.0),
-          bijector=tf.contrib.distributions.bijectors.Softplus())
+          bijector=tfp.bijectors.Softplus())
       x.support = 'nonnegative'
       qx = Empirical(tf.Variable(tf.random_normal([1000])))
 
@@ -140,7 +141,7 @@ class test_inference_auto_transform_class(tf.test.TestCase):
     with self.test_session() as sess:
       x = TransformedDistribution(
           distribution=Normal(1.0, 1.0),
-          bijector=tf.contrib.distributions.bijectors.Softplus())
+          bijector=tfp.bijectors.Softplus())
       x.support = 'nonnegative'
 
       inference = ed.HMC([x])

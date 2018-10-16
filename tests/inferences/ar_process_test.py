@@ -5,16 +5,15 @@ from __future__ import print_function
 import edward as ed
 import numpy as np
 import tensorflow as tf
+import tensorflow_probability as tfp
 
 from edward.models import Normal, PointMass
 from scipy.optimize import minimize
 
 from edward.models import RandomVariable
-from tensorflow.contrib.distributions import Distribution
-from tensorflow.contrib.distributions import FULLY_REPARAMETERIZED
 
 
-class AutoRegressive(RandomVariable, Distribution):
+class AutoRegressive(RandomVariable, tfp.distributions.Distribution):
   # a 1-D AR(1) process
   # a[t + 1] = a[t] + eps with eps ~ N(0, sig**2)
   def __init__(self, T, a, sig, *args, **kwargs):
@@ -29,7 +28,8 @@ class AutoRegressive(RandomVariable, Distribution):
     if 'allow_nan_stats' not in kwargs:
       kwargs['allow_nan_stats'] = False
     if 'reparameterization_type' not in kwargs:
-      kwargs['reparameterization_type'] = FULLY_REPARAMETERIZED
+      kwargs['reparameterization_type'] = (
+          tfp.distributions.FULLY_REPARAMETERIZED)
     if 'validate_args' not in kwargs:
       kwargs['validate_args'] = False
     if 'name' not in kwargs:

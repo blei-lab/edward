@@ -13,7 +13,18 @@ from edward.models import RandomVariable
 from edward.util import check_data, check_latent_vars, get_session, \
     get_variables, Progbar, transform
 
-from tensorflow.contrib.distributions import bijectors
+try:
+  import tensorflow_probability as tfp
+  bijectors = tfp.bijectors
+except Exception as e:
+  print("{0}. Can not import TensorFlow Probability, "
+        "defaulting to TensorFlow.".format(e))
+  try:
+    from tensorflow.contrib.distributions import bijectors
+  except Exception as e2:
+    raise ImportError(
+        "{0}. Your TensorFlow version is not supported.".format(e2))
+
 
 
 @six.add_metaclass(abc.ABCMeta)
