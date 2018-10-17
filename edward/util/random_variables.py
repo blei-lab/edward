@@ -15,7 +15,18 @@ from tensorflow.core.framework import attr_value_pb2
 from tensorflow.python.framework.ops import set_shapes_for_outputs
 from tensorflow.python.util import compat
 
-tfb = tf.contrib.distributions.bijectors
+try:
+  import tensorflow_probability as tfp
+  tfb = tfp.bijectors
+except Exception as e:
+  print("{0}. Can not import TensorFlow Probability, "
+        "defaulting to TensorFlow.".format(e))
+  try:
+    tfb = tf.contrib.distributions.bijectors
+  except Exception as e2:
+    raise ImportError(
+        "{0}. Your TensorFlow version is not supported.".format(e2))
+
 
 
 def check_data(data):

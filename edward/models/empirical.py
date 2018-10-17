@@ -5,12 +5,23 @@ from __future__ import print_function
 import tensorflow as tf
 
 from edward.models.random_variable import RandomVariable
-from tensorflow.contrib.distributions import Distribution
 
 try:
-  from tensorflow.contrib.distributions import FULLY_REPARAMETERIZED
+  import tensorflow_probability as tfp
+  Distribution = tfp.distributions.Distribution
+  Categorical = tfp.distributions.Categorical
+  FULLY_REPARAMETERIZED = tfp.distributions.FULLY_REPARAMETERIZED
 except Exception as e:
-  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
+  print("{0}. Can not import TensorFlow Probability, "
+        "defaulting to TensorFlow.".format(e))
+  try:
+    from tensorflow.contrib.distributions import Distribution
+    Categorical = tf.distributions.Categorical
+    FULLY_REPARAMETERIZED = tf.contrib.distributions.FULLY_REPARAMETERIZED
+  except Exception as e2:
+    raise ImportError(
+        "{0}. Your TensorFlow version is not supported.".format(e2))
+
 
 
 class distributions_Empirical(Distribution):
@@ -104,7 +115,7 @@ class distributions_Empirical(Distribution):
       return tf.tile(input_tensor, multiples)
     else:
       probs = tf.ones([self.n]) / tf.cast(self.n, dtype=tf.float32)
-      cat = tf.contrib.distributions.Categorical(probs)
+      cat = Categorical(probs)
       indices = cat._sample_n(n, seed)
       tensor = tf.gather(input_tensor, indices)
       return tensor

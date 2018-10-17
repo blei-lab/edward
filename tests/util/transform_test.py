@@ -5,12 +5,12 @@ from __future__ import print_function
 import edward as ed
 import numpy as np
 import tensorflow as tf
+import tensorflow_probability as tfp
 
 from collections import namedtuple
 from edward.models import (
     Beta, Dirichlet, DirichletProcess, Gamma, MultivariateNormalDiag,
     Normal, Poisson, TransformedDistribution)
-from tensorflow.contrib.distributions import bijectors
 
 
 class test_transform_class(tf.test.TestCase):
@@ -24,14 +24,14 @@ class test_transform_class(tf.test.TestCase):
   def test_args(self):
     with self.test_session():
       x = Normal(-100.0, 1.0)
-      y = ed.transform(x, bijectors.Softplus())
+      y = ed.transform(x, tfp.bijectors.Softplus())
       sample = y.sample(10).eval()
       self.assertTrue((sample >= 0.0).all())
 
   def test_kwargs(self):
     with self.test_session():
       x = Normal(-100.0, 1.0)
-      y = ed.transform(x, bijector=bijectors.Softplus())
+      y = ed.transform(x, bijector=tfp.bijectors.Softplus())
       sample = y.sample(10).eval()
       self.assertTrue((sample >= 0.0).all())
 

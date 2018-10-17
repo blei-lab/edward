@@ -7,14 +7,14 @@
 Oftentimes we'd like to implement our own random variables.
 To do so, write a class that inherits
 the \texttt{RandomVariable} class in \texttt{edward.models} and
-the \texttt{Distribution} class in \texttt{tf.contrib.distributions} (in that
+the \texttt{Distribution} class in \texttt{tfp.distributions} (in that
 order). A template is provided below.
 
 \begin{lstlisting}[language=Python]
 from edward.models import RandomVariable
-from tensorflow.contrib.distributions import Distribution
+import tensorflow_probability as tfp
 
-class CustomRandomVariable(RandomVariable, Distribution):
+class CustomRandomVariable(RandomVariable, tfp.distributions.Distribution):
   def __init__(self, *args, **kwargs):
     super(CustomRandomVariable, self).__init__(*args, **kwargs)
 
@@ -39,7 +39,7 @@ and
 in the Github repository.
 For more details and more methods one can implement, see the API
 documentation in TensorFlow's
-\href{https://www.tensorflow.org/api_docs/python/tf/contrib/distributions/Distribution}{\texttt{Distribution} class}.
+\href{https://www.tensorflow.org/probability/api_docs/python/tfp/distributions}{\texttt{Distribution} class}.
 
 \subsubsection{Advanced settings}
 

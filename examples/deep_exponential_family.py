@@ -71,6 +71,7 @@ import edward as ed
 import numpy as np
 import os
 import tensorflow as tf
+import tenosrflow_probability as tfp
 
 from datetime import datetime
 from edward.models import Gamma, Poisson, Normal, PointMass, \
@@ -126,7 +127,7 @@ def lognormal_q(shape, name=None):
         "scale", shape, initializer=tf.random_normal_initializer(stddev=0.1))
     rv = TransformedDistribution(
         distribution=Normal(loc, tf.maximum(tf.nn.softplus(scale), min_scale)),
-        bijector=tf.contrib.distributions.bijectors.Exp())
+        bijector=tfp.bijectors.Exp())
     return rv
 
 

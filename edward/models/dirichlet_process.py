@@ -5,13 +5,23 @@ from __future__ import print_function
 import tensorflow as tf
 
 from edward.models.random_variable import RandomVariable
-from tensorflow.contrib.distributions import Distribution
 
 try:
   from edward.models.random_variables import Bernoulli, Beta
-  from tensorflow.contrib.distributions import NOT_REPARAMETERIZED
+  import tensorflow_probability as tfp
+  Distribution = tfp.distributions.Distribution
+  NOT_REPARAMETERIZED = tfp.distributions.NOT_REPARAMETERIZED
 except Exception as e:
-  raise ImportError("{0}. Your TensorFlow version is not supported.".format(e))
+  print("{0}. Can not import TensorFlow Probability, "
+        "defaulting to TensorFlow.".format(e))
+  try:
+    from edward.models.random_variables import Bernoulli, Beta
+    from tensorflow.contrib.distributions import Distribution
+    from tensorflow.contrib.distributions import NOT_REPARAMETERIZED
+  except Exception as e2:
+    raise ImportError(
+        "{0}. Your TensorFlow version is not supported.".format(e2))
+
 
 
 class distributions_DirichletProcess(Distribution):
