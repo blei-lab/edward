@@ -16,7 +16,7 @@ from edward.inferences import (
     KLpq, KLqp, ReparameterizationKLqp, ReparameterizationKLKLqp,
     ReparameterizationEntropyKLqp, ReplicaExchangeMC, ScoreKLqp, ScoreKLKLqp,
     ScoreEntropyKLqp, ScoreRBKLqp, WakeSleep, GANInference, BiGANInference,
-    WGANInference, ImplicitKLqp, MAP, Laplace, complete_conditional, Gibbs)
+    WGANInference, ImplicitKLqp, MAP, Laplace, complete_conditional, Gibbs, BBAlpha)
 from edward.models import RandomVariable
 from edward.util import (
     check_data, check_latent_vars, copy, dot,
@@ -45,6 +45,7 @@ _allowed_symbols = [
     'MetropolisHastings',
     'SGLD',
     'SGHMC',
+    'BBAlpha',
     'KLpq',
     'KLqp',
     'ReparameterizationKLqp',
