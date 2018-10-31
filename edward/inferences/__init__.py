@@ -4,6 +4,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+from edward.inferences.bb_alpha import *
 from edward.inferences.bigan_inference import *
 from edward.inferences.conjugacy import *
 from edward.inferences.gan_inference import *
@@ -27,6 +28,7 @@ from edward.inferences.wgan_inference import *
 from tensorflow.python.util.all_util import remove_undocumented
 
 _allowed_symbols = [
+    'BBAlpha',
     'BiGANInference',
     'complete_conditional',
     'GANInference',
