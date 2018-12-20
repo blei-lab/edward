@@ -71,11 +71,10 @@ class VariationalInference(Inference):
       tf.summary.scalar("loss", self.loss, collections=[self._summary_key])
       for grad, var in grads_and_vars:
         # replace colons which are an invalid character
-        tf.summary.histogram("gradient/" +
-                             var.name.replace(':', '/'),
+        var_name = var.name.replace(':', '/')
+        tf.summary.histogram("gradient/{}".format(var_name),
                              grad, collections=[self._summary_key])
-        tf.summary.scalar("gradient_norm/" +
-                          var.name.replace(':', '/'),
+        tf.summary.scalar("gradient_norm/{}".format(var_name),
                           tf.norm(grad), collections=[self._summary_key])
 
       self.summarize = tf.summary.merge_all(key=self._summary_key)
