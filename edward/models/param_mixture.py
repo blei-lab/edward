@@ -33,7 +33,7 @@ class distributions_ParamMixture(Distribution):
 
   ```python
   probs = tf.ones(5) / 5.0
-  params = {'mu': tf.zeros(5), 'sigma': tf.ones(5)}
+  params = {'loc': tf.zeros(5), 'scale': tf.ones(5)}
   x = ParamMixture(probs, params, Normal)
   assert x.shape == ()
 
