@@ -82,7 +82,7 @@ class MAP(VariationalInference):
       latent_vars: list of RandomVariable or
                    dict of RandomVariable to RandomVariable.
         Collection of random variables to perform inference on. If
-        list, each random variable will be implictly optimized using a
+        list, each random variable will be implicitly optimized using a
         `PointMass` random variable that is defined internally with
         constrained support, has unconstrained free parameters, and is
         initialized using standard normal draws. If dictionary, each
